@@ -110,9 +110,9 @@ class _LoginPage extends State<LoginPage> {
       );
 
   loginHeader() => Container(
-        margin: EdgeInsets.only(top: 35),
-        width: 260,
-        height: 87,
+        margin: EdgeInsets.only(top: 40),
+        width: 250,
+        height: 86,
         decoration: BoxDecoration(
             image: DecorationImage(
               fit: BoxFit.cover,
@@ -123,7 +123,7 @@ class _LoginPage extends State<LoginPage> {
 
   loginFields() => Container(
         margin: EdgeInsets.only(
-          top: 45,
+          top: 40,
           left: 52,
           right: 52,
         ),
@@ -283,8 +283,8 @@ class _LoginPage extends State<LoginPage> {
           child: InkWell(
             onTap: () => print('hello'),
             child: Container(
-              width: 210.0,
-              height: 50.0,
+              width: 190.0,
+              height: 42.0,
               child: Center(
                 child: Text(
                   'INGRESAR',
@@ -359,7 +359,7 @@ class _LoginPage extends State<LoginPage> {
       );
 
   olvidoContrasena() => Container(
-        padding: EdgeInsets.only(top: 25),
+        padding: EdgeInsets.only(top: 11),
         child: FlatButton(
           onPressed: () {},
           child: Text(
@@ -375,7 +375,6 @@ class _LoginPage extends State<LoginPage> {
       );
 
   registrese() => Container(
-        padding: EdgeInsets.only(top: 7),
         child: FlatButton(
           onPressed: () {},
           child: Text(

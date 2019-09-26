@@ -17,6 +17,7 @@ environment:
   sdk: ">=2.1.0 <3.0.0"
 
 dependencies:
+  flutter_search_panel: ^1.0.1
   flutter:
     sdk: flutter
 
@@ -36,6 +37,24 @@ dev_dependencies:
 flutter:
   assets:
     - assets/images/car_wash_movil_logo_blanco.png
+    - assets/images/icon_facebook.png
+    - assets/images/icon_google.png
+    - assets/images/car_wash_movil_logo_color.png
+    - assets/images/img_landing.png
+    - assets/images/profile21.jpg
+    - assets/images/icon_nueva_factura.png
+    - assets/images/icon_facturas.png
+    - assets/images/icon_informes.png
+    - assets/images/icon_home.png
+    - assets/images/icon_admin.png
+    - assets/images/icon_car_admin.png
+    - assets/images/icon_car.png
+    - assets/images/icon_motorcycle.png
+    - assets/images/icon_motorcycle_admin.png
+    - assets/images/icon_suv_car_admin.png
+    - assets/images/icon_suv_car.png
+
+
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.

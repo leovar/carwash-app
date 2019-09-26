@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'Login/ui/screens/login_page.dart';
+import 'Home/ui/screens/home_page.dart';
+import 'Factura/ui/screens/factura_page.dart';
 
 void main() {
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
-      statusBarBrightness: Brightness.light));
+      statusBarBrightness: Brightness.light),
+  );
   runApp(MyApp());
 }
 
@@ -26,8 +29,10 @@ class MyApp extends StatelessWidget {
         // Notice that the counter didn't reset back to zero; the application
         // is not restarted.
         primarySwatch: Colors.blue,
+        secondaryHeaderColor: Color(0xFF27AEBB),
+        primaryColor: Color(0xFF27AEBB),
       ),
-      home: LoginPage(),
+      home: FacturaPage(), //HomePage(),//HomePage(),
       //MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
