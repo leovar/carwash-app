@@ -3,6 +3,8 @@ import 'dart:core';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:generic_bloc_provider/generic_bloc_provider.dart';
+import '../../../main.dart';
 import '../../../widgets/gradient_back.dart';
 
 class LoginPage extends StatefulWidget {
@@ -87,12 +89,15 @@ class _LoginPage extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
+    final appBloc = BlocProvider.of<AppBloc>(context);
     return Scaffold(
-      body: Stack(
-        children: <Widget>[
-          GradientBack(),
-          bodyContainer(),
-        ],
+      body: SafeArea(
+        child: Stack(
+          children: <Widget>[
+            GradientBack(),
+            bodyContainer(),
+          ],
+        ),
       ),
     );
   }
