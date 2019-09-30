@@ -2,10 +2,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
-import 'Autenticacion/ui/screens/login_page.dart';
-import 'Home/ui/screens/home_page.dart';
+import 'Usuario/ui/screens/login_page.dart';
+import 'widgets/home_page.dart';
 import 'Factura/ui/screens/factura_page.dart';
-import 'Autenticacion/bloc/bloc_autenticacion.dart';
+import 'Usuario/bloc/bloc_autenticacion.dart';
 
 void main() {
   SystemChrome.setSystemUIOverlayStyle(
