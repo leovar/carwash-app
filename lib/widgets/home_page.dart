@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../widgets/gradient_back.dart';
-import '../widgets/button_functions.dart';
-import '../../../widgets/header_menu_page.dart';
-import '../../../widgets/drawer_page.dart';
+import 'gradient_back.dart';
+import '../Sede/ui/widgets/button_functions.dart';
+import 'header_menu_page.dart';
+import 'drawer_page.dart';
 
 class HomePage extends StatefulWidget {
   @override

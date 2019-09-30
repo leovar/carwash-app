@@ -89,7 +89,7 @@ class _LoginPage extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
-    final appBloc = BlocProvider.of<AppBloc>(context);
+    //final appBloc = BlocProvider.of<AppBloc>(context);
     return Scaffold(
       body: SafeArea(
         child: Stack(
