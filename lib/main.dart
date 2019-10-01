@@ -5,7 +5,7 @@ import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 import 'Usuario/ui/screens/login_page.dart';
 import 'widgets/home_page.dart';
 import 'Factura/ui/screens/factura_page.dart';
-import 'Usuario/bloc/bloc_autenticacion.dart';
+import 'Usuario/bloc/bloc_user.dart';
 
 void main() {
   SystemChrome.setSystemUIOverlayStyle(
@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      bloc: AutenticacionBloc(),
+      bloc: UserBloc(),
       child: MaterialApp(
         title: 'Carwash Movil App',
         theme: ThemeData(
@@ -33,7 +33,7 @@ class MyApp extends StatelessWidget {
         //HomePage(),//LoginPage(),
         initialRoute: 'main',
         routes: {
-          'main': (context) => HomePage(),
+          'main': (context) => LoginPage(),
         },
       ),
     );

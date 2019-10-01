@@ -1,11 +1,11 @@
 import 'dart:core' as prefix0;
 import 'dart:core';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 import '../../../main.dart';
 import '../../../widgets/gradient_back.dart';
+import 'package:car_wash_app/Usuario/bloc/bloc_user.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -54,6 +54,8 @@ List<ColorModel> _colors = [
 Color _selectedColor = Colors.blue;
 
 class _LoginPage extends State<LoginPage> {
+  UserBloc userBloc;
+
   List<Company> _companies = Company.getCompanies();
   List<DropdownMenuItem<Company>> _dropdownMenuItems;
   Company _selectedCompany;
@@ -90,17 +92,20 @@ class _LoginPage extends State<LoginPage> {
   Widget build(BuildContext context) {
     // TODO: implement build
     //final appBloc = BlocProvider.of<AppBloc>(context);
-    return Scaffold(
-      body: SafeArea(
-        child: Stack(
-          children: <Widget>[
-            GradientBack(),
-            bodyContainer(),
-          ],
-        ),
-      ),
-    );
+    userBloc = BlocProvider.of(context);
+    return loginScreen();
   }
+
+  loginScreen() => Scaffold(
+        body: SafeArea(
+          child: Stack(
+            children: <Widget>[
+              GradientBack(),
+              bodyContainer(),
+            ],
+          ),
+        ),
+      );
 
   bodyContainer() => Center(
         child: SingleChildScrollView(
@@ -332,7 +337,10 @@ class _LoginPage extends State<LoginPage> {
                     width: 55.0,
                     height: 55.0,
                     child: InkWell(
-                      onTap: () {},
+                      onTap: () {
+                        userBloc.singnInFacebook().then((user) =>
+                            prefix0.print("El es ${user.displayName}"));
+                      },
                       child: null,
                     ),
                   ),
@@ -352,7 +360,10 @@ class _LoginPage extends State<LoginPage> {
                     width: 55.0,
                     height: 55.0,
                     child: InkWell(
-                      onTap: () {},
+                      onTap: () {
+                        userBloc.signInGoogle().then((user) =>
+                            prefix0.print("El es ${user.displayName}"));
+                      },
                       child: null,
                     ),
                   ),
