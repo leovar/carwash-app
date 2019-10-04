@@ -6,6 +6,7 @@ import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 import '../../../main.dart';
 import '../../../widgets/gradient_back.dart';
 import 'package:car_wash_app/Usuario/bloc/bloc_user.dart';
+import 'package:car_wash_app/widgets/home_page.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -93,7 +94,21 @@ class _LoginPage extends State<LoginPage> {
     // TODO: implement build
     //final appBloc = BlocProvider.of<AppBloc>(context);
     userBloc = BlocProvider.of(context);
-    return loginScreen();
+    return _handleCurrentSession(); //loginScreen();
+  }
+
+  Widget _handleCurrentSession() {
+    return StreamBuilder(
+      stream: userBloc.authStatus,
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        //el snapshot tiene la data que se esta retornando
+        if (!snapshot.hasData || snapshot.hasError) {
+          return loginScreen();
+        } else {
+          return HomePage();
+        }
+      },
+    );
   }
 
   loginScreen() => Scaffold(

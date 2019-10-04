@@ -9,4 +9,7 @@ class AuthRepository {
   Future<FirebaseUser> signInFirebase() => _firebaseAuthApi.signIn();
 
   Future<FirebaseUser> signInFacebook() => _firebaseAuthApi.facebookSingIn();
+
+  singOut() => _firebaseAuthApi.singOut();
+
 }

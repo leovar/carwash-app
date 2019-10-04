@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
+import 'package:generic_bloc_provider/generic_bloc_provider.dart';
+import 'package:car_wash_app/Usuario/bloc/bloc_user.dart';
 
-class DrawerPage extends StatefulWidget{
+class DrawerPage extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
@@ -8,13 +11,16 @@ class DrawerPage extends StatefulWidget{
   }
 }
 
-class _DrawerPage extends State<DrawerPage>{
+class _DrawerPage extends State<DrawerPage> {
+  UserBloc userBloc;
 
   @override
   Widget build(BuildContext context) {
+    userBloc = BlocProvider.of(context);
     // TODO: implement build
     return Drawer(
-      child: ListView(
+      child: Column(
+        mainAxisSize: MainAxisSize.max,
         children: <Widget>[
           UserAccountsDrawerHeader(
             decoration: BoxDecoration(
@@ -37,7 +43,7 @@ class _DrawerPage extends State<DrawerPage>{
                 iconSize: 35,
                 alignment: Alignment.centerLeft,
                 icon: Icon(
-                  Icons.menu,
+                  Icons.arrow_back,
                   color: Color(0xFF59B258),
                 ),
                 onPressed: () => Navigator.of(context).pop(),
@@ -173,6 +179,39 @@ class _DrawerPage extends State<DrawerPage>{
               color: Color(0xFF59B258),
             ),
           ),
+          Expanded(
+            child: Align(
+              alignment: Alignment.bottomRight,
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border(
+                    top: BorderSide(
+                      color: Color(0xFFD8D8D8),
+                      width: 1.0,
+                    ),
+                  ),
+                ),
+                child: ListTile(
+                  title: Text(
+                    "Salir",
+                    style: TextStyle(
+                      fontFamily: "Lato",
+                      fontWeight: FontWeight.normal,
+                      fontSize: 17,
+                      color: Color(0xFF27AEBB),
+                    ),
+                  ),
+                  leading: Ink.image(
+                    image: AssetImage("assets/images/icon_logout.png"),
+                    width: 25,
+                  ),
+                  onTap: () {
+                    userBloc.singOut();
+                  },
+                ),
+              ),
+            ),
+          )
         ],
       ),
     );

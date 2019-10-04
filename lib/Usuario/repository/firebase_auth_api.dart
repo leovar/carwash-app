@@ -8,7 +8,6 @@ class FirebaseAuthApi {
   final FacebookLogin _facebookSingIn = FacebookLogin();
 
   //Autenticasion con google
-  //TODO el login con
   Future<FirebaseUser> signIn() async {
     //Inicio una instancia de la ventana de google por primera vez para loguearme con google
     GoogleSignInAccount googleSignInAccount = await googleSignIn.signIn();
@@ -68,5 +67,12 @@ class FirebaseAuthApi {
     FirebaseUser user = authResult.user;
 
     return user;
+  }
+
+  singOut() async{
+    await _authApi.signOut().then((result) => print("Sesión cerrada"));
+    googleSignIn.signOut();
+    _facebookSingIn.logOut();
+    print("Sessiones cerradas");
   }
 }
