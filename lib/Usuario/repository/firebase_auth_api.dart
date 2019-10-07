@@ -4,13 +4,13 @@ import 'package:google_sign_in/google_sign_in.dart';
 
 class FirebaseAuthApi {
   final FirebaseAuth _authApi = FirebaseAuth.instance;
-  final GoogleSignIn googleSignIn = GoogleSignIn();
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
   final FacebookLogin _facebookSingIn = FacebookLogin();
 
   //Autenticasion con google
   Future<FirebaseUser> signIn() async {
     //Inicio una instancia de la ventana de google por primera vez para loguearme con google
-    GoogleSignInAccount googleSignInAccount = await googleSignIn.signIn();
+    GoogleSignInAccount googleSignInAccount = await _googleSignIn.signIn();
     GoogleSignInAuthentication gSA = await googleSignInAccount
         .authentication; //Obtengo las credenciales de google al autorizar el login con google
 
@@ -19,7 +19,6 @@ class FirebaseAuthApi {
         GoogleAuthProvider.getCredential(
             idToken: gSA.idToken, accessToken: gSA.accessToken));
     FirebaseUser user = await _authResult.user;
-
     return user;
   }
 
@@ -69,9 +68,9 @@ class FirebaseAuthApi {
     return user;
   }
 
-  singOut() async{
+  singOut() async {
     await _authApi.signOut().then((result) => print("Sesión cerrada"));
-    googleSignIn.signOut();
+    _googleSignIn.signOut();
     _facebookSingIn.logOut();
     print("Sessiones cerradas");
   }

@@ -21,11 +21,9 @@ class Company {
   String name;
   Color color;
 
-  Company(
-    this.Id,
-    this.name,
-    this.color,
-  );
+  Company(this.Id,
+      this.name,
+      this.color,);
 
   static List<Company> getCompanies() {
     return <Company>[
@@ -105,24 +103,30 @@ class _LoginPage extends State<LoginPage> {
         if (!snapshot.hasData || snapshot.hasError) {
           return loginScreen();
         } else {
-          return HomePage();
+          return BlocProvider<UserBloc>(
+            bloc: UserBloc(),
+            child: HomePage(),
+          ) ;
         }
       },
     );
   }
 
-  loginScreen() => Scaffold(
-        body: SafeArea(
-          child: Stack(
-            children: <Widget>[
-              GradientBack(),
-              bodyContainer(),
-            ],
-          ),
+  Widget loginScreen() {
+    return Scaffold(
+      body: SafeArea(
+        child: Stack(
+          children: <Widget>[
+            GradientBack(),
+            bodyContainer(),
+          ],
         ),
-      );
+      ),
+    );
+  }
 
-  bodyContainer() => Center(
+  bodyContainer() =>
+      Center(
         child: SingleChildScrollView(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -134,7 +138,8 @@ class _LoginPage extends State<LoginPage> {
         ),
       );
 
-  loginHeader() => Container(
+  loginHeader() =>
+      Container(
         margin: EdgeInsets.only(top: 40),
         width: 250,
         height: 86,
@@ -146,7 +151,8 @@ class _LoginPage extends State<LoginPage> {
             shape: BoxShape.rectangle),
       );
 
-  loginFields() => Container(
+  loginFields() =>
+      Container(
         margin: EdgeInsets.only(
           top: 40,
           left: 52,
@@ -166,7 +172,8 @@ class _LoginPage extends State<LoginPage> {
         ),
       );
 
-  dropDawnLocations() => DropdownButton(
+  dropDawnLocations() =>
+      DropdownButton(
         isExpanded: true,
         items: _dropdownMenuItems,
         value: _selectedCompany,
@@ -194,7 +201,8 @@ class _LoginPage extends State<LoginPage> {
         ),
       );
 
-  inputUserName() => Container(
+  inputUserName() =>
+      Container(
         padding: EdgeInsets.symmetric(vertical: 29.0),
         child: TextField(
           maxLines: 1,
@@ -236,7 +244,8 @@ class _LoginPage extends State<LoginPage> {
         ),
       );
 
-  inputPassword() => Container(
+  inputPassword() =>
+      Container(
         child: TextField(
           maxLines: 1,
           obscureText: true,
@@ -278,7 +287,8 @@ class _LoginPage extends State<LoginPage> {
         ),
       );
 
-  buttonGo() => Padding(
+  buttonGo() =>
+      Padding(
         padding: EdgeInsets.symmetric(vertical: 49),
         child: OutlineButton(
           color: Colors.white,
@@ -302,7 +312,8 @@ class _LoginPage extends State<LoginPage> {
         ),
       );
 
-  loginButton() => Container(
+  loginButton() =>
+      Container(
         margin: EdgeInsets.only(top: 49),
         child: Material(
           child: InkWell(
@@ -333,7 +344,8 @@ class _LoginPage extends State<LoginPage> {
         ),
       );
 
-  loginFacebookGoogle() => Padding(
+  loginFacebookGoogle() =>
+      Padding(
         padding: EdgeInsets.only(top: 35),
         child: Center(
           child: Row(
@@ -376,8 +388,8 @@ class _LoginPage extends State<LoginPage> {
                     height: 55.0,
                     child: InkWell(
                       onTap: () {
-                        userBloc.signInGoogle().then((user) =>
-                            prefix0.print("El es ${user.displayName}"));
+                        userBloc.singOut();
+                        userBloc.signInGoogle().then((user) => print("El es ${user.displayName}"));
                       },
                       child: null,
                     ),
@@ -389,7 +401,8 @@ class _LoginPage extends State<LoginPage> {
         ),
       );
 
-  olvidoContrasena() => Container(
+  olvidoContrasena() =>
+      Container(
         padding: EdgeInsets.only(top: 11),
         child: FlatButton(
           onPressed: () {},
@@ -405,7 +418,8 @@ class _LoginPage extends State<LoginPage> {
         ),
       );
 
-  registrese() => Container(
+  registrese() =>
+      Container(
         child: FlatButton(
           onPressed: () {},
           child: Text(

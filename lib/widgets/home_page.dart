@@ -1,4 +1,7 @@
+import 'package:car_wash_app/Usuario/bloc/bloc_user.dart';
+import 'package:car_wash_app/Usuario/model/usuario.dart';
 import 'package:flutter/material.dart';
+import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 import 'gradient_back.dart';
 import '../Sede/ui/widgets/button_functions.dart';
 import 'header_menu_page.dart';
@@ -14,25 +17,76 @@ class HomePage extends StatefulWidget {
 
 class _HomePage extends State<HomePage> {
   GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey();
+  UserBloc userBloc;
+  Usuario usuario;
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
-    return Scaffold(
-      key: _scaffoldKey,
-      appBar: AppBar(
-        flexibleSpace: HeaderMenuPage(_scaffoldKey),
-        leading: Container(),
-      ),
-      body: Stack(
-        children: <Widget>[
-          GradientBack(),
-          bodyContainer(),
-        ],
-      ),
-      drawer: DrawerPage(),
+    userBloc = BlocProvider.of<UserBloc>(context);
+
+    return StreamBuilder(
+      stream: userBloc.streamFirebase,
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        print(snapshot.connectionState);
+        switch (snapshot.connectionState) {
+          case ConnectionState.none:
+            return indicadorDeProgreso();
+          case ConnectionState.waiting:
+            return indicadorDeProgreso();
+          case ConnectionState.active:
+            return showSnapShot(snapshot);
+          case ConnectionState.done:
+            return showSnapShot(snapshot);
+          default:
+            print("default connection State return NULL");
+            return null;
+        }
+      },
     );
   }
+
+  Widget showSnapShot(AsyncSnapshot snapshot) {
+    if (!snapshot.hasData || snapshot.hasError) {
+      return indicadorDeProgreso();
+    } else {
+      print(snapshot.data);
+      usuario = Usuario(
+        nombre: snapshot.data.displayName,
+        email: snapshot.data.email,
+        photoUrl: snapshot.data.photoUrl,
+      );
+      return homePage();
+    }
+  }
+
+  indicadorDeProgreso() => Container(
+    margin: EdgeInsets.only(
+      left: 20.0,
+      right: 20.0,
+      top: 50.0,
+    ),
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        CircularProgressIndicator(),
+      ],
+    ),
+  );
+
+  homePage() => Scaffold(
+        key: _scaffoldKey,
+        appBar: AppBar(
+          flexibleSpace: HeaderMenuPage(_scaffoldKey, usuario),
+          leading: Container(),
+        ),
+        body: Stack(
+          children: <Widget>[
+            GradientBack(),
+            bodyContainer(),
+          ],
+        ),
+        drawer: DrawerPage(usuario),
+      );
 
   bodyContainer() => Column(
         children: <Widget>[
@@ -65,22 +119,6 @@ class _HomePage extends State<HomePage> {
               height: 10.0,
             ),
             ButtonFunctions("FACTURAS", "assets/images/icon_facturas.png"),
-            SizedBox(
-              height: 10.0,
-            ),
-            ButtonFunctions("INFORMES", "assets/images/icon_informes.png"),
-            SizedBox(
-              height: 10.0,
-            ),
-            ButtonFunctions("INFORMES", "assets/images/icon_informes.png"),
-            SizedBox(
-              height: 10.0,
-            ),
-            ButtonFunctions("INFORMES", "assets/images/icon_informes.png"),
-            SizedBox(
-              height: 10.0,
-            ),
-            ButtonFunctions("INFORMES", "assets/images/icon_informes.png"),
             SizedBox(
               height: 10.0,
             ),

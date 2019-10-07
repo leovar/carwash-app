@@ -23,7 +23,7 @@ class UserBloc implements Bloc {
   }
 
   singOut() {
-    _auth_repository.singOut();
+    return _auth_repository.singOut();
   }
 
   @override

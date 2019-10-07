@@ -1,9 +1,11 @@
+import 'package:car_wash_app/Usuario/model/usuario.dart';
 import 'package:flutter/material.dart';
 
 class HeaderMenuPage extends StatelessWidget{
-  GlobalKey<ScaffoldState> _scaffoldKey;
+  final GlobalKey<ScaffoldState> _scaffoldKey;
+  final Usuario _usuario;
 
-  HeaderMenuPage(this._scaffoldKey);
+  HeaderMenuPage(this._scaffoldKey, this._usuario);
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +51,7 @@ class HeaderMenuPage extends StatelessWidget{
               shape: BoxShape.circle,
               image: DecorationImage(
                 fit: BoxFit.cover,
-                image: AssetImage("assets/images/profile21.jpg"),
+                image: NetworkImage(_usuario.photoUrl),
               ),
             ),
           ),

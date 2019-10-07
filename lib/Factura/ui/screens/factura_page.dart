@@ -1,9 +1,14 @@
+import 'package:car_wash_app/Usuario/model/usuario.dart';
 import 'package:car_wash_app/widgets/header_menu_page.dart';
 import 'package:flutter/material.dart';
 import 'package:car_wash_app/widgets/drawer_page.dart';
 import 'package:car_wash_app/widgets/gradient_back.dart';
 
 class FacturaPage extends StatefulWidget {
+  final Usuario usuario;
+
+  FacturaPage(this.usuario);
+
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
@@ -13,7 +18,7 @@ class FacturaPage extends StatefulWidget {
 
 class _FacturaPage extends State<FacturaPage>
     with SingleTickerProviderStateMixin {
-  GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey();
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey();
 
   TabController _tabController;
 
@@ -37,7 +42,7 @@ class _FacturaPage extends State<FacturaPage>
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        flexibleSpace: HeaderMenuPage(_scaffoldKey),
+        flexibleSpace: HeaderMenuPage(_scaffoldKey, widget.usuario),
         leading: Container(),
       ),
       body: Stack(
@@ -46,7 +51,7 @@ class _FacturaPage extends State<FacturaPage>
           bodyContainer(),
         ],
       ),
-      drawer: DrawerPage(),
+      drawer: DrawerPage(widget.usuario),
     );
   }
 
