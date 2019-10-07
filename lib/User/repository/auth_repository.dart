@@ -1,4 +1,4 @@
-import 'package:car_wash_app/Usuario/repository/firebase_auth_api.dart';
+import 'package:car_wash_app/User/repository/firebase_auth_api.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 //En esta clase se manejan los diferentes tipos de autenticación

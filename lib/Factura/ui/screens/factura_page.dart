@@ -1,11 +1,11 @@
-import 'package:car_wash_app/Usuario/model/usuario.dart';
+import 'package:car_wash_app/User/model/user.dart';
 import 'package:car_wash_app/widgets/header_menu_page.dart';
 import 'package:flutter/material.dart';
 import 'package:car_wash_app/widgets/drawer_page.dart';
 import 'package:car_wash_app/widgets/gradient_back.dart';
 
 class FacturaPage extends StatefulWidget {
-  final Usuario usuario;
+  final User usuario;
 
   FacturaPage(this.usuario);
 

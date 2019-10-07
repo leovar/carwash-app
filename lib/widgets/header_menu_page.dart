@@ -1,9 +1,9 @@
-import 'package:car_wash_app/Usuario/model/usuario.dart';
+import 'package:car_wash_app/User/model/user.dart';
 import 'package:flutter/material.dart';
 
 class HeaderMenuPage extends StatelessWidget{
   final GlobalKey<ScaffoldState> _scaffoldKey;
-  final Usuario _usuario;
+  final User _usuario;
 
   HeaderMenuPage(this._scaffoldKey, this._usuario);
 

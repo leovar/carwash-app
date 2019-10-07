@@ -1,11 +1,11 @@
-import 'package:car_wash_app/Usuario/bloc/bloc_user.dart';
-import 'package:car_wash_app/Usuario/model/usuario.dart';
+import 'package:car_wash_app/User/bloc/bloc_user.dart';
+import 'package:car_wash_app/User/model/user.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 
 class DrawerPage extends StatefulWidget {
-  Usuario usuario;
+  User usuario;
 
   DrawerPage(this.usuario);
 
@@ -34,7 +34,7 @@ class _DrawerPage extends State<DrawerPage> {
                 color: Colors.white,
               ),
               accountName: Text(
-                widget.usuario.nombre,
+                widget.usuario.name,
                 style: TextStyle(
                   fontFamily: "Lato",
                   fontWeight: FontWeight.w600,

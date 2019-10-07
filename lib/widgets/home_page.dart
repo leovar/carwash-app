@@ -1,5 +1,5 @@
-import 'package:car_wash_app/Usuario/bloc/bloc_user.dart';
-import 'package:car_wash_app/Usuario/model/usuario.dart';
+import 'package:car_wash_app/User/bloc/bloc_user.dart';
+import 'package:car_wash_app/User/model/user.dart';
 import 'package:flutter/material.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 import 'gradient_back.dart';
@@ -18,7 +18,7 @@ class HomePage extends StatefulWidget {
 class _HomePage extends State<HomePage> {
   GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey();
   UserBloc userBloc;
-  Usuario usuario;
+  User usuario;
 
   @override
   Widget build(BuildContext context) {
@@ -50,8 +50,8 @@ class _HomePage extends State<HomePage> {
       return indicadorDeProgreso();
     } else {
       print(snapshot.data);
-      usuario = Usuario(
-        nombre: snapshot.data.displayName,
+      usuario = User(
+        name: snapshot.data.displayName,
         email: snapshot.data.email,
         photoUrl: snapshot.data.photoUrl,
       );
