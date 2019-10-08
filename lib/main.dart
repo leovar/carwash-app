@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:car_wash_app/User/model/user.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
@@ -33,7 +34,7 @@ class MyApp extends StatelessWidget {
         //HomePage(),//LoginPage(),
         initialRoute: 'main',
         routes: {
-          'main': (context) => LoginPage(),
+          'main': (context) => FacturaPage(User()), //LoginPage(),
         },
       ),
     );

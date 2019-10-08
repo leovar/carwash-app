@@ -1,8 +1,12 @@
+import 'package:car_wash_app/Factura/ui/widgets/carousel_test.dart' as prefix0;
 import 'package:car_wash_app/User/model/user.dart';
 import 'package:car_wash_app/widgets/header_menu_page.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:car_wash_app/widgets/drawer_page.dart';
 import 'package:car_wash_app/widgets/gradient_back.dart';
+import 'package:car_wash_app/Factura/ui/widgets/radio_item.dart';
+import 'package:car_wash_app/Factura/ui/widgets/carousel_test.dart';
 
 class FacturaPage extends StatefulWidget {
   final User usuario;
@@ -16,115 +20,102 @@ class FacturaPage extends StatefulWidget {
   }
 }
 
-class _FacturaPage extends State<FacturaPage>
-    with SingleTickerProviderStateMixin {
+class _FacturaPage extends State<FacturaPage> with SingleTickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey();
 
-  TabController _tabController;
+  List<RadioModel> sampleData = new List<RadioModel>();
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    _tabController = TabController(vsync: this, length: 3);
+    sampleData.add(new RadioModel(false, "Auto", 38, "assets/images/icon_car_admin.png", "assets/images/icon_car.png"));
+    sampleData.add(new RadioModel(false, "Camioneta", 37, 'assets/images/icon_suv_car_admin.png', "assets/images/icon_suv_car.png"));
+    sampleData.add(new RadioModel(false, "Moto", 34, "assets/images/icon_motorcycle_admin.png", "assets/images/icon_motorcycle.png"));
+    sampleData[0].isSelected = true;
   }
 
   @override
   void dispose() {
     // TODO: implement dispose
-    _tabController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+
     // TODO: implement build
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        flexibleSpace: HeaderMenuPage(_scaffoldKey, widget.usuario),
+        flexibleSpace: Container(
+          color: Colors.white,
+        ),
+        //HeaderMenuPage(_scaffoldKey, widget.usuario),
         leading: Container(),
       ),
-      body: Stack(
-        children: <Widget>[
-          GradientBack(),
-          bodyContainer(),
-        ],
+      body: SafeArea(
+        child: Stack(
+          children: <Widget>[
+            GradientBack(),
+            bodyContainer(),
+          ],
+        ),
       ),
-      drawer: DrawerPage(widget.usuario),
+      drawer: Container(color: Colors.white), //DrawerPage(widget.usuario),
     );
   }
 
   bodyContainer() => Column(
         children: <Widget>[
-          Material(
-            elevation: 16,
-            child: tabBar(),
-          ),
+          headerContainerOptions(),
+          carouselImage(),
         ],
       );
 
-  tabBar() => TabBar(
-        controller: _tabController,
-        indicatorColor: Color(0xFF59B258),
-        indicatorWeight: 3,
-        unselectedLabelColor: Color(0xFF27AEBB),
-        labelColor: Color(0xFF59B258),
-        labelStyle: TextStyle(
-          color: Color(0xFF59B258),
-        ),
-        tabs: <Widget>[
-          Tab(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: <Widget>[
-                Icon(Icons.directions_car),
-                Text(
-                  "Auto",
-                  style: TextStyle(
-                    fontFamily: "Lato",
-                    fontWeight: FontWeight.w600,
-                    fontSize: 15,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Tab(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: <Widget>[
-                Icon(Icons.airport_shuttle),
-                Expanded(
-                  child: Text(
-                    "Camioneta",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontFamily: "Lato",
-                      fontWeight: FontWeight.w600,
-                      fontSize: 15,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Tab(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: <Widget>[
-                Icon(Icons.motorcycle),
-                Text(
-                  "Moto",
-                  style: TextStyle(
-                    fontFamily: "Lato",
-                    fontWeight: FontWeight.w600,
-                    fontSize: 15,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+  headerContainerOptions() => Container(
+    height: 45,
+    decoration: BoxDecoration(
+        shape: BoxShape.rectangle,
+        boxShadow: [BoxShadow(
+          color: Colors.grey,
+          blurRadius: 5.0,
+        ),]
+    ),
+    child: topSelectVehicle(),
+  );
+
+  topSelectVehicle() => ListView.builder(
+    itemCount: sampleData.length,
+    scrollDirection: Axis.horizontal,
+    itemBuilder: (BuildContext context, int index) {
+      return InkWell(
+        splashColor: Colors.white,
+        onTap: () {
+          setState(() {
+            sampleData.forEach((element) => element.isSelected = false);
+            sampleData[index].isSelected = true;
+          });
+        },
+        child: RadioItem(sampleData[index]),
       );
+    },
+  );
+
+  carouselImage() => Container(
+      margin: EdgeInsets.only(top: 0),
+      width: MediaQuery.of(context).size.width,
+      child: CarouselTest()
+  );
+
+}
+
+class RadioModel {
+  bool isSelected;
+  final String text;
+  final double withImage;
+  final String imageSelected;
+  final String imageUnselected;
+
+  RadioModel(this.isSelected, this.text, this.withImage, this.imageSelected, this.imageUnselected);
 }

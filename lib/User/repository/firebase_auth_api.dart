@@ -69,9 +69,9 @@ class FirebaseAuthApi {
   }
 
   singOut() async {
-    await _authApi.signOut().then((result) => print("Sesión cerrada"));
-    _googleSignIn.signOut();
-    _facebookSingIn.logOut();
+    await _authApi.signOut();
+    await _googleSignIn.signOut();
+    await _facebookSingIn.logOut();
     print("Sessiones cerradas");
   }
 }
