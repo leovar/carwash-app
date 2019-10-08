@@ -14,7 +14,9 @@ final List<String> imgList = [
 
 final Widget placeholder = Container(color: Colors.grey);
 
-final List child = map<Widget>( imgList, (index, i) {
+final List child = map<Widget>(
+  imgList,
+  (index, i) {
     return Container(
       //margin: EdgeInsets.only(left: 5.0, right: 5.0),
       child: ClipRRect(
@@ -28,7 +30,10 @@ final List child = map<Widget>( imgList, (index, i) {
             child: Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Color.fromARGB(200, 0, 0, 0), Color.fromARGB(0, 0, 0, 0)],
+                  colors: [
+                    Color.fromARGB(200, 0, 0, 0),
+                    Color.fromARGB(0, 0, 0, 0)
+                  ],
                   begin: Alignment.bottomCenter,
                   end: Alignment.topCenter,
                 ),
@@ -47,16 +52,23 @@ final List child = map<Widget>( imgList, (index, i) {
           Positioned(
             top: 12,
             right: 18,
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: RadialGradient(colors : [Color.fromARGB(200, 0, 0, 0), Color.fromARGB(0, 0, 0, 0)])
-              ),
-              child: InkWell(
-                onTap: () {},
-                child: Icon(
-                  Icons.close,
-                  size: 28,
-                  color: Colors.white,
+            child: Center(
+              child: Container(
+                width: 37,
+                decoration: BoxDecoration(
+                  gradient: RadialGradient(colors: [
+                    Color.fromARGB(200, 0, 0, 0),
+                    Color.fromARGB(0, 0, 0, 0)
+                  ],),
+                ),
+                child: IconButton(
+                  padding: EdgeInsets.only(right: 1),
+                  icon: Icon(
+                    Icons.close,
+                    color: Colors.white,
+                  ),
+                  iconSize: 28,
+                  onPressed: () {},
                 ),
               ),
             ),
@@ -91,5 +103,4 @@ class CarouselTest extends StatelessWidget {
 
     return manualCarouselDemo;
   }
-
 }

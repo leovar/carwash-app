@@ -61,6 +61,7 @@ flutter:
     - assets/images/icon_suv_car_admin.png
     - assets/images/icon_suv_car.png
     - assets/images/icon_logout.png
+    - assets/images/icon_nueva_factura_white.png
 
 
   # The following line ensures that the Material Icons font is
