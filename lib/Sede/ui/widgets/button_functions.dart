@@ -4,8 +4,9 @@ class ButtonFunctions extends StatefulWidget {
 
   String buttonName = "";
   String imageAsset = "";
+  final VoidCallback onPressed;
 
-  ButtonFunctions(this.buttonName, this.imageAsset);
+  ButtonFunctions({Key key, @required this.onPressed, this.buttonName, this.imageAsset});
 
   @override
   State<StatefulWidget> createState() {
@@ -22,7 +23,7 @@ class _ButtonFunctions extends State<ButtonFunctions> {
     return Container(
       child: Material(
         child: InkWell(
-          onTap: () => print('hello'),
+          onTap: widget.onPressed,
           child: Container(
             height: 70.0,
             child: Align(

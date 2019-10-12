@@ -7,11 +7,14 @@ import 'package:car_wash_app/widgets/drawer_page.dart';
 import 'package:car_wash_app/widgets/gradient_back.dart';
 import 'package:car_wash_app/Factura/ui/widgets/radio_item.dart';
 import 'package:car_wash_app/Factura/ui/widgets/carousel_test.dart';
+import 'package:car_wash_app/Factura/ui/widgets/campos_factura.dart';
+import 'package:car_wash_app/widgets/app_bar_widget.dart';
 
 class FacturaPage extends StatefulWidget {
   final User usuario;
+  bool showDrawer = true;
 
-  FacturaPage(this.usuario);
+  FacturaPage({Key key, @required this.usuario, this.showDrawer});
 
   @override
   State<StatefulWidget> createState() {
@@ -20,11 +23,15 @@ class FacturaPage extends StatefulWidget {
   }
 }
 
-class _FacturaPage extends State<FacturaPage>
-    with SingleTickerProviderStateMixin {
+class _FacturaPage extends State<FacturaPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey();
 
+  bool _sendEmail = false;
   List<RadioModel> sampleData = new List<RadioModel>();
+  var _operadores = ["Juan antonio", "Ernesto", "Camilo Villa"];
+  var _coordinadores = ["Antonio", "Juan esteban", "Carlos andres"];
+  String _currenOperatorSelected = "Ernesto";
+  String _currenCoordinadorSelected = "Juan esteban";
 
   @override
   void initState() {
@@ -58,13 +65,9 @@ class _FacturaPage extends State<FacturaPage>
     // TODO: implement build
     return Scaffold(
       key: _scaffoldKey,
-      appBar: AppBar(
-        flexibleSpace: Container(
-          color: Colors.white,
-        ),
-        //HeaderMenuPage(_scaffoldKey, widget.usuario),
-        leading: Container(),
-      ),
+      appBar: PreferredSize(
+        preferredSize: Size(MediaQuery.of(context).size.width, 65),
+        child: AppBarWidget(_scaffoldKey, widget.usuario, false),) ,
       body: SafeArea(
         child: Stack(
           children: <Widget>[
@@ -73,7 +76,7 @@ class _FacturaPage extends State<FacturaPage>
           ],
         ),
       ),
-      drawer: Container(color: Colors.white), //DrawerPage(widget.usuario),
+      drawer: widget.showDrawer ? DrawerPage(widget.usuario) : null,
     );
   }
 
@@ -117,9 +120,16 @@ class _FacturaPage extends State<FacturaPage>
       );
 
   carouselImage() => Container(
-      margin: EdgeInsets.only(top: 0),
-      width: MediaQuery.of(context).size.width,
-      child: CarouselTest());
+        margin: EdgeInsets.only(top: 0),
+        width: MediaQuery.of(context).size.width,
+        height: 200,
+        child: Stack(
+          children: <Widget>[
+            CarouselTest(),
+            floatButtonAddImage(),
+          ],
+        ),
+      );
 
   numeroDeFactura() => Container(
         height: 70,
@@ -148,30 +158,37 @@ class _FacturaPage extends State<FacturaPage>
       );
 
   contenedorCamposFactura() => Container(
-        margin: EdgeInsets.symmetric(horizontal: 17),
+        margin: EdgeInsets.only(right: 17, left: 17, bottom: 17),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(7.0),
         ),
-        child: Center(
-          child: camposFactura(),
+        child: Container(
+          padding: EdgeInsets.only(
+            right: 15,
+            left: 15,
+            top: 15,
+            bottom: 15,
+          ),
+          child: Center(
+            child: CamposFactura(),
+          ),
         ),
       );
 
-  camposFactura() => Column(
-        children: <Widget>[
-          TextField(
-            maxLines: 1,
-            autofocus: false,
-            cursorColor: Colors.white,
-            style: TextStyle(
-              fontFamily: "AvenirNext",
-              decoration: TextDecoration.none,
-              color: Colors.white,
-              fontSize: 15,
-            ),
+  floatButtonAddImage() => Align(
+        alignment: Alignment(0.9, 0.9),
+        child: FloatingActionButton(
+          child: Icon(
+            Icons.add,
+            color: Colors.black,
+            size: 30,
           ),
-        ],
+          backgroundColor: Colors.white,
+          mini: true,
+          elevation: 16,
+          heroTag: null,
+        ),
       );
 }
 

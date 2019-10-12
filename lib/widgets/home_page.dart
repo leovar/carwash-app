@@ -1,11 +1,13 @@
+import 'package:car_wash_app/Factura/ui/widgets/carousel_test.dart' as prefix0;
 import 'package:car_wash_app/User/bloc/bloc_user.dart';
 import 'package:car_wash_app/User/model/user.dart';
 import 'package:flutter/material.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 import 'gradient_back.dart';
 import '../Sede/ui/widgets/button_functions.dart';
-import 'header_menu_page.dart';
 import 'drawer_page.dart';
+import 'package:car_wash_app/Factura/ui/screens/factura_page.dart';
+import 'package:car_wash_app/widgets/app_bar_widget.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -60,24 +62,24 @@ class _HomePage extends State<HomePage> {
   }
 
   indicadorDeProgreso() => Container(
-    margin: EdgeInsets.only(
-      left: 20.0,
-      right: 20.0,
-      top: 50.0,
-    ),
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        CircularProgressIndicator(),
-      ],
-    ),
-  );
+        margin: EdgeInsets.only(
+          left: 20.0,
+          right: 20.0,
+          top: 50.0,
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            CircularProgressIndicator(),
+          ],
+        ),
+      );
 
   homePage() => Scaffold(
         key: _scaffoldKey,
-        appBar: AppBar(
-          flexibleSpace: HeaderMenuPage(_scaffoldKey, usuario),
-          leading: Container(),
+        appBar: PreferredSize(
+            preferredSize: Size(MediaQuery.of(context).size.width, 65),
+            child: AppBarWidget(_scaffoldKey, usuario, true),
         ),
         body: Stack(
           children: <Widget>[
@@ -114,23 +116,39 @@ class _HomePage extends State<HomePage> {
           scrollDirection: Axis.vertical,
           children: <Widget>[
             ButtonFunctions(
-                "NUEVA FACTURA", "assets/images/icon_nueva_factura.png"),
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => FacturaPage(usuario: usuario, showDrawer: false)));
+                },
+                buttonName: "NUEVA FACTURA",
+                imageAsset: "assets/images/icon_nueva_factura.png"),
             SizedBox(
               height: 10.0,
             ),
-            ButtonFunctions("FACTURAS", "assets/images/icon_facturas.png"),
+            ButtonFunctions(
+                onPressed: () {},
+                buttonName: "FACTURAS",
+                imageAsset: "assets/images/icon_facturas.png"),
             SizedBox(
               height: 10.0,
             ),
-            ButtonFunctions("INFORMES", "assets/images/icon_informes.png"),
+            ButtonFunctions(
+                onPressed: () {},
+                buttonName: "INFORMES",
+                imageAsset: "assets/images/icon_informes.png"),
             SizedBox(
               height: 10.0,
             ),
-            ButtonFunctions("INFORMES", "assets/images/icon_informes.png"),
+            ButtonFunctions(
+                onPressed: () {},
+                buttonName: "INFORMES",
+                imageAsset: "assets/images/icon_informes.png"),
             SizedBox(
               height: 10.0,
             ),
-            ButtonFunctions("INFORMES", "assets/images/icon_informes.png"),
+            ButtonFunctions(
+                onPressed: () {},
+                buttonName: "INFORMES",
+                imageAsset: "assets/images/icon_informes.png"),
           ],
         ),
       );

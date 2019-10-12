@@ -34,7 +34,7 @@ class MyApp extends StatelessWidget {
         //HomePage(),//LoginPage(),
         initialRoute: 'main',
         routes: {
-          'main': (context) => FacturaPage(User()), //LoginPage(),
+          'main': (context) => LoginPage(),
         },
       ),
     );

@@ -4,8 +4,9 @@ import 'package:flutter/material.dart';
 class HeaderMenuPage extends StatelessWidget{
   final GlobalKey<ScaffoldState> _scaffoldKey;
   final User _usuario;
+  bool showDrawerIcon = true;
 
-  HeaderMenuPage(this._scaffoldKey, this._usuario);
+  HeaderMenuPage(this._scaffoldKey, this._usuario, this.showDrawerIcon);
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +23,7 @@ class HeaderMenuPage extends StatelessWidget{
             alignment: Alignment.centerLeft,
             icon: Icon(
               Icons.menu,
-              color: Color(0xFF59B258),
+              color: showDrawerIcon ? Color(0xFF59B258) : Colors.white,
             ),
             onPressed: () {
               _scaffoldKey.currentState.openDrawer();
