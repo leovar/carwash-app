@@ -1,4 +1,3 @@
-import 'package:car_wash_app/Factura/ui/widgets/carousel_test.dart' as prefix0;
 import 'package:car_wash_app/User/bloc/bloc_user.dart';
 import 'package:car_wash_app/User/model/user.dart';
 import 'package:flutter/material.dart';

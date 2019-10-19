@@ -1,4 +1,6 @@
-import 'package:car_wash_app/Factura/ui/widgets/carousel_test.dart' as prefix0;
+import 'dart:io';
+
+import 'package:car_wash_app/Factura/ui/widgets/carousel_cars_widget.dart';
 import 'package:car_wash_app/User/model/user.dart';
 import 'package:car_wash_app/widgets/header_menu_page.dart';
 import 'package:carousel_slider/carousel_slider.dart';
@@ -6,9 +8,12 @@ import 'package:flutter/material.dart';
 import 'package:car_wash_app/widgets/drawer_page.dart';
 import 'package:car_wash_app/widgets/gradient_back.dart';
 import 'package:car_wash_app/Factura/ui/widgets/radio_item.dart';
-import 'package:car_wash_app/Factura/ui/widgets/carousel_test.dart';
 import 'package:car_wash_app/Factura/ui/widgets/campos_factura.dart';
 import 'package:car_wash_app/widgets/app_bar_widget.dart';
+import 'package:car_wash_app/Factura/ui/widgets/header_services.dart';
+import 'package:image_cropper/image_cropper.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:popup_menu/popup_menu.dart';
 
 class FacturaPage extends StatefulWidget {
   final User usuario;
@@ -24,28 +29,38 @@ class FacturaPage extends StatefulWidget {
 }
 
 class _FacturaPage extends State<FacturaPage> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey();
 
+  ///global variables
+  //Esta variable _scaffoldKey se usa para poder abrir el drawer desde un boton diferente al que se coloca por defecto en el AppBar
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey();
+  GlobalKey btnAddImage = GlobalKey();
+  List<String> imageList = [];
   bool _sendEmail = false;
-  List<RadioModel> sampleData = new List<RadioModel>();
-  var _operadores = ["Juan antonio", "Ernesto", "Camilo Villa"];
-  var _coordinadores = ["Antonio", "Juan esteban", "Carlos andres"];
+  List<HeaderServices> sampleData = new List<HeaderServices>();
+  var _operators = ["Juan antonio", "Ernesto", "Camilo Villa"];
+  var _coordinators = ["Antonio", "Juan esteban", "Carlos andres"];
   String _currenOperatorSelected = "Ernesto";
   String _currenCoordinadorSelected = "Juan esteban";
+  final String cameraTag = "Camara";
+  final String galleryTag = "Galeria";
+  String _selectSourceImagePicker = "Camara";
+  File _imageSelect;
+
+
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    sampleData.add(new RadioModel(false, "Auto", 38,
+    sampleData.add(HeaderServices(false, "Auto", 38,
         "assets/images/icon_car_admin.png", "assets/images/icon_car.png"));
-    sampleData.add(new RadioModel(
+    sampleData.add(HeaderServices(
         false,
         "Camioneta",
         37,
         'assets/images/icon_suv_car_admin.png',
         "assets/images/icon_suv_car.png"));
-    sampleData.add(new RadioModel(
+    sampleData.add(HeaderServices(
         false,
         "Moto",
         34,
@@ -55,13 +70,16 @@ class _FacturaPage extends State<FacturaPage> {
   }
 
   @override
-  void dispose() {
-    // TODO: implement dispose
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    PopupMenu.context = context;
+    if (_imageSelect != null) {
+      if (!imageList.contains(_imageSelect.path)) {
+        imageList.add(_imageSelect.path);
+      }
+      _imageSelect = null;
+    }
+
+
     // TODO: implement build
     return Scaffold(
       key: _scaffoldKey,
@@ -81,12 +99,20 @@ class _FacturaPage extends State<FacturaPage> {
   }
 
   bodyContainer() => SingleChildScrollView(
-        child: Column(
+        child: Stack(
           children: <Widget>[
-            headerContainerOptions(),
-            carouselImage(),
-            numeroDeFactura(),
-            contenedorCamposFactura(),
+            Column(
+              children: <Widget>[
+                headerContainerOptions(),
+                Container(
+                  height: 240,
+                  child: CarouselCarsWidget(callbackDeleteImage: _deleteImageList, imgList: imageList),
+                ),
+                numeroDeFactura(),
+                contenedorCamposFactura(),
+              ],
+            ),
+            floatButtonAddImage(),
           ],
         ),
       );
@@ -117,18 +143,6 @@ class _FacturaPage extends State<FacturaPage> {
             child: RadioItem(sampleData[index]),
           );
         },
-      );
-
-  carouselImage() => Container(
-        margin: EdgeInsets.only(top: 0),
-        width: MediaQuery.of(context).size.width,
-        height: 200,
-        child: Stack(
-          children: <Widget>[
-            CarouselTest(),
-            floatButtonAddImage(),
-          ],
-        ),
       );
 
   numeroDeFactura() => Container(
@@ -177,28 +191,110 @@ class _FacturaPage extends State<FacturaPage> {
       );
 
   floatButtonAddImage() => Align(
-        alignment: Alignment(0.9, 0.9),
-        child: FloatingActionButton(
-          child: Icon(
-            Icons.add,
-            color: Colors.black,
-            size: 30,
+        alignment: Alignment(0.8, 0.8),
+        heightFactor: 6,
+        child: Container(
+          child: FloatingActionButton(
+            key: btnAddImage,
+            child: Icon(
+              Icons.add,
+              color: Colors.black,
+              size: 30,
+            ),
+            backgroundColor: Colors.white,
+            elevation: 14,
+            heroTag: null,
+            onPressed: menuSourceAddImage,
           ),
-          backgroundColor: Colors.white,
-          mini: true,
-          elevation: 16,
-          heroTag: null,
         ),
       );
-}
 
-class RadioModel {
-  bool isSelected;
-  final String text;
-  final double withImage;
-  final String imageSelected;
-  final String imageUnselected;
+  ///Functions
 
-  RadioModel(this.isSelected, this.text, this.withImage, this.imageSelected,
-      this.imageUnselected);
+  void menuSourceAddImage() {
+    PopupMenu menu = PopupMenu(
+        backgroundColor: Color(0xFF59B258),
+        lineColor: Color(0xFF59B258),
+        maxColumn: 1,
+        items: [
+          MenuItem(
+              title: cameraTag,
+              textStyle: TextStyle(color: Colors.white),
+              image: Icon(
+                Icons.camera_alt,
+                color: Colors.white,
+              )),
+          MenuItem(
+              title: galleryTag,
+              textStyle: TextStyle(color: Colors.white),
+              image: Icon(
+                Icons.image,
+                color: Colors.white,
+              )),
+        ],
+        onClickMenu: onClickMenuImageSelected);
+    menu.show(widgetKey: btnAddImage);
+  }
+
+  void _deleteImageList(String imageToDelete) {
+    imageList.remove(imageToDelete);
+    _imageSelect = null;
+  }
+
+  void onClickMenuImageSelected(MenuItemProvider item) {
+    _selectSourceImagePicker = item.menuTitle;
+    _addImageTour();
+    print('Click menu -> ${item.menuTitle}');
+  }
+
+  Future _addImageTour() async {
+    var imageCapture = await ImagePicker.pickImage(
+        source: _selectSourceImagePicker == cameraTag
+            ? ImageSource.camera
+            : ImageSource.gallery)
+        .catchError((onError) => print(onError));
+
+    if (imageCapture != null) {
+      setState(() {
+        print(imageCapture.lengthSync());
+        _cropImage(imageCapture);
+      });
+    }
+  }
+
+  Future<Null> _cropImage(File imageCapture) async {
+    File croppedFile = await ImageCropper.cropImage(
+      sourcePath: imageCapture.path,
+      aspectRatioPresets: Platform.isAndroid
+          ? [
+        CropAspectRatioPreset.square,
+        CropAspectRatioPreset.ratio3x2,
+        CropAspectRatioPreset.original,
+        CropAspectRatioPreset.ratio4x3,
+        CropAspectRatioPreset.ratio16x9
+      ]
+          : [
+        CropAspectRatioPreset.original,
+        CropAspectRatioPreset.square,
+        CropAspectRatioPreset.ratio3x2,
+        CropAspectRatioPreset.ratio4x3,
+        CropAspectRatioPreset.ratio5x3,
+        CropAspectRatioPreset.ratio5x4,
+        CropAspectRatioPreset.ratio7x5,
+        CropAspectRatioPreset.ratio16x9
+      ],
+      androidUiSettings: AndroidUiSettings(
+          toolbarTitle: 'Cropper',
+          toolbarColor: Colors.white,
+          toolbarWidgetColor: Theme.of(context).primaryColor,
+          initAspectRatio: CropAspectRatioPreset.original,
+          lockAspectRatio: false),
+    );
+    if (croppedFile != null) {
+      setState(() {
+        _imageSelect = croppedFile;
+      });
+    }
+  }
+
 }

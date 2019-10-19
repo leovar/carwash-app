@@ -43,6 +43,8 @@ class _CamposFactura extends State<CamposFactura>{
                   _sendEmail = value;
                 });
               },
+              checkColor: Colors.white,
+              activeColor: Color(0xFF59B258),
             ),
             Text(
               "Enviar por correo electrónico",

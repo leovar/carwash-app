@@ -38,23 +38,6 @@ class Company {
   }
 }
 
-class ColorModel {
-  String colorName;
-  Color color;
-
-  ColorModel({this.colorName, this.color});
-}
-
-List<ColorModel> _colors = [
-  ColorModel(color: Colors.blue, colorName: "Blue"),
-  ColorModel(color: Colors.purple, colorName: "Purple"),
-  ColorModel(color: Colors.pink, colorName: "Pink"),
-  ColorModel(color: Colors.teal, colorName: "Teal"),
-  ColorModel(color: Colors.amber, colorName: "Amber"),
-  ColorModel(color: Colors.black, colorName: "Black"),
-];
-Color _selectedColor = Colors.blue;
-
 class _LoginPage extends State<LoginPage> {
   UserBloc userBloc;
 
@@ -98,6 +81,7 @@ class _LoginPage extends State<LoginPage> {
     return _handleCurrentSession(); //loginScreen();
   }
 
+  ///Valido si el usuario ya se encuentra logueado y lo mando directamente al Home
   Widget _handleCurrentSession() {
     return StreamBuilder(
       stream: userBloc.authStatus,

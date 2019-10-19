@@ -1,8 +1,9 @@
 import 'package:car_wash_app/Factura/ui/screens/factura_page.dart';
+import 'package:car_wash_app/Factura/ui/widgets/header_services.dart';
 import 'package:flutter/material.dart';
 
 class RadioItem extends StatelessWidget {
-  final RadioModel _item;
+  final HeaderServices _item;
 
   RadioItem(this._item);
 

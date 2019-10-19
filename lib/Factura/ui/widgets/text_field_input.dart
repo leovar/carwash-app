@@ -16,9 +16,10 @@ class TextFieldInput extends StatelessWidget {
         fontFamily: "Lato",
         decoration: TextDecoration.none,
         color: Color(0xFFAEAEAE),
-        fontSize: 15,
+        fontSize: 18,
       ),
       decoration: InputDecoration(
+        contentPadding: EdgeInsets.symmetric(vertical: 17, horizontal: 15),
         labelText: _labelText,
         labelStyle: TextStyle(
           decoration: TextDecoration.none,
