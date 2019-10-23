@@ -1,35 +1,35 @@
 import 'dart:io';
 
-import 'package:car_wash_app/Factura/ui/widgets/carousel_cars_widget.dart';
+import 'package:car_wash_app/invoice/ui/widgets/carousel_cars_widget.dart';
 import 'package:car_wash_app/User/model/user.dart';
 import 'package:car_wash_app/widgets/header_menu_page.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:car_wash_app/widgets/drawer_page.dart';
 import 'package:car_wash_app/widgets/gradient_back.dart';
-import 'package:car_wash_app/Factura/ui/widgets/radio_item.dart';
-import 'package:car_wash_app/Factura/ui/widgets/campos_factura.dart';
+import 'package:car_wash_app/invoice/ui/widgets/radio_item.dart';
+import 'package:car_wash_app/invoice/ui/widgets/fields_invoice.dart';
 import 'package:car_wash_app/widgets/app_bar_widget.dart';
-import 'package:car_wash_app/Factura/ui/widgets/header_services.dart';
+import 'package:car_wash_app/invoice/ui/widgets/header_services.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:popup_menu/popup_menu.dart';
 
-class FacturaPage extends StatefulWidget {
+class InvoicePage extends StatefulWidget {
   final User usuario;
   bool showDrawer = true;
 
-  FacturaPage({Key key, @required this.usuario, this.showDrawer});
+  InvoicePage({Key key, @required this.usuario, this.showDrawer});
 
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
-    return _FacturaPage();
+    return _InvoicePage();
   }
 }
 
-class _FacturaPage extends State<FacturaPage> {
-
+class _InvoicePage extends State<InvoicePage> {
   ///global variables
   //Esta variable _scaffoldKey se usa para poder abrir el drawer desde un boton diferente al que se coloca por defecto en el AppBar
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey();
@@ -45,8 +45,6 @@ class _FacturaPage extends State<FacturaPage> {
   final String galleryTag = "Galeria";
   String _selectSourceImagePicker = "Camara";
   File _imageSelect;
-
-
 
   @override
   void initState() {
@@ -79,13 +77,13 @@ class _FacturaPage extends State<FacturaPage> {
       _imageSelect = null;
     }
 
-
     // TODO: implement build
     return Scaffold(
       key: _scaffoldKey,
       appBar: PreferredSize(
         preferredSize: Size(MediaQuery.of(context).size.width, 65),
-        child: AppBarWidget(_scaffoldKey, widget.usuario, false),) ,
+        child: AppBarWidget(_scaffoldKey, widget.usuario, false),
+      ),
       body: SafeArea(
         child: Stack(
           children: <Widget>[
@@ -106,7 +104,9 @@ class _FacturaPage extends State<FacturaPage> {
                 headerContainerOptions(),
                 Container(
                   height: 240,
-                  child: CarouselCarsWidget(callbackDeleteImage: _deleteImageList, imgList: imageList),
+                  child: CarouselCarsWidget(
+                      callbackDeleteImage: _deleteImageList,
+                      imgList: imageList),
                 ),
                 numeroDeFactura(),
                 contenedorCamposFactura(),
@@ -185,7 +185,7 @@ class _FacturaPage extends State<FacturaPage> {
             bottom: 15,
           ),
           child: Center(
-            child: CamposFactura(),
+            child: FieldsInvoice(callbackSaveInvoice: _saveInvoice,),
           ),
         ),
       );
@@ -204,14 +204,14 @@ class _FacturaPage extends State<FacturaPage> {
             backgroundColor: Colors.white,
             elevation: 14,
             heroTag: null,
-            onPressed: menuSourceAddImage,
+            onPressed: _menuSourceAddImage,
           ),
         ),
       );
 
   ///Functions
 
-  void menuSourceAddImage() {
+  void _menuSourceAddImage() {
     PopupMenu menu = PopupMenu(
         backgroundColor: Color(0xFF59B258),
         lineColor: Color(0xFF59B258),
@@ -232,7 +232,7 @@ class _FacturaPage extends State<FacturaPage> {
                 color: Colors.white,
               )),
         ],
-        onClickMenu: onClickMenuImageSelected);
+        onClickMenu: _onClickMenuImageSelected);
     menu.show(widgetKey: btnAddImage);
   }
 
@@ -241,7 +241,7 @@ class _FacturaPage extends State<FacturaPage> {
     _imageSelect = null;
   }
 
-  void onClickMenuImageSelected(MenuItemProvider item) {
+  void _onClickMenuImageSelected(MenuItemProvider item) {
     _selectSourceImagePicker = item.menuTitle;
     _addImageTour();
     print('Click menu -> ${item.menuTitle}');
@@ -249,9 +249,9 @@ class _FacturaPage extends State<FacturaPage> {
 
   Future _addImageTour() async {
     var imageCapture = await ImagePicker.pickImage(
-        source: _selectSourceImagePicker == cameraTag
-            ? ImageSource.camera
-            : ImageSource.gallery)
+            source: _selectSourceImagePicker == cameraTag
+                ? ImageSource.camera
+                : ImageSource.gallery)
         .catchError((onError) => print(onError));
 
     if (imageCapture != null) {
@@ -264,37 +264,49 @@ class _FacturaPage extends State<FacturaPage> {
 
   Future<Null> _cropImage(File imageCapture) async {
     File croppedFile = await ImageCropper.cropImage(
-      sourcePath: imageCapture.path,
-      aspectRatioPresets: Platform.isAndroid
-          ? [
-        CropAspectRatioPreset.square,
-        CropAspectRatioPreset.ratio3x2,
-        CropAspectRatioPreset.original,
-        CropAspectRatioPreset.ratio4x3,
-        CropAspectRatioPreset.ratio16x9
-      ]
-          : [
-        CropAspectRatioPreset.original,
-        CropAspectRatioPreset.square,
-        CropAspectRatioPreset.ratio3x2,
-        CropAspectRatioPreset.ratio4x3,
-        CropAspectRatioPreset.ratio5x3,
-        CropAspectRatioPreset.ratio5x4,
-        CropAspectRatioPreset.ratio7x5,
-        CropAspectRatioPreset.ratio16x9
-      ],
-      androidUiSettings: AndroidUiSettings(
-          toolbarTitle: 'Cropper',
-          toolbarColor: Colors.white,
-          toolbarWidgetColor: Theme.of(context).primaryColor,
-          initAspectRatio: CropAspectRatioPreset.original,
-          lockAspectRatio: false),
+        sourcePath: imageCapture.path,
+        aspectRatioPresets: Platform.isAndroid
+            ? [
+                CropAspectRatioPreset.square,
+                CropAspectRatioPreset.ratio3x2,
+                CropAspectRatioPreset.original,
+                CropAspectRatioPreset.ratio4x3,
+                CropAspectRatioPreset.ratio16x9
+              ]
+            : [
+                CropAspectRatioPreset.original,
+                CropAspectRatioPreset.square,
+                CropAspectRatioPreset.ratio3x2,
+                CropAspectRatioPreset.ratio4x3,
+                CropAspectRatioPreset.ratio5x3,
+                CropAspectRatioPreset.ratio5x4,
+                CropAspectRatioPreset.ratio7x5,
+                CropAspectRatioPreset.ratio16x9
+              ],
+        androidUiSettings: AndroidUiSettings(
+            toolbarTitle: 'Cropper',
+            toolbarColor: Colors.white,
+            toolbarWidgetColor: Theme.of(context).primaryColor,
+            initAspectRatio: CropAspectRatioPreset.original,
+            lockAspectRatio: false),
+        iosUiSettings: IOSUiSettings(
+          minimumAspectRatio: 1.0,
+        ),
     );
     if (croppedFile != null) {
+
+      File fileCompress = await FlutterImageCompress.compressAndGetFile(
+        croppedFile.absolute.path, croppedFile.path,
+        quality: 40,
+      );
+
       setState(() {
-        _imageSelect = croppedFile;
+        _imageSelect = fileCompress;
       });
     }
   }
 
+  void _saveInvoice(String placa, String client) {
+
+  }
 }

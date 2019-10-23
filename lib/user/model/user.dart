@@ -1,6 +1,8 @@
+import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 
-class User {
+@immutable
+class User extends Equatable {
   final String uid;
   final String name;
   final String email;
@@ -13,4 +15,12 @@ class User {
     @required this.email,
     this.photoUrl,
   });
+
+  @override
+  List<Object> get props => [
+    uid,
+    name,
+    email,
+    photoUrl
+  ];
 }

@@ -24,21 +24,19 @@ class CarouselCarsWidget extends StatefulWidget {
 class _CarouselCarsWidget extends State<CarouselCarsWidget> {
   int _current = 0;
 
-  final Widget placeholder = Container(
-    child: Padding(
-      padding: EdgeInsets.only(bottom: 0),
-      child: Container(
-        color: Colors.grey,
-      ),
-    ),
-  );
-
   @override
   Widget build(BuildContext context) {
     return widget.imgList.length != null && widget.imgList.length > 0
         ? carouselCars()
-        : placeholder;
+        : placeholder();
   }
+
+  placeholder() => Container(
+    child: Image.asset("assets/images/background_ph_image.png",
+      width: MediaQuery.of(context).size.width,
+      fit: BoxFit.cover,
+    ),
+  );
 
   carouselCars() {
     return CarouselSlider(
@@ -66,7 +64,11 @@ class _CarouselCarsWidget extends State<CarouselCarsWidget> {
           child: ClipRRect(
             borderRadius: BorderRadius.all(Radius.circular(5.0)),
             child: Stack(children: <Widget>[
-              Image.file(File(i),width: 1000.0,fit: BoxFit.cover,),
+              Image.file(
+                File(i),
+                width: 1000.0,
+                fit: BoxFit.cover,
+              ),
               //Image.network(i, fit: BoxFit.cover, width: 1000.0),
               Positioned(
                 bottom: 0.0,

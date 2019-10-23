@@ -3,9 +3,9 @@ import 'package:car_wash_app/User/model/user.dart';
 import 'package:flutter/material.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 import 'gradient_back.dart';
-import '../Sede/ui/widgets/button_functions.dart';
+import 'package:car_wash_app/widgets/button_functions.dart';
 import 'drawer_page.dart';
-import 'package:car_wash_app/Factura/ui/screens/factura_page.dart';
+import 'package:car_wash_app/invoice/ui/screens/invoice_page.dart';
 import 'package:car_wash_app/widgets/app_bar_widget.dart';
 
 class HomePage extends StatefulWidget {
@@ -23,7 +23,7 @@ class _HomePage extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    userBloc = BlocProvider.of<UserBloc>(context);
+    userBloc = BlocProvider.of(context);
 
     return StreamBuilder(
       stream: userBloc.streamFirebase,
@@ -116,7 +116,7 @@ class _HomePage extends State<HomePage> {
           children: <Widget>[
             ButtonFunctions(
                 onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => FacturaPage(usuario: usuario, showDrawer: false)));
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => InvoicePage(usuario: usuario, showDrawer: false)));
                 },
                 buttonName: "NUEVA FACTURA",
                 imageAsset: "assets/images/icon_nueva_factura.png"),

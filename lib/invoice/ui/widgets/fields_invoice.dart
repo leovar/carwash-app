@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:car_wash_app/Factura/ui/widgets/text_field_input.dart';
+import 'package:car_wash_app/invoice/ui/widgets/text_field_input.dart';
 import 'package:car_wash_app/widgets/popup_menu_widget.dart';
 
-class CamposFactura extends StatefulWidget{
+class FieldsInvoice extends StatefulWidget{
+
+  final Function(String, String) callbackSaveInvoice;
+
+  FieldsInvoice({Key key, @required this.callbackSaveInvoice});
+
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
-    return _CamposFactura();
+    return _FieldsInvoice();
   }
 }
 
-class _CamposFactura extends State<CamposFactura>{
+class _FieldsInvoice extends State<FieldsInvoice>{
 
   bool _sendEmail = false;
 
