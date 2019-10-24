@@ -4,9 +4,20 @@ import 'package:car_wash_app/widgets/popup_menu_widget.dart';
 
 class FieldsInvoice extends StatefulWidget{
 
-  final Function(String, String) callbackSaveInvoice;
+  final textPlaca;
+  final textClient;
+  final textEmail;
+  bool sendEmail = false;
+  final VoidCallback callbackSaveInvoice;
 
-  FieldsInvoice({Key key, @required this.callbackSaveInvoice});
+  FieldsInvoice({
+    Key key,
+    @required this.callbackSaveInvoice,
+    @required this.textPlaca,
+    this.sendEmail,
+    this.textClient,
+    this.textEmail
+  });
 
   @override
   State<StatefulWidget> createState() {
@@ -17,22 +28,20 @@ class FieldsInvoice extends StatefulWidget{
 
 class _FieldsInvoice extends State<FieldsInvoice>{
 
-  bool _sendEmail = false;
-
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
     return Column(
       children: <Widget>[
-        TextFieldInput("Placa"),
+        TextFieldInput("Placa", widget.textPlaca),
         SizedBox(
           height: 9,
         ),
-        TextFieldInput("Cliente"),
+        TextFieldInput("Cliente", widget.textClient),
         SizedBox(
           height: 9,
         ),
-        TextFieldInput("Correo Electrónico"),
+        TextFieldInput("Correo Electrónico", widget.textEmail),
         SizedBox(
           height: 9,
         ),
@@ -42,10 +51,10 @@ class _FieldsInvoice extends State<FieldsInvoice>{
         Row(
           children: <Widget>[
             Checkbox(
-              value: _sendEmail,
+              value: widget.sendEmail,
               onChanged: (bool value) {
                 setState(() {
-                  _sendEmail = value;
+                  widget.sendEmail = value;
                 });
               },
               checkColor: Colors.white,
@@ -208,7 +217,7 @@ class _FieldsInvoice extends State<FieldsInvoice>{
                   fontSize: 19,
                 ),
               ),
-              onPressed: () {},
+              onPressed: widget.callbackSaveInvoice,
             ),
           ),
         ),

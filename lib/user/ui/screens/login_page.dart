@@ -1,6 +1,7 @@
-import 'dart:core' as prefix0;
 import 'dart:core';
-import 'package:car_wash_app/User/model/user.dart';
+import 'package:car_wash_app/user/model/user.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
@@ -344,12 +345,7 @@ class _LoginPage extends State<LoginPage> {
                     child: InkWell(
                       onTap: () {
                         userBloc.singnInFacebook().then((user) {
-                          userBloc.updateUserData(User(
-                            uid: user.uid,
-                            name: user.displayName,
-                            email: user.email,
-                            photoUrl: user.photoUrl,
-                          ));
+                          this._registerLogin(user);
                         });
                       },
                       child: null,
@@ -374,12 +370,7 @@ class _LoginPage extends State<LoginPage> {
                       onTap: () {
                         userBloc.singOut();
                         userBloc.signInGoogle().then((user) {
-                          userBloc.updateUserData(User(
-                            uid: user.uid,
-                            name: user.displayName,
-                            email: user.email,
-                            photoUrl: user.photoUrl,
-                          ));
+                          this._registerLogin(user);
                         });
                       },
                       child: null,
@@ -422,4 +413,33 @@ class _LoginPage extends State<LoginPage> {
           ),
         ),
       );
+
+  void _registerLogin(FirebaseUser user) {
+    User currentUser = userBloc.searchUserByEmail(user.email) as User;
+    if (currentUser == null) {
+      userBloc.updateUserData(
+        User(
+          uid: user.uid,
+          name: user.displayName,
+          email: user.email,
+          photoUrl: user.photoUrl,
+          lastSignIn: Timestamp.now(),
+          isAdministrator: false,
+          isCoordinator: false,
+          isOperator: false,
+        ),
+      );
+    } else {
+      userBloc.updateUserData(
+        User(
+          uid: user.uid,
+          name: user.displayName,
+          email: user.email,
+          photoUrl: user.photoUrl,
+          lastSignIn: Timestamp.now(),
+        ),
+      );
+    }
+
+  }
 }

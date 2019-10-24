@@ -3,13 +3,15 @@ import 'package:flutter/material.dart';
 class TextFieldInput extends StatelessWidget {
 
   final String _labelText;
+  final textControler;
 
-  TextFieldInput(this._labelText);
+  TextFieldInput(this._labelText, this.textControler);
 
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
     return TextField(
+      controller: textControler,
       maxLines: 1,
       cursorColor: Colors.white,
       style: TextStyle(

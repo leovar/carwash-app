@@ -1,9 +1,9 @@
 
 import 'package:car_wash_app/customer/model/customer.dart';
 import 'package:car_wash_app/location/model/location.dart';
-import 'package:car_wash_app/product/model/product.dart';
 import 'package:car_wash_app/user/model/user.dart';
 import 'package:car_wash_app/vehicle/model/vehicle.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
@@ -11,19 +11,18 @@ import 'package:meta/meta.dart';
 @immutable
 class Invoice extends Equatable {
   final String id;
-  final Product product;
   final double totalPrice;
   final double subtotal;
   final double iva;
-  final User userOwner;
-  final Customer customer;
-  final Vehicle vehicle;
-  final Location location;
+  final DocumentReference userOwner;
+  final DocumentReference customer;
+  final DocumentReference vehicle;
+  final DocumentReference location;
   final int consecutive;
+  final List<String> invoiceImages;
 
   Invoice({
     this.id,
-    this.product,
     this.totalPrice,
     this.subtotal,
     this.iva,
@@ -32,12 +31,26 @@ class Invoice extends Equatable {
     this.vehicle,
     this.location,
     this.consecutive,
+    this.invoiceImages,
   });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'totalPrice': this.totalPrice,
+      'subtotal': this.subtotal,
+      'iva': this.iva,
+      'userOwner': this.userOwner,
+      'customer': this.customer,
+      'vehicle': this.vehicle,
+      'location': this.location,
+      'consecutive': this.consecutive,
+    };
+  }
+
 
   @override
   List<Object> get props => [
     id,
-    product,
     totalPrice,
     subtotal,
     iva,
@@ -46,5 +59,6 @@ class Invoice extends Equatable {
     vehicle,
     location,
     consecutive,
+    invoiceImages,
   ];
 }

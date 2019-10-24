@@ -1,11 +1,13 @@
-import 'package:car_wash_app/User/model/user.dart';
+
 import 'package:car_wash_app/User/repository/auth_repository.dart';
-import 'package:car_wash_app/User/repository/cloud_firestore_repository.dart';
+import 'package:car_wash_app/user/model/user.dart';
+import 'package:car_wash_app/user/repository/user_repository.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 
 class UserBloc implements Bloc {
   final _auth_repository = AuthRepository();
+  final _userRepository = UserRepository();
 
   //Casos de uso del objeto User
   //1. Sign In con Google
@@ -16,8 +18,6 @@ class UserBloc implements Bloc {
   //stream Controller
   Stream<FirebaseUser> streamFirebase = FirebaseAuth.instance.onAuthStateChanged;
   Stream<FirebaseUser> get authStatus => streamFirebase;
-
-  final _cloudFirestoreRepository = CloudFirestoreRepository();
 
   Future<FirebaseUser> signInGoogle() {
     return _auth_repository.signInFirebase();
@@ -31,8 +31,13 @@ class UserBloc implements Bloc {
     return _auth_repository.singOut();
   }
 
-  void updateUserData(User user) => _cloudFirestoreRepository.updateUserDataReposiroty(user);
+  void updateUserData(User user) async {
+    _userRepository.updateUserDataRepository(user);
+  }
 
+  Future<User> searchUserByEmail(String email) async {
+    return _userRepository.searchUserByEmail(email);
+  }
 
 
   @override

@@ -11,7 +11,7 @@ class Product extends Equatable {
   final double price;
   final double iva;
   final VehicleType vehicleType;
-  final Location location;
+  final List<String> locations;
 
   Product({
     this.id,
@@ -19,7 +19,7 @@ class Product extends Equatable {
     this.price,
     this.iva,
     this.vehicleType,
-    this.location,
+    this.locations,
   });
 
   @override
@@ -29,6 +29,6 @@ class Product extends Equatable {
     price,
     iva,
     vehicleType,
-    location,
+    locations,
   ];
 }
