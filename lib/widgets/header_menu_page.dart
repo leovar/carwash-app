@@ -1,4 +1,5 @@
-import 'package:car_wash_app/User/model/user.dart';
+
+import 'package:car_wash_app/user/model/user.dart';
 import 'package:flutter/material.dart';
 
 class HeaderMenuPage extends StatelessWidget{

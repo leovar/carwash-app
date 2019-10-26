@@ -12,6 +12,19 @@ class VehicleType extends Equatable {
     this.vehicleType,
   });
 
+  factory VehicleType.fromJson(Map<String, dynamic> json, {String id}) {
+    return VehicleType(
+      id: id,
+      vehicleType: json['vehicleType'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'vehicleType': this.vehicleType,
+    };
+  }
+
   @override
   List<Object> get props => [
     id,

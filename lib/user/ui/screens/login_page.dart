@@ -1,4 +1,7 @@
 import 'dart:core';
+import 'package:car_wash_app/location/bloc/bloc_location.dart';
+import 'package:car_wash_app/location/model/location.dart';
+import 'package:car_wash_app/user/bloc/bloc_user.dart';
 import 'package:car_wash_app/user/model/user.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -7,7 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 import '../../../main.dart';
 import '../../../widgets/gradient_back.dart';
-import 'package:car_wash_app/User/bloc/bloc_user.dart';
 import 'package:car_wash_app/widgets/home_page.dart';
 
 class LoginPage extends StatefulWidget {
@@ -18,66 +20,15 @@ class LoginPage extends StatefulWidget {
   }
 }
 
-class Company {
-  int Id;
-  String name;
-  Color color;
-
-  Company(
-    this.Id,
-    this.name,
-    this.color,
-  );
-
-  static List<Company> getCompanies() {
-    return <Company>[
-      Company(1, 'Molinos', Colors.red),
-      Company(1, 'Palmas', Colors.white),
-      Company(1, 'La Ceja', Colors.amberAccent),
-      Company(1, 'La Central', Colors.purple),
-    ];
-  }
-}
-
 class _LoginPage extends State<LoginPage> {
   UserBloc userBloc;
+  final blocLocation = BlocLocation();
 
-  List<Company> _companies = Company.getCompanies();
-  List<DropdownMenuItem<Company>> _dropdownMenuItems;
-  Company _selectedCompany;
-
-  @override
-  void initState() {
-    _dropdownMenuItems = builDropdownMenuItems(_companies);
-    _selectedCompany = _dropdownMenuItems[0].value;
-    super.initState();
-  }
-
-  List<DropdownMenuItem<Company>> builDropdownMenuItems(List companies) {
-    List<DropdownMenuItem<Company>> listItems = List();
-    for (Company company in companies) {
-      listItems.add(
-        DropdownMenuItem(
-          value: company,
-          child: Text(
-            company.name,
-          ),
-        ),
-      );
-    }
-    return listItems;
-  }
-
-  onChangeDropDawn(Company selectedCompany) {
-    setState(() {
-      _selectedCompany = selectedCompany;
-    });
-  }
+  List<DropdownMenuItem<Location>> _dropdownMenuItems;
+  Location _selectedLocation;
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
-    //final appBloc = BlocProvider.of<AppBloc>(context);
     userBloc = BlocProvider.of(context);
     return _handleCurrentSession(); //loginScreen();
   }
@@ -91,7 +42,7 @@ class _LoginPage extends State<LoginPage> {
         if (!snapshot.hasData || snapshot.hasError) {
           return loginScreen();
         } else {
-          return BlocProvider<UserBloc>(
+          return BlocProvider(
             bloc: UserBloc(),
             child: HomePage(),
           );
@@ -157,33 +108,51 @@ class _LoginPage extends State<LoginPage> {
         ),
       );
 
-  dropDawnLocations() => DropdownButton(
-        isExpanded: true,
-        items: _dropdownMenuItems,
-        value: _selectedCompany,
-        onChanged: onChangeDropDawn,
-        hint: Text(
-          "Seleccione la Sede...",
-          style: TextStyle(
-            color: Colors.white,
-          ),
-        ),
-        icon: Icon(
-          Icons.keyboard_arrow_down,
-          color: Colors.white,
-        ),
-        iconSize: 24,
-        elevation: 16,
+  Widget dropDawnLocations() {
+    return StreamBuilder(
+      stream: blocLocation.locationsStream,
+      builder: (context, snapshot){
+        switch(snapshot.connectionState) {
+          case ConnectionState.waiting:
+            return CircularProgressIndicator();
+          default:
+            return dropListLocations(snapshot);
+        }
+      },
+    );
+  }
+
+  Widget dropListLocations(AsyncSnapshot snapshot) {
+    List<Location> locationList = blocLocation.buildLocations(snapshot.data.documents);
+    _dropdownMenuItems = builDropdownMenuItems(locationList);
+    return DropdownButton(
+      isExpanded: true,
+      items: _dropdownMenuItems,
+      value: _selectedLocation,
+      onChanged: onChangeDropDawn,
+      hint: Text(
+        "Seleccione la Sede...",
         style: TextStyle(
-          fontFamily: "AvenirNext",
-          fontWeight: FontWeight.normal,
-          color: Colors.black,
-        ),
-        underline: Container(
-          height: 1,
           color: Colors.white,
         ),
-      );
+      ),
+      icon: Icon(
+        Icons.keyboard_arrow_down,
+        color: Colors.white,
+      ),
+      iconSize: 24,
+      elevation: 16,
+      style: TextStyle(
+        fontFamily: "AvenirNext",
+        fontWeight: FontWeight.normal,
+        color: Colors.black,
+      ),
+      underline: Container(
+        height: 1,
+        color: Colors.white,
+      ),
+    );
+  }
 
   inputUserName() => Container(
         padding: EdgeInsets.symmetric(vertical: 29.0),
@@ -415,31 +384,60 @@ class _LoginPage extends State<LoginPage> {
       );
 
   void _registerLogin(FirebaseUser user) {
-    User currentUser = userBloc.searchUserByEmail(user.email) as User;
-    if (currentUser == null) {
-      userBloc.updateUserData(
-        User(
-          uid: user.uid,
-          name: user.displayName,
-          email: user.email,
-          photoUrl: user.photoUrl,
-          lastSignIn: Timestamp.now(),
-          isAdministrator: false,
-          isCoordinator: false,
-          isOperator: false,
-        ),
-      );
-    } else {
-      userBloc.updateUserData(
-        User(
-          uid: user.uid,
-          name: user.displayName,
-          email: user.email,
-          photoUrl: user.photoUrl,
-          lastSignIn: Timestamp.now(),
+    userBloc.searchUserByEmail(user.email).then((User currentUser) {
+      if (currentUser == null) {
+        userBloc.updateUserData(
+          User(
+            uid: user.uid,
+            name: user.displayName,
+            email: user.email,
+            photoUrl: user.photoUrl,
+            lastSignIn: Timestamp.now(),
+            active: true,
+            isAdministrator: false,
+            isCoordinator: false,
+            isOperator: false,
+          ),
+        );
+      } else {
+        userBloc.updateUserData(
+          User(
+            uid: currentUser.uid,
+            name: user.displayName,
+            email: user.email,
+            photoUrl: user.photoUrl,
+            lastSignIn: Timestamp.now(),
+            active: currentUser.active,
+            locations: currentUser.locations,
+            isAdministrator: currentUser.isAdministrator,
+            isCoordinator: currentUser.isCoordinator,
+            isOperator: currentUser.isOperator,
+          ),
+        );
+      }
+    });
+  }
+
+  /// Functions
+
+  List<DropdownMenuItem<Location>> builDropdownMenuItems(List locations) {
+    List<DropdownMenuItem<Location>> listItems = List();
+    for (Location documentLoc in locations) {
+      listItems.add(
+        DropdownMenuItem(
+          value: documentLoc,
+          child: Text(
+            documentLoc.locationName,
+          ),
         ),
       );
     }
+    return listItems;
+  }
 
+  onChangeDropDawn(Location selectedLocation) {
+    setState(() {
+      _selectedLocation = selectedLocation;
+    });
   }
 }

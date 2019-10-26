@@ -1,4 +1,5 @@
 
+import 'package:car_wash_app/location/model/location.dart';
 import 'package:car_wash_app/user/model/user.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:car_wash_app/widgets/firestore_collections.dart';

@@ -26,6 +26,20 @@ class Location extends Equatable {
     this.creationDate,
   });
 
+  factory Location.fromJson(Map<String, dynamic> json, {String id}) {
+    return Location(
+      id: id,
+      locationName: json['locationName'],
+      address: json['address'],
+      nit: json['nit'],
+      prefix: json['prefix'],
+      dianResolution: json['dianResolution'],
+      initConcec: json['initConcec'],
+      finalConsec: json['finalConsec'],
+      creationDate: json['creationDate'],
+    );
+  }
+
   @override
   List<Object> get props => [
     id,

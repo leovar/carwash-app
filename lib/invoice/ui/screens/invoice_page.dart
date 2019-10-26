@@ -1,6 +1,7 @@
-import 'package:car_wash_app/User/model/user.dart';
+
 import 'package:car_wash_app/invoice/bloc/bloc_invoice.dart';
 import 'package:car_wash_app/invoice/ui/widgets/form_invoice.dart';
+import 'package:car_wash_app/user/model/user.dart';
 import 'package:car_wash_app/widgets/app_bar_widget.dart';
 import 'package:car_wash_app/widgets/drawer_page.dart';
 import 'package:flutter/material.dart';
@@ -19,14 +20,7 @@ class InvoicePage extends StatefulWidget {
 }
 
 class _InvoicePage extends State<InvoicePage> {
-
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey();
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {

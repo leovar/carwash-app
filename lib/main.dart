@@ -1,10 +1,9 @@
 import 'dart:async';
-import 'package:car_wash_app/User/model/user.dart';
+import 'package:car_wash_app/user/bloc/bloc_user.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
-import 'User/ui/screens/login_page.dart';
-import 'User/bloc/bloc_user.dart';
+import 'user/ui/screens/login_page.dart';
 
 void main() {
   SystemChrome.setSystemUIOverlayStyle(

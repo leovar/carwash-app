@@ -1,11 +1,11 @@
+
+import 'package:car_wash_app/user/model/user.dart';
 import 'package:flutter/material.dart';
 import 'header_menu_page.dart';
-import 'package:car_wash_app/User/model/user.dart';
 
 class AppBarWidget extends StatelessWidget{
-
-  GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey();
   User usuario;
+  GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey();
   bool showDrawer = true;
 
   AppBarWidget(this._scaffoldKey, this.usuario, this.showDrawer);

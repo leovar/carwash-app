@@ -1,7 +1,10 @@
 
-import 'package:car_wash_app/User/repository/auth_repository.dart';
+import 'package:car_wash_app/user/repository/auth_repository.dart';
+import 'package:car_wash_app/location/model/location.dart';
+import 'package:car_wash_app/location/repository/location_repository.dart';
 import 'package:car_wash_app/user/model/user.dart';
 import 'package:car_wash_app/user/repository/user_repository.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 
@@ -36,7 +39,7 @@ class UserBloc implements Bloc {
   }
 
   Future<User> searchUserByEmail(String email) async {
-    return _userRepository.searchUserByEmail(email);
+    return await _userRepository.searchUserByEmail(email);
   }
 
 

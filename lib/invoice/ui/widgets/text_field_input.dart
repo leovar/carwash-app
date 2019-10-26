@@ -1,18 +1,27 @@
 import 'package:flutter/material.dart';
 
-class TextFieldInput extends StatelessWidget {
+class TextFieldInput extends StatefulWidget {
 
   final String _labelText;
-  final textControler;
+  final textController;
 
-  TextFieldInput(this._labelText, this.textControler);
+  TextFieldInput(this._labelText,
+        this.textController,
+      );
 
   @override
+  State<StatefulWidget> createState() {
+    return _TextFieldInput();
+  }
+}
+
+class _TextFieldInput extends State<TextFieldInput> {
+  @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return TextField(
-      controller: textControler,
+      controller: widget.textController,
       maxLines: 1,
+      autofocus: false,
       cursorColor: Colors.white,
       style: TextStyle(
         fontFamily: "Lato",
@@ -22,7 +31,7 @@ class TextFieldInput extends StatelessWidget {
       ),
       decoration: InputDecoration(
         contentPadding: EdgeInsets.symmetric(vertical: 17, horizontal: 15),
-        labelText: _labelText,
+        labelText: widget._labelText,
         labelStyle: TextStyle(
           decoration: TextDecoration.none,
           fontFamily: "Lato",

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:car_wash_app/invoice/model/invoice.dart';
 import 'package:car_wash_app/invoice/repository/invoice_repository.dart';
+import 'package:car_wash_app/user/model/user.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -14,6 +15,8 @@ class BlocInvoice implements Bloc {
 
   //Casos de uso del objeto User
   //1. guardar nueva factura
+  //2. guardar las imagenes de la factura
+  //3. guardar las url de las fotos en la factura creada
 
   Future<DocumentReference> getUserReference() async {
     return _invoiceRepository.getUserReference();
@@ -34,6 +37,27 @@ class BlocInvoice implements Bloc {
       }
     }
   }
+
+  Future<DocumentReference> updateVehicle(String placa) {
+    return _invoiceRepository.updateVehicle(placa);
+  }
+
+  Future<DocumentReference> getVehicleTypeReference(String vehicleType) {
+    return _invoiceRepository.getVehicleTypeReference(vehicleType);
+  }
+
+  Stream<QuerySnapshot> get operatorsStream => _invoiceRepository.getListOperatorsStream();
+  List<User> buildOperators(List<DocumentSnapshot> operatorsListSnapshot) => _invoiceRepository.buildOperators(operatorsListSnapshot);
+  /*Future<List<User>> getOperatorsUsers() {
+    return _invoiceRepository.getOperatorsUsers();
+  }*/
+
+  Stream<QuerySnapshot> get coordinatorsStream => _invoiceRepository.getListCoordinatorStream();
+  List<User> buildCoordinators(List<DocumentSnapshot> coordinatorListSnapshot) => _invoiceRepository.buildCoordinator(coordinatorListSnapshot);
+
+  /*Future<List<User>> getCoordinatorUser() {
+    return _invoiceRepository.getCoordinatorUsers();
+  }*/
 
 
   @override

@@ -11,7 +11,7 @@ class Vehicle extends Equatable {
   final String model;
   final String placa;
   final String color;
-  final VehicleType vehicleType;
+  final DocumentReference vehicleType;
   final Timestamp creationDate;
 
   Vehicle({
@@ -23,6 +23,17 @@ class Vehicle extends Equatable {
     this.vehicleType,
     this.creationDate,
   });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'brand': this.brand,
+      'model': this.model,
+      'placa': this.placa,
+      'color': this.color,
+      'vehicleType': this.vehicleType,
+      'creationDate': this.creationDate,
+    };
+  }
 
   @override
   List<Object> get props => [
