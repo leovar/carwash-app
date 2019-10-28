@@ -11,7 +11,6 @@ class FieldsInvoice extends StatefulWidget{
   final textClient;
   final textEmail;
   bool sendEmail = false;
-  final VoidCallback callbackSaveInvoice;
   final Function(String) setOperator;
   final Function(String) setCoordinator;
   List<String> listOperators;
@@ -19,7 +18,6 @@ class FieldsInvoice extends StatefulWidget{
 
   FieldsInvoice({
     Key key,
-    @required this.callbackSaveInvoice,
     this.textPlaca,
     this.sendEmail,
     this.textClient,
@@ -97,105 +95,6 @@ class _FieldsInvoice extends State<FieldsInvoice>{
         getCoordinators(),
         SizedBox(
           height: 9,
-        ),
-        Container(
-          height: 50,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              Container(
-                padding: EdgeInsets.only(left: 10),
-                child: Text(
-                  "2 servicios agregados",
-                  style: TextStyle(
-                    fontFamily: "Lato",
-                    decoration: TextDecoration.none,
-                    color: Color(0xFF59B258),
-                    fontSize: 17,
-                  ),
-                ),
-              ),
-              Align(
-                alignment: Alignment.centerRight,
-                child: IconButton(
-                  icon: Icon(
-                    Icons.keyboard_arrow_down,
-                    size: 30,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          decoration: BoxDecoration(
-            color: Color(0xFFF1F1F1),
-            borderRadius: BorderRadius.circular(5),
-          ),
-        ),
-        SizedBox(
-          height: 9,
-        ),
-        Container(
-          height: 90,
-          padding: EdgeInsets.symmetric(horizontal: 10),
-          child: Row(
-            children: <Widget>[
-              FloatingActionButton(
-                child: Icon(
-                  Icons.add,
-                  color: Colors.white,
-                  size: 30,
-                ),
-                backgroundColor: Color(0xFFCCCCCC),
-                onPressed: () {},
-                heroTag: null,
-              ),
-              Container(
-                margin: EdgeInsets.only(left: 15),
-                child: Text(
-                  "Agregar Servicios",
-                  style: TextStyle(
-                    fontFamily: "Lato",
-                    decoration: TextDecoration.none,
-                    color: Color(0xFFAEAEAE),
-                    fontSize: 15,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          decoration: BoxDecoration(
-            border: Border(
-              bottom: BorderSide(
-                color: Color(0xFFD8D8D8),
-                width: 1.0,
-              ),
-            ),
-          ),
-        ),
-        SizedBox(
-          height: 9,
-        ),
-        Container(
-          height: 100,
-          child: Align(
-            alignment: Alignment.center,
-            child: RaisedButton(
-              padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
-              color: Color(0xFF59B258),
-              child: Text(
-                "GUARDAR",
-                style: TextStyle(
-                  fontFamily: "Lato",
-                  decoration: TextDecoration.none,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  fontSize: 19,
-                ),
-              ),
-              onPressed: widget.callbackSaveInvoice,
-            ),
-          ),
         ),
       ],
     );

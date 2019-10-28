@@ -17,4 +17,8 @@ class FirestoreCollections {
 
   /// Fields Vehicle Type Collection
   static String vehicleTypeFieldVehicleType = 'vehicleType';
+
+  /// Fields Product Type Collection
+  static String productFieldProductName = 'productName';
+  static String productFieldLocations = 'locations';
 }

@@ -2,7 +2,10 @@ import 'dart:io';
 
 import 'package:car_wash_app/invoice/bloc/bloc_invoice.dart';
 import 'package:car_wash_app/invoice/model/invoice.dart';
+import 'package:car_wash_app/invoice/ui/widgets/fields_products.dart';
 import 'package:car_wash_app/invoice/ui/widgets/radio_item.dart';
+import 'package:car_wash_app/product/bloc/product_bloc.dart';
+import 'package:car_wash_app/product/model/product.dart';
 import 'package:car_wash_app/user/model/user.dart';
 import 'package:car_wash_app/vehicle/model/vehicle.dart';
 import 'package:car_wash_app/widgets/gradient_back.dart';
@@ -16,7 +19,7 @@ import 'package:popup_menu/popup_menu.dart';
 
 import 'carousel_cars_widget.dart';
 import 'fields_invoice.dart';
-import 'header_services.dart';
+import '../../model/header_services.dart';
 
 class FormInvoice extends StatefulWidget {
   @override
@@ -28,6 +31,7 @@ class FormInvoice extends StatefulWidget {
 
 class _FormInvoice extends State<FormInvoice> {
   BlocInvoice _blocInvoice;
+  final _productBloc = ProductBloc();
 
   ///global variables
   //Esta variable _scaffoldKey se usa para poder abrir el drawer desde un boton diferente al que se coloca por defecto en el AppBar
@@ -36,6 +40,7 @@ class _FormInvoice extends State<FormInvoice> {
   List<String> imageList = [];
   bool _sendEmail = false;
   List<HeaderServices> vehicleTypeList = new List<HeaderServices>();
+  HeaderServices vehicleTypeSelected;
   final String cameraTag = "Camara";
   final String galleryTag = "Galeria";
   String _selectSourceImagePicker = "Camara";
@@ -48,6 +53,7 @@ class _FormInvoice extends State<FormInvoice> {
   String _selectCoordinator = "";
   List<String> _listOperators = <String>[];
   List<String> _listCoordinators = <String>[];
+  List<Product> _listProduct = <Product>[];
 
   @override
   void initState() {
@@ -67,6 +73,7 @@ class _FormInvoice extends State<FormInvoice> {
         "assets/images/icon_motorcycle_admin.png",
         "assets/images/icon_motorcycle.png"));
     vehicleTypeList[0].isSelected = true;
+    vehicleTypeSelected = vehicleTypeList[0];
   }
 
   @override
@@ -132,6 +139,7 @@ class _FormInvoice extends State<FormInvoice> {
                 vehicleTypeList
                     .forEach((element) => element.isSelected = false);
                 vehicleTypeList[index].isSelected = true;
+                vehicleTypeSelected = vehicleTypeList[index];
               });
             },
             child: RadioItem(vehicleTypeList[index]),
@@ -180,16 +188,34 @@ class _FormInvoice extends State<FormInvoice> {
           bottom: 15,
         ),
         child: Center(
-          child: FieldsInvoice(
-            callbackSaveInvoice: _saveInvoice,
-            textPlaca: _textPlaca,
-            textClient: _textClient,
-            textEmail: _textEmail,
-            sendEmail: _sendEmail,
-            setOperator: _setOperator,
-            setCoordinator: _setCoordinator,
-            listOperators: _listOperators,
-            listCoordinators: _listCoordinators,
+          child: Column(
+            children: <Widget>[
+              FieldsInvoice(
+                textPlaca: _textPlaca,
+                textClient: _textClient,
+                textEmail: _textEmail,
+                sendEmail: _sendEmail,
+                setOperator: _setOperator,
+                setCoordinator: _setCoordinator,
+                listOperators: _listOperators,
+                listCoordinators: _listCoordinators,
+              ),
+              SizedBox(
+                height: 9,
+              ),
+              FieldsProducts(
+                callbackProductsList: _setProductsDb,
+                productListCallback: _listProduct,
+                vehicleTypeSelect: vehicleTypeSelected,
+              ),
+              SizedBox(
+                height: 9,
+              ),
+              saveInvoice(),
+              SizedBox(
+                height: 9,
+              ),
+            ],
           ),
         ),
       ),
@@ -215,8 +241,33 @@ class _FormInvoice extends State<FormInvoice> {
         ),
       );
 
+  Widget saveInvoice() {
+    return Container(
+      height: 100,
+      child: Align(
+        alignment: Alignment.center,
+        child: RaisedButton(
+          padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
+          color: Color(0xFF59B258),
+          child: Text(
+            "GUARDAR",
+            style: TextStyle(
+              fontFamily: "Lato",
+              decoration: TextDecoration.none,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              fontSize: 19,
+            ),
+          ),
+          onPressed: _saveInvoice,
+        ),
+      ),
+    );
+  }
+
   ///Functions
 
+  ///Image Functions
   void _menuSourceAddImage() {
     PopupMenu menu = PopupMenu(
         backgroundColor: Color(0xFF59B258),
@@ -312,6 +363,7 @@ class _FormInvoice extends State<FormInvoice> {
     }
   }
 
+  ///Functions Select Menu
   void _setOperator(String selectOperator) {
     _selectOperator = selectOperator;
   }
@@ -320,19 +372,27 @@ class _FormInvoice extends State<FormInvoice> {
     _selectCoordinator = selectCoordinator;
   }
 
+
+  ///Functions Services or Products
+  void _setProductsDb(List<Product> productListSelected) {
+    _listProduct = productListSelected;
+  }
+
+  ///Functions Save Invoice
   void _saveInvoice() async {
     //Obtiene la referencia del currentUser
     DocumentReference _userRef = await _blocInvoice.getUserReference();
 
     //Obtiene el tipo de Vehiculo seleccionado
-    HeaderServices vehicleTypeSelect =
+    //ya lo esta obteniendo con la propiedad vehicleTypeSelected al seleccionalo
+    /*HeaderServices vehicleTypeSelect =
         vehicleTypeList.firstWhere((HeaderServices type) {
       return type.isSelected == true;
-    });
+    });*/
 
     //Obtiene la referencia del vehiculo seleccionado
     DocumentReference _vehicleTypeRef =
-        await _blocInvoice.getVehicleTypeReference(vehicleTypeSelect.text);
+        await _blocInvoice.getVehicleTypeReference(vehicleTypeSelected.text);
 
     //Obtiene la referencia del vehiculo referenciado en la factura, guarda el vehiculo si no existe
     //DocumentReference _vehicleRef = await _blocInvoice.updateVehicle(_textPlaca.text.trim().toUpperCase());

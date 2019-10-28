@@ -5,6 +5,11 @@ class HeaderServices {
   final String imageSelected;
   final String imageUnselected;
 
-  HeaderServices (this.isSelected, this.text, this.withImage, this.imageSelected,
-      this.imageUnselected);
+  HeaderServices(
+    this.isSelected,
+    this.text,
+    this.withImage,
+    this.imageSelected,
+    this.imageUnselected,
+  );
 }

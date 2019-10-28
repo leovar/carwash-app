@@ -1,5 +1,5 @@
 import 'package:car_wash_app/invoice/ui/screens/invoice_page.dart';
-import 'package:car_wash_app/invoice/ui/widgets/header_services.dart';
+import 'package:car_wash_app/invoice/model/header_services.dart';
 import 'package:flutter/material.dart';
 
 class RadioItem extends StatelessWidget {
