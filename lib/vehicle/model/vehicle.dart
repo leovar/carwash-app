@@ -24,6 +24,18 @@ class Vehicle extends Equatable {
     this.creationDate,
   });
 
+  factory Vehicle.fromJson(Map<String, dynamic> json, {String id}) {
+    return Vehicle(
+      id: id,
+      brand: json['brand'],
+      model: json['model'],
+      placa: json['placa'],
+      color: json['color'],
+      vehicleType: json['vehicleType'],
+      creationDate: json['creationDate'],
+    );
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'brand': this.brand,

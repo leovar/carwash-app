@@ -45,6 +45,9 @@ dependencies:
   image_cropper: ^1.1.0
   image_picker: ^0.6.1+7
 
+  #alerts-dialogs
+  rflutter_alert: ^1.0.3
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

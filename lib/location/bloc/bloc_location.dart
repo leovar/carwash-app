@@ -13,6 +13,10 @@ class BlocLocation implements Bloc {
   //1. Obtener locaciones desde la bd
   //2. Crear o Editar locaciones
 
+  Future<DocumentReference> getLocationReference(String locationId) async {
+    return await _locationRepository.getLocationReference(locationId);
+  }
+
   Stream<QuerySnapshot> locationsListStream = Firestore.instance.collection(FirestoreCollections.locations).snapshots();
   Stream<QuerySnapshot> get locationsStream => locationsListStream;
 

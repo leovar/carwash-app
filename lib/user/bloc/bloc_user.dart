@@ -6,6 +6,7 @@ import 'package:car_wash_app/user/model/user.dart';
 import 'package:car_wash_app/user/repository/user_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 
 class UserBloc implements Bloc {
@@ -42,9 +43,15 @@ class UserBloc implements Bloc {
     return await _userRepository.searchUserByEmail(email);
   }
 
+  Future<DocumentReference> getUserReference() async {
+    return _userRepository.getUserReference();
+  }
+
+  Future<DocumentReference> getUserReferenceById(String userId) async {
+    return _userRepository.getUserReferenceById(userId);
+  }
 
   @override
   void dispose() {
-    // TODO: implement dispose
   }
 }

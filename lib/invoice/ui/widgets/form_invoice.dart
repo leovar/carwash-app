@@ -1,15 +1,21 @@
 import 'dart:io';
 
+import 'package:car_wash_app/customer/bloc/bloc_customer.dart';
+import 'package:car_wash_app/customer/model/customer.dart';
 import 'package:car_wash_app/invoice/bloc/bloc_invoice.dart';
 import 'package:car_wash_app/invoice/model/additional_product.dart';
 import 'package:car_wash_app/invoice/model/invoice.dart';
 import 'package:car_wash_app/invoice/ui/widgets/fields_products.dart';
 import 'package:car_wash_app/invoice/ui/widgets/radio_item.dart';
+import 'package:car_wash_app/location/bloc/bloc_location.dart';
 import 'package:car_wash_app/product/bloc/product_bloc.dart';
 import 'package:car_wash_app/product/model/product.dart';
+import 'package:car_wash_app/user/bloc/bloc_user.dart';
 import 'package:car_wash_app/user/model/user.dart';
+import 'package:car_wash_app/vehicle/bloc/bloc_vehicle.dart';
 import 'package:car_wash_app/vehicle/model/vehicle.dart';
 import 'package:car_wash_app/widgets/gradient_back.dart';
+import 'package:car_wash_app/widgets/keys.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
@@ -17,6 +23,7 @@ import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:popup_menu/popup_menu.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'carousel_cars_widget.dart';
 import 'fields_invoice.dart';
@@ -34,6 +41,10 @@ class FormInvoice extends StatefulWidget {
 class _FormInvoice extends State<FormInvoice> {
   BlocInvoice _blocInvoice;
   final _productBloc = ProductBloc();
+  final _customerBloc = BlocCustomer();
+  final _blocVehicle = BlocVehicle();
+  final _userBloc = UserBloc();
+  final _locationBloc = BlocLocation();
   bool _enableForm;
 
   ///global variables
@@ -55,11 +66,13 @@ class _FormInvoice extends State<FormInvoice> {
   final _textEmail = TextEditingController();
   String _selectOperator = "";
   String _selectCoordinator = "";
-  List<String> _listOperators = <String>[];
-  List<String> _listCoordinators = <String>[];
+  List<User> _listOperators = <User>[];
+  List<User> _listCoordinators = <User>[];
   List<Product> _listProduct = <Product>[];
   List<AdditionalProduct> _listAdditionalProducts = <AdditionalProduct>[];
   bool _validatePlaca = false;
+  Customer _customer;
+  DocumentReference _vehicleReference;
 
   @override
   void initState() {
@@ -222,8 +235,8 @@ class _FormInvoice extends State<FormInvoice> {
               FieldsMenusInvoice(
                 setOperator: _setOperator,
                 setCoordinator: _setCoordinator,
-                listOperators: _listOperators,
-                listCoordinators: _listCoordinators,
+                cbSetOperatorsList: _setUsersOperatorsList,
+                cbSetCoordinatorsList: _setUsersCoordinatorsList,
                 selectedOperator: _selectOperator,
                 selectedCoordinator: _selectCoordinator,
                 enableForm: _enableForm,
@@ -403,6 +416,14 @@ class _FormInvoice extends State<FormInvoice> {
     _selectCoordinator = selectCoordinator;
   }
 
+  void _setUsersOperatorsList(List<User> operatorsList){
+    _listOperators = operatorsList;
+  }
+
+  void _setUsersCoordinatorsList(List<User> coordinatorsList){
+    _listCoordinators = coordinatorsList;
+  }
+
   ///Functions Services or Products
   void _setProductsDb(List<Product> productListSelected) {
     _listProduct = productListSelected;
@@ -412,45 +433,111 @@ class _FormInvoice extends State<FormInvoice> {
     _listAdditionalProducts = additionalProductList;
   }
 
-  ///Function validate exist client after digit placa
+  ///Function validate exist customer
+  /// After digit placa validate Vehicle and Customer
   void _onFinalEditPlaca() {
     String placa = _textPlaca.text??'';
-    setState(() {
-      if (placa.isEmpty) {
+
+    if (placa.isEmpty) {
+      setState(() {
         _validatePlaca = true;
         _enableForm = false;
-      } else {
-        FocusScope.of(context).requestFocus(_clientFocusNode);
-        _validatePlaca = false;
-        _enableForm = true;
-      }
-    });
+      });
+    } else {
+
+      //Get vehicle if exist
+      _blocVehicle.getVehicleReferenceByPlaca(placa).then((DocumentReference vehicleRef) {
+        _vehicleReference = vehicleRef;
+      });
+
+      //Get Customer if exist
+      _customerBloc.getCustomerByVehicle(placa).then((Customer customer) {
+        setState(() {
+          if (customer == null) {
+            FocusScope.of(context).requestFocus(_clientFocusNode);
+            _validatePlaca = false;
+            _enableForm = true;
+          } else {
+            _customer = customer;
+            _textClient.text = customer.name;
+            _textEmail.text = customer.email;
+          }
+        });
+      });
+    }
   }
 
   ///Functions Save Invoice
   void _saveInvoice() async {
-    //Obtiene la referencia del currentUser
-    DocumentReference _userRef = await _blocInvoice.getUserReference();
+    DocumentReference _vehicleTypeRef;
+    DocumentReference _customerReference;
+    DocumentReference _operatorRefererence;
+    DocumentReference _coordinatorRefererence;
+    DocumentReference _locationReference;
 
-    //Obtiene el tipo de Vehiculo seleccionado
-    //ya lo esta obteniendo con la propiedad vehicleTypeSelected al seleccionalo
-    /*HeaderServices vehicleTypeSelect =
-        vehicleTypeList.firstWhere((HeaderServices type) {
-      return type.isSelected == true;
-    });*/
+    //Get Current user reference
+    DocumentReference _userRef = await _userBloc.getUserReference();
 
-    //Obtiene la referencia del vehiculo seleccionado
-    DocumentReference _vehicleTypeRef =
-        await _blocInvoice.getVehicleTypeReference(vehicleTypeSelected.text);
+    //Get Operator reference
+    _operatorRefererence = await _userBloc.getUserReferenceById(_listOperators.firstWhere((User user){
+      return user.name == _selectOperator;
+    }).uid);
 
-    //Obtiene la referencia del vehiculo referenciado en la factura, guarda el vehiculo si no existe
-    //DocumentReference _vehicleRef = await _blocInvoice.updateVehicle(_textPlaca.text.trim().toUpperCase());
+    //Get Coordinator reference
+    _coordinatorRefererence = await _userBloc.getUserReferenceById(_listCoordinators.firstWhere((User user) {
+      return user.name == _selectCoordinator;
+    }).uid);
+
+
+    //Get VehicleType reference
+    _vehicleTypeRef = await _blocInvoice.getVehicleTypeReference(vehicleTypeSelected.text);
+
+    //Get Vehicle reference, save if not exist
+    if (_vehicleReference == null) {
+      Vehicle updateVehicle = Vehicle(
+        brand: '',
+        model: '',
+        placa: _textPlaca.text.trim(),
+        color: '',
+        vehicleType: _vehicleTypeRef,
+        creationDate: Timestamp.now(),
+      );
+      DocumentReference vehicleRef = await _blocVehicle.updateVehicle(updateVehicle);
+      _vehicleReference = vehicleRef;
+    }
+
+    //Get Customer reference
+    if (_customer ==  null) {
+      List<DocumentReference> listVehicles = <DocumentReference>[];
+      listVehicles.add(_vehicleReference);
+
+      Customer customer = Customer(
+        name: _textClient.text.trim(),
+        address: '',
+        phoneNumber: '',
+        email: _textEmail.text.trim(),
+        creationDate: Timestamp.now(),
+        vehicles: listVehicles,
+      );
+      DocumentReference customerRef = await _customerBloc.updateCustomer(customer);
+      _customerReference = customerRef;
+    }
+
+    //Get products and values
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    String idLocation = pref.getString(Keys.locations);
+    _locationReference = await _locationBloc.getLocationReference(idLocation);
 
     final invoice = Invoice(
+      customer: _customerReference,
+      vehicle: _vehicleReference,
+      location: _locationReference,
       totalPrice: 25000,
       subtotal: 3500,
       iva: 2500,
       userOwner: _userRef,
+      userOperator: _operatorRefererence,
+      userCoordinator: _coordinatorRefererence,
       invoiceImages: imageList,
     );
     _blocInvoice.saveInvoice(invoice);

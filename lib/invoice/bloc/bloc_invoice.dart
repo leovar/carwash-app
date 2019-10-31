@@ -18,10 +18,6 @@ class BlocInvoice implements Bloc {
   //2. guardar las imagenes de la factura
   //3. guardar las url de las fotos en la factura creada
 
-  Future<DocumentReference> getUserReference() async {
-    return _invoiceRepository.getUserReference();
-  }
-
   Future<void> saveInvoice(Invoice invoice) async {
 
     DocumentReference ref = await _invoiceRepository.updateInvoiceData(invoice);
@@ -36,10 +32,6 @@ class BlocInvoice implements Bloc {
         await _invoiceRepository.updateInvoiceImages(invoiceId, imageUrl);
       }
     }
-  }
-
-  Future<DocumentReference> updateVehicle(String placa) {
-    return _invoiceRepository.updateVehicle(placa);
   }
 
   Future<DocumentReference> getVehicleTypeReference(String vehicleType) {
@@ -62,7 +54,6 @@ class BlocInvoice implements Bloc {
 
   @override
   void dispose() {
-    // TODO: implement dispose
   }
 
 }

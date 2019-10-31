@@ -15,6 +15,8 @@ class Invoice extends Equatable {
   final double subtotal;
   final double iva;
   final DocumentReference userOwner;
+  final DocumentReference userOperator;
+  final DocumentReference userCoordinator;
   final DocumentReference customer;
   final DocumentReference vehicle;
   final DocumentReference location;
@@ -27,6 +29,8 @@ class Invoice extends Equatable {
     this.subtotal,
     this.iva,
     this.userOwner,
+    this.userOperator,
+    this.userCoordinator,
     this.customer,
     this.vehicle,
     this.location,
@@ -40,6 +44,8 @@ class Invoice extends Equatable {
       'subtotal': this.subtotal,
       'iva': this.iva,
       'userOwner': this.userOwner,
+      'userOperator': this.userOperator,
+      'userCoordinator': this.userCoordinator,
       'customer': this.customer,
       'vehicle': this.vehicle,
       'location': this.location,

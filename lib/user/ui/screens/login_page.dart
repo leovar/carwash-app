@@ -1,21 +1,22 @@
 import 'dart:core';
+
 import 'package:car_wash_app/location/bloc/bloc_location.dart';
 import 'package:car_wash_app/location/model/location.dart';
 import 'package:car_wash_app/user/bloc/bloc_user.dart';
 import 'package:car_wash_app/user/model/user.dart';
+import 'package:car_wash_app/widgets/home_page.dart';
+import 'package:car_wash_app/widgets/keys.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
-import '../../../main.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '../../../widgets/gradient_back.dart';
-import 'package:car_wash_app/widgets/home_page.dart';
 
 class LoginPage extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
-    // TODO: implement createState
     return _LoginPage();
   }
 }
@@ -23,14 +24,18 @@ class LoginPage extends StatefulWidget {
 class _LoginPage extends State<LoginPage> {
   UserBloc userBloc;
   final blocLocation = BlocLocation();
+  BuildContext _globalContext;
 
   List<DropdownMenuItem<Location>> _dropdownMenuItems;
   Location _selectedLocation;
 
   @override
   Widget build(BuildContext context) {
+    _globalContext = context;
     userBloc = BlocProvider.of(context);
-    return _handleCurrentSession(); //loginScreen();
+    //TODO no valida si el usuario ya esta logueado para entrar directamente al login y seleccionar la sede
+    //TODO la sede puede seleccionarse tambien del usuario que ya esta logueado
+    return loginScreen(); //_handleCurrentSession()
   }
 
   ///Valido si el usuario ya se encuentra logueado y lo mando directamente al Home
@@ -313,9 +318,7 @@ class _LoginPage extends State<LoginPage> {
                     height: 55.0,
                     child: InkWell(
                       onTap: () {
-                        userBloc.singnInFacebook().then((user) {
-                          this._registerLogin(user);
-                        });
+                        _facebookLogin();
                       },
                       child: null,
                     ),
@@ -337,10 +340,7 @@ class _LoginPage extends State<LoginPage> {
                     height: 55.0,
                     child: InkWell(
                       onTap: () {
-                        userBloc.singOut();
-                        userBloc.signInGoogle().then((user) {
-                          this._registerLogin(user);
-                        });
+                        _googleLogin();
                       },
                       child: null,
                     ),
@@ -383,7 +383,39 @@ class _LoginPage extends State<LoginPage> {
         ),
       );
 
+
+
+
+  /// Functions
+
+  void _googleLogin() {
+    if (_validations()) {
+      userBloc.singOut();
+      userBloc.signInGoogle().then((user) {
+        this._registerLogin(user);
+      });
+    }
+  }
+
+  void _facebookLogin() {
+    if (_validations()) {
+      userBloc.singnInFacebook().then((user) {
+        this._registerLogin(user);
+      });
+    }
+  }
+
+  bool _validations() {
+    //TODO validar que se haya seleccionado una sede, mostrar mensaje de sebe seleccionar sede
+
+    if (_selectedLocation != null) {
+      return true;
+    }
+    return false;
+  }
+
   void _registerLogin(FirebaseUser user) {
+    _setLocationInPreferences();
     userBloc.searchUserByEmail(user.email).then((User currentUser) {
       if (currentUser == null) {
         userBloc.updateUserData(
@@ -416,9 +448,19 @@ class _LoginPage extends State<LoginPage> {
         );
       }
     });
+    // TODo este navigate se debe quitar si se coloca la app a validar primero si el usuario esta logueado
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (BuildContext context) => HomePage()
+      )
+    );
   }
 
-  /// Functions
+  void _setLocationInPreferences() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    pref.setString(Keys.locations, _selectedLocation.id);
+  }
 
   List<DropdownMenuItem<Location>> builDropdownMenuItems(List locations) {
     List<DropdownMenuItem<Location>> listItems = List();

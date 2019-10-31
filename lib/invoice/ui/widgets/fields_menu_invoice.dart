@@ -7,21 +7,21 @@ import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 class FieldsMenusInvoice extends StatefulWidget {
   final Function(String) setOperator;
   final Function(String) setCoordinator;
-  List<String> listOperators;
-  List<String> listCoordinators;
+  final Function(List<User>) cbSetOperatorsList;
+  final Function(List<User>) cbSetCoordinatorsList;
   final selectedOperator;
   final selectedCoordinator;
   final bool enableForm;
 
-  FieldsMenusInvoice({Key key,
-    this.setOperator,
-    this.setCoordinator,
-    this.listOperators,
-    this.listCoordinators,
-    this.selectedOperator,
-    this.selectedCoordinator,
-    this.enableForm
-  });
+  FieldsMenusInvoice(
+      {Key key,
+      this.setOperator,
+      this.setCoordinator,
+      this.cbSetOperatorsList,
+      this.cbSetCoordinatorsList,
+      this.selectedOperator,
+      this.selectedCoordinator,
+      this.enableForm});
 
   @override
   State<StatefulWidget> createState() {
@@ -31,6 +31,10 @@ class FieldsMenusInvoice extends StatefulWidget {
 
 class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
   BlocInvoice _blocInvoice;
+  List<User> _listUsersOperators;
+  List<User> _listUsersCoordinators;
+  List<String> _listOperators = <String>[];
+  List<String> _listCoordinators = <String>[];
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +54,7 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
     return StreamBuilder(
       stream: _blocInvoice.operatorsStream,
       builder: (BuildContext context, AsyncSnapshot snapshot) {
-        switch(snapshot.connectionState) {
+        switch (snapshot.connectionState) {
           case ConnectionState.waiting:
             return CircularProgressIndicator();
           default:
@@ -59,13 +63,15 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
       },
     );
   }
+
   Widget showPopUpOperators(AsyncSnapshot snapshot) {
-    List<User> operatorsList = _blocInvoice.buildOperators(snapshot.data.documents);
-    widget.listOperators = operatorsList.map((user) => user.name).toList();
+    _listUsersOperators = _blocInvoice.buildOperators(snapshot.data.documents);
+    _listOperators = _listUsersOperators.map((user) => user.name).toList();
+    widget.cbSetOperatorsList(_listUsersOperators);
     return PopUpMenuWidget(
       popUpName: 'Operador',
       selectValue: widget.setOperator,
-      listString: widget.listOperators,
+      listString: _listOperators,
       valueSelect: widget.selectedOperator,
       enableForm: widget.enableForm,
     );
@@ -75,7 +81,7 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
     return StreamBuilder(
       stream: _blocInvoice.coordinatorsStream,
       builder: (BuildContext context, AsyncSnapshot snapshot) {
-        switch(snapshot.connectionState) {
+        switch (snapshot.connectionState) {
           case ConnectionState.waiting:
             return CircularProgressIndicator();
           default:
@@ -84,16 +90,19 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
       },
     );
   }
+
   Widget showPopUpCoordinators(AsyncSnapshot snapshot) {
-    List<User> coordinatorsList = _blocInvoice.buildCoordinators(snapshot.data.documents);
-    widget.listCoordinators = coordinatorsList.map((user) => user.name).toList();
+    _listUsersCoordinators =
+        _blocInvoice.buildCoordinators(snapshot.data.documents);
+    _listCoordinators =
+        _listUsersCoordinators.map((user) => user.name).toList();
+    widget.cbSetCoordinatorsList(_listUsersCoordinators);
     return PopUpMenuWidget(
       popUpName: 'Coordinador',
       selectValue: widget.setCoordinator,
-      listString: widget.listCoordinators,
+      listString: _listCoordinators,
       valueSelect: widget.selectedCoordinator,
       enableForm: widget.enableForm,
     );
   }
-
 }

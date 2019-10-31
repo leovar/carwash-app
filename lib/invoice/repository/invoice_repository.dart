@@ -16,12 +16,6 @@ class InvoiceRepository {
   final FirebaseAuth _authApi = FirebaseAuth.instance;
   final StorageReference _storageReference =FirebaseStorage.instance.ref();
 
-  ///Obtiene la referencia del Usuario actualmente logueado
-  Future<DocumentReference> getUserReference() async {
-    FirebaseUser user = await FirebaseAuth.instance.currentUser();
-    return _db.collection(FirestoreCollections.users).document(user.uid);
-  }
-
   /// Guarda y actualiza la factura
   Future<DocumentReference> updateInvoiceData(Invoice invoice) async {
     CollectionReference ref  = _db.collection(FirestoreCollections.invoices);
@@ -44,10 +38,6 @@ class InvoiceRepository {
         .document(invoiceId)
         .collection('images')
         .add({'imageUrl': invoiceImage});
-  }
-
-  Future<DocumentReference> updateVehicle(String placa) async {
-    CollectionReference ref  = _db.collection(FirestoreCollections.vehicle);
   }
 
   /// Obtiene la lista de los oeradores segun el Location

@@ -5,6 +5,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class LocationRepository {
   final Firestore _db = Firestore.instance;
 
+  Future<DocumentReference> getLocationReference(String locationId) async {
+    return _db.collection(FirestoreCollections.locations).document(locationId);
+  }
+
   Stream<QuerySnapshot> getLocationsStream() {
     var querySnapshot = this
         ._db
