@@ -1,20 +1,17 @@
-import 'package:car_wash_app/invoice/bloc/bloc_invoice.dart';
-import 'package:car_wash_app/user/model/user.dart';
-import 'package:flutter/material.dart';
 import 'package:car_wash_app/invoice/ui/widgets/text_field_input.dart';
-import 'package:car_wash_app/widgets/popup_menu_widget.dart';
-import 'package:generic_bloc_provider/generic_bloc_provider.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
-class FieldsInvoice extends StatefulWidget{
-
+class FieldsInvoice extends StatefulWidget {
   final textPlaca;
   final textClient;
   final textEmail;
   bool sendEmail = false;
-  final Function(String) setOperator;
-  final Function(String) setCoordinator;
-  List<String> listOperators;
-  List<String> listCoordinators;
+  VoidCallback finalEditPlaca;
+  final bool enableForm;
+  final bool validatePlaca;
+  final focusClient;
+  final autofocusPlaca;
 
   FieldsInvoice({
     Key key,
@@ -22,10 +19,11 @@ class FieldsInvoice extends StatefulWidget{
     this.sendEmail,
     this.textClient,
     this.textEmail,
-    this.setOperator,
-    this.setCoordinator,
-    this.listOperators,
-    this.listCoordinators,
+    this.finalEditPlaca,
+    this.enableForm,
+    this.validatePlaca,
+    this.focusClient,
+    this.autofocusPlaca
   });
 
   @override
@@ -34,27 +32,41 @@ class FieldsInvoice extends StatefulWidget{
   }
 }
 
-class _FieldsInvoice extends State<FieldsInvoice>{
-  BlocInvoice _blocInvoice;
+class _FieldsInvoice extends State<FieldsInvoice> {
   @override
   Widget build(BuildContext context) {
-    _blocInvoice = BlocProvider.of(context);
     return Column(
       children: <Widget>[
-        TextFieldInput("Placa",
-          widget.textPlaca,
+        //Regular expression para dejar pasar solo letras y numeros
+        TextFieldInput(
+          labelText: "Placa",
+          textController: widget.textPlaca,
+          isUpperCase: true,
+          textInputFormatter: [
+            WhitelistingTextInputFormatter(RegExp("^[a-zA-Z0-9]*"))
+          ],
+          onFinalEditText: widget.finalEditPlaca,
+          validate: widget.validatePlaca,
+          textValidate: 'El Campo no puede estar vacio',
+          autofocus: widget.autofocusPlaca,
         ),
         SizedBox(
           height: 9,
         ),
-        TextFieldInput("Cliente",
-          widget.textClient,
+        TextFieldInput(
+          labelText: "Cliente",
+          textController: widget.textClient,
+          enable: widget.enableForm,
+          focusNode: widget.focusClient,
         ),
         SizedBox(
           height: 9,
         ),
-        TextFieldInput("Correo Electrónico",
-          widget.textEmail,
+        TextFieldInput(
+          labelText: "Correo Electrónico",
+          textController: widget.textEmail,
+          inputType: TextInputType.emailAddress,
+          enable: widget.enableForm,
         ),
         SizedBox(
           height: 9,
@@ -66,11 +78,11 @@ class _FieldsInvoice extends State<FieldsInvoice>{
           children: <Widget>[
             Checkbox(
               value: widget.sendEmail,
-              onChanged: (bool value) {
+              onChanged: widget.enableForm ? (bool value) {
                 setState(() {
                   widget.sendEmail = value;
                 });
-              },
+              } : null,
               checkColor: Colors.white,
               activeColor: Color(0xFF59B258),
             ),
@@ -85,57 +97,7 @@ class _FieldsInvoice extends State<FieldsInvoice>{
             ),
           ],
         ),
-        SizedBox(
-          height: 9,
-        ),
-        getOperators(),
-        SizedBox(
-          height: 9,
-        ),
-        getCoordinators(),
-        SizedBox(
-          height: 9,
-        ),
       ],
     );
   }
-
-  Widget getOperators() {
-    return StreamBuilder(
-      stream: _blocInvoice.operatorsStream,
-      builder: (BuildContext context, AsyncSnapshot snapshot) {
-        switch(snapshot.connectionState) {
-          case ConnectionState.waiting:
-            return CircularProgressIndicator();
-          default:
-            return showPopUpOperators(snapshot);
-        }
-      },
-    );
-  }
-  Widget showPopUpOperators(AsyncSnapshot snapshot) {
-    List<User> operatorsList = _blocInvoice.buildOperators(snapshot.data.documents);
-    widget.listOperators = operatorsList.map((user) => user.name).toList();
-    return PopUpMenuWidget(PopUpName: 'Operador', selectValue: widget.setOperator, listString: widget.listOperators,);
-  }
-
-  Widget getCoordinators() {
-    return StreamBuilder(
-      stream: _blocInvoice.coordinatorsStream,
-      builder: (BuildContext context, AsyncSnapshot snapshot) {
-        switch(snapshot.connectionState) {
-          case ConnectionState.waiting:
-            return CircularProgressIndicator();
-          default:
-            return showPopUpCoordinators(snapshot);
-        }
-      },
-    );
-  }
-  Widget showPopUpCoordinators(AsyncSnapshot snapshot) {
-    List<User> coordinatorsList = _blocInvoice.buildCoordinators(snapshot.data.documents);
-    widget.listCoordinators = coordinatorsList.map((user) => user.name).toList();
-    return PopUpMenuWidget(PopUpName: 'Coordinador', selectValue: widget.setCoordinator, listString: widget.listCoordinators,);
-  }
-
 }

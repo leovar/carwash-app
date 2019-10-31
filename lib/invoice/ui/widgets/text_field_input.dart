@@ -1,13 +1,34 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class TextFieldInput extends StatefulWidget {
-
-  final String _labelText;
+  final String labelText;
   final textController;
+  TextInputType inputType;
+  final textInputFormatter;
+  final focusNode;
+  final bool isUpperCase;
+  VoidCallback onFinalEditText;
+  bool enable;
+  bool validate;
+  final String textValidate;
+  bool autofocus;
 
-  TextFieldInput(this._labelText,
-        this.textController,
-      );
+  TextFieldInput({
+    Key key,
+    this.labelText,
+    this.textController,
+    this.onFinalEditText,
+    this.textValidate,
+    this.focusNode = null,
+    this.inputType = null,
+    this.textInputFormatter = null,
+    this.isUpperCase = false,
+    this.enable = true,
+    this.validate = false,
+    this.autofocus = false,
+  });
 
   @override
   State<StatefulWidget> createState() {
@@ -21,8 +42,18 @@ class _TextFieldInput extends State<TextFieldInput> {
     return TextField(
       controller: widget.textController,
       maxLines: 1,
-      autofocus: false,
+      autofocus: widget.autofocus ?? false,
+      focusNode: widget.focusNode,
+      keyboardType: widget.inputType ?? null,
+      inputFormatters: widget.textInputFormatter ?? null,
+      textCapitalization: widget.isUpperCase ?? false
+          ? TextCapitalization.characters
+          : TextCapitalization.sentences,
       cursorColor: Colors.white,
+      onEditingComplete: () {
+        widget.onFinalEditText();
+      },
+      enabled: widget.enable ?? true,
       style: TextStyle(
         fontFamily: "Lato",
         decoration: TextDecoration.none,
@@ -31,7 +62,8 @@ class _TextFieldInput extends State<TextFieldInput> {
       ),
       decoration: InputDecoration(
         contentPadding: EdgeInsets.symmetric(vertical: 17, horizontal: 15),
-        labelText: widget._labelText,
+        labelText: widget.labelText,
+        errorText: widget.validate ? widget.textValidate : null,
         labelStyle: TextStyle(
           decoration: TextDecoration.none,
           fontFamily: "Lato",

@@ -1,13 +1,24 @@
+import 'package:car_wash_app/invoice/model/additional_product.dart';
 import 'package:car_wash_app/invoice/ui/screens/products_invoice_page.dart';
 import 'package:car_wash_app/product/model/product.dart';
 import 'package:flutter/material.dart';
 
 class FieldsProducts extends StatefulWidget {
   Function(List<Product>) callbackProductsList;
+  Function(List<AdditionalProduct>) callbackAdditionalProdList;
   List<Product> productListCallback;
+  List<AdditionalProduct> additionalProductListCb;
   final vehicleTypeSelect;
+  final bool enableForm;
 
-  FieldsProducts({Key key, this.callbackProductsList, this.productListCallback, this.vehicleTypeSelect});
+  FieldsProducts({Key key,
+    this.callbackProductsList,
+    this.productListCallback,
+    this.callbackAdditionalProdList,
+    this.additionalProductListCb,
+    this.vehicleTypeSelect,
+    this.enableForm
+  });
 
   @override
   State<StatefulWidget> createState() {
@@ -16,6 +27,8 @@ class FieldsProducts extends StatefulWidget {
 }
 
 class _FieldsProducts extends State<FieldsProducts> {
+  List<Product> listProducts = <Product>[];
+  List<AdditionalProduct> listAdditionalProducts = <AdditionalProduct>[];
   int selectedProductsCount = 0;
 
   @override
@@ -71,18 +84,20 @@ class _FieldsProducts extends State<FieldsProducts> {
                   size: 30,
                 ),
                 backgroundColor: Color(0xFFCCCCCC),
-                onPressed: () {
+                onPressed: widget.enableForm??true ? () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => ProductsInvoicePage(
                         callbackSetProductsList: _setProductList,
                         productListCallback : widget.productListCallback,
+                        cbAdditionalProducts: _setAdditionalProductList,
+                        additionalProductListCb: widget.additionalProductListCb,
                         vehicleTypeSelect: widget.vehicleTypeSelect,
                       ),
                     ),
                   );
-                },
+                } : null,
                 heroTag: null,
               ),
               Container(
@@ -114,7 +129,14 @@ class _FieldsProducts extends State<FieldsProducts> {
 
   void _setProductList(List<Product> productListGet) {
     List<Product> listSelected = productListGet.where((f) => f.isSelected == true).toList();
-    selectedProductsCount = listSelected.length;
+    listProducts = listSelected;
+    selectedProductsCount = listProducts.length + listAdditionalProducts.length;
     widget.callbackProductsList(productListGet);
+  }
+
+  void _setAdditionalProductList(List<AdditionalProduct> additionalProductListGet) {
+    listAdditionalProducts = additionalProductListGet;
+    selectedProductsCount = listProducts.length + listAdditionalProducts.length;
+    widget.callbackAdditionalProdList(additionalProductListGet);
   }
 }

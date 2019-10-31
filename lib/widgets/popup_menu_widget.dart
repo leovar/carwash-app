@@ -4,13 +4,20 @@ import 'package:flutter/material.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 
 class PopUpMenuWidget extends StatefulWidget {
-
-  String valueSelect = '';
-  String PopUpName = '';
+  String valueSelect;
+  String popUpName = '';
   List<String> listString = <String>[];
   Function(String) selectValue;
+  final bool enableForm;
 
-  PopUpMenuWidget({Key key, this.PopUpName, this.selectValue, this.listString}) : super(key: key);
+  PopUpMenuWidget({
+    Key key,
+    this.popUpName,
+    this.selectValue,
+    this.listString,
+    this.valueSelect,
+    this.enableForm,
+  });
 
   @override
   State<StatefulWidget> createState() {
@@ -21,8 +28,16 @@ class PopUpMenuWidget extends StatefulWidget {
 class _PopUpMenuWidget extends State<PopUpMenuWidget> {
   @override
   Widget build(BuildContext context) {
+    if (!widget.listString.contains(widget.popUpName)) {
+      widget.listString.add(widget.popUpName);
+    }
     print(widget.valueSelect);
+    if (widget.valueSelect.isEmpty) {
+      widget.valueSelect = widget.popUpName;
+    }
+
     return PopupMenuButton(
+      enabled: widget.enableForm?? true,
       itemBuilder: (BuildContext context) {
         return widget.listString.map((String valueList) {
           return PopupMenuItem<String>(
@@ -31,7 +46,7 @@ class _PopUpMenuWidget extends State<PopUpMenuWidget> {
           );
         }).toList();
       },
-      onSelected: (valText) {
+      onSelected: (String valText) {
         _selectValue(valText);
       },
       child: Container(
@@ -42,7 +57,8 @@ class _PopUpMenuWidget extends State<PopUpMenuWidget> {
           children: <Widget>[
             Container(
               padding: EdgeInsets.only(left: 10),
-              child: Text(widget.valueSelect,
+              child: Text(
+                widget.valueSelect,
                 style: TextStyle(
                   fontFamily: "Lato",
                   decoration: TextDecoration.none,
@@ -54,7 +70,10 @@ class _PopUpMenuWidget extends State<PopUpMenuWidget> {
             Align(
               alignment: Alignment.centerRight,
               child: IconButton(
-                icon: Icon(Icons.keyboard_arrow_down, size: 30,),
+                icon: Icon(
+                  Icons.keyboard_arrow_down,
+                  size: 30,
+                ),
               ),
             ),
           ],
@@ -71,11 +90,10 @@ class _PopUpMenuWidget extends State<PopUpMenuWidget> {
     );
   }
 
-  void _selectValue(var value) {
+  void _selectValue(String value) {
     setState(() {
-      widget.valueSelect = '${value}';
-      widget.selectValue('${value}');
+      widget.valueSelect = value;
+      widget.selectValue(value);
     });
   }
-
 }

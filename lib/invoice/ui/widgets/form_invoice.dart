@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:car_wash_app/invoice/bloc/bloc_invoice.dart';
+import 'package:car_wash_app/invoice/model/additional_product.dart';
 import 'package:car_wash_app/invoice/model/invoice.dart';
 import 'package:car_wash_app/invoice/ui/widgets/fields_products.dart';
 import 'package:car_wash_app/invoice/ui/widgets/radio_item.dart';
@@ -20,6 +21,7 @@ import 'package:popup_menu/popup_menu.dart';
 import 'carousel_cars_widget.dart';
 import 'fields_invoice.dart';
 import '../../model/header_services.dart';
+import 'fields_menu_invoice.dart';
 
 class FormInvoice extends StatefulWidget {
   @override
@@ -32,6 +34,7 @@ class FormInvoice extends StatefulWidget {
 class _FormInvoice extends State<FormInvoice> {
   BlocInvoice _blocInvoice;
   final _productBloc = ProductBloc();
+  bool _enableForm;
 
   ///global variables
   //Esta variable _scaffoldKey se usa para poder abrir el drawer desde un boton diferente al que se coloca por defecto en el AppBar
@@ -45,6 +48,7 @@ class _FormInvoice extends State<FormInvoice> {
   final String galleryTag = "Galeria";
   String _selectSourceImagePicker = "Camara";
   File _imageSelect;
+  FocusNode _clientFocusNode;
 
   final _textPlaca = TextEditingController();
   final _textClient = TextEditingController();
@@ -54,10 +58,14 @@ class _FormInvoice extends State<FormInvoice> {
   List<String> _listOperators = <String>[];
   List<String> _listCoordinators = <String>[];
   List<Product> _listProduct = <Product>[];
+  List<AdditionalProduct> _listAdditionalProducts = <AdditionalProduct>[];
+  bool _validatePlaca = false;
 
   @override
   void initState() {
     super.initState();
+    _enableForm = false;
+    _clientFocusNode = FocusNode();
     vehicleTypeList.add(HeaderServices(false, "Auto", 38,
         "assets/images/icon_car_admin.png", "assets/images/icon_car.png"));
     vehicleTypeList.add(HeaderServices(
@@ -77,9 +85,16 @@ class _FormInvoice extends State<FormInvoice> {
   }
 
   @override
+  void dispose() {
+    _clientFocusNode.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     this._blocInvoice = BlocProvider.of(context);
     PopupMenu.context = context;
+    //FocusScope.of(context).requestFocus(_placaFocusNode);
 
     if (_imageSelect != null) {
       if (!imageList.contains(_imageSelect.path)) {
@@ -192,13 +207,26 @@ class _FormInvoice extends State<FormInvoice> {
             children: <Widget>[
               FieldsInvoice(
                 textPlaca: _textPlaca,
+                validatePlaca: _validatePlaca,
                 textClient: _textClient,
                 textEmail: _textEmail,
                 sendEmail: _sendEmail,
+                finalEditPlaca: _onFinalEditPlaca,
+                enableForm: _enableForm,
+                focusClient: _clientFocusNode,
+                autofocusPlaca: true,
+              ),
+              SizedBox(
+                height: 9,
+              ),
+              FieldsMenusInvoice(
                 setOperator: _setOperator,
                 setCoordinator: _setCoordinator,
                 listOperators: _listOperators,
                 listCoordinators: _listCoordinators,
+                selectedOperator: _selectOperator,
+                selectedCoordinator: _selectCoordinator,
+                enableForm: _enableForm,
               ),
               SizedBox(
                 height: 9,
@@ -206,7 +234,10 @@ class _FormInvoice extends State<FormInvoice> {
               FieldsProducts(
                 callbackProductsList: _setProductsDb,
                 productListCallback: _listProduct,
+                callbackAdditionalProdList: _setAdditionalProducts,
+                additionalProductListCb: _listAdditionalProducts,
                 vehicleTypeSelect: vehicleTypeSelected,
+                enableForm: _enableForm,
               ),
               SizedBox(
                 height: 9,
@@ -236,7 +267,7 @@ class _FormInvoice extends State<FormInvoice> {
             backgroundColor: Colors.white,
             elevation: 14,
             heroTag: null,
-            onPressed: _menuSourceAddImage,
+            onPressed: _enableForm? _menuSourceAddImage: null,
           ),
         ),
       );
@@ -259,7 +290,7 @@ class _FormInvoice extends State<FormInvoice> {
               fontSize: 19,
             ),
           ),
-          onPressed: _saveInvoice,
+          onPressed: _enableForm??true ?  _saveInvoice : null,
         ),
       ),
     );
@@ -372,10 +403,28 @@ class _FormInvoice extends State<FormInvoice> {
     _selectCoordinator = selectCoordinator;
   }
 
-
   ///Functions Services or Products
   void _setProductsDb(List<Product> productListSelected) {
     _listProduct = productListSelected;
+  }
+
+  void _setAdditionalProducts(List<AdditionalProduct> additionalProductList) {
+    _listAdditionalProducts = additionalProductList;
+  }
+
+  ///Function validate exist client after digit placa
+  void _onFinalEditPlaca() {
+    String placa = _textPlaca.text??'';
+    setState(() {
+      if (placa.isEmpty) {
+        _validatePlaca = true;
+        _enableForm = false;
+      } else {
+        FocusScope.of(context).requestFocus(_clientFocusNode);
+        _validatePlaca = false;
+        _enableForm = true;
+      }
+    });
   }
 
   ///Functions Save Invoice
