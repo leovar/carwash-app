@@ -6,6 +6,7 @@ class FirestoreCollections {
   static String vehicles = 'vehicles';
   static String vehicleType = 'vehicleType';
   static String customers = 'customers';
+  static String additionalProducts = 'additionalProducts';
 
   /// Fields User Collection
   static String usersFieldUid = 'uid';
@@ -26,6 +27,11 @@ class FirestoreCollections {
   static String productFieldProductName = 'productName';
   static String productFieldLocations = 'locations';
 
-  /// FIelds Customer Collections
+  /// Fields Customer Collections
   static String customerFieldVehicles = 'vehicles';
+  static String customerFieldPhoneNumber = 'phoneNumber';
+  static String customerFieldCreationDate = 'creationDate';
+  static String customerFieldEmail = 'email';
+
+
 }

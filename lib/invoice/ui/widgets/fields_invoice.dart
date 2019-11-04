@@ -6,6 +6,7 @@ class FieldsInvoice extends StatefulWidget {
   final textPlaca;
   final textClient;
   final textEmail;
+  final textPhoneNumber;
   bool sendEmail = false;
   VoidCallback finalEditPlaca;
   final bool enableForm;
@@ -19,6 +20,7 @@ class FieldsInvoice extends StatefulWidget {
     this.sendEmail,
     this.textClient,
     this.textEmail,
+    this.textPhoneNumber,
     this.finalEditPlaca,
     this.enableForm,
     this.validatePlaca,
@@ -58,6 +60,15 @@ class _FieldsInvoice extends State<FieldsInvoice> {
           textController: widget.textClient,
           enable: widget.enableForm,
           focusNode: widget.focusClient,
+        ),
+        SizedBox(
+          height: 9,
+        ),
+        TextFieldInput(
+          labelText: "Telefono",
+          textController: widget.textPhoneNumber,
+          inputType: TextInputType.number,
+          enable: widget.enableForm,
         ),
         SizedBox(
           height: 9,

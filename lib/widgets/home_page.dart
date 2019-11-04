@@ -91,8 +91,12 @@ class _HomePage extends State<HomePage> {
 
   bodyContainer() => Column(
         children: <Widget>[
-          backgroundImage(),
-          listOptions(),
+          Expanded(
+            child: backgroundImage(),
+          ),
+          Expanded(
+            child: listOptions(),
+          ),
         ],
       );
 
@@ -109,46 +113,44 @@ class _HomePage extends State<HomePage> {
         ),
       );
 
-  listOptions() => Expanded(
-        child: ListView(
-          padding: EdgeInsets.only(right: 17, left: 17, top: 10),
-          scrollDirection: Axis.vertical,
-          children: <Widget>[
-            ButtonFunctions(
-                onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => InvoicePage(usuario: usuario, showDrawer: false)));
-                },
-                buttonName: "NUEVA FACTURA",
-                imageAsset: "assets/images/icon_nueva_factura.png"),
-            SizedBox(
-              height: 10.0,
-            ),
-            ButtonFunctions(
-                onPressed: () {},
-                buttonName: "FACTURAS",
-                imageAsset: "assets/images/icon_facturas.png"),
-            SizedBox(
-              height: 10.0,
-            ),
-            ButtonFunctions(
-                onPressed: () {},
-                buttonName: "INFORMES",
-                imageAsset: "assets/images/icon_informes.png"),
-            SizedBox(
-              height: 10.0,
-            ),
-            ButtonFunctions(
-                onPressed: () {},
-                buttonName: "INFORMES",
-                imageAsset: "assets/images/icon_informes.png"),
-            SizedBox(
-              height: 10.0,
-            ),
-            ButtonFunctions(
-                onPressed: () {},
-                buttonName: "INFORMES",
-                imageAsset: "assets/images/icon_informes.png"),
-          ],
-        ),
-      );
+  listOptions() => ListView(
+    padding: EdgeInsets.only(right: 17, left: 17, top: 10),
+    scrollDirection: Axis.vertical,
+    children: <Widget>[
+      ButtonFunctions(
+          onPressed: () {
+            Navigator.push(context, MaterialPageRoute(builder: (context) => InvoicePage(usuario: usuario, showDrawer: false)));
+          },
+          buttonName: "NUEVA FACTURA",
+          imageAsset: "assets/images/icon_nueva_factura.png"),
+      SizedBox(
+        height: 10.0,
+      ),
+      ButtonFunctions(
+          onPressed: () {},
+          buttonName: "FACTURAS",
+          imageAsset: "assets/images/icon_facturas.png"),
+      SizedBox(
+        height: 10.0,
+      ),
+      ButtonFunctions(
+          onPressed: () {},
+          buttonName: "INFORMES",
+          imageAsset: "assets/images/icon_informes.png"),
+      SizedBox(
+        height: 10.0,
+      ),
+      ButtonFunctions(
+          onPressed: () {},
+          buttonName: "INFORMES",
+          imageAsset: "assets/images/icon_informes.png"),
+      SizedBox(
+        height: 10.0,
+      ),
+      ButtonFunctions(
+          onPressed: () {},
+          buttonName: "INFORMES",
+          imageAsset: "assets/images/icon_informes.png"),
+    ],
+  );
 }

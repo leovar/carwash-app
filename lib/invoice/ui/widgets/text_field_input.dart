@@ -49,8 +49,8 @@ class _TextFieldInput extends State<TextFieldInput> {
       textCapitalization: widget.isUpperCase ?? false
           ? TextCapitalization.characters
           : TextCapitalization.sentences,
-      cursorColor: Colors.white,
-      onEditingComplete: () {
+      cursorColor: Color(0xFFAEAEAE),
+      onChanged: (value) {
         widget.onFinalEditText();
       },
       enabled: widget.enable ?? true,

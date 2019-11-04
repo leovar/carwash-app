@@ -51,6 +51,25 @@ class Customer extends Equatable {
     };
   }
 
+  factory Customer.copyWith({
+    @required Customer origin,
+    String name,
+    String address,
+    String phoneNumber,
+    String email,
+    List<DocumentReference> vehicles,
+  }) {
+    return Customer(
+      id: origin.id,
+      name: name ?? origin.name,
+      address: address?? origin.address,
+      phoneNumber: phoneNumber ?? origin.phoneNumber,
+      email: email ?? origin.email,
+      creationDate: origin.creationDate,
+      vehicles: vehicles ?? origin.vehicles,
+    );
+  }
+
   @override
   List<Object> get props => [
         id,

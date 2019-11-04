@@ -16,6 +16,7 @@ import 'package:car_wash_app/vehicle/bloc/bloc_vehicle.dart';
 import 'package:car_wash_app/vehicle/model/vehicle.dart';
 import 'package:car_wash_app/widgets/gradient_back.dart';
 import 'package:car_wash_app/widgets/keys.dart';
+import 'package:car_wash_app/widgets/messages_utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
@@ -25,9 +26,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:popup_menu/popup_menu.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../model/header_services.dart';
 import 'carousel_cars_widget.dart';
 import 'fields_invoice.dart';
-import '../../model/header_services.dart';
 import 'fields_menu_invoice.dart';
 
 class FormInvoice extends StatefulWidget {
@@ -53,6 +54,7 @@ class _FormInvoice extends State<FormInvoice> {
   GlobalKey btnAddImage = GlobalKey();
   List<String> imageList = [];
   bool _sendEmail = false;
+  String _placa = '';
   List<HeaderServices> vehicleTypeList = new List<HeaderServices>();
   HeaderServices vehicleTypeSelected;
   final String cameraTag = "Camara";
@@ -64,6 +66,7 @@ class _FormInvoice extends State<FormInvoice> {
   final _textPlaca = TextEditingController();
   final _textClient = TextEditingController();
   final _textEmail = TextEditingController();
+  final _textPhoneNumber = TextEditingController();
   String _selectOperator = "";
   String _selectCoordinator = "";
   List<User> _listOperators = <User>[];
@@ -73,12 +76,16 @@ class _FormInvoice extends State<FormInvoice> {
   bool _validatePlaca = false;
   Customer _customer;
   DocumentReference _vehicleReference;
+  int _listOperatorsCount = 0;
+  int _listCoordinatorsCount = 0;
 
   @override
   void initState() {
     super.initState();
     _enableForm = false;
     _clientFocusNode = FocusNode();
+    _listOperatorsCount = 0;
+    _listCoordinatorsCount = 0;
     vehicleTypeList.add(HeaderServices(false, "Auto", 38,
         "assets/images/icon_car_admin.png", "assets/images/icon_car.png"));
     vehicleTypeList.add(HeaderServices(
@@ -107,7 +114,6 @@ class _FormInvoice extends State<FormInvoice> {
   Widget build(BuildContext context) {
     this._blocInvoice = BlocProvider.of(context);
     PopupMenu.context = context;
-    //FocusScope.of(context).requestFocus(_placaFocusNode);
 
     if (_imageSelect != null) {
       if (!imageList.contains(_imageSelect.path)) {
@@ -168,6 +174,8 @@ class _FormInvoice extends State<FormInvoice> {
                     .forEach((element) => element.isSelected = false);
                 vehicleTypeList[index].isSelected = true;
                 vehicleTypeSelected = vehicleTypeList[index];
+                _listAdditionalProducts = <AdditionalProduct>[];
+                _listProduct = <Product>[];
               });
             },
             child: RadioItem(vehicleTypeList[index]),
@@ -189,7 +197,7 @@ class _FormInvoice extends State<FormInvoice> {
               ),
             ),
             Text(
-              "Nueva Factura - No. 1017",
+              "Nueva Factura", //- No. 1017
               style: TextStyle(
                 fontFamily: "Lato",
                 fontWeight: FontWeight.bold,
@@ -223,6 +231,7 @@ class _FormInvoice extends State<FormInvoice> {
                 validatePlaca: _validatePlaca,
                 textClient: _textClient,
                 textEmail: _textEmail,
+                textPhoneNumber: _textPhoneNumber,
                 sendEmail: _sendEmail,
                 finalEditPlaca: _onFinalEditPlaca,
                 enableForm: _enableForm,
@@ -233,6 +242,8 @@ class _FormInvoice extends State<FormInvoice> {
                 height: 9,
               ),
               FieldsMenusInvoice(
+                listCountOperators: _listOperatorsCount,
+                listCountCoordinators: _listCoordinatorsCount,
                 setOperator: _setOperator,
                 setCoordinator: _setCoordinator,
                 cbSetOperatorsList: _setUsersOperatorsList,
@@ -251,6 +262,9 @@ class _FormInvoice extends State<FormInvoice> {
                 additionalProductListCb: _listAdditionalProducts,
                 vehicleTypeSelect: vehicleTypeSelected,
                 enableForm: _enableForm,
+                selectedProductsCount:
+                    _listProduct.where((f) => f.isSelected).toList().length +
+                        _listAdditionalProducts.length,
               ),
               SizedBox(
                 height: 9,
@@ -280,7 +294,7 @@ class _FormInvoice extends State<FormInvoice> {
             backgroundColor: Colors.white,
             elevation: 14,
             heroTag: null,
-            onPressed: _enableForm? _menuSourceAddImage: null,
+            onPressed: _enableForm ? _menuSourceAddImage : null,
           ),
         ),
       );
@@ -303,7 +317,7 @@ class _FormInvoice extends State<FormInvoice> {
               fontSize: 19,
             ),
           ),
-          onPressed: _enableForm??true ?  _saveInvoice : null,
+          onPressed: _enableForm ?? true ? _saveInvoice : null,
         ),
       ),
     );
@@ -416,12 +430,14 @@ class _FormInvoice extends State<FormInvoice> {
     _selectCoordinator = selectCoordinator;
   }
 
-  void _setUsersOperatorsList(List<User> operatorsList){
+  void _setUsersOperatorsList(List<User> operatorsList) {
     _listOperators = operatorsList;
+    _listOperatorsCount = _listOperators.length;
   }
 
-  void _setUsersCoordinatorsList(List<User> coordinatorsList){
+  void _setUsersCoordinatorsList(List<User> coordinatorsList) {
     _listCoordinators = coordinatorsList;
+    _listCoordinatorsCount = _listCoordinators.length;
   }
 
   ///Functions Services or Products
@@ -436,61 +452,92 @@ class _FormInvoice extends State<FormInvoice> {
   ///Function validate exist customer
   /// After digit placa validate Vehicle and Customer
   void _onFinalEditPlaca() {
-    String placa = _textPlaca.text??'';
+    _placa = _textPlaca.text ?? '';
 
-    if (placa.isEmpty) {
+    if (_placa.isEmpty) {
       setState(() {
         _validatePlaca = true;
         _enableForm = false;
       });
     } else {
+      _validatePlaca = false;
+      _enableForm = true;
 
       //Get vehicle if exist
-      _blocVehicle.getVehicleReferenceByPlaca(placa).then((DocumentReference vehicleRef) {
+      _blocVehicle
+          .getVehicleReferenceByPlaca(_placa)
+          .then((DocumentReference vehicleRef) {
         _vehicleReference = vehicleRef;
-      });
 
-      //Get Customer if exist
-      _customerBloc.getCustomerByVehicle(placa).then((Customer customer) {
-        setState(() {
-          if (customer == null) {
-            FocusScope.of(context).requestFocus(_clientFocusNode);
-            _validatePlaca = false;
-            _enableForm = true;
-          } else {
-            _customer = customer;
-            _textClient.text = customer.name;
-            _textEmail.text = customer.email;
-          }
-        });
+        //Validate if Customer exist for this vehicle
+        if (_vehicleReference != null) {
+          _customerBloc
+              .getCustomerByVehicle(_vehicleReference)
+              .then((Customer customer) {
+            setState(() {
+              if (customer == null) {
+                _cleanTextFields();
+              } else {
+                _customer = customer;
+                _textClient.text = customer.name;
+                _textEmail.text = customer.email;
+                _textPhoneNumber.text = customer.phoneNumber;
+              }
+            });
+          });
+        } else {
+          setState(() {
+            _cleanTextFields();
+          });
+        }
       });
     }
   }
 
+  void _cleanTextFields() {
+    _textClient.text = '';
+    _textEmail.text = '';
+    _textPhoneNumber.text = '';
+    //FocusScope.of(context).requestFocus(_clientFocusNode);
+  }
+
   ///Functions Save Invoice
   void _saveInvoice() async {
+    //Open message Saving
+    MessagesUtils.showAlertWithLoading(context: context, title: 'Guardando')
+        .show();
+
     DocumentReference _vehicleTypeRef;
     DocumentReference _customerReference;
     DocumentReference _operatorRefererence;
     DocumentReference _coordinatorRefererence;
     DocumentReference _locationReference;
+    double _total = 0;
+    double _iva = 0;
+    double _subTotal = 0;
 
     //Get Current user reference
     DocumentReference _userRef = await _userBloc.getUserReference();
 
     //Get Operator reference
-    _operatorRefererence = await _userBloc.getUserReferenceById(_listOperators.firstWhere((User user){
-      return user.name == _selectOperator;
-    }).uid);
+    if (_selectOperator.isNotEmpty) {
+      _operatorRefererence = await _userBloc
+          .getUserReferenceById(_listOperators.firstWhere((User user) {
+        return user.name == _selectOperator;
+      }).uid);
+    }
 
     //Get Coordinator reference
-    _coordinatorRefererence = await _userBloc.getUserReferenceById(_listCoordinators.firstWhere((User user) {
-      return user.name == _selectCoordinator;
-    }).uid);
-
+    if (_selectCoordinator.isNotEmpty) {
+      _coordinatorRefererence = await _userBloc
+          .getUserReferenceById(_listCoordinators.firstWhere((User user) {
+        return user.name == _selectCoordinator;
+      }).uid);
+    }
 
     //Get VehicleType reference
-    _vehicleTypeRef = await _blocInvoice.getVehicleTypeReference(vehicleTypeSelected.text);
+    _vehicleTypeRef =
+        await _blocInvoice.getVehicleTypeReference(vehicleTypeSelected.text);
 
     //Get Vehicle reference, save if not exist
     if (_vehicleReference == null) {
@@ -502,44 +549,89 @@ class _FormInvoice extends State<FormInvoice> {
         vehicleType: _vehicleTypeRef,
         creationDate: Timestamp.now(),
       );
-      DocumentReference vehicleRef = await _blocVehicle.updateVehicle(updateVehicle);
+      DocumentReference vehicleRef =
+          await _blocVehicle.updateVehicle(updateVehicle);
       _vehicleReference = vehicleRef;
     }
 
-    //Get Customer reference
-    if (_customer ==  null) {
+    ///Get Customer reference or create customer or update customer
+    if (_customer == null) {
       List<DocumentReference> listVehicles = <DocumentReference>[];
       listVehicles.add(_vehicleReference);
 
       Customer customer = Customer(
         name: _textClient.text.trim(),
         address: '',
-        phoneNumber: '',
+        phoneNumber: _textPhoneNumber.text.trim(),
         email: _textEmail.text.trim(),
         creationDate: Timestamp.now(),
         vehicles: listVehicles,
       );
-      DocumentReference customerRef = await _customerBloc.updateCustomer(customer);
+      DocumentReference customerRef =
+          await _customerBloc.updateCustomer(customer);
       _customerReference = customerRef;
+    } else {
+      if (!_customer.vehicles.contains(_vehicleReference)) {
+        _customer.vehicles.add(_vehicleReference);
+      }
+
+      Customer customerUpdate = Customer.copyWith(
+        origin: _customer,
+        name: _textClient.text.trim(),
+        phoneNumber: _textPhoneNumber.text.trim(),
+        email: _textEmail.text.trim(),
+      );
+      _customerReference = await _customerBloc.updateCustomer(customerUpdate);
     }
 
-    //Get products and values
+    //Get preferences with location and get location reference
     SharedPreferences pref = await SharedPreferences.getInstance();
     String idLocation = pref.getString(Keys.locations);
     _locationReference = await _locationBloc.getLocationReference(idLocation);
+
+    //Get products and values
+    _listProduct.forEach((product) {
+      if (product.isSelected) {
+        _total = _total + product.price;
+        _iva = _iva + product.iva;
+      }
+    });
+    _listAdditionalProducts.forEach((addProduct) {
+      _total = _total + double.parse(addProduct.productValue ?? '0');
+      _iva = _iva + addProduct.productIva;
+    });
 
     final invoice = Invoice(
       customer: _customerReference,
       vehicle: _vehicleReference,
       location: _locationReference,
-      totalPrice: 25000,
-      subtotal: 3500,
-      iva: 2500,
+      totalPrice: _total,
+      subtotal: _subTotal,
+      iva: _iva,
       userOwner: _userRef,
       userOperator: _operatorRefererence,
       userCoordinator: _coordinatorRefererence,
       invoiceImages: imageList,
     );
-    _blocInvoice.saveInvoice(invoice);
+    DocumentReference invoiceReference =
+        await _blocInvoice.saveInvoice(invoice);
+    String invoiceId = invoiceReference.documentID;
+
+    //Save products list
+    List<Product> _selectedProducts =
+        _listProduct.where((f) => f.isSelected).toList();
+    if (_selectedProducts.length > 0) {
+      _blocInvoice.saveInvoiceProduct(invoiceId, _selectedProducts);
+    }
+
+    //Save additional products list
+    if (_listAdditionalProducts.length > 0) {
+      _blocInvoice.saveInvoiceAdditionalProducts(
+          invoiceId, _listAdditionalProducts);
+    }
+
+    //Close screen
+    Navigator.pop(context); //Close popUp Save
+    Navigator.pop(context); //Close form Create Invoice
   }
 }

@@ -10,14 +10,17 @@ class FieldsProducts extends StatefulWidget {
   List<AdditionalProduct> additionalProductListCb;
   final vehicleTypeSelect;
   final bool enableForm;
+  int selectedProductsCount;
 
-  FieldsProducts({Key key,
+  FieldsProducts({
+    Key key,
     this.callbackProductsList,
     this.productListCallback,
     this.callbackAdditionalProdList,
     this.additionalProductListCb,
     this.vehicleTypeSelect,
-    this.enableForm
+    this.enableForm,
+    this.selectedProductsCount,
   });
 
   @override
@@ -29,7 +32,6 @@ class FieldsProducts extends StatefulWidget {
 class _FieldsProducts extends State<FieldsProducts> {
   List<Product> listProducts = <Product>[];
   List<AdditionalProduct> listAdditionalProducts = <AdditionalProduct>[];
-  int selectedProductsCount = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +46,7 @@ class _FieldsProducts extends State<FieldsProducts> {
               Container(
                 padding: EdgeInsets.only(left: 10),
                 child: Text(
-                  '$selectedProductsCount servicios agregados',
+                  '${widget.selectedProductsCount} servicios agregados',
                   style: TextStyle(
                     fontFamily: "Lato",
                     decoration: TextDecoration.none,
@@ -84,20 +86,25 @@ class _FieldsProducts extends State<FieldsProducts> {
                   size: 30,
                 ),
                 backgroundColor: Color(0xFFCCCCCC),
-                onPressed: widget.enableForm??true ? () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ProductsInvoicePage(
-                        callbackSetProductsList: _setProductList,
-                        productListCallback : widget.productListCallback,
-                        cbAdditionalProducts: _setAdditionalProductList,
-                        additionalProductListCb: widget.additionalProductListCb,
-                        vehicleTypeSelect: widget.vehicleTypeSelect,
-                      ),
-                    ),
-                  );
-                } : null,
+                onPressed: widget.enableForm ?? true
+                    ? () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ProductsInvoicePage(
+                              callbackSetProductsList:
+                                  widget.callbackProductsList,
+                              productListCallback: widget.productListCallback,
+                              cbAdditionalProducts:
+                                  widget.callbackAdditionalProdList,
+                              additionalProductListCb:
+                                  widget.additionalProductListCb,
+                              vehicleTypeSelect: widget.vehicleTypeSelect,
+                            ),
+                          ),
+                        );
+                      }
+                    : null,
                 heroTag: null,
               ),
               Container(
@@ -125,18 +132,5 @@ class _FieldsProducts extends State<FieldsProducts> {
         ),
       ],
     );
-  }
-
-  void _setProductList(List<Product> productListGet) {
-    List<Product> listSelected = productListGet.where((f) => f.isSelected == true).toList();
-    listProducts = listSelected;
-    selectedProductsCount = listProducts.length + listAdditionalProducts.length;
-    widget.callbackProductsList(productListGet);
-  }
-
-  void _setAdditionalProductList(List<AdditionalProduct> additionalProductListGet) {
-    listAdditionalProducts = additionalProductListGet;
-    selectedProductsCount = listProducts.length + listAdditionalProducts.length;
-    widget.callbackAdditionalProdList(additionalProductListGet);
   }
 }

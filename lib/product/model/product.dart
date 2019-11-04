@@ -57,6 +57,20 @@ class Product extends Equatable {
     };
   }
 
+  Map<String, dynamic> toJsonInvoiceProduct(
+      String productName,
+      double price,
+      double iva,
+      bool isAdditional,
+      ) {
+    return {
+      'productName': productName,
+      'price': price,
+      'iva': iva,
+      'isAdditional': isAdditional,
+    };
+  }
+
   @override
   List<Object> get props => [
     id,
