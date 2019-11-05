@@ -42,13 +42,17 @@ class BlocInvoice implements Bloc {
     return _invoiceRepository.getVehicleTypeReference(vehicleType);
   }
 
-  Stream<QuerySnapshot> get operatorsStream => _invoiceRepository.getListOperatorsStream();
-  List<User> buildOperators(List<DocumentSnapshot> operatorsListSnapshot) => _invoiceRepository.buildOperators(operatorsListSnapshot);
-  Future<List<User>> getOperatorsUsers() {
-    return _invoiceRepository.getOperatorsUsers();
+  Stream<QuerySnapshot> operatorsStream(DocumentReference locationReference) {
+    return locationReference != null ? _invoiceRepository.getListOperatorsStream(locationReference): QuerySnapshot;
   }
+  List<User> buildOperators(List<DocumentSnapshot> operatorsListSnapshot) => _invoiceRepository.buildOperators(operatorsListSnapshot);
+  /*Future<List<User>> getOperatorsUsers() {
+    return _invoiceRepository.getOperatorsUsers();
+  }*/
 
-  Stream<QuerySnapshot> get coordinatorsStream => _invoiceRepository.getListCoordinatorStream();
+  Stream<QuerySnapshot> coordinatorsStream(DocumentReference locationReference) {
+    return locationReference != null ? _invoiceRepository.getListCoordinatorStream(locationReference): QuerySnapshot;
+  }
   List<User> buildCoordinators(List<DocumentSnapshot> coordinatorListSnapshot) => _invoiceRepository.buildCoordinator(coordinatorListSnapshot);
   /*Future<List<User>> getCoordinatorUser() {
     return _invoiceRepository.getCoordinatorUsers();

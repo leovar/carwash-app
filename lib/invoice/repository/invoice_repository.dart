@@ -45,16 +45,17 @@ class InvoiceRepository {
         .add({'imageUrl': invoiceImage});
   }
 
-  /// Obtiene la lista de los oeradores segun el Location
-  Stream<QuerySnapshot> getListOperatorsStream() {
+  ///Get Operators list by Location
+  Stream<QuerySnapshot> getListOperatorsStream(DocumentReference locationReference) {
     final querySnapshot = this
         ._db
         .collection(FirestoreCollections.users)
         .where(FirestoreCollections.usersFieldIsOperator, isEqualTo: true)
+        .where(FirestoreCollections.usersFieldIsOperator)
+        .where(FirestoreCollections.usersFieldLocations, arrayContains: locationReference)
         .snapshots();
     return querySnapshot;
   }
-
   List<User> buildOperators(List<DocumentSnapshot> operatorsListSnapshot) {
     List<User> usersList = <User>[];
     operatorsListSnapshot.forEach((p) {
@@ -82,15 +83,15 @@ class InvoiceRepository {
   }
 
   /// Obtiene la lista de usuarios Coordinadores de la base de datos
-  Stream<QuerySnapshot> getListCoordinatorStream() {
+  Stream<QuerySnapshot> getListCoordinatorStream(DocumentReference locationReference) {
     final querySnapshot = this
         ._db
         .collection(FirestoreCollections.users)
         .where(FirestoreCollections.usersFieldIsCoordinator, isEqualTo: true)
+        .where(FirestoreCollections.usersFieldLocations, arrayContains: locationReference)
         .snapshots();
     return querySnapshot;
   }
-
   List<User> buildCoordinator(List<DocumentSnapshot> coordinatorListSnapshot) {
     List<User> usersList = <User>[];
     coordinatorListSnapshot.forEach((p) {

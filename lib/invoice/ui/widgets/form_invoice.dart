@@ -62,6 +62,7 @@ class _FormInvoice extends State<FormInvoice> {
   String _selectSourceImagePicker = "Camara";
   File _imageSelect;
   FocusNode _clientFocusNode;
+  DocumentReference _locationReference;
 
   final _textPlaca = TextEditingController();
   final _textClient = TextEditingController();
@@ -114,6 +115,7 @@ class _FormInvoice extends State<FormInvoice> {
   Widget build(BuildContext context) {
     this._blocInvoice = BlocProvider.of(context);
     PopupMenu.context = context;
+    getPreferences();
 
     if (_imageSelect != null) {
       if (!imageList.contains(_imageSelect.path)) {
@@ -250,6 +252,7 @@ class _FormInvoice extends State<FormInvoice> {
                 cbSetCoordinatorsList: _setUsersCoordinatorsList,
                 selectedOperator: _selectOperator,
                 selectedCoordinator: _selectCoordinator,
+                locationReference: _locationReference,
                 enableForm: _enableForm,
               ),
               SizedBox(
@@ -501,6 +504,13 @@ class _FormInvoice extends State<FormInvoice> {
     //FocusScope.of(context).requestFocus(_clientFocusNode);
   }
 
+  void getPreferences() async {
+    //Get preferences with location and get location reference
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    String idLocation = pref.getString(Keys.locations);
+    _locationReference = await _locationBloc.getLocationReference(idLocation);
+  }
+
   ///Functions Save Invoice
   void _saveInvoice() async {
     //Open message Saving
@@ -511,7 +521,6 @@ class _FormInvoice extends State<FormInvoice> {
     DocumentReference _customerReference;
     DocumentReference _operatorRefererence;
     DocumentReference _coordinatorRefererence;
-    DocumentReference _locationReference;
     double _total = 0;
     double _iva = 0;
     double _subTotal = 0;
@@ -583,11 +592,6 @@ class _FormInvoice extends State<FormInvoice> {
       );
       _customerReference = await _customerBloc.updateCustomer(customerUpdate);
     }
-
-    //Get preferences with location and get location reference
-    SharedPreferences pref = await SharedPreferences.getInstance();
-    String idLocation = pref.getString(Keys.locations);
-    _locationReference = await _locationBloc.getLocationReference(idLocation);
 
     //Get products and values
     _listProduct.forEach((product) {

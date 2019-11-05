@@ -13,6 +13,7 @@ class FieldsMenusInvoice extends StatefulWidget {
   final Function(List<User>) cbSetCoordinatorsList;
   final selectedOperator;
   final selectedCoordinator;
+  final locationReference;
   final bool enableForm;
 
   FieldsMenusInvoice(
@@ -25,6 +26,7 @@ class FieldsMenusInvoice extends StatefulWidget {
       this.cbSetCoordinatorsList,
       this.selectedOperator,
       this.selectedCoordinator,
+      this.locationReference,
       this.enableForm});
 
   @override
@@ -60,7 +62,7 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
     // cada vez que hace un set state.
     if (widget.listCountCoordinators == 0) {
       return StreamBuilder(
-        stream: _blocInvoice.operatorsStream,
+        stream: _blocInvoice.operatorsStream(widget.locationReference),
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           switch (snapshot.connectionState) {
             case ConnectionState.waiting:
@@ -105,7 +107,7 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
   Widget getCoordinators() {
     if (widget.listCountCoordinators == 0) {
       return StreamBuilder(
-        stream: _blocInvoice.coordinatorsStream,
+        stream: _blocInvoice.coordinatorsStream(widget.locationReference),
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           switch (snapshot.connectionState) {
             case ConnectionState.waiting:

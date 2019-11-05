@@ -16,6 +16,7 @@ class FirestoreCollections {
   static String usersFieldIsAdministrator = 'isAdministrator';
   static String usersFieldIsCoordinator = 'isCoordinator';
   static String usersFieldIsOperator = 'isOperator';
+  static String usersFieldLocations = 'locations';
 
   ///Fields Vehicle Collection
   static String vehiclesFieldPlaca = 'placa';

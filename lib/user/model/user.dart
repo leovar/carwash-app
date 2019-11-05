@@ -30,6 +30,12 @@ class User extends Equatable {
   });
 
   factory User.fromJson(Map<String, dynamic> json, {String id}) {
+    List<DocumentReference> operatorsListDb = <DocumentReference>[];
+    List operatorsList = json['locations'];
+    operatorsList?.forEach((drLocation) {
+      operatorsListDb.add(drLocation);
+    });
+
     return User(
       uid: id,
       name: json['name'],
@@ -37,7 +43,7 @@ class User extends Equatable {
       photoUrl: json['photoUrl'],
       lastSignIn: json['lastSignIn'],
       active: json['active'],
-      locations: json['locations'],
+      locations: operatorsListDb,
       isAdministrator: json['isAdministrator'],
       isCoordinator: json['isCoordinator'],
       isOperator: json['isOperator'],
