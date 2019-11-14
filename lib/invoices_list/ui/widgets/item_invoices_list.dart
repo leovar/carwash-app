@@ -120,7 +120,7 @@ class _ItemInvoicesList extends State<ItemInvoicesList> {
             width: 55,
             alignment: Alignment.centerRight,
             child: Text(
-              '1258',
+              invoiceList.consecutive.toString(),
               style: TextStyle(
                 color: Color(0xFF59B258),
                 fontFamily: "Lato",

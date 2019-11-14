@@ -40,6 +40,7 @@ class FirestoreCollections {
   static String invoiceFieldProducts = 'products';
   static String invoiceFieldImages = 'images';
   static String invoiceFieldLocation = 'location';
+  static String invoiceFieldConsecutive = 'consecutive';
 
 
 }

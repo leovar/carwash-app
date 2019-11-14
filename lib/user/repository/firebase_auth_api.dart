@@ -1,4 +1,6 @@
+import 'package:car_wash_app/widgets/messages_utils.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -7,7 +9,7 @@ class FirebaseAuthApi {
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   final FacebookLogin _facebookSingIn = FacebookLogin();
 
-  //Autenticasion con google
+  //Authentication google
   Future<FirebaseUser> signIn() async {
     //Inicio una instancia de la ventana de google por primera vez para loguearme con google
     GoogleSignInAccount googleSignInAccount = await _googleSignIn.signIn();
@@ -22,7 +24,7 @@ class FirebaseAuthApi {
     return user;
   }
 
-  //Autenticasion con Facebook
+  //Authentication Facebook
   //TODO el login con Facebook en IOS aun no funcion
   Future<FirebaseUser> facebookSingIn() async {
     final FacebookLoginResult result =
@@ -56,16 +58,15 @@ class FirebaseAuthApi {
     }
   }
 
-  //Autenticacion con Email
-  //TODO esta funcion aun no se ha probado
+  //Authentication Email
   Future<FirebaseUser> emailAndPasswordSignIn(
       String email, String password) async {
-    AuthResult authResult = await _authApi.signInWithEmailAndPassword(
-        email: email, password: password);
 
-    FirebaseUser user = authResult.user;
+      AuthResult authResult = await _authApi.signInWithEmailAndPassword(
+          email: email, password: password);
 
-    return user;
+      FirebaseUser user = authResult.user;
+      return user;
   }
 
   singOut() async {

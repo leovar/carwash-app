@@ -48,16 +48,19 @@ class InvoiceRepository {
   }
 
   ///Get Operators list by Location
-  Stream<QuerySnapshot> getListOperatorsStream(DocumentReference locationReference) {
+  Stream<QuerySnapshot> getListOperatorsStream(
+      DocumentReference locationReference) {
     final querySnapshot = this
         ._db
         .collection(FirestoreCollections.users)
         .where(FirestoreCollections.usersFieldIsOperator, isEqualTo: true)
         .where(FirestoreCollections.usersFieldIsOperator)
-        .where(FirestoreCollections.usersFieldLocations, arrayContains: locationReference)
+        .where(FirestoreCollections.usersFieldLocations,
+            arrayContains: locationReference)
         .snapshots();
     return querySnapshot;
   }
+
   List<User> buildOperators(List<DocumentSnapshot> operatorsListSnapshot) {
     List<User> usersList = <User>[];
     operatorsListSnapshot.forEach((p) {
@@ -85,15 +88,18 @@ class InvoiceRepository {
   }*/
 
   /// Get Coordinators list by Location
-  Stream<QuerySnapshot> getListCoordinatorStream(DocumentReference locationReference) {
+  Stream<QuerySnapshot> getListCoordinatorStream(
+      DocumentReference locationReference) {
     final querySnapshot = this
         ._db
         .collection(FirestoreCollections.users)
         .where(FirestoreCollections.usersFieldIsCoordinator, isEqualTo: true)
-        .where(FirestoreCollections.usersFieldLocations, arrayContains: locationReference)
+        .where(FirestoreCollections.usersFieldLocations,
+            arrayContains: locationReference)
         .snapshots();
     return querySnapshot;
   }
+
   List<User> buildCoordinator(List<DocumentSnapshot> coordinatorListSnapshot) {
     List<User> usersList = <User>[];
     coordinatorListSnapshot.forEach((p) {
@@ -158,23 +164,27 @@ class InvoiceRepository {
         .document(invoiceId)
         .collection(FirestoreCollections.products)
         .add(Product().toJsonInvoiceProduct(
-        additionalProduct.productName,
-        double.parse(additionalProduct.productValue),
-        additionalProduct.productIva,
-        true));
+            additionalProduct.productName,
+            double.parse(additionalProduct.productValue),
+            additionalProduct.productIva,
+            true));
   }
 
   ///Get invoices list from current Month
-  Stream<QuerySnapshot> getListInvoicesByMonthStream(DocumentReference locationReference, DateTime date) {
+  Stream<QuerySnapshot> getListInvoicesByMonthStream(
+      DocumentReference locationReference, DateTime date) {
     final querySnapshot = this
         ._db
         .collection(FirestoreCollections.invoices)
-        .where(FirestoreCollections.invoiceFieldCreationDate, isGreaterThanOrEqualTo: Timestamp.fromDate(date))
+        .where(FirestoreCollections.invoiceFieldCreationDate,
+            isGreaterThanOrEqualTo: Timestamp.fromDate(date))
         .where(FirestoreCollections.invoiceFieldLocation, isEqualTo: locationReference)
         .snapshots();
     return querySnapshot;
   }
-  List<Invoice> buildInvoicesListByMonth(List<DocumentSnapshot> invoicesListSnapshot) {
+
+  List<Invoice> buildInvoicesListByMonth(
+      List<DocumentSnapshot> invoicesListSnapshot) {
     List<Invoice> invoicesList = <Invoice>[];
     invoicesListSnapshot.forEach((p) {
       Invoice loc = Invoice.fromJson(p.data, id: p.documentID);
@@ -195,10 +205,36 @@ class InvoiceRepository {
     final documents = querySnapshot.documents;
     if (documents.length > 0) {
       documents.forEach((document) {
-        Product product = Product.fromJson(document.data, id: document.documentID);
+        Product product =
+            Product.fromJson(document.data, id: document.documentID);
         productList.add(product);
       });
     }
     return productList;
+  }
+
+  ///Get last consecutive for location
+  Future<int> getLastConsecutiveByLocation(
+      DocumentReference locationReference) async {
+    final querySnapshot = await this
+        ._db
+        .collection(FirestoreCollections.invoices)
+        .where(FirestoreCollections.invoiceFieldLocation,
+            isEqualTo: locationReference)
+        .orderBy(FirestoreCollections.invoiceFieldConsecutive, descending: true)
+        .limit(3)
+        .getDocuments();
+
+    final documents = querySnapshot.documents;
+    if (documents.length > 0) {
+      Invoice invoice = Invoice.fromJson(documents.first.data,
+          id: documents.first.documentID);
+      if (invoice.consecutive != null && invoice.consecutive > 0) {
+        return invoice.consecutive;
+      } else {
+        return 0;
+      }
+    }
+    return 0;
   }
 }

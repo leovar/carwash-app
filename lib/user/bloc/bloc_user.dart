@@ -27,8 +27,12 @@ class UserBloc implements Bloc {
     return _auth_repository.signInFirebase();
   }
 
-  Future<FirebaseUser> singnInFacebook() {
+  Future<FirebaseUser> signInFacebook() {
     return _auth_repository.signInFacebook();
+  }
+
+  Future<FirebaseUser> signInEmail(String email, String password) {
+    return _auth_repository.signInEmail(email, password);
   }
 
   singOut() {

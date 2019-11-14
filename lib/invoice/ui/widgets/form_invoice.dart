@@ -20,6 +20,7 @@ import 'package:car_wash_app/widgets/keys.dart';
 import 'package:car_wash_app/widgets/messages_utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 import 'package:image_cropper/image_cropper.dart';
@@ -64,6 +65,9 @@ class _FormInvoice extends State<FormInvoice> {
   File _imageSelect;
   FocusNode _clientFocusNode;
   DocumentReference _locationReference;
+  String _locationName;
+  String _initConsecLocation;
+  String _finalConsecLocation;
 
   final _textPlaca = TextEditingController();
   final _textClient = TextEditingController();
@@ -492,6 +496,9 @@ class _FormInvoice extends State<FormInvoice> {
   void getPreferences() async {
     //Get preferences with location and get location reference
     SharedPreferences pref = await SharedPreferences.getInstance();
+    _locationName = pref.getString(Keys.locationName);
+    _initConsecLocation = pref.getString(Keys.locationInitCount);
+    _finalConsecLocation = pref.getString(Keys.locationFinalCount);
     String idLocation = pref.getString(Keys.locations);
     _locationReference = await _locationBloc.getLocationReference(idLocation);
   }
@@ -502,129 +509,150 @@ class _FormInvoice extends State<FormInvoice> {
     MessagesUtils.showAlertWithLoading(context: context, title: 'Guardando')
         .show();
 
-    DocumentReference _vehicleTypeRef;
-    DocumentReference _customerReference;
-    DocumentReference _operatorRefererence;
-    DocumentReference _coordinatorRefererence;
-    double _total = 0;
-    double _iva = 0;
-    double _subTotal = 0;
+    try {
 
-    //Get Current user reference
-    DocumentReference _userRef = await _userBloc.getUserReference();
+      DocumentReference _vehicleTypeRef;
+      DocumentReference _customerReference;
+      DocumentReference _operatorReference;
+      DocumentReference _coordinatorReference;
+      double _total = 0;
+      double _iva = 0;
+      double _subTotal = 0;
 
-    //Get Operator reference
-    if (_selectOperator.isNotEmpty) {
-      _operatorRefererence = await _userBloc
-          .getUserReferenceById(_listOperators.firstWhere((User user) {
-        return user.name == _selectOperator;
-      }).uid);
-    }
+      //Get Current user reference
+      DocumentReference _userRef = await _userBloc.getUserReference();
 
-    //Get Coordinator reference
-    if (_selectCoordinator.isNotEmpty) {
-      _coordinatorRefererence = await _userBloc
-          .getUserReferenceById(_listCoordinators.firstWhere((User user) {
-        return user.name == _selectCoordinator;
-      }).uid);
-    }
+      //Get Operator reference
+      if (_selectOperator.isNotEmpty ) {
+        _operatorReference = await _userBloc
+            .getUserReferenceById(_listOperators.firstWhere((User user) {
+          return user.name == _selectOperator;
+        }).uid);
+      }
 
-    //Get VehicleType reference
-    _vehicleTypeRef =
-        await _blocInvoice.getVehicleTypeReference(vehicleTypeSelected.text);
+      //Get Coordinator reference
+      if (_selectCoordinator.isNotEmpty) {
+        _coordinatorReference = await _userBloc
+            .getUserReferenceById(_listCoordinators.firstWhere((User user) {
+          return user.name == _selectCoordinator;
+        }).uid);
+      }
 
-    //Get Vehicle reference, save if not exist
-    if (_vehicleReference == null) {
-      Vehicle updateVehicle = Vehicle(
-        brand: '',
-        model: '',
+      //Get VehicleType reference
+      _vehicleTypeRef =
+      await _blocInvoice.getVehicleTypeReference(vehicleTypeSelected.text);
+
+      //Get Vehicle reference, save if not exist
+      if (_vehicleReference == null) {
+        Vehicle updateVehicle = Vehicle(
+          brand: '',
+          model: '',
+          placa: _textPlaca.text.trim(),
+          color: '',
+          vehicleType: _vehicleTypeRef,
+          creationDate: Timestamp.now(),
+        );
+        DocumentReference vehicleRef =
+        await _blocVehicle.updateVehicle(updateVehicle);
+        _vehicleReference = vehicleRef;
+      }
+
+      //Get Customer reference or create customer or update customer
+      if (_customer == null) {
+        List<DocumentReference> listVehicles = <DocumentReference>[];
+        listVehicles.add(_vehicleReference);
+
+        Customer customer = Customer(
+          name: _textClient.text.trim(),
+          address: '',
+          phoneNumber: _textPhoneNumber.text.trim(),
+          email: _textEmail.text.trim(),
+          creationDate: Timestamp.now(),
+          vehicles: listVehicles,
+        );
+        DocumentReference customerRef =
+        await _customerBloc.updateCustomer(customer);
+        _customerReference = customerRef;
+      } else {
+        if (!_customer.vehicles.contains(_vehicleReference)) {
+          _customer.vehicles.add(_vehicleReference);
+        }
+
+        Customer customerUpdate = Customer.copyWith(
+          origin: _customer,
+          name: _textClient.text.trim(),
+          phoneNumber: _textPhoneNumber.text.trim(),
+          email: _textEmail.text.trim(),
+        );
+        _customerReference = await _customerBloc.updateCustomer(customerUpdate);
+      }
+
+      //Get products and values
+      _listProduct.forEach((product) {
+        if (product.isSelected) {
+          _total = _total + product.price;
+          _iva = _iva + product.iva;
+        }
+      });
+      _listAdditionalProducts.forEach((addProduct) {
+        _total = _total + double.parse(addProduct.productValue ?? '0');
+        _iva = _iva + addProduct.productIva;
+      });
+
+      //Get Consecutive
+      int _consecutive = await _blocInvoice.getLastConsecutiveByLocation(_locationReference);
+      if (_consecutive == 0) {
+        _consecutive = int.parse(_initConsecLocation);
+      } else {
+        _consecutive ++;
+      }
+
+      final invoice = Invoice(
+        consecutive: _consecutive,
+        customer: _customerReference,
+        vehicle: _vehicleReference,
         placa: _textPlaca.text.trim(),
-        color: '',
-        vehicleType: _vehicleTypeRef,
+        uidVehicleType: vehicleTypeSelected.uid,
+        location: _locationReference,
+        locationName: _locationName,
+        totalPrice: _total,
+        subtotal: _subTotal,
+        iva: _iva,
+        userOwner: _userRef,
+        userOperator: _operatorReference,
+        userOperatorName: _selectOperator,
+        userCoordinator: _coordinatorReference,
+        userCoordinatorName: _selectCoordinator,
         creationDate: Timestamp.now(),
+        invoiceImages: imageList,
       );
-      DocumentReference vehicleRef =
-          await _blocVehicle.updateVehicle(updateVehicle);
-      _vehicleReference = vehicleRef;
-    }
+      DocumentReference invoiceReference =
+      await _blocInvoice.saveInvoice(invoice);
+      String invoiceId = invoiceReference.documentID;
 
-    ///Get Customer reference or create customer or update customer
-    if (_customer == null) {
-      List<DocumentReference> listVehicles = <DocumentReference>[];
-      listVehicles.add(_vehicleReference);
-
-      Customer customer = Customer(
-        name: _textClient.text.trim(),
-        address: '',
-        phoneNumber: _textPhoneNumber.text.trim(),
-        email: _textEmail.text.trim(),
-        creationDate: Timestamp.now(),
-        vehicles: listVehicles,
-      );
-      DocumentReference customerRef =
-          await _customerBloc.updateCustomer(customer);
-      _customerReference = customerRef;
-    } else {
-      if (!_customer.vehicles.contains(_vehicleReference)) {
-        _customer.vehicles.add(_vehicleReference);
+      //Save products list
+      List<Product> _selectedProducts =
+      _listProduct.where((f) => f.isSelected).toList();
+      if (_selectedProducts.length > 0) {
+        _blocInvoice.saveInvoiceProduct(invoiceId, _selectedProducts);
       }
 
-      Customer customerUpdate = Customer.copyWith(
-        origin: _customer,
-        name: _textClient.text.trim(),
-        phoneNumber: _textPhoneNumber.text.trim(),
-        email: _textEmail.text.trim(),
-      );
-      _customerReference = await _customerBloc.updateCustomer(customerUpdate);
-    }
-
-    //Get products and values
-    _listProduct.forEach((product) {
-      if (product.isSelected) {
-        _total = _total + product.price;
-        _iva = _iva + product.iva;
+      //Save additional products list
+      if (_listAdditionalProducts.length > 0) {
+        _blocInvoice.saveInvoiceAdditionalProducts(
+            invoiceId, _listAdditionalProducts);
       }
-    });
-    _listAdditionalProducts.forEach((addProduct) {
-      _total = _total + double.parse(addProduct.productValue ?? '0');
-      _iva = _iva + addProduct.productIva;
-    });
 
-    final invoice = Invoice(
-      customer: _customerReference,
-      vehicle: _vehicleReference,
-      placa: _textPlaca.text.trim(),
-      uidVehicleType: vehicleTypeSelected.uid,
-      location: _locationReference,
-      totalPrice: _total,
-      subtotal: _subTotal,
-      iva: _iva,
-      userOwner: _userRef,
-      userOperator: _operatorRefererence,
-      userOperatorName: _selectOperator,
-      userCoordinator: _coordinatorRefererence,
-      creationDate: Timestamp.now(),
-      invoiceImages: imageList,
-    );
-    DocumentReference invoiceReference =
-        await _blocInvoice.saveInvoice(invoice);
-    String invoiceId = invoiceReference.documentID;
+      //Close screen
+      Navigator.pop(context); //Close popUp Save
+      Navigator.pop(context); //Close form Create Invoice
 
-    //Save products list
-    List<Product> _selectedProducts =
-        _listProduct.where((f) => f.isSelected).toList();
-    if (_selectedProducts.length > 0) {
-      _blocInvoice.saveInvoiceProduct(invoiceId, _selectedProducts);
+    } on PlatformException catch(e) {
+      print('$e');
+      MessagesUtils.showAlert(context: context, title: 'Error al guardar la factura');
+    } catch(error) {
+      print('$error');
+      MessagesUtils.showAlert(context: context, title: 'Error al guardar la factura');
     }
-
-    //Save additional products list
-    if (_listAdditionalProducts.length > 0) {
-      _blocInvoice.saveInvoiceAdditionalProducts(
-          invoiceId, _listAdditionalProducts);
-    }
-
-    //Close screen
-    Navigator.pop(context); //Close popUp Save
-    Navigator.pop(context); //Close form Create Invoice
   }
 }

@@ -19,11 +19,13 @@ class Invoice extends Equatable {
   final DocumentReference userOperator;
   final String userOperatorName;
   final DocumentReference userCoordinator;
+  final String userCoordinatorName;
   final DocumentReference customer;
   final DocumentReference vehicle;
   final String placa;
   final int uidVehicleType;
   final DocumentReference location;
+  final String locationName;
   final int consecutive;
   final Timestamp creationDate;
   final List<String> invoiceImages;
@@ -38,11 +40,13 @@ class Invoice extends Equatable {
     this.userOperator,
     this.userOperatorName,
     this.userCoordinator,
+    this.userCoordinatorName,
     this.customer,
     this.vehicle,
     this.placa,
     this.uidVehicleType,
     this.location,
+    this.locationName,
     this.consecutive,
     this.creationDate,
     this.invoiceImages,
@@ -58,11 +62,13 @@ class Invoice extends Equatable {
       'userOperator': this.userOperator,
       'userOperatorName': this.userOperatorName,
       'userCoordinator': this.userCoordinator,
+      'userCoordinatorName': this.userCoordinatorName,
       'customer': this.customer,
       'vehicle': this.vehicle,
       'placa': this.placa,
       'uidVehicleType': this.uidVehicleType,
       'location': this.location,
+      'locationName': this.locationName,
       'consecutive': this.consecutive,
       'creationDate': this.creationDate,
     };
@@ -84,11 +90,13 @@ class Invoice extends Equatable {
       userOperator: json['userOperator'],
       userOperatorName: json['userOperatorName'],
       userCoordinator: json['userCoordinator'],
+      userCoordinatorName: json['userCoordinatorName'],
       customer: json['customer'],
       vehicle: json['vehicle'],
       placa: json['placa'],
       uidVehicleType: json['uidVehicleType'],
       location: json['location'],
+      locationName: json['locationName'],
       consecutive: json['consecutive'],
       creationDate: json['creationDate'],
     );
@@ -110,6 +118,7 @@ class Invoice extends Equatable {
     placa,
     uidVehicleType,
     location,
+    locationName,
     consecutive,
     creationDate,
     invoiceImages,

@@ -23,9 +23,9 @@ class BlocInvoice implements Bloc {
   //1. guardar nueva factura
   //2. guardar las imagenes de la factura
   //3. guardar las url de las fotos en la factura creada
+  //4. consultar y generar nuevo consecutivo
 
   Future<DocumentReference> saveInvoice(Invoice invoice) async {
-
     DocumentReference ref = await _invoiceRepository.updateInvoiceData(invoice);
     String invoiceId = ref.documentID;
 
@@ -80,6 +80,8 @@ class BlocInvoice implements Bloc {
   }
 
   Future<List<Product>> getInvoiceProducts (String idInvoice) => _invoiceRepository.getInvoiceProducts(idInvoice);
+
+  Future<int> getLastConsecutiveByLocation(DocumentReference locationReference) => _invoiceRepository.getLastConsecutiveByLocation(locationReference);
 
 
   @override

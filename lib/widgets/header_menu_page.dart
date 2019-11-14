@@ -55,7 +55,9 @@ class HeaderMenuPage extends StatelessWidget{
               shape: BoxShape.circle,
               image: DecorationImage(
                 fit: BoxFit.cover,
-                image: NetworkImage(_userPhotoUrl),
+                image: (_userPhotoUrl == null || _userPhotoUrl.isEmpty)
+                    ? AssetImage('assets/images/profile_placeholder.png')
+                    : NetworkImage(_userPhotoUrl),
               ),
             ),
           ),

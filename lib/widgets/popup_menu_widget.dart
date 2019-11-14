@@ -47,7 +47,11 @@ class _PopUpMenuWidget extends State<PopUpMenuWidget> {
         }).toList();
       },
       onSelected: (String valText) {
-        _selectValue(valText);
+        if (valText == widget.popUpName) {
+          _selectValue('');
+        } else {
+          _selectValue(valText);
+        }
       },
       child: Container(
         height: 50,

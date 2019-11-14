@@ -5,6 +5,7 @@ import 'package:car_wash_app/invoices_list/ui/widgets/item_invoices_list.dart';
 import 'package:car_wash_app/location/bloc/bloc_location.dart';
 import 'package:car_wash_app/vehicle/bloc/bloc_vehicle.dart';
 import 'package:car_wash_app/vehicle/model/vehicle.dart';
+import 'package:car_wash_app/widgets/firestore_collections.dart';
 import 'package:car_wash_app/widgets/gradient_back.dart';
 import 'package:car_wash_app/widgets/info_header_container.dart';
 import 'package:car_wash_app/widgets/keys.dart';
@@ -86,9 +87,7 @@ class _FormInvoicesList extends State<FormInvoicesList> {
                 child: Row(),
               ),
             ),
-            Expanded(
-              child: _getInvoices(),
-            ),
+            _getInvoices(),
           ],
         ),
       ),
@@ -104,7 +103,9 @@ class _FormInvoicesList extends State<FormInvoicesList> {
           case ConnectionState.waiting:
             return CircularProgressIndicator();
           default:
-            return _listItems(snapshot);
+            return Expanded(
+              child: _listItems(snapshot),
+            );
         }
       },
     );
@@ -112,6 +113,7 @@ class _FormInvoicesList extends State<FormInvoicesList> {
 
   Widget _listItems(AsyncSnapshot snapshot) {
     _listInvoices = _blocInvoice.buildInvoicesListByMonth(snapshot.data.documents);
+    _listInvoices.sort((a, b) => b.consecutive.compareTo(a.consecutive));
     _listModel.clear();
     _listInvoices.forEach((invoice){
       _listModel.add(InvoiceListModel(
