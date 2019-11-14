@@ -4,6 +4,7 @@ import 'package:car_wash_app/invoice/model/additional_product.dart';
 import 'package:car_wash_app/invoice/model/invoice.dart';
 import 'package:car_wash_app/product/model/product.dart';
 import 'package:car_wash_app/user/model/user.dart';
+import 'package:car_wash_app/vehicle/model/vehicle.dart';
 import 'package:car_wash_app/vehicle_type/model/vehicleType.dart';
 import 'package:car_wash_app/widgets/firestore_collections.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -17,12 +18,13 @@ class InvoiceRepository {
   final FirebaseAuth _authApi = FirebaseAuth.instance;
   final StorageReference _storageReference = FirebaseStorage.instance.ref();
 
-  /// Guarda y actualiza la factura
+  /// Save and Update Invoice
   Future<DocumentReference> updateInvoiceData(Invoice invoice) async {
     CollectionReference ref = _db.collection(FirestoreCollections.invoices);
     return await ref.add(invoice.toJson());
   }
 
+  /// Save invoice images in firebase storage
   Future<StorageTaskSnapshot> uploadImageInvoice(
       String path, File imageFile) async {
     StorageUploadTask storageUploadTask = _storageReference.child(path).putData(
@@ -34,7 +36,7 @@ class InvoiceRepository {
     return storageUploadTask.onComplete;
   }
 
-  /// Guarda las url de las imagenes en una subcolection de la factura
+  /// Save images URL in subcollection invoice
   Future<void> updateInvoiceImages(
       String invoiceId, String invoiceImage) async {
     return await this
@@ -65,7 +67,7 @@ class InvoiceRepository {
     return usersList;
   }
 
-  ///Get Operators From simple consult
+/*
   Future<List<User>> getOperatorsUsers() async {
     List<User> userList = <User>[];
     final querySnapshot = await this
@@ -80,9 +82,9 @@ class InvoiceRepository {
       userList.add(user);
     });
     return userList;
-  }
+  }*/
 
-  /// Obtiene la lista de usuarios Coordinadores de la base de datos
+  /// Get Coordinators list by Location
   Stream<QuerySnapshot> getListCoordinatorStream(DocumentReference locationReference) {
     final querySnapshot = this
         ._db
@@ -117,6 +119,7 @@ class InvoiceRepository {
     return userList;
   }*/
 
+  /// Get Vehicle Reference
   Future<DocumentReference> getVehicleTypeReference(String vehicleType) async {
     final querySnapshot = await this
         ._db
@@ -135,6 +138,7 @@ class InvoiceRepository {
     return null;
   }
 
+  /// Save Invoice Products
   Future<void> saveInvoiceProduct(String invoiceId, Product product) async {
     await this
         ._db
@@ -145,6 +149,7 @@ class InvoiceRepository {
             product.productName, product.price, product.iva, false));
   }
 
+  /// Save Invoice Additional Products
   Future<void> saveInvoiceAdditionalProducts(
       String invoiceId, AdditionalProduct additionalProduct) async {
     await this
@@ -157,5 +162,43 @@ class InvoiceRepository {
         double.parse(additionalProduct.productValue),
         additionalProduct.productIva,
         true));
+  }
+
+  ///Get invoices list from current Month
+  Stream<QuerySnapshot> getListInvoicesByMonthStream(DocumentReference locationReference, DateTime date) {
+    final querySnapshot = this
+        ._db
+        .collection(FirestoreCollections.invoices)
+        .where(FirestoreCollections.invoiceFieldCreationDate, isGreaterThanOrEqualTo: Timestamp.fromDate(date))
+        .where(FirestoreCollections.invoiceFieldLocation, isEqualTo: locationReference)
+        .snapshots();
+    return querySnapshot;
+  }
+  List<Invoice> buildInvoicesListByMonth(List<DocumentSnapshot> invoicesListSnapshot) {
+    List<Invoice> invoicesList = <Invoice>[];
+    invoicesListSnapshot.forEach((p) {
+      Invoice loc = Invoice.fromJson(p.data, id: p.documentID);
+      invoicesList.add(loc);
+    });
+    return invoicesList;
+  }
+
+  Future<List<Product>> getInvoiceProducts(String idInvoice) async {
+    List<Product> productList = <Product>[];
+    var querySnapshot = await this
+        ._db
+        .collection(FirestoreCollections.invoices)
+        .document(idInvoice)
+        .collection(FirestoreCollections.invoiceFieldProducts)
+        .getDocuments();
+
+    final documents = querySnapshot.documents;
+    if (documents.length > 0) {
+      documents.forEach((document) {
+        Product product = Product.fromJson(document.data, id: document.documentID);
+        productList.add(product);
+      });
+    }
+    return productList;
   }
 }

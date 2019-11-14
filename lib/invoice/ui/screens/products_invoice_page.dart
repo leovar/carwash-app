@@ -1,8 +1,6 @@
 import 'package:car_wash_app/invoice/model/additional_product.dart';
-import 'package:car_wash_app/invoice/model/header_services.dart';
 import 'package:car_wash_app/invoice/ui/screens/additional_products_page.dart';
 import 'package:car_wash_app/invoice/ui/widgets/item_product.dart';
-import 'package:car_wash_app/invoice/ui/widgets/text_field_input.dart';
 import 'package:car_wash_app/product/bloc/product_bloc.dart';
 import 'package:car_wash_app/product/model/product.dart';
 import 'package:flutter/material.dart';
@@ -71,8 +69,7 @@ class _ProductsInvoicePage extends State<ProductsInvoicePage> {
   }
 
   Widget listProducts(AsyncSnapshot snapshot) {
-    List<Product> getProductList =
-        _productBloc.buildProduct(snapshot.data.documents);
+    List<Product> getProductList = _productBloc.buildProduct(snapshot.data.documents);
     List<Product> productGet = getProductList;
     if (widget.productListCallback.length > 0) {
       widget.productListCallback.forEach((f) {

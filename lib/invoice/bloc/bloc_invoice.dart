@@ -3,8 +3,11 @@ import 'dart:io';
 import 'package:car_wash_app/invoice/model/additional_product.dart';
 import 'package:car_wash_app/invoice/model/invoice.dart';
 import 'package:car_wash_app/invoice/repository/invoice_repository.dart';
+import 'package:car_wash_app/invoices_list/model/invoice_list_model.dart';
 import 'package:car_wash_app/product/model/product.dart';
 import 'package:car_wash_app/user/model/user.dart';
+import 'package:car_wash_app/vehicle/model/vehicle.dart';
+import 'package:car_wash_app/vehicle/repository/vehicle_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -14,6 +17,7 @@ import 'package:path/path.dart';
 class BlocInvoice implements Bloc {
 
   final _invoiceRepository = InvoiceRepository();
+  final _vehicleRepository = VehicleRepository();
 
   //Casos de uso del objeto User
   //1. guardar nueva factura
@@ -34,7 +38,6 @@ class BlocInvoice implements Bloc {
         await _invoiceRepository.updateInvoiceImages(invoiceId, imageUrl);
       }
     }
-
     return ref;
   }
 
@@ -58,6 +61,11 @@ class BlocInvoice implements Bloc {
     return _invoiceRepository.getCoordinatorUsers();
   }*/
 
+  Stream<QuerySnapshot> invoicesListByMonthStream(DocumentReference locationReference, DateTime date) {
+    return _invoiceRepository.getListInvoicesByMonthStream(locationReference, date);
+  }
+  List<Invoice> buildInvoicesListByMonth(List<DocumentSnapshot> invoicesListSnapshot) => _invoiceRepository.buildInvoicesListByMonth(invoicesListSnapshot);
+
 
   Future<void> saveInvoiceProduct(String invoiceId, List<Product> listProducts) async {
     listProducts.forEach((product) {
@@ -70,6 +78,8 @@ class BlocInvoice implements Bloc {
       _invoiceRepository.saveInvoiceAdditionalProducts(invoiceId, addProduct);
     });
   }
+
+  Future<List<Product>> getInvoiceProducts (String idInvoice) => _invoiceRepository.getInvoiceProducts(idInvoice);
 
 
   @override

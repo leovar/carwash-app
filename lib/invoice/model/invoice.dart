@@ -1,6 +1,7 @@
 
 import 'package:car_wash_app/customer/model/customer.dart';
 import 'package:car_wash_app/location/model/location.dart';
+import 'package:car_wash_app/product/model/product.dart';
 import 'package:car_wash_app/user/model/user.dart';
 import 'package:car_wash_app/vehicle/model/vehicle.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -16,12 +17,17 @@ class Invoice extends Equatable {
   final double iva;
   final DocumentReference userOwner;
   final DocumentReference userOperator;
+  final String userOperatorName;
   final DocumentReference userCoordinator;
   final DocumentReference customer;
   final DocumentReference vehicle;
+  final String placa;
+  final int uidVehicleType;
   final DocumentReference location;
   final int consecutive;
+  final Timestamp creationDate;
   final List<String> invoiceImages;
+  final List<Product> invoiceProducts;
 
   Invoice({
     this.id,
@@ -30,12 +36,17 @@ class Invoice extends Equatable {
     this.iva,
     this.userOwner,
     this.userOperator,
+    this.userOperatorName,
     this.userCoordinator,
     this.customer,
     this.vehicle,
+    this.placa,
+    this.uidVehicleType,
     this.location,
     this.consecutive,
+    this.creationDate,
     this.invoiceImages,
+    this.invoiceProducts,
   });
 
   Map<String, dynamic> toJson() {
@@ -45,12 +56,42 @@ class Invoice extends Equatable {
       'iva': this.iva,
       'userOwner': this.userOwner,
       'userOperator': this.userOperator,
+      'userOperatorName': this.userOperatorName,
       'userCoordinator': this.userCoordinator,
       'customer': this.customer,
       'vehicle': this.vehicle,
+      'placa': this.placa,
+      'uidVehicleType': this.uidVehicleType,
       'location': this.location,
       'consecutive': this.consecutive,
+      'creationDate': this.creationDate,
     };
+  }
+
+  factory Invoice.fromJson(Map<String, dynamic> json, {String id}) {
+    List<DocumentReference> locationsListDb = <DocumentReference>[];
+    List locationsList = json['locations'];
+    locationsList?.forEach((drLocation) {
+      locationsListDb.add(drLocation);
+    });
+
+    return Invoice(
+      id: id ?? '',
+      totalPrice: json['totalPrice'].toDouble(),
+      subtotal: json['subtotal'].toDouble(),
+      iva: json['iva'].toDouble(),
+      userOwner: json['userOwner'],
+      userOperator: json['userOperator'],
+      userOperatorName: json['userOperatorName'],
+      userCoordinator: json['userCoordinator'],
+      customer: json['customer'],
+      vehicle: json['vehicle'],
+      placa: json['placa'],
+      uidVehicleType: json['uidVehicleType'],
+      location: json['location'],
+      consecutive: json['consecutive'],
+      creationDate: json['creationDate'],
+    );
   }
 
 
@@ -61,10 +102,17 @@ class Invoice extends Equatable {
     subtotal,
     iva,
     userOwner,
+    userOperator,
+    userOperatorName,
+    userCoordinator,
     customer,
     vehicle,
+    placa,
+    uidVehicleType,
     location,
     consecutive,
+    creationDate,
     invoiceImages,
+    invoiceProducts,
   ];
 }

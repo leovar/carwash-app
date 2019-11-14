@@ -18,6 +18,10 @@ class BlocVehicle extends Bloc {
     return await _vehicleRepository.updateVehicle(vehicle);
   }
 
+  Future<Vehicle> getVehicleById(String idVehicle) async {
+    return await _vehicleRepository.getVehicleById(idVehicle);
+  }
+
   @override
   void dispose() {}
 }

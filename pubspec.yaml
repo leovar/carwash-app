@@ -79,6 +79,7 @@ flutter:
     - assets/images/icon_logout.png
     - assets/images/icon_nueva_factura_white.png
     - assets/images/background_ph_image.png
+    - assets/images/icon_facturas_blanco.png
 
 
   # The following line ensures that the Material Icons font is

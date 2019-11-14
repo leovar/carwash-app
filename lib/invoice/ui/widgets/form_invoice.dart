@@ -15,6 +15,7 @@ import 'package:car_wash_app/user/model/user.dart';
 import 'package:car_wash_app/vehicle/bloc/bloc_vehicle.dart';
 import 'package:car_wash_app/vehicle/model/vehicle.dart';
 import 'package:car_wash_app/widgets/gradient_back.dart';
+import 'package:car_wash_app/widgets/info_header_container.dart';
 import 'package:car_wash_app/widgets/keys.dart';
 import 'package:car_wash_app/widgets/messages_utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -87,17 +88,20 @@ class _FormInvoice extends State<FormInvoice> {
     _clientFocusNode = FocusNode();
     _listOperatorsCount = 0;
     _listCoordinatorsCount = 0;
-    vehicleTypeList.add(HeaderServices(false, "Auto", 38,
+    //TODO traer estos datos desde la base de datos y cargarlos en un widget aparte con un stream
+    vehicleTypeList.add(HeaderServices(false, "Auto", 1, 38,
         "assets/images/icon_car_admin.png", "assets/images/icon_car.png"));
     vehicleTypeList.add(HeaderServices(
         false,
         "Camioneta",
+        2,
         37,
         'assets/images/icon_suv_car_admin.png',
         "assets/images/icon_suv_car.png"));
     vehicleTypeList.add(HeaderServices(
         false,
         "Moto",
+        3,
         34,
         "assets/images/icon_motorcycle_admin.png",
         "assets/images/icon_motorcycle.png"));
@@ -185,31 +189,12 @@ class _FormInvoice extends State<FormInvoice> {
         },
       );
 
-  numeroDeFactura() => Container(
-        height: 70,
-        padding: EdgeInsets.only(left: 30),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            Container(
-              padding: EdgeInsets.only(right: 15),
-              child: Image(
-                width: 30,
-                image: AssetImage("assets/images/icon_nueva_factura_white.png"),
-              ),
-            ),
-            Text(
-              "Nueva Factura", //- No. 1017
-              style: TextStyle(
-                fontFamily: "Lato",
-                fontWeight: FontWeight.bold,
-                fontSize: 21,
-                color: Colors.white,
-              ),
-            ),
-          ],
-        ),
-      );
+  Widget numeroDeFactura() {
+    return InfoHeaderContainer(
+      image: 'assets/images/icon_nueva_factura_white.png',
+      textInfo: 'Nueva Factura',
+    );
+  }
 
   Widget containerFieldsInvoice() {
     return Container(
@@ -608,13 +593,17 @@ class _FormInvoice extends State<FormInvoice> {
     final invoice = Invoice(
       customer: _customerReference,
       vehicle: _vehicleReference,
+      placa: _textPlaca.text.trim(),
+      uidVehicleType: vehicleTypeSelected.uid,
       location: _locationReference,
       totalPrice: _total,
       subtotal: _subTotal,
       iva: _iva,
       userOwner: _userRef,
       userOperator: _operatorRefererence,
+      userOperatorName: _selectOperator,
       userCoordinator: _coordinatorRefererence,
+      creationDate: Timestamp.now(),
       invoiceImages: imageList,
     );
     DocumentReference invoiceReference =

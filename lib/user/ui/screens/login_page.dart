@@ -415,7 +415,7 @@ class _LoginPage extends State<LoginPage> {
   }
 
   void _registerLogin(FirebaseUser user) {
-    _setLocationInPreferences();
+    _setLocationInPreferences(user);
     userBloc.searchUserByEmail(user.email).then((User currentUser) {
       if (currentUser == null) {
         userBloc.updateUserData(
@@ -448,7 +448,7 @@ class _LoginPage extends State<LoginPage> {
         );
       }
     });
-    // TODo este navigate se debe quitar si se coloca la app a validar primero si el usuario esta logueado
+    // TODO este navigate se debe quitar si se coloca la app a validar primero si el usuario esta logueado
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -457,9 +457,10 @@ class _LoginPage extends State<LoginPage> {
     );
   }
 
-  void _setLocationInPreferences() async {
+  void _setLocationInPreferences(FirebaseUser user) async {
     SharedPreferences pref = await SharedPreferences.getInstance();
     pref.setString(Keys.locations, _selectedLocation.id);
+    pref.setString(Keys.photoUserUrl, user.photoUrl);
   }
 
   List<DropdownMenuItem<Location>> builDropdownMenuItems(List locations) {

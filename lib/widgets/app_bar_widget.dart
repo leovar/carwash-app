@@ -4,17 +4,16 @@ import 'package:flutter/material.dart';
 import 'header_menu_page.dart';
 
 class AppBarWidget extends StatelessWidget{
-  User usuario;
+  String photoUserUrl;
   GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey();
   bool showDrawer = true;
 
-  AppBarWidget(this._scaffoldKey, this.usuario, this.showDrawer);
+  AppBarWidget(this._scaffoldKey, this.photoUserUrl, this.showDrawer);
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return AppBar(
-      flexibleSpace: HeaderMenuPage(_scaffoldKey, usuario, showDrawer),
+      flexibleSpace: HeaderMenuPage(_scaffoldKey, photoUserUrl, showDrawer),
       leading: backIcon(context),
     );
   }

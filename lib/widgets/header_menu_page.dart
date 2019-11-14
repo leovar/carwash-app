@@ -1,17 +1,19 @@
 
 import 'package:car_wash_app/user/model/user.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'keys.dart';
 
 class HeaderMenuPage extends StatelessWidget{
   final GlobalKey<ScaffoldState> _scaffoldKey;
-  final User _usuario;
   bool showDrawerIcon = true;
+  String _userPhotoUrl;
 
-  HeaderMenuPage(this._scaffoldKey, this._usuario, this.showDrawerIcon);
+  HeaderMenuPage(this._scaffoldKey, this._userPhotoUrl, this.showDrawerIcon);
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return Container(
       margin: EdgeInsets.only(top: 25),
       height: 65,
@@ -53,7 +55,7 @@ class HeaderMenuPage extends StatelessWidget{
               shape: BoxShape.circle,
               image: DecorationImage(
                 fit: BoxFit.cover,
-                image: NetworkImage(_usuario.photoUrl),
+                image: NetworkImage(_userPhotoUrl),
               ),
             ),
           ),

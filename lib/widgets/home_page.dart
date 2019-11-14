@@ -1,13 +1,19 @@
 
+import 'package:car_wash_app/invoices_list/ui/screens/invoices_list_page.dart';
+import 'package:car_wash_app/location/bloc/bloc_location.dart';
 import 'package:car_wash_app/user/bloc/bloc_user.dart';
 import 'package:car_wash_app/user/model/user.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'gradient_back.dart';
 import 'package:car_wash_app/widgets/button_functions.dart';
 import 'drawer_page.dart';
 import 'package:car_wash_app/invoice/ui/screens/invoice_page.dart';
 import 'package:car_wash_app/widgets/app_bar_widget.dart';
+
+import 'keys.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -18,13 +24,15 @@ class HomePage extends StatefulWidget {
 
 class _HomePage extends State<HomePage> {
   GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey();
+  final _locationBloc = BlocLocation();
   UserBloc userBloc;
   User usuario;
+  DocumentReference _locationReference;
 
   @override
   Widget build(BuildContext context) {
     userBloc = BlocProvider.of(context);
-
+    this._getPreferences();
     return StreamBuilder(
       stream: userBloc.streamFirebase,
       builder: (BuildContext context, AsyncSnapshot snapshot) {
@@ -78,7 +86,7 @@ class _HomePage extends State<HomePage> {
         key: _scaffoldKey,
         appBar: PreferredSize(
             preferredSize: Size(MediaQuery.of(context).size.width, 65),
-            child: AppBarWidget(_scaffoldKey, usuario, true),
+            child: AppBarWidget(_scaffoldKey, usuario.photoUrl, true),
         ),
         body: Stack(
           children: <Widget>[
@@ -127,7 +135,9 @@ class _HomePage extends State<HomePage> {
         height: 10.0,
       ),
       ButtonFunctions(
-          onPressed: () {},
+          onPressed: () {
+            Navigator.push(context, MaterialPageRoute(builder: (context) => InvoicesListPage(user: usuario, locationReference: _locationReference,)));
+          },
           buttonName: "FACTURAS",
           imageAsset: "assets/images/icon_facturas.png"),
       SizedBox(
@@ -153,4 +163,12 @@ class _HomePage extends State<HomePage> {
           imageAsset: "assets/images/icon_informes.png"),
     ],
   );
+
+  ///Functions
+
+  void _getPreferences() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    String idLocation = pref.getString(Keys.locations);
+    _locationReference = await _locationBloc.getLocationReference(idLocation);
+  }
 }

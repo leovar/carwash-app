@@ -20,6 +20,7 @@ class FirestoreCollections {
 
   ///Fields Vehicle Collection
   static String vehiclesFieldPlaca = 'placa';
+  static String vehiclesFieldId = 'id';
 
   /// Fields Vehicle Type Collection
   static String vehicleTypeFieldVehicleType = 'vehicleType';
@@ -33,6 +34,12 @@ class FirestoreCollections {
   static String customerFieldPhoneNumber = 'phoneNumber';
   static String customerFieldCreationDate = 'creationDate';
   static String customerFieldEmail = 'email';
+
+  /// Fields Invoice Collections
+  static String invoiceFieldCreationDate = 'creationDate';
+  static String invoiceFieldProducts = 'products';
+  static String invoiceFieldImages = 'images';
+  static String invoiceFieldLocation = 'location';
 
 
 }
