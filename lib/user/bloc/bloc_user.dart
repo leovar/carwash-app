@@ -43,12 +43,18 @@ class UserBloc implements Bloc {
     _userRepository.updateUserDataRepository(user);
   }
 
+  Future<User> getUserById(String userId) async => await _userRepository.getUserById(userId);
+
   Future<User> searchUserByEmail(String email) async {
     return await _userRepository.searchUserByEmail(email);
   }
 
-  Future<DocumentReference> getUserReference() async {
-    return _userRepository.getUserReference();
+  Future<DocumentReference> getCurrentUserReference() async {
+    return _userRepository.getCurrentUserReference();
+  }
+
+  Future<User> getCurrentUser() async {
+    return await _userRepository.getCurrentUser();
   }
 
   Future<DocumentReference> getUserReferenceById(String userId) async {

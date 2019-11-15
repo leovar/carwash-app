@@ -462,6 +462,7 @@ class _LoginPage extends State<LoginPage> {
     pref.setString(
         Keys.locationFinalCount, _selectedLocation.finalConsec.toString());
     pref.setString(Keys.photoUserUrl, user.photoUrl);
+    pref.setString(Keys.userId, user.uid);
   }
 
   List<DropdownMenuItem<Location>> builDropdownMenuItems(List locations) {

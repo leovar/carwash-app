@@ -520,7 +520,7 @@ class _FormInvoice extends State<FormInvoice> {
       double _subTotal = 0;
 
       //Get Current user reference
-      DocumentReference _userRef = await _userBloc.getUserReference();
+      DocumentReference _userRef = await _userBloc.getCurrentUserReference();
 
       //Get Operator reference
       if (_selectOperator.isNotEmpty ) {

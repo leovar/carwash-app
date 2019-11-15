@@ -79,7 +79,7 @@ class _ItemInvoicesList extends State<ItemInvoicesList> {
         children: <Widget>[
           Container(
             width: 55,
-            margin: EdgeInsets.only(left: 5),
+            margin: EdgeInsets.only(left: 7),
             child: Align(
               alignment: Alignment.centerLeft,
               child: Image.asset(_iconVehicle, width: _imageWith),

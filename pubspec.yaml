@@ -81,6 +81,8 @@ flutter:
     - assets/images/background_ph_image.png
     - assets/images/icon_facturas_blanco.png
     - assets/images/profile_placeholder.png
+    - assets/images/icon_filter.png
+    - assets/images/icon_filter1.png
 
 
   # The following line ensures that the Material Icons font is

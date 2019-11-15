@@ -2,7 +2,10 @@ import 'package:car_wash_app/invoice/bloc/bloc_invoice.dart';
 import 'package:car_wash_app/invoice/model/invoice.dart';
 import 'package:car_wash_app/invoices_list/model/invoice_list_model.dart';
 import 'package:car_wash_app/invoices_list/ui/widgets/item_invoices_list.dart';
+import 'package:car_wash_app/invoices_list/ui/widgets/total_filter_invoices_widget.dart';
 import 'package:car_wash_app/location/bloc/bloc_location.dart';
+import 'package:car_wash_app/user/bloc/bloc_user.dart';
+import 'package:car_wash_app/user/model/user.dart';
 import 'package:car_wash_app/vehicle/bloc/bloc_vehicle.dart';
 import 'package:car_wash_app/vehicle/model/vehicle.dart';
 import 'package:car_wash_app/widgets/firestore_collections.dart';
@@ -16,7 +19,6 @@ import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class FormInvoicesList extends StatefulWidget {
-
   final locationReference;
 
   FormInvoicesList({Key key, this.locationReference});
@@ -27,8 +29,27 @@ class FormInvoicesList extends StatefulWidget {
 
 class _FormInvoicesList extends State<FormInvoicesList> {
   BlocInvoice _blocInvoice;
+  UserBloc _blocUser = UserBloc();
   List<Invoice> _listInvoices = <Invoice>[];
   List<InvoiceListModel> _listModel = <InvoiceListModel>[];
+  User _currentUser;
+  bool _showInfoAmounts = false;
+  double _totalDay = 0.0;
+  double _totalMonth = 0.0;
+  int _totalInvoices = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _blocUser.getCurrentUser().then((User user) {
+      _currentUser = user;
+      if (user.isAdministrator) {
+        setState(() {
+          _showInfoAmounts = true;
+        });
+      }
+    });
+  }
 
   @override
   void dispose() {
@@ -40,7 +61,7 @@ class _FormInvoicesList extends State<FormInvoicesList> {
   Widget build(BuildContext context) {
     _blocInvoice = BlocProvider.of(context);
 
-    //this._getPreferences();
+    this._getPreferences();
 
     return Stack(
       children: <Widget>[
@@ -81,11 +102,8 @@ class _FormInvoicesList extends State<FormInvoicesList> {
         child: Column(
           children: <Widget>[
             Visibility(
-              visible: false,
-              child: Container(
-                height: 55,
-                child: Row(),
-              ),
+              visible: _showInfoAmounts,
+              child: _infoAmounts(),
             ),
             _getInvoices(),
           ],
@@ -97,47 +115,166 @@ class _FormInvoicesList extends State<FormInvoicesList> {
   Widget _getInvoices() {
     var date = DateTime(DateTime.now().year, DateTime.now().month, 1);
     return StreamBuilder(
-      stream: _blocInvoice.invoicesListByMonthStream(widget.locationReference, date),
+      stream: _blocInvoice.invoicesListByMonthStream(
+          widget.locationReference, date),
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.waiting:
-            return CircularProgressIndicator();
-          default:
-            return Expanded(
-              child: _listItems(snapshot),
+            return Container(
+              height: 80,
+              child: CircularProgressIndicator(),
             );
+          default:
+            return _listItems(snapshot);
         }
       },
     );
   }
 
   Widget _listItems(AsyncSnapshot snapshot) {
-    _listInvoices = _blocInvoice.buildInvoicesListByMonth(snapshot.data.documents);
+    _listInvoices =
+        _blocInvoice.buildInvoicesListByMonth(snapshot.data.documents);
     _listInvoices.sort((a, b) => b.consecutive.compareTo(a.consecutive));
+    //TotalFilterInvoicesWidget().updateInvoicesList(_listInvoices);
+    _countAmountPerDayMonth();
     _listModel.clear();
-    _listInvoices.forEach((invoice){
+    _listInvoices.forEach((invoice) {
       _listModel.add(InvoiceListModel(
-          id: invoice.id,
-          consec: invoice.consecutive,
-          totalPrice: invoice.totalPrice,
-          placa: '',
+        id: invoice.id,
+        consec: invoice.consecutive,
+        totalPrice: invoice.totalPrice,
+        placa: '',
       ));
     });
 
-    return ListView.builder(
-      itemCount: _listInvoices.length,
-      scrollDirection: Axis.vertical,
-      itemBuilder: (BuildContext context, int index) {
-        return ItemInvoicesList(
-          listInvoices: _listInvoices,
-          listInvoicesModel: _listModel,
-          index: index,
-          updateDate: true,
-        );
-      },
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        TotalFilterInvoicesWidget(listInvoices: _listInvoices,),
+        ListView.builder(
+          shrinkWrap: true,
+          itemCount: _listInvoices.length,
+          scrollDirection: Axis.vertical,
+          itemBuilder: (BuildContext context, int index) {
+            return ItemInvoicesList(
+              listInvoices: _listInvoices,
+              listInvoicesModel: _listModel,
+              index: index,
+              updateDate: true,
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _infoAmounts() {
+    return Container(
+      height: 90,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: <Widget>[
+          ClipRRect(
+            borderRadius: BorderRadius.all(Radius.circular(7.0)),
+            child: Container(
+              height: 80,
+              width: 150,
+              color: Color(0xFFF1F1F1),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Text(
+                      'Total día',
+                      style: TextStyle(
+                        fontFamily: "Lato",
+                        fontWeight: FontWeight.bold,
+                        fontSize: 17,
+                        color: Color(0xFF27AEBB),
+                      ),
+                    ),
+                    Text(
+                      '\$$_totalDay',
+                      style: TextStyle(
+                        fontFamily: "Lato",
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                        color: Color(0xFF59B258),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          ClipRRect(
+            borderRadius: BorderRadius.all(Radius.circular(7.0)),
+            child: Container(
+              height: 80,
+              width: 150,
+              color: Color(0xFFF1F1F1),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Text(
+                      'Total mes',
+                      style: TextStyle(
+                        fontFamily: "Lato",
+                        fontWeight: FontWeight.bold,
+                        fontSize: 17,
+                        color: Color(0xFF27AEBB),
+                      ),
+                    ),
+                    Text(
+                      '\$$_totalMonth',
+                      style: TextStyle(
+                        fontFamily: "Lato",
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                        color: Color(0xFF59B258),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          )
+        ],
+      ),
     );
   }
 
   /// Functions
+  void _getPreferences() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    String userId = pref.getString(Keys.userId);
+  }
 
+  void _countAmountPerDayMonth() {
+    _totalDay = 0;
+    _totalMonth = 0;
+    if (_listInvoices.length > 0) {
+      _listInvoices.forEach((invoice) {
+        DateTime nowMonth =
+            new DateTime(DateTime.now().year, DateTime.now().month);
+        DateTime nowDay = new DateTime(
+            DateTime.now().year, DateTime.now().month, DateTime.now().day);
+        DateTime dateMonthInvoice = DateTime(invoice.creationDate.toDate().year,
+            invoice.creationDate.toDate().month);
+        DateTime dateDayInvoice = DateTime(
+            invoice.creationDate.toDate().year,
+            invoice.creationDate.toDate().month,
+            invoice.creationDate.toDate().day);
+
+        if (dateDayInvoice.compareTo(nowDay) == 0) {
+          _totalDay = _totalDay + invoice.totalPrice;
+        }
+
+        if (nowMonth.compareTo(dateMonthInvoice) == 0) {
+          _totalMonth = _totalMonth + invoice.totalPrice;
+        }
+      });
+    }
+  }
 }

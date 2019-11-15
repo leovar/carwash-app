@@ -11,13 +11,29 @@ class UserRepository {
   final Firestore _db = Firestore.instance;
 
   ///Get current user reference
-  Future<DocumentReference> getUserReference() async {
+  Future<DocumentReference> getCurrentUserReference() async {
     FirebaseUser user = await FirebaseAuth.instance.currentUser();
     return _db.collection(FirestoreCollections.users).document(user.uid);
   }
 
+  Future<User> getCurrentUser() async {
+    FirebaseUser user = await FirebaseAuth.instance.currentUser();
+    final querySnapshot = await _db.collection(FirestoreCollections.users).document(user.uid).get();
+    return User.fromJson(querySnapshot.data, id: querySnapshot.documentID);
+  }
+
   Future<DocumentReference> getUserReferenceById(String userId) async {
     return _db.collection(FirestoreCollections.users).document(userId);
+  }
+
+  Future<User> getUserById(String userId) async {
+    final querySnapshot = await this
+        ._db
+        .collection(FirestoreCollections.users)
+        .document(userId)
+        .get();
+
+    return User.fromJson(querySnapshot.data, id: querySnapshot.documentID);
   }
 
   void updateUserDataRepository(User user) async {
