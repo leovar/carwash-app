@@ -1,12 +1,8 @@
 import 'package:car_wash_app/invoice/model/invoice.dart';
-import 'package:car_wash_app/invoices_list/model/invoice_list_model.dart';
 import 'package:flutter/material.dart';
 
 class TotalFilterInvoicesWidget extends StatefulWidget {
-  List<Invoice> listInvoices;
-  updateInvoicesList(List<Invoice> listInvoicesUpdate){
-    listInvoices = listInvoicesUpdate;
-  }
+  final List<Invoice> listInvoices;
 
   TotalFilterInvoicesWidget({Key key, this.listInvoices});
 
@@ -28,7 +24,7 @@ class _TotalFilterInvoicesWidget extends State<TotalFilterInvoicesWidget> {
         ),
       ),
       child: Row(
-        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           Container(
             height: 45,
@@ -48,7 +44,6 @@ class _TotalFilterInvoicesWidget extends State<TotalFilterInvoicesWidget> {
           ),
           Container(
             height: 45,
-            width: MediaQuery.of(context).size.width - 195.0,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: <Widget>[

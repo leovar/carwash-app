@@ -3,20 +3,16 @@ import 'package:car_wash_app/invoice/model/invoice.dart';
 import 'package:car_wash_app/invoices_list/model/invoice_list_model.dart';
 import 'package:car_wash_app/invoices_list/ui/widgets/item_invoices_list.dart';
 import 'package:car_wash_app/invoices_list/ui/widgets/total_filter_invoices_widget.dart';
-import 'package:car_wash_app/location/bloc/bloc_location.dart';
 import 'package:car_wash_app/user/bloc/bloc_user.dart';
 import 'package:car_wash_app/user/model/user.dart';
-import 'package:car_wash_app/vehicle/bloc/bloc_vehicle.dart';
-import 'package:car_wash_app/vehicle/model/vehicle.dart';
-import 'package:car_wash_app/widgets/firestore_collections.dart';
 import 'package:car_wash_app/widgets/gradient_back.dart';
 import 'package:car_wash_app/widgets/info_header_container.dart';
 import 'package:car_wash_app/widgets/keys.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart';
 
 class FormInvoicesList extends StatefulWidget {
   final locationReference;
@@ -36,7 +32,6 @@ class _FormInvoicesList extends State<FormInvoicesList> {
   bool _showInfoAmounts = false;
   double _totalDay = 0.0;
   double _totalMonth = 0.0;
-  int _totalInvoices = 0;
 
   @override
   void initState() {
@@ -79,36 +74,9 @@ class _FormInvoicesList extends State<FormInvoicesList> {
           textInfo: 'Facturas',
         ),
         Flexible(
-          child: _containerList(),
+          child: _getInvoices(),
         ),
       ],
-    );
-  }
-
-  Widget _containerList() {
-    return Container(
-      margin: EdgeInsets.only(right: 17, left: 17, bottom: 17),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(7.0),
-      ),
-      child: Container(
-        padding: EdgeInsets.only(
-          right: 15,
-          left: 15,
-          top: 15,
-          bottom: 15,
-        ),
-        child: Column(
-          children: <Widget>[
-            Visibility(
-              visible: _showInfoAmounts,
-              child: _infoAmounts(),
-            ),
-            _getInvoices(),
-          ],
-        ),
-      ),
     );
   }
 
@@ -125,17 +93,16 @@ class _FormInvoicesList extends State<FormInvoicesList> {
               child: CircularProgressIndicator(),
             );
           default:
-            return _listItems(snapshot);
+            return _containerList(snapshot);
         }
       },
     );
   }
 
-  Widget _listItems(AsyncSnapshot snapshot) {
+  Widget _containerList(AsyncSnapshot snapshot) {
     _listInvoices =
         _blocInvoice.buildInvoicesListByMonth(snapshot.data.documents);
     _listInvoices.sort((a, b) => b.consecutive.compareTo(a.consecutive));
-    //TotalFilterInvoicesWidget().updateInvoicesList(_listInvoices);
     _countAmountPerDayMonth();
     _listModel.clear();
     _listInvoices.forEach((invoice) {
@@ -147,32 +114,66 @@ class _FormInvoicesList extends State<FormInvoicesList> {
       ));
     });
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        TotalFilterInvoicesWidget(listInvoices: _listInvoices,),
-        ListView.builder(
-          shrinkWrap: true,
-          itemCount: _listInvoices.length,
-          scrollDirection: Axis.vertical,
-          itemBuilder: (BuildContext context, int index) {
-            return ItemInvoicesList(
-              listInvoices: _listInvoices,
-              listInvoicesModel: _listModel,
-              index: index,
-              updateDate: true,
-            );
-          },
-        ),
-      ],
+    return Container(
+      margin: EdgeInsets.only(right: 17, left: 17, bottom: 17),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(7.0),
+      ),
+      child: Column(
+        children: <Widget>[
+          Visibility(
+            visible: _showInfoAmounts,
+            child: _infoAmounts(),
+          ),
+          Expanded(
+            child: Container(
+              padding: EdgeInsets.only(
+                right: 15,
+                left: 15,
+                bottom: 15,
+              ),
+              child: Column(
+                children: <Widget>[
+                  TotalFilterInvoicesWidget(
+                    listInvoices: _listInvoices,
+                  ),
+                  Expanded(
+                    child: _listItems(),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _listItems() {
+    return ListView.builder(
+      //shrinkWrap: true,
+      itemCount: _listInvoices.length,
+      scrollDirection: Axis.vertical,
+      itemBuilder: (BuildContext context, int index) {
+        return ItemInvoicesList(
+          listInvoices: _listInvoices,
+          listInvoicesModel: _listModel,
+          index: index,
+          updateDate: true,
+        );
+      },
     );
   }
 
   Widget _infoAmounts() {
+    final formatter = NumberFormat("#,###");
+
     return Container(
-      height: 90,
+      margin: EdgeInsets.only(top: 15),
+      height: 85,
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: <Widget>[
           ClipRRect(
             borderRadius: BorderRadius.all(Radius.circular(7.0)),
@@ -194,7 +195,7 @@ class _FormInvoicesList extends State<FormInvoicesList> {
                       ),
                     ),
                     Text(
-                      '\$$_totalDay',
+                      '\$${formatter.format(_totalDay)}',
                       style: TextStyle(
                         fontFamily: "Lato",
                         fontWeight: FontWeight.bold,
@@ -227,7 +228,7 @@ class _FormInvoicesList extends State<FormInvoicesList> {
                       ),
                     ),
                     Text(
-                      '\$$_totalMonth',
+                      '\$${formatter.format(_totalMonth)}',
                       style: TextStyle(
                         fontFamily: "Lato",
                         fontWeight: FontWeight.bold,

@@ -48,6 +48,9 @@ dependencies:
   #alerts-dialogs
   rflutter_alert: ^1.0.3
 
+  #number formatter
+  intl: ^0.16.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

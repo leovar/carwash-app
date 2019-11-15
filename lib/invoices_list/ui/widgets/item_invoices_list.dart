@@ -1,17 +1,13 @@
 import 'package:car_wash_app/invoice/model/invoice.dart';
 import 'package:car_wash_app/invoices_list/model/invoice_list_model.dart';
-import 'package:car_wash_app/vehicle/bloc/bloc_vehicle.dart';
-import 'package:car_wash_app/vehicle/model/vehicle.dart';
-import 'package:car_wash_app/vehicle_type/bloc/vehicle_type_bloc.dart';
-import 'package:car_wash_app/vehicle_type/model/vehicleType.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class ItemInvoicesList extends StatefulWidget {
-  List<Invoice> listInvoices;
-  List<InvoiceListModel> listInvoicesModel;
-  int index;
-  bool updateDate;
+  final List<Invoice> listInvoices;
+  final List<InvoiceListModel> listInvoicesModel;
+  final int index;
+  final bool updateDate;
 
   ItemInvoicesList(
       {Key key,
@@ -25,8 +21,6 @@ class ItemInvoicesList extends StatefulWidget {
 }
 
 class _ItemInvoicesList extends State<ItemInvoicesList> {
-  final _blocVehicle = BlocVehicle();
-  final _blocVehicleType = VehicleTypeBloc();
   double _imageWith;
   String _iconVehicle;
 
@@ -66,44 +60,26 @@ class _ItemInvoicesList extends State<ItemInvoicesList> {
       height: 55,
       decoration: BoxDecoration(
         color: (widget.index % 2 == 0) ? Colors.white : Color(0xFFF1F1F1),
-        /*border: Border(
-          bottom: BorderSide(
-            color: Color(0xFFD8D8D8),
-            width: 1.0,
-          ),
-        ),*/
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        //crossAxisAlignment: CrossAxisAlignment.center,
+        //mainAxisSize: MainAxisSize.max,
         children: <Widget>[
-          Container(
-            width: 55,
-            margin: EdgeInsets.only(left: 7),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Image.asset(_iconVehicle, width: _imageWith),
-            ),
-          ),
-          Container(
-            width: MediaQuery.of(context).size.width - 185.0,
-            child: Wrap(
-              direction: Axis.vertical,
-              children: <Widget>[
-                Text(
-                  invoiceList.placa ?? '',
-                  style: TextStyle(
-                    color: Color(0xFF787A71),
-                    fontFamily: "Lato",
-                    fontWeight: FontWeight.normal,
-                    fontSize: 15,
-                  ),
+          Row(
+            children: <Widget>[
+              Container(
+                margin: EdgeInsets.only(left: 8, right: 22),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Image.asset(_iconVehicle, width: _imageWith),
                 ),
-                Visibility(
-                  visible:
-                      (invoiceList.userOperatorName != null) ? true : false,
-                  child: Text(
-                    invoiceList.userOperatorName ?? '',
+              ),
+              Wrap(
+                direction: Axis.vertical,
+                children: <Widget>[
+                  Text(
+                    invoiceList.placa ?? '',
                     style: TextStyle(
                       color: Color(0xFF787A71),
                       fontFamily: "Lato",
@@ -111,13 +87,26 @@ class _ItemInvoicesList extends State<ItemInvoicesList> {
                       fontSize: 15,
                     ),
                   ),
-                ),
-              ],
-            ),
+                  Visibility(
+                    visible:
+                        (invoiceList.userOperatorName != null) ? true : false,
+                    child: Text(
+                      invoiceList.userOperatorName ?? '',
+                      style: TextStyle(
+                        color: Color(0xFF787A71),
+                        fontFamily: "Lato",
+                        fontWeight: FontWeight.normal,
+                        fontSize: 15,
+                      ),
+                    ),
+                  ),
+                ],
+              )
+            ],
           ),
           //Text(invoiceList.totalPrice.toString()),
           Container(
-            width: 55,
+            margin: EdgeInsets.only(right: 8),
             alignment: Alignment.centerRight,
             child: Text(
               invoiceList.consecutive.toString(),
