@@ -103,6 +103,7 @@ class _FieldsProducts extends State<FieldsProducts> {
                               additionalProductListCb:
                                   widget.additionalProductListCb,
                               vehicleTypeSelect: widget.vehicleTypeSelect,
+                              idLocation: widget.idLocation,
                             ),
                           ),
                         );

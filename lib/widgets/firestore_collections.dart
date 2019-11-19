@@ -30,6 +30,7 @@ class FirestoreCollections {
   static String productFieldProductName = 'productName';
   static String productFieldLocations = 'locations';
   static String productFieldUidVehicleType = 'vehicleTypeUid';
+  static String productFieldProductActive = 'productActive';
 
   /// Fields Customer Collections
   static String customerFieldVehicles = 'vehicles';

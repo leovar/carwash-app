@@ -12,8 +12,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
+import 'package:intl/intl.dart';
 
 class ProductAdminPage extends StatefulWidget {
+
+  final Product currentProduct;
+
+  ProductAdminPage({Key key, this.currentProduct});
+
   @override
   State<StatefulWidget> createState() => _ProductAdminPage();
 }
@@ -43,7 +49,10 @@ class _ProductAdminPage extends State<ProductAdminPage> {
   void initState() {
     super.initState();
     _textIvaPercent.text = _initialIvaPercent;
-    //_getLocations();
+    if (widget.currentProduct != null) {
+      _productSelected = widget.currentProduct;
+      _selectProductList();
+    }
   }
 
   @override
@@ -69,14 +78,18 @@ class _ProductAdminPage extends State<ProductAdminPage> {
         backgroundColor: Colors.white,
       ),
       body: SafeArea(
-        child: _containerBody(),
+        child: Container(
+          color: Colors.white,
+          height: MediaQuery.of(context).size.height,
+          child: _containerBody(),
+        ),
       ),
     );
   }
 
   Widget _containerBody() {
     return Container(
-      margin: EdgeInsets.symmetric(vertical: 17, horizontal: 16),
+      padding: EdgeInsets.symmetric(vertical: 17, horizontal: 16),
       color: Colors.white,
       child: SingleChildScrollView(
         child: Column(
@@ -136,53 +149,7 @@ class _ProductAdminPage extends State<ProductAdminPage> {
               ),
             ),
             SizedBox(height: 9),
-            InkWell(
-              child: Container(
-                height: 50,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    Container(
-                      padding: EdgeInsets.only(left: 10),
-                      child: Text(
-                        '${_listLocation.where((f) => f.isSelected).toList().length} sedes agregadas',
-                        style: TextStyle(
-                          fontFamily: "Lato",
-                          decoration: TextDecoration.none,
-                          color: Color(0xFF59B258),
-                          fontSize: 17,
-                        ),
-                      ),
-                    ),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: IconButton(
-                        icon: Icon(
-                          Icons.keyboard_arrow_down,
-                          size: 30,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                decoration: BoxDecoration(
-                  color: Color(0xFFF1F1F1),
-                  borderRadius: BorderRadius.circular(5),
-                ),
-              ),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => LocationsSelectListPage(
-                      callbackSetLocationsList: _setLocationsDb,
-                      locationsList: _listLocation,
-                    ),
-                  ),
-                );
-              },
-            ),
+            _locationsToSelect(),
             SizedBox(height: 9),
             Flexible(
               child: _dropVehicleType(),
@@ -217,23 +184,79 @@ class _ProductAdminPage extends State<ProductAdminPage> {
             Flexible(
               child: _buttonSave(),
             ),
-            Container(
-              height: 9,
-              decoration: BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(
-                    color: Color(0xFF27AEBB),
-                    width: 2.0,
-                  ),
-                ),
-              ),
-            ),
-            SizedBox(height: 9),
-            _listProducts(),
             SizedBox(height: 9),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _locationsToSelect() {
+    return StreamBuilder(
+      stream: _blocLocation.locationsListStream,
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        switch (snapshot.connectionState) {
+          case ConnectionState.waiting:
+            return CircularProgressIndicator();
+          default:
+            return _getLocationsToSelectWidget(snapshot);
+        }
+      },
+    );
+  }
+  Widget _getLocationsToSelectWidget(AsyncSnapshot snapshot) {
+    if (_blocLocation.buildLocations(snapshot.data.documents).length > _listLocation.length) {
+      _listLocation = _blocLocation.buildLocations(snapshot.data.documents);
+      if (widget.currentProduct != null) {
+        _selectProductList();
+      }
+    }
+    return InkWell(
+      child: Container(
+        height: 50,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            Container(
+              padding: EdgeInsets.only(left: 10),
+              child: Text(
+                '${_listLocation.where((f) => f.isSelected).toList().length} sedes agregadas',
+                style: TextStyle(
+                  fontFamily: "Lato",
+                  decoration: TextDecoration.none,
+                  color: Color(0xFF59B258),
+                  fontSize: 17,
+                ),
+              ),
+            ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: IconButton(
+                icon: Icon(
+                  Icons.keyboard_arrow_down,
+                  size: 30,
+                ),
+              ),
+            ),
+          ],
+        ),
+        decoration: BoxDecoration(
+          color: Color(0xFFF1F1F1),
+          borderRadius: BorderRadius.circular(5),
+        ),
+      ),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => LocationsSelectListPage(
+              callbackSetLocationsList: _setLocationsDb,
+              locationsList: _listLocation,
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -242,18 +265,21 @@ class _ProductAdminPage extends State<ProductAdminPage> {
       stream: _vehicleTypeBloc.vehicleTypeStream,
       builder: (context, snapshot) {
         switch (snapshot.connectionState) {
-          case ConnectionState.done:
-            return _getDataVehicleTypeList(snapshot);
+          case ConnectionState.waiting:
+            return CircularProgressIndicator();
           default:
             return _getDataVehicleTypeList(snapshot);
         }
       },
     );
   }
-
   Widget _getDataVehicleTypeList(AsyncSnapshot snapshot) {
-    _lisVehicleType =
-        _vehicleTypeBloc.buildVehicleType(snapshot.data.documents);
+    if (_vehicleTypeBloc.buildVehicleType(snapshot.data.documents).length > _lisVehicleType.length) {
+      _lisVehicleType = _vehicleTypeBloc.buildVehicleType(snapshot.data.documents);
+      if (widget.currentProduct != null) {
+        _selectProductList();
+      }
+    }
     _dropdownVehicleTypes = _buildDropdownVehicleTypes(_lisVehicleType);
     return DropdownButton(
       isExpanded: true,
@@ -311,57 +337,29 @@ class _ProductAdminPage extends State<ProductAdminPage> {
     );
   }
 
-  Widget _listProducts() {
-    return StreamBuilder(
-      stream: _productBloc.allProductsStream,
-      builder: (context, snapshot) {
-        switch (snapshot.connectionState) {
-          case ConnectionState.done:
-            return _getDataListProducts(snapshot);
-          default:
-            return _getDataListProducts(snapshot);
-        }
-      },
-    );
-  }
-
-  Widget _getDataListProducts(AsyncSnapshot snapshot) {
-    _productList = _productBloc.buildAllProduct(snapshot.data.documents);
-    return Flexible(
-      child: ListView.builder(
-          itemCount: _productList.length,
-          scrollDirection: Axis.vertical,
-          shrinkWrap: true,
-          itemBuilder: (BuildContext context, int index) {
-            return ItemProductAdminList(
-                _selectProductList, _productList, index);
-          }),
-    );
-  }
-
   /// Functions
 
   ///Function product selected
-  void _selectProductList(Product productSelected) {
-    _productSelected = productSelected;
-    setState(() {
-      _textProductName.text = _productSelected.productName;
-      _textIvaPercent.text = _productSelected.ivaPercent;
-      _textIva.text = _productSelected.iva.toString();
-      _textPrice.text = _productSelected.price.toString();
-      _productActive = _productSelected.productActive ?? true;
-      _selectedVehicleType = _lisVehicleType
-          .firstWhere((f) => f.id == _productSelected.vehicleType.documentID);
-      _listLocation.forEach((Location loc) {
-        List<DocumentReference> dr = _productSelected.locations
-            .where((e) => e.documentID == loc.id)
-            .toList();
-        if (dr.length > 0) {
-          _listLocation[_listLocation.indexOf(loc)].isSelected = true;
-        } else {
-          _listLocation[_listLocation.indexOf(loc)].isSelected = false;
-        }
-      });
+  void _selectProductList() {
+    _validateName = false;
+    _validatePrice = false;
+    _textProductName.text = _productSelected.productName;
+    _textIvaPercent.text = _productSelected.ivaPercent;
+    _textIva.text = _productSelected.iva.toString();
+    _textPrice.text = _productSelected.price.toStringAsFixed(2);
+    _productActive = _productSelected.productActive ?? true;
+    _selectedVehicleType = _lisVehicleType.length > 0
+        ? _lisVehicleType.firstWhere((f) => f.id == _productSelected.vehicleType.documentID)
+        : null;
+    _listLocation.forEach((Location loc) {
+      List<DocumentReference> dr = _productSelected.locations
+          .where((e) => e.documentID == loc.id)
+          .toList();
+      if (dr.length > 0) {
+        _listLocation[_listLocation.indexOf(loc)].isSelected = true;
+      } else {
+        _listLocation[_listLocation.indexOf(loc)].isSelected = false;
+      }
     });
   }
 
@@ -399,13 +397,11 @@ class _ProductAdminPage extends State<ProductAdminPage> {
       double price = double.tryParse(_textPrice.text) ?? 0.0;
       double ivaPercent = double.tryParse(_textIvaPercent.text) ?? 0.0;
       setState(() {
-        _textIva.text = (price * (ivaPercent / 100)).toString();
-        //_validateInputs();
+        _textIva.text = (price * (ivaPercent / 100)).toStringAsFixed(2);
       });
     } else {
       setState(() {
         _textIva.text = '0';
-        //_validateInputs();
       });
     }
   }
@@ -413,7 +409,7 @@ class _ProductAdminPage extends State<ProductAdminPage> {
   bool _validateInputs() {
     bool canSave = true;
     bool listSedesEmpty = false;
-    bool listVehicletTypeEmpty = false;
+    bool listVehicleTypeEmpty = false;
     if (_textProductName.text.isEmpty) {
       _validateName = true;
       canSave = false;
@@ -432,18 +428,17 @@ class _ProductAdminPage extends State<ProductAdminPage> {
     }
 
     if (_selectedVehicleType == null) {
-      listVehicletTypeEmpty = true;
+      listVehicleTypeEmpty = true;
       canSave = false;
     }
 
-    if (listSedesEmpty || listVehicletTypeEmpty) {
+    if (listSedesEmpty || listVehicleTypeEmpty) {
       setState(() {
         MessagesUtils.showAlert(context: context, title: 'Debe agregar Sedes y un tipo de Vehiculo').show();
       });
     }
 
     return canSave;
-
   }
 
   void _clearData() {
@@ -481,18 +476,24 @@ class _ProductAdminPage extends State<ProductAdminPage> {
 
       //Delete locations at product exist
       if (_productSelected != null) {
-        _productSelected.locations.forEach((e) {
-          List<Location> lotionsFind =
-          _listLocation.where((f) => f.id == e.documentID).toList();
+        List<DocumentReference> locListDeleted = <DocumentReference>[];
+        _productSelected.locations.forEach((item) {
+          locListDeleted.add(item);
+        });
+        _productSelected.locations.forEach((DocumentReference locRefDelete) {
+          List<Location> lotionsFind = _listLocation.where((f) => f.id == locRefDelete.documentID && f.isSelected).toList();
           if (lotionsFind.length == 0) {
-            _productSelected.locations
-                .removeAt(_productSelected.locations.indexOf(e));
+            locListDeleted.removeAt(_productSelected.locations.indexOf(locRefDelete));
           }
+        });
+        _productSelected.locations.clear();
+        locListDeleted.forEach((d) {
+          _productSelected.locations.add(d);
         });
       }
 
       List<DocumentReference> _newListLocationsReferences = <DocumentReference>[];
-      _listLocation.forEach((f) {
+      _listLocation.where((d) => d.isSelected).toList().forEach((f) {
         _newListLocationsReferences
             .add(_blocLocation.getDocumentReferenceLocationById(f.id));
       });
@@ -513,6 +514,7 @@ class _ProductAdminPage extends State<ProductAdminPage> {
 
       _productBloc.updateProduct(product);
 
+      Navigator.pop(context);
       Navigator.pop(context);
 
       _clearData();

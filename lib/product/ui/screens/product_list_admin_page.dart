@@ -1,0 +1,125 @@
+import 'package:car_wash_app/product/bloc/product_bloc.dart';
+import 'package:car_wash_app/product/model/product.dart';
+import 'package:car_wash_app/product/ui/screens/product_admin_page.dart';
+import 'package:car_wash_app/product/ui/widgets/item_products_admin_list.dart';
+import 'package:flutter/material.dart';
+import 'package:generic_bloc_provider/generic_bloc_provider.dart';
+
+class ProductListAdminPage extends StatefulWidget {
+  @override
+  State<StatefulWidget> createState() => _ProductListAdminPage();
+}
+
+class _ProductListAdminPage extends State<ProductListAdminPage> {
+  ProductBloc _productBloc;
+  List<Product> _productList = <Product>[];
+
+  @override
+  Widget build(BuildContext context) {
+    _productBloc = BlocProvider.of(context);
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          iconSize: 30,
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          "Servicios",
+          style: TextStyle(
+            fontFamily: "Lato",
+            decoration: TextDecoration.none,
+            fontWeight: FontWeight.w600,
+            color: Colors.black,
+            fontSize: 24,
+          ),
+        ),
+        backgroundColor: Colors.white,
+      ),
+      body: SafeArea(
+        child: _containerBody(),
+      ),
+    );
+  }
+
+  Widget _containerBody() {
+    return Container(
+      padding: EdgeInsets.only(bottom: 17),
+      color: Colors.white,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          _listProducts(),
+          _buttonNewProduct(),
+        ],
+      ),
+    );
+  }
+
+  Widget _listProducts() {
+    return StreamBuilder(
+      stream: _productBloc.allProductsStream,
+      builder: (context, snapshot) {
+        switch (snapshot.connectionState) {
+          case ConnectionState.waiting:
+            return CircularProgressIndicator();
+          default:
+            return _getDataListProducts(snapshot);
+        }
+      },
+    );
+  }
+
+  Widget _getDataListProducts(AsyncSnapshot snapshot) {
+    _productList = _productBloc.buildAllProduct(snapshot.data.documents);
+    return Flexible(
+      child: ListView.builder(
+        itemCount: _productList.length,
+        scrollDirection: Axis.vertical,
+        shrinkWrap: true,
+        itemBuilder: (BuildContext context, int index) {
+          return ItemProductAdminList(_selectProductList, _productList, index);
+        },
+      ),
+    );
+  }
+
+  Widget _buttonNewProduct() {
+    return Container(
+      height: 60,
+      margin: EdgeInsets.only(top: 8,),
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: RaisedButton(
+          padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
+          color: Color(0xFF59B258),
+          child: Text(
+            "Nuevo Servicio",
+            style: TextStyle(
+              fontFamily: "Lato",
+              decoration: TextDecoration.none,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              fontSize: 19,
+            ),
+          ),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) {
+                  return BlocProvider(
+                    bloc: ProductBloc(),
+                    child: ProductAdminPage(),
+                  );
+                },
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  void _selectProductList(Product selectedProduct) {}
+}

@@ -2,6 +2,7 @@ import 'package:car_wash_app/location/bloc/bloc_location.dart';
 import 'package:car_wash_app/location/ui/screens/locations_admin_page.dart';
 import 'package:car_wash_app/product/bloc/product_bloc.dart';
 import 'package:car_wash_app/product/ui/screens/product_admin_page.dart';
+import 'package:car_wash_app/product/ui/screens/product_list_admin_page.dart';
 import 'package:car_wash_app/user/bloc/bloc_user.dart';
 import 'package:car_wash_app/user/model/user.dart';
 import 'package:car_wash_app/user/ui/screens/users_admin_page.dart';
@@ -157,7 +158,7 @@ class _DrawerPage extends State<DrawerPage> {
                         MaterialPageRoute(builder: (context) {
                           return BlocProvider<ProductBloc>(
                             bloc: ProductBloc(),
-                            child: ProductAdminPage(),
+                            child: ProductListAdminPage(),
                           );
                         }),
                       );

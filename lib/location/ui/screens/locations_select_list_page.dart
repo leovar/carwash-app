@@ -25,7 +25,13 @@ class LocationsSelectListPage extends StatefulWidget {
 }
 
 class _LocationsSelectListPage extends State<LocationsSelectListPage> {
-  final _locationsBloc = BlocLocation();
+  List<Location> locationGet = <Location>[];
+
+  @override
+  void initState() {
+    super.initState();
+    locationGet = widget.locationsList;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,29 +54,11 @@ class _LocationsSelectListPage extends State<LocationsSelectListPage> {
         ),
         backgroundColor: Colors.white,
       ),
-      body: getProducts(),
+      body: listLocations(),
     );
   }
 
-  Widget getProducts() {
-    return StreamBuilder(
-      stream: _locationsBloc.locationsStream,
-      builder: (BuildContext context, AsyncSnapshot snapshot) {
-        switch (snapshot.connectionState) {
-          case ConnectionState.waiting:
-            return CircularProgressIndicator();
-          default:
-            return listLocations(snapshot);
-        }
-      },
-    );
-  }
-
-  Widget listLocations(AsyncSnapshot snapshot) {
-    List<Location> getLocationsList =
-        _locationsBloc.buildLocations(snapshot.data.documents);
-    List<Location> locationGet = getLocationsList;
-    widget.callbackSetLocationsList(getLocationsList);
+  Widget listLocations() {
     if (widget.locationsList.length > 0) {
       widget.locationsList.forEach((f) {
         if (f.isSelected) {
