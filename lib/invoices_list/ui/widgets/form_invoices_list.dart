@@ -228,7 +228,7 @@ class _FormInvoicesList extends State<FormInvoicesList> {
                       ),
                     ),
                     Text(
-                      '\$${formatter.format(_totalMonth)}',
+                '\$${formatter.format(_totalMonth)}',
                       style: TextStyle(
                         fontFamily: "Lato",
                         fontWeight: FontWeight.bold,

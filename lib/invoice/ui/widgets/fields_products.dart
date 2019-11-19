@@ -1,16 +1,18 @@
 import 'package:car_wash_app/invoice/model/additional_product.dart';
+import 'package:car_wash_app/invoice/model/header_services.dart';
 import 'package:car_wash_app/invoice/ui/screens/products_invoice_page.dart';
 import 'package:car_wash_app/product/model/product.dart';
 import 'package:flutter/material.dart';
 
 class FieldsProducts extends StatefulWidget {
-  Function(List<Product>) callbackProductsList;
-  Function(List<AdditionalProduct>) callbackAdditionalProdList;
-  List<Product> productListCallback;
-  List<AdditionalProduct> additionalProductListCb;
-  final vehicleTypeSelect;
+  final Function(List<Product>) callbackProductsList;
+  final Function(List<AdditionalProduct>) callbackAdditionalProdList;
+  final List<Product> productListCallback;
+  final List<AdditionalProduct> additionalProductListCb;
+  final HeaderServices vehicleTypeSelect;
   final bool enableForm;
-  int selectedProductsCount;
+  final int selectedProductsCount;
+  final String idLocation;
 
   FieldsProducts({
     Key key,
@@ -21,6 +23,7 @@ class FieldsProducts extends StatefulWidget {
     this.vehicleTypeSelect,
     this.enableForm,
     this.selectedProductsCount,
+    this.idLocation,
   });
 
   @override

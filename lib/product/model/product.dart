@@ -14,6 +14,8 @@ class Product extends Equatable {
   final String ivaPercent;
   final DocumentReference vehicleType;
   final List<DocumentReference> locations;
+  final bool productActive;
+  final int vehicleTypeUid;
   bool isSelected;
 
   Product({
@@ -24,13 +26,15 @@ class Product extends Equatable {
     this.ivaPercent,
     this.vehicleType,
     this.locations,
+    this.productActive,
+    this.vehicleTypeUid,
     this.isSelected,
   });
 
   factory Product.fromJson(Map<String, dynamic> json, {String id}) {
     List<DocumentReference> locationsListDb = <DocumentReference>[];
-    List locationslist = json['locations'];
-    locationslist?.forEach((drLocation) {
+    List locationsList = json['locations'];
+    locationsList?.forEach((drLocation) {
       locationsListDb.add(drLocation);
     });
 
@@ -41,6 +45,8 @@ class Product extends Equatable {
       iva: json['iva'].toDouble(),
       ivaPercent: json['ivaPercent'],
       vehicleType: json['vehicleType'],
+      productActive : json['productActive'],
+      vehicleTypeUid : json['vehicleTypeUid'],
       locations: locationsListDb,
       isSelected: false,
     );
@@ -54,6 +60,8 @@ class Product extends Equatable {
       'ivaPercent' : this.ivaPercent,
       'vehicleType' : this.vehicleType,
       'locations' : this.locations,
+      'productActive' : this.productActive,
+      'vehicleTypeUid' : this.vehicleTypeUid,
     };
   }
 
@@ -79,6 +87,9 @@ class Product extends Equatable {
     iva,
     ivaPercent,
     vehicleType,
+    productActive,
+    vehicleTypeUid,
+    isSelected,
     locations,
   ];
 }

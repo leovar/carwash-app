@@ -66,6 +66,7 @@ class _FormInvoice extends State<FormInvoice> {
   FocusNode _clientFocusNode;
   DocumentReference _locationReference;
   String _locationName;
+  String _idLocation;
   String _initConsecLocation;
   String _finalConsecLocation;
 
@@ -254,6 +255,7 @@ class _FormInvoice extends State<FormInvoice> {
                 additionalProductListCb: _listAdditionalProducts,
                 vehicleTypeSelect: vehicleTypeSelected,
                 enableForm: _enableForm,
+                idLocation: _idLocation,
                 selectedProductsCount:
                     _listProduct.where((f) => f.isSelected).toList().length +
                         _listAdditionalProducts.length,
@@ -499,8 +501,8 @@ class _FormInvoice extends State<FormInvoice> {
     _locationName = pref.getString(Keys.locationName);
     _initConsecLocation = pref.getString(Keys.locationInitCount);
     _finalConsecLocation = pref.getString(Keys.locationFinalCount);
-    String idLocation = pref.getString(Keys.locations);
-    _locationReference = await _locationBloc.getLocationReference(idLocation);
+    _idLocation = pref.getString(Keys.idLocation);
+    _locationReference = await _locationBloc.getLocationReference(_idLocation);
   }
 
   ///Functions Save Invoice
@@ -539,8 +541,8 @@ class _FormInvoice extends State<FormInvoice> {
       }
 
       //Get VehicleType reference
-      _vehicleTypeRef =
-      await _blocInvoice.getVehicleTypeReference(vehicleTypeSelected.text);
+
+
 
       //Get Vehicle reference, save if not exist
       if (_vehicleReference == null) {

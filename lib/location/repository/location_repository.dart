@@ -5,6 +5,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class LocationRepository {
   final Firestore _db = Firestore.instance;
 
+  DocumentReference getDocumentReferenceLocationById(String idLocation) {
+    return _db.document('${FirestoreCollections.locations}/$idLocation');
+  }
+
   Future<DocumentReference> getLocationReference(String locationId) async {
     return _db.collection(FirestoreCollections.locations).document(locationId);
   }

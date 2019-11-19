@@ -7,12 +7,18 @@ class ProductBloc implements Bloc {
 
   final _productRepository = ProductRepository();
 
-  Stream<QuerySnapshot> get productsStream => _productRepository.getListProductsStream();
-  List<Product> buildProduct(List<DocumentSnapshot> productsListSnapshot) => _productRepository.buildProducts(productsListSnapshot);
+  Stream<QuerySnapshot> get allProductsStream => _productRepository.getListProductsStream();
+  List<Product> buildAllProduct(List<DocumentSnapshot> productsListSnapshot) => _productRepository.buildProducts(productsListSnapshot);
+
+  Stream<QuerySnapshot> productsByLocationStream(String idLocation, int uidVehicleType) => _productRepository.getListProductsByLocationStream(idLocation, uidVehicleType);
+  List<Product> buildProductByLocation(List<DocumentSnapshot> productsListSnapshot) => _productRepository.buildProductsByLocation(productsListSnapshot);
+
+  void updateProduct(Product product) async {
+    return _productRepository.updateProduct(product);
+  }
 
 
   @override
   void dispose() {
   }
-
 }

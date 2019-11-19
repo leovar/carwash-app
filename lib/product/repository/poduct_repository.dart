@@ -22,4 +22,27 @@ class ProductRepository {
     });
     return productList;
   }
+
+  Stream<QuerySnapshot> getListProductsByLocationStream(String idLocation, int uidVehicleType) {
+    final querySnapshot = this
+        ._db
+        .collection(FirestoreCollections.products)
+        .where(FirestoreCollections.locations, arrayContains: idLocation)
+        .where(FirestoreCollections.productFieldUidVehicleType, isEqualTo: uidVehicleType)
+        .snapshots();
+    return querySnapshot;
+  }
+  List<Product> buildProductsByLocation(List<DocumentSnapshot> productListSnapshot){
+    List<Product> productList = <Product>[];
+    productListSnapshot.forEach((p) {
+      Product loc = Product.fromJson(p.data, id: p.documentID);
+      productList.add(loc);
+    });
+    return productList;
+  }
+
+  void updateProduct (Product product) async {
+    DocumentReference ref = _db.collection(FirestoreCollections.products).document(product.id);
+    return await ref.setData(product.toJson(), merge: true);
+  }
 }

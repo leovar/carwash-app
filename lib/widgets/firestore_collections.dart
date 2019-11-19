@@ -24,10 +24,12 @@ class FirestoreCollections {
 
   /// Fields Vehicle Type Collection
   static String vehicleTypeFieldVehicleType = 'vehicleType';
+  static String vehicleTypeFieldUid = 'uid';
 
   /// Fields Product Collection
   static String productFieldProductName = 'productName';
   static String productFieldLocations = 'locations';
+  static String productFieldUidVehicleType = 'vehicleTypeUid';
 
   /// Fields Customer Collections
   static String customerFieldVehicles = 'vehicles';

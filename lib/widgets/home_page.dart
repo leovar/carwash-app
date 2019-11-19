@@ -147,20 +147,6 @@ class _HomePage extends State<HomePage> {
           onPressed: () {},
           buttonName: "INFORMES",
           imageAsset: "assets/images/icon_informes.png"),
-      SizedBox(
-        height: 10.0,
-      ),
-      ButtonFunctions(
-          onPressed: () {},
-          buttonName: "INFORMES",
-          imageAsset: "assets/images/icon_informes.png"),
-      SizedBox(
-        height: 10.0,
-      ),
-      ButtonFunctions(
-          onPressed: () {},
-          buttonName: "INFORMES",
-          imageAsset: "assets/images/icon_informes.png"),
     ],
   );
 
@@ -168,7 +154,7 @@ class _HomePage extends State<HomePage> {
 
   void _getPreferences() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
-    String idLocation = pref.getString(Keys.locations);
+    String idLocation = pref.getString(Keys.idLocation);
     _locationReference = await _locationBloc.getLocationReference(idLocation);
   }
 }

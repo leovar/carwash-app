@@ -28,7 +28,6 @@ class _LoginPage extends State<LoginPage> {
   final blocLocation = BlocLocation();
   final _textUser = TextEditingController();
   final _textPassword = TextEditingController();
-  BuildContext _globalContext;
 
   List<DropdownMenuItem<Location>> _dropdownMenuItems;
   Location _selectedLocation;
@@ -36,13 +35,17 @@ class _LoginPage extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
+    _init();
     _textUser.text = '';
     _textPassword.text = '';
   }
 
+  Future _init() async {
+    await Firestore.instance.settings(persistenceEnabled: true);
+  }
+
   @override
   Widget build(BuildContext context) {
-    _globalContext = context;
     userBloc = BlocProvider.of(context);
     return _handleCurrentSession();
   }
@@ -455,7 +458,7 @@ class _LoginPage extends State<LoginPage> {
 
   void _setLocationInPreferences(FirebaseUser user) async {
     SharedPreferences pref = await SharedPreferences.getInstance();
-    pref.setString(Keys.locations, _selectedLocation.id);
+    pref.setString(Keys.idLocation, _selectedLocation.id);
     pref.setString(Keys.locationName, _selectedLocation.locationName);
     pref.setString(
         Keys.locationInitCount, _selectedLocation.initConcec.toString());

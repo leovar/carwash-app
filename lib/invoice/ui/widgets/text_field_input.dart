@@ -5,15 +5,17 @@ import 'package:flutter/services.dart';
 class TextFieldInput extends StatefulWidget {
   final String labelText;
   final textController;
-  TextInputType inputType;
+  final TextInputType inputType;
   final textInputFormatter;
   final focusNode;
   final bool isUpperCase;
-  VoidCallback onFinalEditText;
-  bool enable;
-  bool validate;
+  final VoidCallback onFinalEditText;
+  final bool enable;
+  final bool validate;
   final String textValidate;
-  bool autofocus;
+  final bool autofocus;
+  final int maxLength;
+  final int maxLines;
 
   TextFieldInput({
     Key key,
@@ -28,6 +30,8 @@ class TextFieldInput extends StatefulWidget {
     this.enable = true,
     this.validate = false,
     this.autofocus = false,
+    this.maxLength,
+    this.maxLines = 1,
   });
 
   @override
@@ -41,7 +45,8 @@ class _TextFieldInput extends State<TextFieldInput> {
   Widget build(BuildContext context) {
     return TextField(
       controller: widget.textController,
-      maxLines: 1,
+      maxLines: widget.maxLines,
+      maxLength: widget.maxLength ?? null,
       autofocus: widget.autofocus ?? false,
       focusNode: widget.focusNode,
       keyboardType: widget.inputType ?? null,

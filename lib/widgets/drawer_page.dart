@@ -1,5 +1,10 @@
+import 'package:car_wash_app/location/bloc/bloc_location.dart';
+import 'package:car_wash_app/location/ui/screens/locations_admin_page.dart';
+import 'package:car_wash_app/product/bloc/product_bloc.dart';
+import 'package:car_wash_app/product/ui/screens/product_admin_page.dart';
 import 'package:car_wash_app/user/bloc/bloc_user.dart';
 import 'package:car_wash_app/user/model/user.dart';
+import 'package:car_wash_app/user/ui/screens/users_admin_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
@@ -34,7 +39,7 @@ class _DrawerPage extends State<DrawerPage> {
                 color: Colors.white,
               ),
               accountName: Text(
-                widget.usuario.name??'',
+                widget.usuario.name ?? '',
                 style: TextStyle(
                   fontFamily: "Lato",
                   fontWeight: FontWeight.w600,
@@ -43,7 +48,7 @@ class _DrawerPage extends State<DrawerPage> {
                 ),
               ),
               accountEmail: Text(
-                widget.usuario.email??'',
+                widget.usuario.email ?? '',
               ),
               otherAccountsPictures: <Widget>[
                 IconButton(
@@ -106,55 +111,84 @@ class _DrawerPage extends State<DrawerPage> {
               ),
               children: <Widget>[
                 Container(
-                  padding: EdgeInsets.only(left: 90),
+                  padding: EdgeInsets.only(left: 90, top: 17),
                   alignment: Alignment(-1.0, 0.0),
-                  child: Text(
-                    "Operadores",
-                    style: TextStyle(
-                      fontFamily: "Lato",
-                      fontWeight: FontWeight.normal,
-                      fontSize: 17,
-                      color: Color(0xFFAEAEAE),
+                  child: InkWell(
+                    child: Text(
+                      "Usuarios",
+                      style: TextStyle(
+                        fontFamily: "Lato",
+                        fontWeight: FontWeight.normal,
+                        fontSize: 17,
+                        color: Color(0xFFAEAEAE),
+                      ),
                     ),
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) {
+                          return BlocProvider(
+                            bloc: UserBloc(),
+                            child: UsersAdminPage(),
+                          );
+                        }),
+                      );
+                    },
                   ),
                 ),
                 Container(
                   padding: EdgeInsets.only(left: 90, top: 17),
                   alignment: Alignment(-1.0, 0.0),
-                  child: Text(
-                    "Usuarios",
-                    style: TextStyle(
-                      fontFamily: "Lato",
-                      fontWeight: FontWeight.normal,
-                      fontSize: 17,
-                      color: Color(0xFFAEAEAE),
+                  child: InkWell(
+                    child: Text(
+                      "Servicios",
+                      style: TextStyle(
+                        fontFamily: "Lato",
+                        fontWeight: FontWeight.normal,
+                        fontSize: 17,
+                        color: Color(0xFFAEAEAE),
+                      ),
                     ),
-                  ),
-                ),
-                Container(
-                  padding: EdgeInsets.only(left: 90, top: 17),
-                  alignment: Alignment(-1.0, 0.0),
-                  child: Text(
-                    "Servicios",
-                    style: TextStyle(
-                      fontFamily: "Lato",
-                      fontWeight: FontWeight.normal,
-                      fontSize: 17,
-                      color: Color(0xFFAEAEAE),
-                    ),
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) {
+                          return BlocProvider<ProductBloc>(
+                            bloc: ProductBloc(),
+                            child: ProductAdminPage(),
+                          );
+                        }),
+                      );
+                    },
                   ),
                 ),
                 Container(
                   padding: EdgeInsets.only(left: 90, top: 17, bottom: 10),
                   alignment: Alignment(-1.0, 0.0),
-                  child: Text(
-                    "Sedes",
-                    style: TextStyle(
-                      fontFamily: "Lato",
-                      fontWeight: FontWeight.normal,
-                      fontSize: 17,
-                      color: Color(0xFFAEAEAE),
+                  child: InkWell(
+                    child: Text(
+                      "Sedes",
+                      style: TextStyle(
+                        fontFamily: "Lato",
+                        fontWeight: FontWeight.normal,
+                        fontSize: 17,
+                        color: Color(0xFFAEAEAE),
+                      ),
                     ),
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) {
+                          return BlocProvider<BlocLocation>(
+                            bloc: BlocLocation(),
+                            child: LocationsAdminPage(),
+                          );
+                        }),
+                      );
+                    },
                   ),
                 ),
               ],

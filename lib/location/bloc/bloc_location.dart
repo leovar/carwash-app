@@ -22,6 +22,10 @@ class BlocLocation implements Bloc {
 
   List<Location> buildLocations(List<DocumentSnapshot> locationsListSnapshot) => _locationRepository.buildLocations(locationsListSnapshot);
 
+  Future<List<Location>> getLocationsList() => _locationRepository.getLocations();
+
+  DocumentReference getDocumentReferenceLocationById(String idLocation) => _locationRepository.getDocumentReferenceLocationById(idLocation);
+
   @override
   void dispose() {
   }

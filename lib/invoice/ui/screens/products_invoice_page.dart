@@ -1,4 +1,5 @@
 import 'package:car_wash_app/invoice/model/additional_product.dart';
+import 'package:car_wash_app/invoice/model/header_services.dart';
 import 'package:car_wash_app/invoice/ui/screens/additional_products_page.dart';
 import 'package:car_wash_app/invoice/ui/widgets/item_product.dart';
 import 'package:car_wash_app/product/bloc/product_bloc.dart';
@@ -6,11 +7,12 @@ import 'package:car_wash_app/product/model/product.dart';
 import 'package:flutter/material.dart';
 
 class ProductsInvoicePage extends StatefulWidget {
-  Function(List<Product>) callbackSetProductsList;
-  Function(List<AdditionalProduct>) cbAdditionalProducts;
+  final Function(List<Product>) callbackSetProductsList;
+  final Function(List<AdditionalProduct>) cbAdditionalProducts;
   List<Product> productListCallback;
-  List<AdditionalProduct> additionalProductListCb;
-  final vehicleTypeSelect;
+  final List<AdditionalProduct> additionalProductListCb;
+  final HeaderServices vehicleTypeSelect;
+  final String idLocation;
 
   ProductsInvoicePage(
       {Key key,
@@ -18,7 +20,9 @@ class ProductsInvoicePage extends StatefulWidget {
       this.productListCallback,
       this.cbAdditionalProducts,
       this.additionalProductListCb,
-      this.vehicleTypeSelect});
+      this.vehicleTypeSelect,
+      this.idLocation,
+      });
 
   @override
   State<StatefulWidget> createState() {
@@ -56,7 +60,7 @@ class _ProductsInvoicePage extends State<ProductsInvoicePage> {
 
   Widget getProducts() {
     return StreamBuilder(
-      stream: _productBloc.productsStream,
+      stream: _productBloc.productsByLocationStream(widget.idLocation, widget.vehicleTypeSelect.uid),
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.waiting:
@@ -69,7 +73,7 @@ class _ProductsInvoicePage extends State<ProductsInvoicePage> {
   }
 
   Widget listProducts(AsyncSnapshot snapshot) {
-    List<Product> getProductList = _productBloc.buildProduct(snapshot.data.documents);
+    List<Product> getProductList = _productBloc.buildProductByLocation(snapshot.data.documents);
     List<Product> productGet = getProductList;
     if (widget.productListCallback.length > 0) {
       widget.productListCallback.forEach((f) {

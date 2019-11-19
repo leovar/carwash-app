@@ -13,6 +13,7 @@ class Location extends Equatable {
   final int initConcec;
   final int finalConsec;
   final Timestamp creationDate;
+  bool isSelected;
 
   Location({
     this.id,
@@ -24,6 +25,7 @@ class Location extends Equatable {
     this.initConcec,
     this.finalConsec,
     this.creationDate,
+    this.isSelected,
   });
 
   factory Location.fromJson(Map<String, dynamic> json, {String id}) {
@@ -37,6 +39,7 @@ class Location extends Equatable {
       initConcec: json['initConcec'],
       finalConsec: json['finalConsec'],
       creationDate: json['creationDate'],
+      isSelected: false
     );
   }
 
