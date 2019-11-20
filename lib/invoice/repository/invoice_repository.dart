@@ -55,8 +55,6 @@ class InvoiceRepository {
         .collection(FirestoreCollections.users)
         .where(FirestoreCollections.usersFieldIsOperator, isEqualTo: true)
         .where(FirestoreCollections.usersFieldUserActive, isEqualTo: true)
-        .where(FirestoreCollections.usersFieldLocations,
-            arrayContains: locationReference)
         .snapshots();
     return querySnapshot;
   }
@@ -95,8 +93,6 @@ class InvoiceRepository {
         .collection(FirestoreCollections.users)
         .where(FirestoreCollections.usersFieldIsCoordinator, isEqualTo: true)
         .where(FirestoreCollections.usersFieldUserActive, isEqualTo: true)
-        .where(FirestoreCollections.usersFieldLocations,
-            arrayContains: locationReference)
         .snapshots();
     return querySnapshot;
   }
