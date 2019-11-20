@@ -72,7 +72,7 @@ class _DrawerPage extends State<DrawerPage> {
                   ),
                   shape: BoxShape.circle,
                   image: DecorationImage(
-                    fit: BoxFit.fill,
+                    fit: BoxFit.cover,
                     image: (widget.usuario.photoUrl == null ||
                             widget.usuario.photoUrl.isEmpty)
                         ? AssetImage('assets/images/profile_placeholder.png')

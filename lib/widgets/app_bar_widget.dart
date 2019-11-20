@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'header_menu_page.dart';
 
 class AppBarWidget extends StatelessWidget{
-  String photoUserUrl;
+  final String photoUserUrl;
   GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey();
-  bool showDrawer = true;
+  final bool showDrawer;
 
   AppBarWidget(this._scaffoldKey, this.photoUserUrl, this.showDrawer);
 
@@ -32,5 +32,4 @@ class AppBarWidget extends StatelessWidget{
       return Container();
     }
   }
-
 }

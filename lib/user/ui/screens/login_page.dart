@@ -56,6 +56,7 @@ class _LoginPage extends State<LoginPage> {
       stream: userBloc.authStatus,
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         //el snapshot tiene la data que se esta retornando
+        print(snapshot);
         if (!snapshot.hasData || snapshot.hasError) {
           return loginScreen();
         } else {

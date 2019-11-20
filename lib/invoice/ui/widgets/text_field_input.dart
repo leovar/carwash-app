@@ -16,6 +16,7 @@ class TextFieldInput extends StatefulWidget {
   final bool autofocus;
   final int maxLength;
   final int maxLines;
+  final bool isPassword;
 
   TextFieldInput({
     Key key,
@@ -32,6 +33,7 @@ class TextFieldInput extends StatefulWidget {
     this.autofocus = false,
     this.maxLength,
     this.maxLines = 1,
+    this.isPassword = false,
   });
 
   @override
@@ -46,6 +48,7 @@ class _TextFieldInput extends State<TextFieldInput> {
     return TextField(
       controller: widget.textController,
       maxLines: widget.maxLines,
+      obscureText: widget.isPassword,
       maxLength: widget.maxLength ?? null,
       autofocus: widget.autofocus ?? false,
       focusNode: widget.focusNode,

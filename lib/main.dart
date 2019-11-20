@@ -25,6 +25,7 @@ class MyApp extends StatelessWidget {
           primarySwatch: Colors.blue,
           secondaryHeaderColor: Color(0xFF27AEBB),
           primaryColor: Color(0xFF27AEBB),
+          accentColor: Color(0xFF59B258),
         ),
         home: LoginPage(),
         //HomePage(),//LoginPage(),

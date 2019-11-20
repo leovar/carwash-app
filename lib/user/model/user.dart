@@ -8,7 +8,7 @@ class User extends Equatable {
   final String uid;
   final String name;
   final String email;
-  final String photoUrl;
+  String photoUrl;
   final Timestamp lastSignIn;
   final bool active;
   final List<DocumentReference> locations;

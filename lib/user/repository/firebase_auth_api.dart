@@ -1,5 +1,8 @@
+import 'package:car_wash_app/user/model/user.dart';
 import 'package:car_wash_app/widgets/messages_utils.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -67,6 +70,29 @@ class FirebaseAuthApi {
 
       FirebaseUser user = authResult.user;
       return user;
+  }
+
+  Future<String> registerEmailUser(String email, String password) async {
+    FirebaseOptions options = FirebaseOptions(
+        googleAppID: 'carwash-app-9a2c2',
+        apiKey: 'AIzaSyCZZfdnJ3eEZ9RIMuQtQYDABArHjTSjFxY',
+        databaseURL: 'https://carwash-app-9a2c2.firebaseio.com',
+        projectID: 'carwash-app-9a2c2'
+    );
+
+    final Future<FirebaseApp> newApp = FirebaseApp.configure(name: 'secondApp', options: options);
+    final FirebaseAuth secondInstance = FirebaseAuth.fromApp(
+        await newApp
+    );
+    AuthResult  auth = await secondInstance.createUserWithEmailAndPassword(email: email, password: password);
+
+    String userUid = auth.user.uid;
+    secondInstance.signOut();
+    return userUid;
+  }
+
+  void resetEmailPassword(String email) async {
+    _authApi.sendPasswordResetEmail (email: email);
   }
 
   singOut() async {

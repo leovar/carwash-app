@@ -14,6 +14,10 @@ class AuthRepository {
     return _firebaseAuthApi.emailAndPasswordSignIn(email, password);
   }
 
+  Future<String> registerEmailUser(String email, String password) {
+    return _firebaseAuthApi.registerEmailUser(email, password);
+  }
+
   singOut() => _firebaseAuthApi.singOut();
 
 }
