@@ -5,6 +5,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class LocationRepository {
   final Firestore _db = Firestore.instance;
 
+  void updateLocationDataRepository(Location location) async {
+    DocumentReference ref = _db.collection(FirestoreCollections.locations).document(location.id);
+    return await ref.setData(location.toJson(), merge: true);
+  }
+
   DocumentReference getDocumentReferenceLocationById(String idLocation) {
     return _db.document('${FirestoreCollections.locations}/$idLocation');
   }
@@ -24,6 +29,23 @@ class LocationRepository {
   List<Location> buildLocations(List<DocumentSnapshot> placesListSnapshot){
     List<Location> locationsList = List<Location>();
     placesListSnapshot.forEach((p) {
+      Location loc = Location.fromJson(p.data, id: p.documentID);
+      locationsList.add(loc);
+    });
+    return locationsList;
+  }
+
+  ///Get all locations by id
+  Stream<QuerySnapshot> getAllLocationsStream() {
+    final querySnapshot = this
+        ._db
+        .collection(FirestoreCollections.locations)
+        .snapshots();
+    return querySnapshot;
+  }
+  List<Location> buildGetAllLocations(List<DocumentSnapshot> locationsListSnapshot) {
+    List<Location> locationsList = <Location>[];
+    locationsListSnapshot.forEach((p) {
       Location loc = Location.fromJson(p.data, id: p.documentID);
       locationsList.add(loc);
     });

@@ -13,6 +13,10 @@ class BlocLocation implements Bloc {
   //1. Obtener locaciones desde la bd
   //2. Crear o Editar locaciones
 
+  void updateLocationData(Location location) async {
+    _locationRepository.updateLocationDataRepository(location);
+  }
+
   Future<DocumentReference> getLocationReference(String locationId) async {
     return await _locationRepository.getLocationReference(locationId);
   }
@@ -25,6 +29,9 @@ class BlocLocation implements Bloc {
   Future<List<Location>> getLocationsList() => _locationRepository.getLocations();
 
   DocumentReference getDocumentReferenceLocationById(String idLocation) => _locationRepository.getDocumentReferenceLocationById(idLocation);
+
+  Stream<QuerySnapshot> get allLocationsStream => _locationRepository.getAllLocationsStream();
+  List<Location> buildAllLocations(List<DocumentSnapshot> locationsListSnapshot) => _locationRepository.buildGetAllLocations(locationsListSnapshot);
 
   @override
   void dispose() {

@@ -1,7 +1,11 @@
 import 'package:car_wash_app/location/bloc/bloc_location.dart';
+import 'package:car_wash_app/location/model/location.dart';
+import 'package:car_wash_app/location/ui/widgets/item_location_admin_list.dart';
 import 'package:car_wash_app/user/bloc/bloc_user.dart';
 import 'package:flutter/material.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
+
+import 'create_location_admin_page.dart';
 
 class LocationsAdminPage extends StatefulWidget{
   @override
@@ -10,6 +14,7 @@ class LocationsAdminPage extends StatefulWidget{
 
 class _LocationsAdminPage extends State<LocationsAdminPage> {
   BlocLocation _locationsBloc;
+  List<Location> _locationList = <Location>[];
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +46,80 @@ class _LocationsAdminPage extends State<LocationsAdminPage> {
 
   Widget _bodyContainer() {
     return Container(
+      padding: EdgeInsets.only(bottom: 17),
+      color: Colors.white,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          _listLocationsStream(),
+          _buttonNewUser(),
+        ],
+      ),
+    );
+  }
 
+  Widget _listLocationsStream() {
+    return StreamBuilder(
+      stream: _locationsBloc.allLocationsStream,
+      builder: (context, snapshot) {
+        switch (snapshot.connectionState) {
+          case ConnectionState.waiting:
+            return CircularProgressIndicator();
+          default:
+            return _getDataLocationsList(snapshot);
+        }
+      },
+    );
+  }
+
+  Widget _getDataLocationsList(AsyncSnapshot snapshot) {
+    _locationList = _locationsBloc.buildAllLocations(snapshot.data.documents);
+    return Flexible(
+      child: ListView.builder(
+        itemCount: _locationList.length,
+        scrollDirection: Axis.vertical,
+        shrinkWrap: true,
+        itemBuilder: (BuildContext context, int index) {
+          return ItemLocationAdminList(_locationList, index);
+        },
+      ),
+    );
+  }
+
+  Widget _buttonNewUser() {
+    return Container(
+      height: 60,
+      margin: EdgeInsets.only(top: 8,),
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: RaisedButton(
+          padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
+          color: Color(0xFF59B258),
+          child: Text(
+            "Nueva Sede",
+            style: TextStyle(
+              fontFamily: "Lato",
+              decoration: TextDecoration.none,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              fontSize: 19,
+            ),
+          ),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) {
+                  return BlocProvider(
+                    bloc: BlocLocation(),
+                    child: CreateLocationAdminPage(),
+                  );
+                },
+              ),
+            );
+          },
+        ),
+      ),
     );
   }
 }
