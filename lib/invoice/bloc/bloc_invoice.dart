@@ -1,15 +1,13 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:car_wash_app/invoice/model/additional_product.dart';
 import 'package:car_wash_app/invoice/model/invoice.dart';
 import 'package:car_wash_app/invoice/repository/invoice_repository.dart';
-import 'package:car_wash_app/invoices_list/model/invoice_list_model.dart';
 import 'package:car_wash_app/product/model/product.dart';
 import 'package:car_wash_app/user/model/user.dart';
-import 'package:car_wash_app/vehicle/model/vehicle.dart';
 import 'package:car_wash_app/vehicle/repository/vehicle_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 import 'package:path/path.dart';
@@ -38,6 +36,14 @@ class BlocInvoice implements Bloc {
         await _invoiceRepository.updateInvoiceImages(invoiceId, imageUrl);
       }
     }
+
+    if (invoice.imageFirm != null) {
+      final pathImage = '$invoiceId/before/firm';
+      StorageTaskSnapshot storageTaskSnapshot = await _invoiceRepository.uploadImageFirmInvoice(pathImage, invoice.imageFirm);
+      String imageUrl = await storageTaskSnapshot.ref.getDownloadURL();
+      await _invoiceRepository.updateInvoiceImages(invoiceId, imageUrl);
+    }
+
     return ref;
   }
 
@@ -82,6 +88,14 @@ class BlocInvoice implements Bloc {
   Future<List<Product>> getInvoiceProducts (String idInvoice) => _invoiceRepository.getInvoiceProducts(idInvoice);
 
   Future<int> getLastConsecutiveByLocation(DocumentReference locationReference) => _invoiceRepository.getLastConsecutiveByLocation(locationReference);
+
+  Future<List<Product>> getProductsByInvoice(String invoiceId){
+    return _invoiceRepository.getProductsByIdInvoice(invoiceId);
+  }
+
+  Future<List<String>> getInvoiceImages(String invoiceId) {
+    return _invoiceRepository.getImagesByIdInvoice(invoiceId);
+  }
 
 
   @override

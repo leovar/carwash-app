@@ -17,6 +17,7 @@ class Product extends Equatable {
   final bool productActive;
   final int vehicleTypeUid;
   bool isSelected;
+  final bool isAdditional;
 
   Product({
     this.id,
@@ -29,6 +30,7 @@ class Product extends Equatable {
     this.productActive,
     this.vehicleTypeUid,
     this.isSelected,
+    this.isAdditional,
   });
 
   factory Product.fromJson(Map<String, dynamic> json, {String id}) {
@@ -47,8 +49,31 @@ class Product extends Equatable {
       vehicleType: json['vehicleType'],
       productActive : json['productActive'],
       vehicleTypeUid : json['vehicleTypeUid'],
+      isAdditional: json['isAdditional'],
       locations: locationsListDb,
       isSelected: false,
+    );
+  }
+
+  factory Product.fromJsonProInvoice(Map<String, dynamic> json, {String id}) {
+    List<DocumentReference> locationsListDb = <DocumentReference>[];
+    List locationsList = json['locations'];
+    locationsList?.forEach((drLocation) {
+      locationsListDb.add(drLocation);
+    });
+
+    return Product(
+      id: json['productId'],
+      productName: json['productName'],
+      price: json['price'].toDouble(),
+      iva: json['iva'].toDouble(),
+      ivaPercent: json['ivaPercent'],
+      vehicleType: json['vehicleType'],
+      productActive : json['productActive'],
+      vehicleTypeUid : json['vehicleTypeUid'],
+      isAdditional: json['isAdditional'],
+      locations: locationsListDb,
+      isSelected: true,
     );
   }
 
@@ -70,13 +95,36 @@ class Product extends Equatable {
       double price,
       double iva,
       bool isAdditional,
+      String productId,
       ) {
     return {
       'productName': productName,
       'price': price,
       'iva': iva,
       'isAdditional': isAdditional,
+      'productId': productId,
     };
+  }
+
+  factory Product.copyProductInvoiceWith({
+    @required Product origin,
+    bool isSelected,
+    double price,
+    double iva,
+  }) {
+    return Product(
+      id: origin.id,
+      productName: origin.productName,
+      price: price ?? origin.price,
+      iva: iva ?? origin.iva,
+      ivaPercent: origin.ivaPercent,
+      vehicleType: origin.vehicleType,
+      locations: origin.locations,
+      productActive: origin.productActive,
+      vehicleTypeUid: origin.vehicleTypeUid,
+      isSelected: isSelected ?? origin.isSelected,
+      isAdditional: origin.isAdditional,
+    );
   }
 
   @override
@@ -87,9 +135,9 @@ class Product extends Equatable {
     iva,
     ivaPercent,
     vehicleType,
+    locations,
     productActive,
     vehicleTypeUid,
     isSelected,
-    locations,
   ];
 }

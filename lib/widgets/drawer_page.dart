@@ -9,21 +9,27 @@ import 'package:car_wash_app/user/ui/screens/users_admin_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'keys.dart';
 
 class DrawerPage extends StatefulWidget {
-  User usuario;
-
-  DrawerPage(this.usuario);
 
   @override
-  State<StatefulWidget> createState() {
-    // TODO: implement createState
-    return _DrawerPage();
-  }
+  State<StatefulWidget> createState() => _DrawerPage();
 }
 
 class _DrawerPage extends State<DrawerPage> {
   UserBloc userBloc;
+  String _photoUser = '';
+  String _userName = '';
+  String _userEmail = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _getPreferences();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +46,7 @@ class _DrawerPage extends State<DrawerPage> {
                 color: Colors.white,
               ),
               accountName: Text(
-                widget.usuario.name ?? '',
+                _userName ?? '',
                 style: TextStyle(
                   fontFamily: "Lato",
                   fontWeight: FontWeight.w600,
@@ -49,7 +55,7 @@ class _DrawerPage extends State<DrawerPage> {
                 ),
               ),
               accountEmail: Text(
-                widget.usuario.email ?? '',
+                _userEmail ?? '',
               ),
               otherAccountsPictures: <Widget>[
                 IconButton(
@@ -73,10 +79,10 @@ class _DrawerPage extends State<DrawerPage> {
                   shape: BoxShape.circle,
                   image: DecorationImage(
                     fit: BoxFit.cover,
-                    image: (widget.usuario.photoUrl == null ||
-                            widget.usuario.photoUrl.isEmpty)
+                    image: (_photoUser == null ||
+                        _photoUser.isEmpty)
                         ? AssetImage('assets/images/profile_placeholder.png')
-                        : NetworkImage(widget.usuario.photoUrl),
+                        : NetworkImage(_photoUser),
                   ),
                 ),
               ),
@@ -260,4 +266,14 @@ class _DrawerPage extends State<DrawerPage> {
           ],
         ),
       );
+
+  void _getPreferences() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    String userId = pref.getString(Keys.userId);
+    setState(() {
+      _photoUser = pref.getString(Keys.photoUserUrl);
+      _userName = pref.getString(Keys.userName);
+      _userEmail = pref.getString(Keys.userEmail);
+    });
+  }
 }

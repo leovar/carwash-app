@@ -13,6 +13,7 @@ class FieldsInvoice extends StatefulWidget {
   final bool validatePlaca;
   final focusClient;
   final autofocusPlaca;
+  final editForm;
 
   FieldsInvoice({
     Key key,
@@ -25,7 +26,8 @@ class FieldsInvoice extends StatefulWidget {
     this.enableForm,
     this.validatePlaca,
     this.focusClient,
-    this.autofocusPlaca
+    this.autofocusPlaca,
+    this.editForm,
   });
 
   @override
@@ -41,6 +43,7 @@ class _FieldsInvoice extends State<FieldsInvoice> {
       children: <Widget>[
         //Regular expression para dejar pasar solo letras y numeros
         TextFieldInput(
+          enable: widget.editForm,
           labelText: "Placa",
           textController: widget.textPlaca,
           isUpperCase: true,

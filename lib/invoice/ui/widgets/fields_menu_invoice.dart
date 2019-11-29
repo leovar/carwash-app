@@ -15,19 +15,22 @@ class FieldsMenusInvoice extends StatefulWidget {
   final selectedCoordinator;
   final locationReference;
   final bool enableForm;
+  final bool editForm;
 
-  FieldsMenusInvoice(
-      {Key key,
-      this.listCountOperators,
-      this.listCountCoordinators,
-      this.setOperator,
-      this.setCoordinator,
-      this.cbSetOperatorsList,
-      this.cbSetCoordinatorsList,
-      this.selectedOperator,
-      this.selectedCoordinator,
-      this.locationReference,
-      this.enableForm});
+  FieldsMenusInvoice({
+    Key key,
+    this.listCountOperators,
+    this.listCountCoordinators,
+    this.setOperator,
+    this.setCoordinator,
+    this.cbSetOperatorsList,
+    this.cbSetCoordinatorsList,
+    this.selectedOperator,
+    this.selectedCoordinator,
+    this.locationReference,
+    this.enableForm,
+    this.editForm,
+  });
 
   @override
   State<StatefulWidget> createState() {
@@ -91,6 +94,7 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
       listString: _listOperators,
       valueSelect: widget.selectedOperator,
       enableForm: widget.enableForm,
+      editForm: widget.editForm,
     );
   }
 
@@ -101,6 +105,7 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
       listString: _listOperators,
       valueSelect: widget.selectedOperator,
       enableForm: widget.enableForm,
+      editForm: widget.editForm,
     );
   }
 

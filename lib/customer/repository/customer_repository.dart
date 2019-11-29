@@ -25,6 +25,20 @@ class CustomerRepository {
     return null;
   }
 
+  Future<Customer> getCustomerByIdCustomer(
+      String idCustomer) async {
+    final querySnapshot = await this
+        ._db
+        .collection(FirestoreCollections.customers)
+        .document(idCustomer)
+        .get();
+
+    return Customer.fromJson(
+      querySnapshot.data,
+      id: querySnapshot.documentID,
+    );
+  }
+
   Future<DocumentReference> getCustomerFilter(String telephoneNumber, String email, String name) async {
     final querySnapshot = await this
         ._db

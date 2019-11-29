@@ -5,4 +5,6 @@ class Keys {
   static String locationFinalCount = 'locationFinalCount';
   static String photoUserUrl = 'photoUrl';
   static String userId = 'userId';
+  static String userName = 'userName';
+  static String userEmail = 'userEmail';
 }

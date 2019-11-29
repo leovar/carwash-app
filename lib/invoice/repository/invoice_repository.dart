@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:car_wash_app/invoice/model/additional_product.dart';
 import 'package:car_wash_app/invoice/model/invoice.dart';
@@ -20,8 +21,10 @@ class InvoiceRepository {
 
   /// Save and Update Invoice
   Future<DocumentReference> updateInvoiceData(Invoice invoice) async {
-    CollectionReference ref = _db.collection(FirestoreCollections.invoices);
-    return await ref.add(invoice.toJson());
+    DocumentReference ref =
+        _db.collection(FirestoreCollections.invoices).document(invoice.id);
+    ref.setData(invoice.toJson(), merge: true);
+    return ref;
   }
 
   /// Save invoice images in firebase storage
@@ -29,6 +32,18 @@ class InvoiceRepository {
       String path, File imageFile) async {
     StorageUploadTask storageUploadTask = _storageReference.child(path).putData(
           imageFile.readAsBytesSync(),
+          StorageMetadata(
+            contentType: 'image/jpeg',
+          ),
+        );
+    return storageUploadTask.onComplete;
+  }
+
+  ///Save Firm Image in firebase storage
+  Future<StorageTaskSnapshot> uploadImageFirmInvoice(
+      String path, Uint8List imageFile) async {
+    StorageUploadTask storageUploadTask = _storageReference.child(path).putData(
+          imageFile,
           StorageMetadata(
             contentType: 'image/jpeg',
           ),
@@ -149,7 +164,12 @@ class InvoiceRepository {
         .document(invoiceId)
         .collection(FirestoreCollections.products)
         .add(Product().toJsonInvoiceProduct(
-            product.productName, product.price, product.iva, false));
+          product.productName,
+          product.price,
+          product.iva,
+          false,
+          product.id,
+        ));
   }
 
   /// Save Invoice Additional Products
@@ -161,10 +181,12 @@ class InvoiceRepository {
         .document(invoiceId)
         .collection(FirestoreCollections.products)
         .add(Product().toJsonInvoiceProduct(
-            additionalProduct.productName,
-            double.parse(additionalProduct.productValue),
-            additionalProduct.productIva,
-            true));
+          additionalProduct.productName,
+          double.parse(additionalProduct.productValue),
+          additionalProduct.productIva,
+          true,
+          null,
+        ));
   }
 
   ///Get invoices list from current Month
@@ -175,7 +197,8 @@ class InvoiceRepository {
         .collection(FirestoreCollections.invoices)
         .where(FirestoreCollections.invoiceFieldCreationDate,
             isGreaterThanOrEqualTo: Timestamp.fromDate(date))
-        .where(FirestoreCollections.invoiceFieldLocation, isEqualTo: locationReference)
+        .where(FirestoreCollections.invoiceFieldLocation,
+            isEqualTo: locationReference)
         .snapshots();
     return querySnapshot;
   }
@@ -233,5 +256,46 @@ class InvoiceRepository {
       }
     }
     return 0;
+  }
+
+  /// Get products per invoice
+  Future<List<Product>> getProductsByIdInvoice(String invoiceId) async {
+    List<Product> productList = <Product>[];
+    final querySnapshot = await this
+        ._db
+        .collection(FirestoreCollections.invoices)
+        .document(invoiceId)
+        .collection(FirestoreCollections.invoiceFieldProducts)
+        .getDocuments();
+
+    final documents = querySnapshot.documents;
+    if (documents.length > 0) {
+      documents.forEach((product) {
+        Product productGet = Product.fromJsonProInvoice(product.data,
+            id: product.documentID);
+        productList.add(productGet);
+      });
+    }
+    return productList;
+  }
+
+  /// Get invoices images
+  Future<List<String>> getImagesByIdInvoice(String invoiceId) async {
+    List<String> imageList = <String>[];
+    final querySnapshot = await this
+        ._db
+        .collection(FirestoreCollections.invoices)
+        .document(invoiceId)
+        .collection(FirestoreCollections.invoiceFieldImages)
+        .getDocuments();
+
+    final documents = querySnapshot.documents;
+    if (documents.length > 0) {
+      documents.forEach((product) {
+        String imageGet = product.data['imageUrl'];
+        imageList.add(imageGet);
+      });
+    }
+    return imageList;
   }
 }

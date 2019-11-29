@@ -1,4 +1,6 @@
 
+import 'dart:typed_data';
+
 import 'package:car_wash_app/customer/model/customer.dart';
 import 'package:car_wash_app/location/model/location.dart';
 import 'package:car_wash_app/product/model/product.dart';
@@ -30,6 +32,8 @@ class Invoice extends Equatable {
   final Timestamp creationDate;
   final List<String> invoiceImages;
   final List<Product> invoiceProducts;
+  final Uint8List imageFirm;
+  final bool approveDataProcessing;
 
   Invoice({
     this.id,
@@ -51,6 +55,8 @@ class Invoice extends Equatable {
     this.creationDate,
     this.invoiceImages,
     this.invoiceProducts,
+    this.imageFirm,
+    this.approveDataProcessing,
   });
 
   Map<String, dynamic> toJson() {
@@ -71,6 +77,7 @@ class Invoice extends Equatable {
       'locationName': this.locationName,
       'consecutive': this.consecutive,
       'creationDate': this.creationDate,
+      'approveDataProcessing': this.approveDataProcessing,
     };
   }
 
@@ -99,6 +106,7 @@ class Invoice extends Equatable {
       locationName: json['locationName'],
       consecutive: json['consecutive'],
       creationDate: json['creationDate'],
+      approveDataProcessing: json['approveDataProcessing'],
     );
   }
 
@@ -123,5 +131,6 @@ class Invoice extends Equatable {
     creationDate,
     invoiceImages,
     invoiceProducts,
+    approveDataProcessing,
   ];
 }

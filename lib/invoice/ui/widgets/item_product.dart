@@ -1,17 +1,17 @@
 import 'package:car_wash_app/product/model/product.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class ItemProduct extends StatefulWidget {
-  Function(List<Product>) productListCallback;
-  List<Product> productList;
-  int index;
+  final Function(List<Product>) productListCallback;
+  final List<Product> productList;
+  final int index;
+  final bool editForm;
 
-  ItemProduct(this.productListCallback, this.productList, this.index);
+  ItemProduct(this.productListCallback, this.productList, this.index, this.editForm);
 
   @override
-  State<StatefulWidget> createState() {
-    return _ItemProduct();
-  }
+  State<StatefulWidget> createState() => _ItemProduct();
 }
 
 class _ItemProduct extends State<ItemProduct> {
@@ -19,7 +19,7 @@ class _ItemProduct extends State<ItemProduct> {
   Widget build(BuildContext context) {
     return InkWell(
       splashColor: Colors.white,
-      onTap: () {
+      onTap: widget.editForm ? () {
         setState(() {
           if (widget.productList[widget.index].isSelected) {
             widget.productList[widget.index].isSelected = false;
@@ -28,12 +28,13 @@ class _ItemProduct extends State<ItemProduct> {
           }
           widget.productListCallback(widget.productList);
         });
-      },
+      } : null,
       child: itemDecoration(widget.productList[widget.index]),
     );
   }
 
   Widget itemDecoration(Product _itemProduct) {
+    final formatter = NumberFormat("#,###");
     return ConstrainedBox(
       constraints: BoxConstraints(
         minHeight: 70.0
@@ -52,7 +53,7 @@ class _ItemProduct extends State<ItemProduct> {
         child: Row(
           children: <Widget>[
             Container(
-              margin: EdgeInsets.only(left: 10),
+              margin: EdgeInsets.only(left: 10, right: 15),
               width: 30,
               child: _itemProduct.isSelected
                   ? Icon(
@@ -62,18 +63,37 @@ class _ItemProduct extends State<ItemProduct> {
               )
                   : null,
             ),
-            Expanded(
-              child: Container(
-                margin: EdgeInsets.only(left: 15),
-                child: Text(
-                  _itemProduct.productName,
-                  style: TextStyle(
-                    fontFamily: "Lato",
-                    decoration: TextDecoration.none,
-                    color: Color(0xFFAEAEAE),
-                    fontSize: 21,
+            Flexible(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Flexible(
+                    child: Text(
+                      _itemProduct.productName,
+                      style: TextStyle(
+                        fontFamily: "Lato",
+                        decoration: TextDecoration.none,
+                        color: Color(0xFFAEAEAE),
+                        fontSize: 21,
+                      ),
+                    ),
                   ),
-                ),
+                  Flexible(
+                    child: Container(
+                      margin: EdgeInsets.only(top: 4, bottom: 4),
+                      child: Text(
+                        '\$${formatter.format(_itemProduct.price)}',
+                        style: TextStyle(
+                          fontFamily: "Lato",
+                          color: Theme.of(context).accentColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],

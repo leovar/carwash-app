@@ -20,6 +20,7 @@ class MyApp extends StatelessWidget {
     return BlocProvider(
       bloc: UserBloc(),
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         title: 'Carwash Movil App',
         theme: ThemeData(
           primarySwatch: Colors.blue,

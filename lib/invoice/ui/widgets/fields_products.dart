@@ -13,6 +13,7 @@ class FieldsProducts extends StatefulWidget {
   final bool enableForm;
   final int selectedProductsCount;
   final String idLocation;
+  final bool editForm;
 
   FieldsProducts({
     Key key,
@@ -24,6 +25,7 @@ class FieldsProducts extends StatefulWidget {
     this.enableForm,
     this.selectedProductsCount,
     this.idLocation,
+    this.editForm,
   });
 
   @override
@@ -89,7 +91,7 @@ class _FieldsProducts extends State<FieldsProducts> {
                   size: 30,
                 ),
                 backgroundColor: Color(0xFFCCCCCC),
-                onPressed: widget.enableForm ?? true
+                onPressed: (widget.enableForm || !widget.editForm)
                     ? () {
                         Navigator.push(
                           context,
@@ -104,6 +106,7 @@ class _FieldsProducts extends State<FieldsProducts> {
                                   widget.additionalProductListCb,
                               vehicleTypeSelect: widget.vehicleTypeSelect,
                               idLocation: widget.idLocation,
+                              editForm: widget.editForm,
                             ),
                           ),
                         );

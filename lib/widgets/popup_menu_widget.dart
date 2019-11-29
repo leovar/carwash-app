@@ -9,6 +9,7 @@ class PopUpMenuWidget extends StatefulWidget {
   List<String> listString = <String>[];
   Function(String) selectValue;
   final bool enableForm;
+  final bool editForm;
 
   PopUpMenuWidget({
     Key key,
@@ -17,6 +18,7 @@ class PopUpMenuWidget extends StatefulWidget {
     this.listString,
     this.valueSelect,
     this.enableForm,
+    this.editForm,
   });
 
   @override
@@ -37,7 +39,7 @@ class _PopUpMenuWidget extends State<PopUpMenuWidget> {
     }
 
     return PopupMenuButton(
-      enabled: widget.enableForm?? true,
+      enabled: widget.enableForm ?? true,
       itemBuilder: (BuildContext context) {
         return widget.listString.map((String valueList) {
           return PopupMenuItem<String>(

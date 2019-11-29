@@ -46,6 +46,7 @@ dependencies:
   flutter_image_compress: ^0.6.3
   image_cropper: ^1.1.0
   image_picker: ^0.6.1+7
+  image: ^2.1.9
 
   #alerts-dialogs
   rflutter_alert: ^1.0.3

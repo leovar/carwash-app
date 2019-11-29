@@ -1,10 +1,13 @@
+import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:car_wash_app/customer/bloc/bloc_customer.dart';
 import 'package:car_wash_app/customer/model/customer.dart';
 import 'package:car_wash_app/invoice/bloc/bloc_invoice.dart';
 import 'package:car_wash_app/invoice/model/additional_product.dart';
 import 'package:car_wash_app/invoice/model/invoice.dart';
+import 'package:car_wash_app/invoice/ui/screens/draw_page.dart';
 import 'package:car_wash_app/invoice/ui/widgets/fields_products.dart';
 import 'package:car_wash_app/invoice/ui/widgets/radio_item.dart';
 import 'package:car_wash_app/location/bloc/bloc_location.dart';
@@ -23,6 +26,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
+import 'package:image/image.dart' as imagePack;
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:popup_menu/popup_menu.dart';
@@ -34,6 +38,10 @@ import 'fields_invoice.dart';
 import 'fields_menu_invoice.dart';
 
 class FormInvoice extends StatefulWidget {
+  final Invoice editInvoice;
+
+  FormInvoice(this.editInvoice);
+
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
@@ -49,6 +57,7 @@ class _FormInvoice extends State<FormInvoice> {
   final _userBloc = UserBloc();
   final _locationBloc = BlocLocation();
   bool _enableForm;
+  bool _editForm = true;
 
   ///global variables
   //Esta variable _scaffoldKey se usa para poder abrir el drawer desde un boton diferente al que se coloca por defecto en el AppBar
@@ -56,6 +65,8 @@ class _FormInvoice extends State<FormInvoice> {
   GlobalKey btnAddImage = GlobalKey();
   List<String> imageList = [];
   bool _sendEmail = false;
+  bool _approveDataProcessing = false;
+  Uint8List _imageFirmInMemory;
   String _placa = '';
   List<HeaderServices> vehicleTypeList = new List<HeaderServices>();
   HeaderServices vehicleTypeSelected;
@@ -112,6 +123,10 @@ class _FormInvoice extends State<FormInvoice> {
         "assets/images/icon_motorcycle.png"));
     vehicleTypeList[0].isSelected = true;
     vehicleTypeSelected = vehicleTypeList[0];
+    if (widget.editInvoice != null) {
+      _editInvoice(widget.editInvoice);
+      _editForm = false;
+    }
   }
 
   @override
@@ -150,10 +165,12 @@ class _FormInvoice extends State<FormInvoice> {
                 Container(
                   height: 240,
                   child: CarouselCarsWidget(
-                      callbackDeleteImage: _deleteImageList,
-                      imgList: imageList),
+                    callbackDeleteImage: _deleteImageList,
+                    imgList: imageList,
+                    editForm: _editForm,
+                  ),
                 ),
-                numeroDeFactura(),
+                _invoiceNumber(),
                 containerFieldsInvoice(),
               ],
             ),
@@ -179,25 +196,27 @@ class _FormInvoice extends State<FormInvoice> {
         itemBuilder: (BuildContext context, int index) {
           return InkWell(
             splashColor: Colors.white,
-            onTap: () {
-              setState(() {
-                vehicleTypeList
-                    .forEach((element) => element.isSelected = false);
-                vehicleTypeList[index].isSelected = true;
-                vehicleTypeSelected = vehicleTypeList[index];
-                _listAdditionalProducts = <AdditionalProduct>[];
-                _listProduct = <Product>[];
-              });
-            },
+            onTap: _editForm
+                ? () {
+                    setState(() {
+                      vehicleTypeList
+                          .forEach((element) => element.isSelected = false);
+                      vehicleTypeList[index].isSelected = true;
+                      vehicleTypeSelected = vehicleTypeList[index];
+                      _listAdditionalProducts = <AdditionalProduct>[];
+                      _listProduct = <Product>[];
+                    });
+                  }
+                : null,
             child: RadioItem(vehicleTypeList[index]),
           );
         },
       );
 
-  Widget numeroDeFactura() {
+  Widget _invoiceNumber() {
     return InfoHeaderContainer(
       image: 'assets/images/icon_nueva_factura_white.png',
-      textInfo: 'Nueva Factura',
+      textInfo: _editForm ? 'Nueva Factura' : 'Factura Nro ${widget.editInvoice.consecutive}',
     );
   }
 
@@ -228,11 +247,10 @@ class _FormInvoice extends State<FormInvoice> {
                 finalEditPlaca: _onFinalEditPlaca,
                 enableForm: _enableForm,
                 focusClient: _clientFocusNode,
-                autofocusPlaca: true,
+                autofocusPlaca: widget.editInvoice == null ? true : false,
+                editForm: _editForm,
               ),
-              SizedBox(
-                height: 9,
-              ),
+              SizedBox(height: 9),
               FieldsMenusInvoice(
                 listCountOperators: _listOperatorsCount,
                 listCountCoordinators: _listCoordinatorsCount,
@@ -244,10 +262,9 @@ class _FormInvoice extends State<FormInvoice> {
                 selectedCoordinator: _selectCoordinator,
                 locationReference: _locationReference,
                 enableForm: _enableForm,
+                editForm: _editForm,
               ),
-              SizedBox(
-                height: 9,
-              ),
+              SizedBox(height: 9),
               FieldsProducts(
                 callbackProductsList: _setProductsDb,
                 productListCallback: _listProduct,
@@ -259,14 +276,22 @@ class _FormInvoice extends State<FormInvoice> {
                 selectedProductsCount:
                     _listProduct.where((f) => f.isSelected).toList().length +
                         _listAdditionalProducts.length,
+                editForm: _editForm,
               ),
-              SizedBox(
-                height: 9,
+              SizedBox(height: 9),
+              Visibility(
+                visible: _editForm,
+                child: _showDraw(),
               ),
-              saveInvoice(),
-              SizedBox(
-                height: 9,
+              Visibility(
+                visible: _editForm,
+                child: _saveInvoiceButton(),
               ),
+              Visibility(
+                visible: !_editForm,
+                child: _rePrintInvoice(),
+              ),
+              SizedBox(height: 9),
             ],
           ),
         ),
@@ -293,7 +318,44 @@ class _FormInvoice extends State<FormInvoice> {
         ),
       );
 
-  Widget saveInvoice() {
+  Widget _showDraw() {
+    return Container(
+      height: 80,
+      child: Align(
+        alignment: Alignment.center,
+        child: RaisedButton(
+          padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
+          color: Color(0xFF59B258),
+          child: Text(
+            "FIRMAR",
+            style: TextStyle(
+              fontFamily: "Lato",
+              decoration: TextDecoration.none,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              fontSize: 19,
+            ),
+          ),
+          onPressed: _editForm
+              ? () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => DrawPage(
+                        changeValueApproveData: _callBackApproveDataprocessing,
+                        callBackChargeImageFirm: _callBackChargeFirm,
+                        approveDataProcessing: _approveDataProcessing,
+                      ),
+                    ),
+                  );
+                }
+              : null,
+        ),
+      ),
+    );
+  }
+
+  Widget _saveInvoiceButton() {
     return Container(
       height: 100,
       child: Align(
@@ -312,6 +374,30 @@ class _FormInvoice extends State<FormInvoice> {
             ),
           ),
           onPressed: _enableForm ?? true ? _saveInvoice : null,
+        ),
+      ),
+    );
+  }
+
+  Widget _rePrintInvoice() {
+    return Container(
+      height: 80,
+      child: Align(
+        alignment: Alignment.center,
+        child: RaisedButton(
+          padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
+          color: Color(0xFF59B258),
+          child: Text(
+            "IMPRIMIR FACTURA",
+            style: TextStyle(
+              fontFamily: "Lato",
+              decoration: TextDecoration.none,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              fontSize: 19,
+            ),
+          ),
+          onPressed: () {},
         ),
       ),
     );
@@ -434,6 +520,15 @@ class _FormInvoice extends State<FormInvoice> {
     _listCoordinatorsCount = _listCoordinators.length;
   }
 
+  ///Functions Image Firma
+  void _callBackApproveDataprocessing(bool value) {
+    _approveDataProcessing = value;
+  }
+
+  void _callBackChargeFirm(Uint8List imageFirm) {
+    _imageFirmInMemory = imageFirm;
+  }
+
   ///Functions Services or Products
   void _setProductsDb(List<Product> productListSelected) {
     _listProduct = productListSelected;
@@ -512,7 +607,6 @@ class _FormInvoice extends State<FormInvoice> {
         .show();
 
     try {
-
       DocumentReference _vehicleTypeRef;
       DocumentReference _customerReference;
       DocumentReference _operatorReference;
@@ -525,7 +619,7 @@ class _FormInvoice extends State<FormInvoice> {
       DocumentReference _userRef = await _userBloc.getCurrentUserReference();
 
       //Get Operator reference
-      if (_selectOperator.isNotEmpty ) {
+      if (_selectOperator.isNotEmpty) {
         _operatorReference = await _userBloc
             .getUserReferenceById(_listOperators.firstWhere((User user) {
           return user.name == _selectOperator;
@@ -540,10 +634,6 @@ class _FormInvoice extends State<FormInvoice> {
         }).uid);
       }
 
-      //Get VehicleType reference
-
-
-
       //Get Vehicle reference, save if not exist
       if (_vehicleReference == null) {
         Vehicle updateVehicle = Vehicle(
@@ -555,7 +645,7 @@ class _FormInvoice extends State<FormInvoice> {
           creationDate: Timestamp.now(),
         );
         DocumentReference vehicleRef =
-        await _blocVehicle.updateVehicle(updateVehicle);
+            await _blocVehicle.updateVehicle(updateVehicle);
         _vehicleReference = vehicleRef;
       }
 
@@ -573,7 +663,7 @@ class _FormInvoice extends State<FormInvoice> {
           vehicles: listVehicles,
         );
         DocumentReference customerRef =
-        await _customerBloc.updateCustomer(customer);
+            await _customerBloc.updateCustomer(customer);
         _customerReference = customerRef;
       } else {
         if (!_customer.vehicles.contains(_vehicleReference)) {
@@ -602,14 +692,16 @@ class _FormInvoice extends State<FormInvoice> {
       });
 
       //Get Consecutive
-      int _consecutive = await _blocInvoice.getLastConsecutiveByLocation(_locationReference);
+      int _consecutive =
+          await _blocInvoice.getLastConsecutiveByLocation(_locationReference);
       if (_consecutive == 0) {
         _consecutive = int.parse(_initConsecLocation);
       } else {
-        _consecutive ++;
+        _consecutive++;
       }
 
       final invoice = Invoice(
+        id: widget.editInvoice != null ? widget.editInvoice.id : null,
         consecutive: _consecutive,
         customer: _customerReference,
         vehicle: _vehicleReference,
@@ -627,14 +719,16 @@ class _FormInvoice extends State<FormInvoice> {
         userCoordinatorName: _selectCoordinator,
         creationDate: Timestamp.now(),
         invoiceImages: imageList,
+        imageFirm: _imageFirmInMemory,
+        approveDataProcessing: _approveDataProcessing,
       );
       DocumentReference invoiceReference =
-      await _blocInvoice.saveInvoice(invoice);
+          await _blocInvoice.saveInvoice(invoice);
       String invoiceId = invoiceReference.documentID;
 
       //Save products list
       List<Product> _selectedProducts =
-      _listProduct.where((f) => f.isSelected).toList();
+          _listProduct.where((f) => f.isSelected).toList();
       if (_selectedProducts.length > 0) {
         _blocInvoice.saveInvoiceProduct(invoiceId, _selectedProducts);
       }
@@ -649,12 +743,56 @@ class _FormInvoice extends State<FormInvoice> {
       Navigator.pop(context); //Close popUp Save
       Navigator.pop(context); //Close form Create Invoice
 
-    } on PlatformException catch(e) {
+    } on PlatformException catch (e) {
       print('$e');
-      MessagesUtils.showAlert(context: context, title: 'Error al guardar la factura');
-    } catch(error) {
+      MessagesUtils.showAlert(
+          context: context, title: 'Error al guardar la factura');
+    } catch (error) {
       print('$error');
-      MessagesUtils.showAlert(context: context, title: 'Error al guardar la factura');
+      MessagesUtils.showAlert(
+          context: context, title: 'Error al guardar la factura');
     }
+  }
+
+  ///Set Fields Invoice to Edit
+  void _editInvoice(Invoice invoiceToEdit) async {
+    _textPlaca.text = invoiceToEdit.placa;
+    _selectOperator = invoiceToEdit.userOperatorName;
+    _selectCoordinator = invoiceToEdit.userCoordinatorName;
+    Customer editCustomer = await _customerBloc
+        .getCustomerByIdCustomer(invoiceToEdit.customer.documentID);
+    _textClient.text = editCustomer.name;
+    _textEmail.text = editCustomer.email;
+    _textPhoneNumber.text = editCustomer.phoneNumber;
+    vehicleTypeList.forEach((element) => element.isSelected = false);
+    vehicleTypeSelected = vehicleTypeList
+        .firstWhere((f) => f.uid == invoiceToEdit.uidVehicleType);
+    setState(() {
+      vehicleTypeList[vehicleTypeList.indexOf(vehicleTypeSelected)].isSelected =
+          true;
+    });
+    List<Product> listProducts =
+        await _blocInvoice.getProductsByInvoice(invoiceToEdit.id);
+    List<Product> productEditList = <Product>[];
+    listProducts.forEach((prodSelected) {
+      if (!prodSelected.isAdditional) {
+        productEditList.add(prodSelected);
+      } else {
+        AdditionalProduct addProd = AdditionalProduct(
+          prodSelected.productName,
+          prodSelected.price.toString(),
+          prodSelected.iva,
+        );
+        _listAdditionalProducts.add(addProd);
+      }
+    });
+    setState(() {
+      _listProduct = productEditList;
+    });
+    List<String> imagesList =
+        await _blocInvoice.getInvoiceImages(invoiceToEdit.id);
+    setState(() {
+      imageList = imagesList;
+    });
   }
 }

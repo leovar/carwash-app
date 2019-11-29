@@ -1,4 +1,5 @@
 import 'package:car_wash_app/invoice/model/invoice.dart';
+import 'package:car_wash_app/invoice/ui/screens/invoice_page.dart';
 import 'package:car_wash_app/invoices_list/model/invoice_list_model.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -50,7 +51,14 @@ class _ItemInvoicesList extends State<ItemInvoicesList> {
     }
     return InkWell(
       splashColor: Colors.white,
-      onTap: () {},
+      onTap: () {
+        Navigator.push(context,
+          MaterialPageRoute(builder: (context) => InvoicePage(
+            showDrawer: false,
+            invoiceToEdit: widget.listInvoices[widget.index],
+          ))
+        );
+      },
       child: _itemDecoration(widget.listInvoices[widget.index]),
     );
   }

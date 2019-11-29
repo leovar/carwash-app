@@ -8,10 +8,11 @@ final Widget placeholder = Container(color: Colors.grey);
 
 class CarouselCarsWidget extends StatefulWidget {
   List<String> imgList = [];
+  final editForm;
   final Function(String) callbackDeleteImage;
 
   CarouselCarsWidget(
-      {Key key, @required this.callbackDeleteImage, this.imgList})
+      {Key key, @required this.callbackDeleteImage, this.imgList, this.editForm})
       : super(key: key);
 
   @override
@@ -64,12 +65,7 @@ class _CarouselCarsWidget extends State<CarouselCarsWidget> {
           child: ClipRRect(
             borderRadius: BorderRadius.all(Radius.circular(5.0)),
             child: Stack(children: <Widget>[
-              Image.file(
-                File(i),
-                width: 1000.0,
-                fit: BoxFit.cover,
-              ),
-              //Image.network(i, fit: BoxFit.cover, width: 1000.0),
+              _getImageProvider(i),
               Positioned(
                 bottom: 0.0,
                 left: 0.0,
@@ -118,11 +114,11 @@ class _CarouselCarsWidget extends State<CarouselCarsWidget> {
                         color: Colors.white,
                       ),
                       iconSize: 28,
-                      onPressed: () {
+                      onPressed: widget.editForm ? () {
                         setState(() {
                           widget.callbackDeleteImage(i);
                         });
-                      },
+                      } : null,
                     ),
                   ),
                 ),
@@ -132,6 +128,24 @@ class _CarouselCarsWidget extends State<CarouselCarsWidget> {
         );
       },
     ).toList();
+  }
+
+  Widget _getImageProvider(String imagePath){
+    if (imagePath.isNotEmpty &&
+        imagePath.contains('https://firebasestorage.')) {
+      return Image.network(imagePath, width: 1000.0, fit: BoxFit.cover,);
+    } else if (imagePath.isNotEmpty) {
+      return Image.file(
+        File(imagePath),
+        width: 1000.0,
+        fit: BoxFit.cover,
+      );
+    } else {
+      return Image.asset("assets/images/background_ph_image.png",
+        width: MediaQuery.of(context).size.width,
+        fit: BoxFit.cover,
+      );
+    }
   }
 
   List<T> map<T>(List list, Function handler) {

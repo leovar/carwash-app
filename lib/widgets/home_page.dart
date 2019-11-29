@@ -106,7 +106,7 @@ class _HomePage extends State<HomePage> {
             locationIndicator(),
           ],
         ),
-        drawer: DrawerPage(usuario),
+        drawer: DrawerPage(),
       );
 
   bodyContainer() => Column(
@@ -143,7 +143,7 @@ class _HomePage extends State<HomePage> {
                     context,
                     MaterialPageRoute(
                         builder: (context) =>
-                            InvoicePage(usuario: usuario, showDrawer: false)));
+                            InvoicePage(showDrawer: false)));
               },
               buttonName: "NUEVA FACTURA",
               imageAsset: "assets/images/icon_nueva_factura.png"),

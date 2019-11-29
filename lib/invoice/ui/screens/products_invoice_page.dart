@@ -13,16 +13,18 @@ class ProductsInvoicePage extends StatefulWidget {
   final List<AdditionalProduct> additionalProductListCb;
   final HeaderServices vehicleTypeSelect;
   final String idLocation;
+  final bool editForm;
 
-  ProductsInvoicePage(
-      {Key key,
-      this.callbackSetProductsList,
-      this.productListCallback,
-      this.cbAdditionalProducts,
-      this.additionalProductListCb,
-      this.vehicleTypeSelect,
-      this.idLocation,
-      });
+  ProductsInvoicePage({
+    Key key,
+    this.callbackSetProductsList,
+    this.productListCallback,
+    this.cbAdditionalProducts,
+    this.additionalProductListCb,
+    this.vehicleTypeSelect,
+    this.idLocation,
+    this.editForm,
+  });
 
   @override
   State<StatefulWidget> createState() {
@@ -60,7 +62,8 @@ class _ProductsInvoicePage extends State<ProductsInvoicePage> {
 
   Widget getProducts() {
     return StreamBuilder(
-      stream: _productBloc.productsByLocationStream(widget.idLocation, widget.vehicleTypeSelect.uid),
+      stream: _productBloc.productsByLocationStream(
+          widget.idLocation, widget.vehicleTypeSelect.uid),
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.waiting:
@@ -73,18 +76,38 @@ class _ProductsInvoicePage extends State<ProductsInvoicePage> {
   }
 
   Widget listProducts(AsyncSnapshot snapshot) {
-    List<Product> getProductList = _productBloc.buildProductByLocation(snapshot.data.documents);
-    List<Product> productGet = getProductList;
-    if (widget.productListCallback.length > 0) {
+    List<Product> productsList =
+        _productBloc.buildProductByLocation(snapshot.data.documents);
+    List<Product> productGet = <Product>[];
+    productsList.forEach((prod) {
+      Product proFindSelect = widget.productListCallback
+          .firstWhere((d) => d.id == prod.id && d.isSelected, orElse: () => null);
+      if (proFindSelect == null) {
+        productGet.add(prod);
+      } else {
+        Product prodSelected = Product.copyProductInvoiceWith(
+          origin: prod,
+          isSelected: true,
+          price: proFindSelect.price,
+          iva: proFindSelect.iva,
+        );
+        productGet.add(prodSelected);
+      }
+    });
+    widget.productListCallback = productGet;
+
+    /*if (widget.productListCallback.length > 0) {
       widget.productListCallback.forEach((f) {
         if (f.isSelected) {
           productGet[productGet.indexWhere((p) => p.id == f.id)].isSelected =
               true;
+          productGet[productGet.indexWhere((p) => p.id == f.id)].price =
+              f.price;
         }
       });
       widget.productListCallback = productGet;
     }
-    widget.productListCallback = productGet;
+    widget.productListCallback = productGet;*/
 
     return Column(
       children: <Widget>[
@@ -125,7 +148,7 @@ class _ProductsInvoicePage extends State<ProductsInvoicePage> {
             scrollDirection: Axis.vertical,
             itemBuilder: (BuildContext context, int index) {
               return ItemProduct(widget.callbackSetProductsList,
-                  widget.productListCallback, index);
+                  widget.productListCallback, index, widget.editForm);
             },
           ),
         ),
@@ -153,6 +176,7 @@ class _ProductsInvoicePage extends State<ProductsInvoicePage> {
                     builder: (context) => AdditionalProductPage(
                       setCbAdditionalProducts: widget.cbAdditionalProducts,
                       additionalProductsList: widget.additionalProductListCb,
+                      editForm: widget.editForm,
                     ),
                   ),
                 );

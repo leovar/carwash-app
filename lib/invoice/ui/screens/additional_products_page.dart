@@ -4,11 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class AdditionalProductPage extends StatefulWidget {
-  Function(List<AdditionalProduct>) setCbAdditionalProducts;
-  List<AdditionalProduct> additionalProductsList;
+  final Function(List<AdditionalProduct>) setCbAdditionalProducts;
+  final List<AdditionalProduct> additionalProductsList;
+  final bool editForm;
 
   AdditionalProductPage(
-      {Key key, this.setCbAdditionalProducts, this.additionalProductsList});
+      {Key key, this.setCbAdditionalProducts, this.additionalProductsList, this.editForm});
 
   @override
   State<StatefulWidget> createState() {
@@ -142,9 +143,9 @@ class _AdditionalProductPage extends State<AdditionalProductPage> {
                               fontSize: 16,
                             ),
                           ),
-                          onPressed: () {
+                          onPressed: widget.editForm ? () {
                             _addAdditionalProduct();
-                          },
+                          } : null,
                         ),
                       ),
                     )
@@ -204,9 +205,9 @@ class _AdditionalProductPage extends State<AdditionalProductPage> {
                 icon: Icon(Icons.cancel),
                 color: Colors.red,
                 iconSize: 26,
-                onPressed: () {
+                onPressed: widget.editForm ? () {
                   _deleteItemAdditionalProduct(index);
-                },
+                } : null,
               ),
             ),
             Expanded(

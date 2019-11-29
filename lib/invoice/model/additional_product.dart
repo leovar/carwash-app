@@ -3,5 +3,9 @@ class AdditionalProduct {
   final String productValue;
   double productIva;
 
-  AdditionalProduct(this.productName, this.productValue, this.productIva);
+  AdditionalProduct(
+    this.productName,
+    this.productValue,
+    this.productIva,
+  );
 }
