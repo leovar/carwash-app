@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
 class MessagesUtils {
-  static var _alertStyle = AlertStyle(
+  static var alertStyle = AlertStyle(
     animationType: AnimationType.fromTop,
     isCloseButton: false,
     isOverlayTapDismiss: false,
@@ -30,7 +30,7 @@ class MessagesUtils {
       context: context,
       type: alertType,
       title: title,
-      style: _alertStyle,
+      style: alertStyle,
       buttons: [
         DialogButton(
           color: Theme.of(context).primaryColor,
@@ -51,7 +51,7 @@ class MessagesUtils {
     return Alert(
       context: context,
       title: title,
-      style: _alertStyle,
+      style: alertStyle,
       content: Center(
         child: CircularProgressIndicator(
           backgroundColor: Theme.of(context).primaryColor,

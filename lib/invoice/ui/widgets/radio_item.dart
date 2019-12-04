@@ -11,7 +11,7 @@ class RadioItem extends StatelessWidget {
   Widget build(BuildContext context) {
     // TODO: implement build
     return Container(
-      width: MediaQuery.of(context).size.width / 3,
+      width: (MediaQuery.of(context).size.width / 4),
       decoration: BoxDecoration(
         color: Colors.white,
         border: Border(
@@ -21,18 +21,20 @@ class RadioItem extends StatelessWidget {
           ),
         ),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.max,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          Container(
-            width: _item.withImage,
-            margin: EdgeInsets.only(right: 5),
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                  image: AssetImage(_item.isSelected
-                      ? _item.imageSelected
-                      : _item.imageUnselected)),
+          Flexible(
+            child: Container(
+              width: _item.withImage,
+              margin: EdgeInsets.only(top: 4),
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                    image: AssetImage(_item.isSelected
+                        ? _item.imageSelected
+                        : _item.imageUnselected)),
+              ),
             ),
           ),
           Flexible(
@@ -41,7 +43,7 @@ class RadioItem extends StatelessWidget {
               style: TextStyle(
                 fontFamily: "Lato",
                 fontWeight: FontWeight.w600,
-                fontSize: _item.isSelected ? 16: 15,
+                fontSize: _item.isSelected ? 16 : 15,
                 color: _item.isSelected ? Color(0xFF59B258) : Color(0xFF27AEBB),
               ),
             ),

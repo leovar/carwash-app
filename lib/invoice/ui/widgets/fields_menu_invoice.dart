@@ -77,9 +77,9 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
     //El contador inicial arranca en 0, al consultra los usuarios operadores por primera vez
     // ya queda cargado con la cantidad de usuarios encontrados y no tiene que volver a hacer la consulta
     // cada vez que hace un set state.
-    if (widget.listCountCoordinators == 0) {
+    if (widget.listCountOperators == 0) {
       return StreamBuilder(
-        stream: _blocInvoice.operatorsStream(widget.locationReference),
+        stream: _blocInvoice.operatorsStream(),
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           switch (snapshot.connectionState) {
             case ConnectionState.waiting:
@@ -114,7 +114,7 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
   Widget _getCoordinators() {
     if (widget.listCountCoordinators == 0) {
       return StreamBuilder(
-        stream: _blocInvoice.coordinatorsStream(widget.locationReference),
+        stream: _blocInvoice.coordinatorsStream(),
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           switch (snapshot.connectionState) {
             case ConnectionState.waiting:

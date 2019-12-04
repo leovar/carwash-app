@@ -1,6 +1,7 @@
 import 'package:car_wash_app/invoice/bloc/bloc_invoice.dart';
 import 'package:car_wash_app/invoice/model/invoice.dart';
 import 'package:car_wash_app/invoices_list/model/invoice_list_model.dart';
+import 'package:car_wash_app/invoices_list/ui/widgets/filter_fields_widget.dart';
 import 'package:car_wash_app/invoices_list/ui/widgets/item_invoices_list.dart';
 import 'package:car_wash_app/invoices_list/ui/widgets/total_filter_invoices_widget.dart';
 import 'package:car_wash_app/user/bloc/bloc_user.dart';
@@ -8,9 +9,11 @@ import 'package:car_wash_app/user/model/user.dart';
 import 'package:car_wash_app/widgets/gradient_back.dart';
 import 'package:car_wash_app/widgets/info_header_container.dart';
 import 'package:car_wash_app/widgets/keys.dart';
+import 'package:car_wash_app/widgets/messages_utils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 
@@ -32,6 +35,14 @@ class _FormInvoicesList extends State<FormInvoicesList> {
   bool _showInfoAmounts = false;
   double _totalDay = 0.0;
   double _totalMonth = 0.0;
+
+  ///Filter Keys
+  final _textPlaca = TextEditingController();
+  final _textConsecutive = TextEditingController();
+  var _dateFilterInit = DateTime(DateTime.now().year, DateTime.now().month, 1);
+  var _dateFilterFinal = DateTime.now();
+  User _operatorFilter = User();
+  double _totalPriceFilters = 0.0;
 
   @override
   void initState() {
@@ -81,38 +92,31 @@ class _FormInvoicesList extends State<FormInvoicesList> {
   }
 
   Widget _getInvoices() {
-    var date = DateTime(DateTime.now().year, DateTime.now().month, 1);
     return StreamBuilder(
       stream: _blocInvoice.invoicesListByMonthStream(
-          widget.locationReference, date),
+        widget.locationReference,
+        _dateFilterInit,
+        _dateFilterFinal,
+        _textPlaca.text,
+        _operatorFilter.name??'',
+        _textConsecutive.text,
+      ),
       builder: (BuildContext context, AsyncSnapshot snapshot) {
-        switch (snapshot.connectionState) {
-          case ConnectionState.waiting:
-            return Container(
-              height: 80,
-              child: CircularProgressIndicator(),
-            );
-          default:
-            return _containerList(snapshot);
-        }
+        return _containerList(snapshot);
       },
     );
   }
 
   Widget _containerList(AsyncSnapshot snapshot) {
-    _listInvoices =
-        _blocInvoice.buildInvoicesListByMonth(snapshot.data.documents);
-    _listInvoices.sort((a, b) => b.consecutive.compareTo(a.consecutive));
-    _countAmountPerDayMonth();
-    _listModel.clear();
-    _listInvoices.forEach((invoice) {
-      _listModel.add(InvoiceListModel(
-        id: invoice.id,
-        consec: invoice.consecutive,
-        totalPrice: invoice.totalPrice,
-        placa: '',
-      ));
-    });
+    switch (snapshot.connectionState) {
+      case ConnectionState.waiting:
+        _listInvoices = [];
+        break;
+      default:
+        _listInvoices = _blocInvoice.buildInvoicesListByMonth(snapshot.data.documents);
+        _listInvoices.sort((a, b) => b.consecutive.compareTo(a.consecutive));
+        _countAmountPerDayMonth();
+    }
 
     return Container(
       margin: EdgeInsets.only(right: 17, left: 17, bottom: 17),
@@ -137,6 +141,7 @@ class _FormInvoicesList extends State<FormInvoicesList> {
                 children: <Widget>[
                   TotalFilterInvoicesWidget(
                     listInvoices: _listInvoices,
+                    openFilters: _callBackOpenFilter,
                   ),
                   Expanded(
                     child: _listItems(),
@@ -158,7 +163,6 @@ class _FormInvoicesList extends State<FormInvoicesList> {
       itemBuilder: (BuildContext context, int index) {
         return ItemInvoicesList(
           listInvoices: _listInvoices,
-          listInvoicesModel: _listModel,
           index: index,
           updateDate: true,
         );
@@ -168,81 +172,99 @@ class _FormInvoicesList extends State<FormInvoicesList> {
 
   Widget _infoAmounts() {
     final formatter = NumberFormat("#,###");
-
-    return Container(
-      margin: EdgeInsets.only(top: 15),
-      height: 85,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: <Widget>[
-          ClipRRect(
-            borderRadius: BorderRadius.all(Radius.circular(7.0)),
-            child: Container(
-              height: 80,
-              width: 150,
-              color: Color(0xFFF1F1F1),
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text(
-                      'Total día',
-                      style: TextStyle(
-                        fontFamily: "Lato",
-                        fontWeight: FontWeight.bold,
-                        fontSize: 17,
-                        color: Color(0xFF27AEBB),
-                      ),
+    return Column(
+      children: <Widget>[
+        Container(
+          margin: EdgeInsets.only(top: 15),
+          height: 85,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: <Widget>[
+              ClipRRect(
+                borderRadius: BorderRadius.all(Radius.circular(7.0)),
+                child: Container(
+                  height: 80,
+                  width: 150,
+                  color: Color(0xFFF1F1F1),
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Text(
+                          'Total día',
+                          style: TextStyle(
+                            fontFamily: "Lato",
+                            fontWeight: FontWeight.bold,
+                            fontSize: 17,
+                            color: Color(0xFF27AEBB),
+                          ),
+                        ),
+                        Text(
+                          '\$${formatter.format(_totalDay)}',
+                          style: TextStyle(
+                            fontFamily: "Lato",
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20,
+                            color: Color(0xFF59B258),
+                          ),
+                        ),
+                      ],
                     ),
-                    Text(
-                      '\$${formatter.format(_totalDay)}',
-                      style: TextStyle(
-                        fontFamily: "Lato",
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
-                        color: Color(0xFF59B258),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
+              ClipRRect(
+                borderRadius: BorderRadius.all(Radius.circular(7.0)),
+                child: Container(
+                  height: 80,
+                  width: 150,
+                  color: Color(0xFFF1F1F1),
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Text(
+                          'Total mes',
+                          style: TextStyle(
+                            fontFamily: "Lato",
+                            fontWeight: FontWeight.bold,
+                            fontSize: 17,
+                            color: Color(0xFF27AEBB),
+                          ),
+                        ),
+                        Text(
+                          '\$${formatter.format(_totalMonth)}',
+                          style: TextStyle(
+                            fontFamily: "Lato",
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20,
+                            color: Color(0xFF59B258),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              )
+            ],
+          ),
+        ),
+        Container(
+          margin: EdgeInsets.only(left: 22),
+          padding: EdgeInsets.only(top: 5),
+          alignment: Alignment.centerLeft,
+          height: 25,
+          child: Text(
+            'Total Filtro: \$${formatter.format(_totalPriceFilters)}',
+            style: TextStyle(
+              fontFamily: "Lato",
+              fontWeight: FontWeight.bold,
+              fontSize: 17,
+              color: Color(0xFF27AEBB),
             ),
           ),
-          ClipRRect(
-            borderRadius: BorderRadius.all(Radius.circular(7.0)),
-            child: Container(
-              height: 80,
-              width: 150,
-              color: Color(0xFFF1F1F1),
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text(
-                      'Total mes',
-                      style: TextStyle(
-                        fontFamily: "Lato",
-                        fontWeight: FontWeight.bold,
-                        fontSize: 17,
-                        color: Color(0xFF27AEBB),
-                      ),
-                    ),
-                    Text(
-                '\$${formatter.format(_totalMonth)}',
-                      style: TextStyle(
-                        fontFamily: "Lato",
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
-                        color: Color(0xFF59B258),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          )
-        ],
-      ),
+        )
+      ],
     );
   }
 
@@ -255,6 +277,7 @@ class _FormInvoicesList extends State<FormInvoicesList> {
   void _countAmountPerDayMonth() {
     _totalDay = 0;
     _totalMonth = 0;
+    _totalPriceFilters = 0.0;
     if (_listInvoices.length > 0) {
       _listInvoices.forEach((invoice) {
         DateTime nowMonth =
@@ -275,7 +298,55 @@ class _FormInvoicesList extends State<FormInvoicesList> {
         if (nowMonth.compareTo(dateMonthInvoice) == 0) {
           _totalMonth = _totalMonth + invoice.totalPrice;
         }
+
+        _totalPriceFilters = _totalPriceFilters + invoice.totalPrice;
       });
     }
   }
+
+  void _callBackOpenFilter() {
+    Alert(
+      context: context,
+      title: 'Filtros',
+      style: MessagesUtils.alertStyle,
+      content: FilterFieldsWidget(
+        placaController: _textPlaca,
+        consecutiveController: _textConsecutive,
+        dateInit: _dateFilterInit,
+        dateFinal: _dateFilterFinal,
+        operatorSelected: _operatorFilter,
+        selectOperator: _callBackSelectOperatorFilter,
+        selectDateInit: _setDateInitFilter,
+        selectDateFinal: _setDateFinalFilter,
+      ),
+      buttons: [
+        DialogButton(
+          color: Theme.of(context).primaryColor,
+          child: Text(
+            'ACEPTAR',
+            style: Theme.of(context).textTheme.button,
+          ),
+          onPressed: () {
+            Navigator.of(context).pop();
+            setState(() {
+
+            });
+          },
+        )
+      ],
+    ).show();
+  }
+
+  void _callBackSelectOperatorFilter(User operatorSelected) {
+    _operatorFilter = operatorSelected;
+  }
+
+  void _setDateInitFilter(DateTime dateInit) {
+    _dateFilterInit = dateInit;
+  }
+
+  void _setDateFinalFilter(DateTime dateFinal) {
+    _dateFilterFinal = dateFinal;
+  }
+
 }

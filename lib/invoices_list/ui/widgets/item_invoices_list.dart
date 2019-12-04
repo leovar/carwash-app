@@ -3,17 +3,16 @@ import 'package:car_wash_app/invoice/ui/screens/invoice_page.dart';
 import 'package:car_wash_app/invoices_list/model/invoice_list_model.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class ItemInvoicesList extends StatefulWidget {
   final List<Invoice> listInvoices;
-  final List<InvoiceListModel> listInvoicesModel;
   final int index;
   final bool updateDate;
 
   ItemInvoicesList(
       {Key key,
       this.listInvoices,
-      this.listInvoicesModel,
       this.index,
       this.updateDate});
 
@@ -24,6 +23,7 @@ class ItemInvoicesList extends StatefulWidget {
 class _ItemInvoicesList extends State<ItemInvoicesList> {
   double _imageWith;
   String _iconVehicle;
+  var formatter = new DateFormat('dd-MM-yyyy hh:mm a');
 
   @override
   void initState() {
@@ -65,7 +65,7 @@ class _ItemInvoicesList extends State<ItemInvoicesList> {
 
   Widget _itemDecoration(Invoice invoiceList) {
     return Container(
-      height: 55,
+      height: 63,
       decoration: BoxDecoration(
         color: (widget.index % 2 == 0) ? Colors.white : Color(0xFFF1F1F1),
       ),
@@ -89,7 +89,7 @@ class _ItemInvoicesList extends State<ItemInvoicesList> {
                   Text(
                     invoiceList.placa ?? '',
                     style: TextStyle(
-                      color: Color(0xFF787A71),
+                      color: Theme.of(context).primaryColor,
                       fontFamily: "Lato",
                       fontWeight: FontWeight.normal,
                       fontSize: 15,
@@ -108,6 +108,15 @@ class _ItemInvoicesList extends State<ItemInvoicesList> {
                       ),
                     ),
                   ),
+                  Text(
+                    formatter.format(invoiceList.creationDate.toDate()),
+                    style: TextStyle(
+                      color: Color(0xFF787A71),
+                      fontFamily: "Lato",
+                      fontWeight: FontWeight.normal,
+                      fontSize: 14,
+                    ),
+                  )
                 ],
               )
             ],

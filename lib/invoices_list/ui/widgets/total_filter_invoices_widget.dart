@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 
 class TotalFilterInvoicesWidget extends StatefulWidget {
   final List<Invoice> listInvoices;
+  final VoidCallback openFilters;
 
-  TotalFilterInvoicesWidget({Key key, this.listInvoices});
+  TotalFilterInvoicesWidget({Key key, this.listInvoices, this.openFilters});
 
   @override
   State<StatefulWidget> createState() => _TotalFilterInvoicesWidget();
@@ -58,7 +59,14 @@ class _TotalFilterInvoicesWidget extends State<TotalFilterInvoicesWidget> {
                 ),
                 Container(
                   margin: EdgeInsets.only(left: 8),
-                  child: Image.asset('assets/images/icon_filter1.png', width: 23.0, height: 23.0,),
+                  child: InkWell(
+                    onTap: widget.openFilters,
+                    child: Image.asset(
+                      'assets/images/icon_filter1.png',
+                      width: 23.0,
+                      height: 23.0,
+                    ),
+                  ),
                 )
               ],
             ),

@@ -13,7 +13,6 @@ import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 import 'package:path/path.dart';
 
 class BlocInvoice implements Bloc {
-
   final _invoiceRepository = InvoiceRepository();
   final _vehicleRepository = VehicleRepository();
 
@@ -27,12 +26,13 @@ class BlocInvoice implements Bloc {
     DocumentReference ref = await _invoiceRepository.updateInvoiceData(invoice);
     String invoiceId = ref.documentID;
 
-    if (invoice.invoiceImages != null && invoice.invoiceImages.length > 0 ) {
-      for(String imageFilePath in invoice.invoiceImages) {
+    if (invoice.invoiceImages != null && invoice.invoiceImages.length > 0) {
+      for (String imageFilePath in invoice.invoiceImages) {
         if (!imageFilePath.contains('https://firebasestorage.')) {
           File imageFile = File(imageFilePath);
           final pathImage = '$invoiceId/before/${basename(imageFilePath)}';
-          StorageTaskSnapshot storageTaskSnapshot = await _invoiceRepository.uploadImageInvoice(pathImage, imageFile);
+          StorageTaskSnapshot storageTaskSnapshot =
+              await _invoiceRepository.uploadImageInvoice(pathImage, imageFile);
           String imageUrl = await storageTaskSnapshot.ref.getDownloadURL();
           await _invoiceRepository.updateInvoiceImages(invoiceId, imageUrl);
         }
@@ -42,7 +42,8 @@ class BlocInvoice implements Bloc {
     if (invoice.imageFirm != null) {
       if (!invoice.imageFirm.contains('https://firebasestorage.')) {
         final pathImage = '$invoiceId/before/firm';
-        StorageTaskSnapshot storageTaskSnapshot = await _invoiceRepository.uploadImageFirmInvoice(pathImage, invoice.imageFirm);
+        StorageTaskSnapshot storageTaskSnapshot = await _invoiceRepository
+            .uploadImageFirmInvoice(pathImage, invoice.imageFirm);
         String imageUrl = await storageTaskSnapshot.ref.getDownloadURL();
         await _invoiceRepository.updateInvoiceImages(invoiceId, imageUrl);
       }
@@ -56,19 +57,26 @@ class BlocInvoice implements Bloc {
   }
 
   /// Operators
-  Stream<QuerySnapshot> operatorsStream(DocumentReference locationReference) {
-    return locationReference != null ? _invoiceRepository.getListOperatorsStream(locationReference): QuerySnapshot;
+  Stream<QuerySnapshot> operatorsStream() {
+    return _invoiceRepository.getListOperatorsStream();
   }
-  List<User> buildOperators(List<DocumentSnapshot> operatorsListSnapshot) => _invoiceRepository.buildOperators(operatorsListSnapshot);
+
+  List<User> buildOperators(List<DocumentSnapshot> operatorsListSnapshot) =>
+      _invoiceRepository.buildOperators(operatorsListSnapshot);
+
   /*Future<List<User>> getOperatorsUsers() {
     return _invoiceRepository.getOperatorsUsers();
   }*/
 
   /// Coordinators
-  Stream<QuerySnapshot> coordinatorsStream(DocumentReference locationReference) {
-    return locationReference != null ? _invoiceRepository.getListCoordinatorStream(locationReference): QuerySnapshot;
+  Stream<QuerySnapshot> coordinatorsStream() {
+    return _invoiceRepository.getListCoordinatorStream();
   }
-  List<User> buildCoordinators(List<DocumentSnapshot> coordinatorListSnapshot) => _invoiceRepository.buildCoordinator(coordinatorListSnapshot);
+
+  List<User> buildCoordinators(
+          List<DocumentSnapshot> coordinatorListSnapshot) =>
+      _invoiceRepository.buildCoordinator(coordinatorListSnapshot);
+
   /*Future<List<User>> getCoordinatorUser() {
     return _invoiceRepository.getCoordinatorUsers();
   }*/
@@ -77,40 +85,65 @@ class BlocInvoice implements Bloc {
   Stream<QuerySnapshot> brandsStream(int uidVehicleType) {
     return _invoiceRepository.getListBrandsStream(uidVehicleType);
   }
-  List<String> buildBrands(List<DocumentSnapshot> brandsListSnapshot) => _invoiceRepository.buildBrands(brandsListSnapshot);
+
+  List<String> buildBrands(List<DocumentSnapshot> brandsListSnapshot) =>
+      _invoiceRepository.buildBrands(brandsListSnapshot);
 
   /// Colors
   Stream<QuerySnapshot> colorsStream(int uidVehicleType) {
     return _invoiceRepository.getListColorsStream(uidVehicleType);
   }
-  List<String> buildColors(List<DocumentSnapshot> colorsListSnapshot) => _invoiceRepository.buildColors(colorsListSnapshot);
+
+  List<String> buildColors(List<DocumentSnapshot> colorsListSnapshot) =>
+      _invoiceRepository.buildColors(colorsListSnapshot);
 
   /// List Invoices per month
-  Stream<QuerySnapshot> invoicesListByMonthStream(DocumentReference locationReference, DateTime date) {
-    return _invoiceRepository.getListInvoicesByMonthStream(locationReference, date);
+  Stream<QuerySnapshot> invoicesListByMonthStream(
+    DocumentReference locationReference,
+    DateTime dateInit,
+    DateTime dateFinal,
+    String placa,
+    String operator,
+      String consecutive,
+  ) {
+    return _invoiceRepository.getListInvoicesByMonthStream(
+      locationReference,
+      dateInit,
+      dateFinal,
+      placa,
+      operator,
+      consecutive,
+    );
   }
-  List<Invoice> buildInvoicesListByMonth(List<DocumentSnapshot> invoicesListSnapshot) => _invoiceRepository.buildInvoicesListByMonth(invoicesListSnapshot);
 
+  List<Invoice> buildInvoicesListByMonth(
+          List<DocumentSnapshot> invoicesListSnapshot) =>
+      _invoiceRepository.buildInvoicesListByMonth(invoicesListSnapshot);
 
-  Future<void> saveInvoiceProduct(String invoiceId, List<Product> listProducts) async {
+  Future<void> saveInvoiceProduct(
+      String invoiceId, List<Product> listProducts) async {
     listProducts.forEach((product) {
-      if (product.newProduct??true) {
+      if (product.newProduct ?? true) {
         _invoiceRepository.saveInvoiceProduct(invoiceId, product);
       }
     });
   }
 
-  Future<void> saveInvoiceAdditionalProducts(String invoiceId, List<AdditionalProduct> additionalProducts) async {
+  Future<void> saveInvoiceAdditionalProducts(
+      String invoiceId, List<AdditionalProduct> additionalProducts) async {
     additionalProducts.forEach((addProduct) {
       _invoiceRepository.saveInvoiceAdditionalProducts(invoiceId, addProduct);
     });
   }
 
-  Future<List<Product>> getInvoiceProducts (String idInvoice) => _invoiceRepository.getInvoiceProducts(idInvoice);
+  Future<List<Product>> getInvoiceProducts(String idInvoice) =>
+      _invoiceRepository.getInvoiceProducts(idInvoice);
 
-  Future<int> getLastConsecutiveByLocation(DocumentReference locationReference) => _invoiceRepository.getLastConsecutiveByLocation(locationReference);
+  Future<int> getLastConsecutiveByLocation(
+          DocumentReference locationReference) =>
+      _invoiceRepository.getLastConsecutiveByLocation(locationReference);
 
-  Future<List<Product>> getProductsByInvoice(String invoiceId){
+  Future<List<Product>> getProductsByInvoice(String invoiceId) {
     return _invoiceRepository.getProductsByIdInvoice(invoiceId);
   }
 
@@ -122,9 +155,6 @@ class BlocInvoice implements Bloc {
     return _invoiceRepository.getInvoiceByIdInvoice(invoiceId);
   }
 
-
   @override
-  void dispose() {
-  }
-
+  void dispose() {}
 }

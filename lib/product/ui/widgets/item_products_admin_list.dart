@@ -21,6 +21,7 @@ class ItemProductAdminList extends StatefulWidget {
 class _ItemProductAdminList extends State<ItemProductAdminList> {
   double _imageWith;
   String _iconVehicle;
+  String _vehicleTypeName = '';
 
   @override
   void initState() {
@@ -29,14 +30,22 @@ class _ItemProductAdminList extends State<ItemProductAdminList> {
       case 1:
         _imageWith = 38;
         _iconVehicle = "assets/images/icon_car_admin.png";
+        _vehicleTypeName = 'Auto';
         break;
       case 2:
         _imageWith = 37;
         _iconVehicle = 'assets/images/icon_suv_car_admin.png';
+        _vehicleTypeName = 'Camioneta';
         break;
       case 3:
         _imageWith = 34;
         _iconVehicle = 'assets/images/icon_motorcycle_admin.png';
+        _vehicleTypeName = 'Moto';
+        break;
+      case 4:
+        _imageWith = 34;
+        _iconVehicle = 'assets/images/icon_motorcycle_admin.png';
+        _vehicleTypeName = 'Bicicleta';
         break;
     }
   }
@@ -78,10 +87,30 @@ class _ItemProductAdminList extends State<ItemProductAdminList> {
                 child: Row(
                   children: <Widget>[
                     Container(
-                      margin: EdgeInsets.only(left: 8, right: 18),
+                      width: 70,
+                      margin: EdgeInsets.only(left: 7, right: 13),
                       child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Image.asset(_iconVehicle, width: _imageWith),
+                        alignment: Alignment.center,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: <Widget>[
+                            Flexible(
+                                child: Image.asset(_iconVehicle, width: _imageWith),
+                            ),
+                            Flexible(
+                              child: Text(
+                                _vehicleTypeName,
+                                style: TextStyle(
+                                  fontFamily: "Lato",
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                  color: Color(0xFF59B258),
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
                       ),
                     ),
                     Flexible(

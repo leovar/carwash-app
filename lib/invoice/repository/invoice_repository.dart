@@ -64,8 +64,7 @@ class InvoiceRepository {
   }
 
   ///Get Operators list by Location
-  Stream<QuerySnapshot> getListOperatorsStream(
-      DocumentReference locationReference) {
+  Stream<QuerySnapshot> getListOperatorsStream() {
     final querySnapshot = this
         ._db
         .collection(FirestoreCollections.users)
@@ -102,8 +101,7 @@ class InvoiceRepository {
   }*/
 
   /// Get Coordinators list by Location
-  Stream<QuerySnapshot> getListCoordinatorStream(
-      DocumentReference locationReference) {
+  Stream<QuerySnapshot> getListCoordinatorStream() {
     final querySnapshot = this
         ._db
         .collection(FirestoreCollections.users)
@@ -123,12 +121,12 @@ class InvoiceRepository {
   }
 
   /// Get Brands list by vehicleType
-  Stream<QuerySnapshot> getListBrandsStream(
-      int uidVehicleType) {
+  Stream<QuerySnapshot> getListBrandsStream(int uidVehicleType) {
     final querySnapshot = this
         ._db
         .collection(FirestoreCollections.brands)
-        .where(FirestoreCollections.brandFieldVehicleType, isEqualTo: uidVehicleType)
+        .where(FirestoreCollections.brandFieldVehicleType,
+            isEqualTo: uidVehicleType)
         .snapshots();
     return querySnapshot;
   }
@@ -143,12 +141,9 @@ class InvoiceRepository {
   }
 
   /// Get Colors list by vehicleType
-  Stream<QuerySnapshot> getListColorsStream(
-      int uidVehicleType) {
-    final querySnapshot = this
-        ._db
-        .collection(FirestoreCollections.colors)
-        .snapshots();
+  Stream<QuerySnapshot> getListColorsStream(int uidVehicleType) {
+    final querySnapshot =
+        this._db.collection(FirestoreCollections.colors).snapshots();
     return querySnapshot;
   }
 
@@ -231,16 +226,44 @@ class InvoiceRepository {
 
   ///Get invoices list from current Month
   Stream<QuerySnapshot> getListInvoicesByMonthStream(
-      DocumentReference locationReference, DateTime date) {
-    final querySnapshot = this
+    DocumentReference locationReference,
+    DateTime dateInit,
+    DateTime dateFinal,
+    String placa,
+    String operator,
+    String consecutive,
+  ) {
+    DateTime dateFinalModify =
+        DateTime(dateFinal.year, dateFinal.month, dateFinal.day, 23, 59);
+
+    var querySnapshot = this
         ._db
         .collection(FirestoreCollections.invoices)
         .where(FirestoreCollections.invoiceFieldCreationDate,
-            isGreaterThanOrEqualTo: Timestamp.fromDate(date))
+            isGreaterThanOrEqualTo: Timestamp.fromDate(dateInit))
+        .where(FirestoreCollections.invoiceFieldCreationDate,
+            isLessThanOrEqualTo: Timestamp.fromDate(dateFinalModify))
         .where(FirestoreCollections.invoiceFieldLocation,
-            isEqualTo: locationReference)
-        .snapshots();
-    return querySnapshot;
+            isEqualTo: locationReference);
+
+    if (placa.isNotEmpty) {
+      querySnapshot = querySnapshot
+          .where(FirestoreCollections.invoiceFieldPlaca, isEqualTo: placa);
+    }
+
+    if (operator.isNotEmpty) {
+      querySnapshot = querySnapshot.where(
+          FirestoreCollections.invoiceFieldUserOperatorName,
+          isEqualTo: operator);
+    }
+
+    if (consecutive.isNotEmpty) {
+      querySnapshot = querySnapshot.where(
+          FirestoreCollections.invoiceFieldConsecutive,
+          isEqualTo: int.parse(consecutive) );
+    }
+
+    return querySnapshot.snapshots();
   }
 
   List<Invoice> buildInvoicesListByMonth(
@@ -311,8 +334,8 @@ class InvoiceRepository {
     final documents = querySnapshot.documents;
     if (documents.length > 0) {
       documents.forEach((product) {
-        Product productGet = Product.fromJsonProInvoice(product.data,
-            id: product.documentID);
+        Product productGet =
+            Product.fromJsonProInvoice(product.data, id: product.documentID);
         productList.add(productGet);
       });
     }
@@ -347,7 +370,6 @@ class InvoiceRepository {
         .document(invoiceId)
         .get();
 
-    return Invoice.fromJson(querySnapshot.data,
-        id: querySnapshot.documentID);
+    return Invoice.fromJson(querySnapshot.data, id: querySnapshot.documentID);
   }
 }

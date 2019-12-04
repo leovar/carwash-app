@@ -27,6 +27,8 @@ class MyApp extends StatelessWidget {
           secondaryHeaderColor: Color(0xFF27AEBB),
           primaryColor: Color(0xFF27AEBB),
           accentColor: Color(0xFF59B258),
+          cardColor: Color(0xFF787A71),
+          cursorColor: Color(0xFFAEAEAE),
         ),
         home: LoginPage(),
         //HomePage(),//LoginPage(),
