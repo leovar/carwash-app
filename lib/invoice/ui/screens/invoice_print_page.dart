@@ -17,9 +17,13 @@ class InvoicePrintPage extends StatelessWidget{
   }
 
   Widget _containerBody(){
-    return Column(
+    return ListView(
       children: <Widget>[
-
+        Container(
+          child: Center(
+            child: Image.asset('assets/images/logo-car-wash.png'),
+          ),
+        )
       ],
     );
   }

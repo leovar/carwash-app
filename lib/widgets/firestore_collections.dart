@@ -7,6 +7,8 @@ class FirestoreCollections {
   static String vehicleType = 'vehicleType';
   static String customers = 'customers';
   static String additionalProducts = 'additionalProducts';
+  static String brands = 'brands';
+  static String colors = 'colors';
 
   /// Fields User Collection
   static String usersFieldUid = 'uid';
@@ -45,6 +47,9 @@ class FirestoreCollections {
   static String invoiceFieldImages = 'images';
   static String invoiceFieldLocation = 'location';
   static String invoiceFieldConsecutive = 'consecutive';
+
+  /// Fields Brands
+  static String brandFieldVehicleType = 'vehicleType';
 
 
 }

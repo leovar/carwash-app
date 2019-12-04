@@ -32,6 +32,8 @@ class Invoice extends Equatable {
   final Timestamp creationDate;
   final List<String> invoiceImages;
   final List<Product> invoiceProducts;
+  final String vehicleBrand;
+  final String vehicleColor;
   final Uint8List imageFirm;
   final bool approveDataProcessing;
 
@@ -55,6 +57,8 @@ class Invoice extends Equatable {
     this.creationDate,
     this.invoiceImages,
     this.invoiceProducts,
+    this.vehicleBrand,
+    this.vehicleColor,
     this.imageFirm,
     this.approveDataProcessing,
   });
@@ -76,6 +80,8 @@ class Invoice extends Equatable {
       'location': this.location,
       'locationName': this.locationName,
       'consecutive': this.consecutive,
+      'vehicleBrand': this.vehicleBrand,
+      'vehicleColor': this.vehicleColor,
       'creationDate': this.creationDate,
       'approveDataProcessing': this.approveDataProcessing,
     };
@@ -105,6 +111,8 @@ class Invoice extends Equatable {
       location: json['location'],
       locationName: json['locationName'],
       consecutive: json['consecutive'],
+      vehicleBrand: json['vehicleBrand'],
+      vehicleColor: json['vehicleColor'],
       creationDate: json['creationDate'],
       approveDataProcessing: json['approveDataProcessing'],
     );
@@ -132,5 +140,7 @@ class Invoice extends Equatable {
     invoiceImages,
     invoiceProducts,
     approveDataProcessing,
+    vehicleBrand,
+    vehicleColor,
   ];
 }

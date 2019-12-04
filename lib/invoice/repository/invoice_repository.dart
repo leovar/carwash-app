@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -119,6 +120,45 @@ class InvoiceRepository {
       usersList.add(loc);
     });
     return usersList;
+  }
+
+  /// Get Brands list by vehicleType
+  Stream<QuerySnapshot> getListBrandsStream(
+      int uidVehicleType) {
+    final querySnapshot = this
+        ._db
+        .collection(FirestoreCollections.brands)
+        .where(FirestoreCollections.brandFieldVehicleType, isEqualTo: uidVehicleType)
+        .snapshots();
+    return querySnapshot;
+  }
+
+  List<String> buildBrands(List<DocumentSnapshot> brandsListSnapshot) {
+    List<String> brandsList = <String>[];
+    brandsListSnapshot.forEach((p) {
+      String brand = p.data['brand'];
+      brandsList.add(brand);
+    });
+    return brandsList;
+  }
+
+  /// Get Colors list by vehicleType
+  Stream<QuerySnapshot> getListColorsStream(
+      int uidVehicleType) {
+    final querySnapshot = this
+        ._db
+        .collection(FirestoreCollections.colors)
+        .snapshots();
+    return querySnapshot;
+  }
+
+  List<String> buildColors(List<DocumentSnapshot> colorsListSnapshot) {
+    List<String> colorsList = <String>[];
+    colorsListSnapshot.forEach((p) {
+      String brand = p.data['color'];
+      colorsList.add(brand);
+    });
+    return colorsList;
   }
 
   /*Future<List<User>> getCoordinatorUsers() async {
@@ -297,5 +337,17 @@ class InvoiceRepository {
       });
     }
     return imageList;
+  }
+
+  /// Get Invoice By Id Invoice
+  Future<Invoice> getInvoiceByIdInvoice(String invoiceId) async {
+    final querySnapshot = await this
+        ._db
+        .collection(FirestoreCollections.invoices)
+        .document(invoiceId)
+        .get();
+
+    return Invoice.fromJson(querySnapshot.data,
+        id: querySnapshot.documentID);
   }
 }

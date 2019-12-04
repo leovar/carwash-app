@@ -60,5 +60,4 @@ class MessagesUtils {
       buttons: [],
     );
   }
-
 }

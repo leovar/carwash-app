@@ -58,6 +58,7 @@ class _FormInvoice extends State<FormInvoice> {
   final _locationBloc = BlocLocation();
   bool _enableForm;
   bool _editForm = true;
+  bool _editOperator = false;
 
   ///global variables
   //Esta variable _scaffoldKey se usa para poder abrir el drawer desde un boton diferente al que se coloca por defecto en el AppBar
@@ -80,6 +81,8 @@ class _FormInvoice extends State<FormInvoice> {
   String _idLocation;
   String _initConsecLocation;
   String _finalConsecLocation;
+  String _selectBrand = '';
+  String _selectColor = '';
 
   final _textPlaca = TextEditingController();
   final _textClient = TextEditingController();
@@ -87,8 +90,6 @@ class _FormInvoice extends State<FormInvoice> {
   final _textPhoneNumber = TextEditingController();
   String _selectOperator = "";
   String _selectCoordinator = "";
-  List<User> _listOperators = <User>[];
-  List<User> _listCoordinators = <User>[];
   List<Product> _listProduct = <Product>[];
   List<AdditionalProduct> _listAdditionalProducts = <AdditionalProduct>[];
   bool _validatePlaca = false;
@@ -96,6 +97,8 @@ class _FormInvoice extends State<FormInvoice> {
   DocumentReference _vehicleReference;
   int _listOperatorsCount = 0;
   int _listCoordinatorsCount = 0;
+  int _countBrands = 0;
+  int _countColors = 0;
 
   @override
   void initState() {
@@ -104,6 +107,8 @@ class _FormInvoice extends State<FormInvoice> {
     _clientFocusNode = FocusNode();
     _listOperatorsCount = 0;
     _listCoordinatorsCount = 0;
+    _countBrands = 0;
+    _countColors = 0;
     //TODO traer estos datos desde la base de datos y cargarlos en un widget aparte con un stream
     vehicleTypeList.add(HeaderServices(false, "Auto", 1, 38,
         "assets/images/icon_car_admin.png", "assets/images/icon_car.png"));
@@ -254,15 +259,20 @@ class _FormInvoice extends State<FormInvoice> {
               FieldsMenusInvoice(
                 listCountOperators: _listOperatorsCount,
                 listCountCoordinators: _listCoordinatorsCount,
-                setOperator: _setOperator,
-                setCoordinator: _setCoordinator,
-                cbSetOperatorsList: _setUsersOperatorsList,
-                cbSetCoordinatorsList: _setUsersCoordinatorsList,
+                listCountBrands: _countBrands,
+                listCountColors: _countColors,
+                cbHandlerOperator: _setHandlerUsersOperator,
+                cbHandlerCoordinator: _setHandlerUserCoordinator,
+                cbHandlerVehicleBrand: _setHandlerVehicleBrand,
+                cbHandlerVehicleColor: _setHandlerVehicleColor,
+                locationReference: _locationReference,
                 selectedOperator: _selectOperator,
                 selectedCoordinator: _selectCoordinator,
-                locationReference: _locationReference,
+                selectedVehicleBrand: _selectBrand,
+                selectedVehicleColor: _selectColor,
+                uidVehicleType: vehicleTypeSelected.uid,
                 enableForm: _enableForm,
-                editForm: _editForm,
+                editOperator: _editOperator,
               ),
               SizedBox(height: 9),
               FieldsProducts(
@@ -284,7 +294,7 @@ class _FormInvoice extends State<FormInvoice> {
                 child: _showDraw(),
               ),
               Visibility(
-                visible: _editForm,
+                visible: (_editOperator || _editForm) ? true : false,
                 child: _saveInvoiceButton(),
               ),
               Visibility(
@@ -373,7 +383,7 @@ class _FormInvoice extends State<FormInvoice> {
               fontSize: 19,
             ),
           ),
-          onPressed: _enableForm ?? true ? _saveInvoice : null,
+          onPressed: (_editOperator || _enableForm)? _saveInvoice : null,
         ),
       ),
     );
@@ -502,22 +512,36 @@ class _FormInvoice extends State<FormInvoice> {
   }
 
   ///Functions Select Menu
-  void _setOperator(String selectOperator) {
-    _selectOperator = selectOperator;
+  void _setHandlerUsersOperator(String operatorSelect, int operatorsCount, int operationType) {
+    if (operationType == 1) {
+      _selectOperator = operatorSelect;
+    } else {
+      _listOperatorsCount = operatorsCount;
+    }
   }
 
-  void _setCoordinator(String selectCoordinator) {
-    _selectCoordinator = selectCoordinator;
+  void _setHandlerUserCoordinator(String selectCoordinator, int countList, int operationType) {
+    if (operationType == 1) {
+      _selectCoordinator = selectCoordinator;
+    } else {
+      _listCoordinatorsCount = countList;
+    }
   }
-
-  void _setUsersOperatorsList(List<User> operatorsList) {
-    _listOperators = operatorsList;
-    _listOperatorsCount = _listOperators.length;
+  //operationType 1=setBrand, 2= setCountBrands
+  void _setHandlerVehicleBrand(String brand, int countBrands, int operationType) {
+    if (operationType == 1) {
+      _selectBrand = brand;
+    } else {
+      _countBrands = countBrands;
+    }
   }
-
-  void _setUsersCoordinatorsList(List<User> coordinatorsList) {
-    _listCoordinators = coordinatorsList;
-    _listCoordinatorsCount = _listCoordinators.length;
+  //operationType 1=setColor, 2= setCountColors
+  void _setHandlerVehicleColor(String vehicleColor, int countColors, int operationType) {
+    if (operationType == 1) {
+      _selectColor = vehicleColor;
+    } else {
+      _countColors = countColors;
+    }
   }
 
   ///Functions Image Firma
@@ -621,17 +645,13 @@ class _FormInvoice extends State<FormInvoice> {
       //Get Operator reference
       if (_selectOperator.isNotEmpty) {
         _operatorReference = await _userBloc
-            .getUserReferenceById(_listOperators.firstWhere((User user) {
-          return user.name == _selectOperator;
-        }).uid);
+            .getUserReferenceByUserName(_selectOperator);
       }
 
       //Get Coordinator reference
       if (_selectCoordinator.isNotEmpty) {
         _coordinatorReference = await _userBloc
-            .getUserReferenceById(_listCoordinators.firstWhere((User user) {
-          return user.name == _selectCoordinator;
-        }).uid);
+            .getUserReferenceByUserName(_selectCoordinator);
       }
 
       //Get Vehicle reference, save if not exist
@@ -721,10 +741,13 @@ class _FormInvoice extends State<FormInvoice> {
         invoiceImages: imageList,
         imageFirm: _imageFirmInMemory,
         approveDataProcessing: _approveDataProcessing,
+        vehicleBrand: _selectBrand,
+        vehicleColor: _selectColor,
       );
       DocumentReference invoiceReference =
           await _blocInvoice.saveInvoice(invoice);
       String invoiceId = invoiceReference.documentID;
+      Invoice _currentInvoiceSaved = await _blocInvoice.getInvoiceById(invoiceId);
 
       //Save products list
       List<Product> _selectedProducts =
@@ -743,6 +766,10 @@ class _FormInvoice extends State<FormInvoice> {
       Navigator.pop(context); //Close popUp Save
       Navigator.pop(context); //Close form Create Invoice
 
+      //MessagesUtils.showAlert(context: context, title: 'Factura Guardada').show();
+
+
+
     } on PlatformException catch (e) {
       print('$e');
       MessagesUtils.showAlert(
@@ -759,6 +786,11 @@ class _FormInvoice extends State<FormInvoice> {
     _textPlaca.text = invoiceToEdit.placa;
     _selectOperator = invoiceToEdit.userOperatorName;
     _selectCoordinator = invoiceToEdit.userCoordinatorName;
+    _selectBrand = invoiceToEdit.vehicleBrand ?? '';
+    _selectColor = invoiceToEdit.vehicleColor ?? '';
+    if (_selectOperator.isEmpty) {
+      _editOperator = true;
+    }
     Customer editCustomer = await _customerBloc
         .getCustomerByIdCustomer(invoiceToEdit.customer.documentID);
     _textClient.text = editCustomer.name;
@@ -771,17 +803,18 @@ class _FormInvoice extends State<FormInvoice> {
       vehicleTypeList[vehicleTypeList.indexOf(vehicleTypeSelected)].isSelected =
           true;
     });
-    List<Product> listProducts =
-        await _blocInvoice.getProductsByInvoice(invoiceToEdit.id);
+    List<Product> listProducts = await _blocInvoice.getProductsByInvoice(invoiceToEdit.id);
     List<Product> productEditList = <Product>[];
     listProducts.forEach((prodSelected) {
       if (!prodSelected.isAdditional) {
+        prodSelected.newProduct = false;
         productEditList.add(prodSelected);
       } else {
         AdditionalProduct addProd = AdditionalProduct(
           prodSelected.productName,
           prodSelected.price.toString(),
           prodSelected.iva,
+          false,
         );
         _listAdditionalProducts.add(addProd);
       }
@@ -789,8 +822,7 @@ class _FormInvoice extends State<FormInvoice> {
     setState(() {
       _listProduct = productEditList;
     });
-    List<String> imagesList =
-        await _blocInvoice.getInvoiceImages(invoiceToEdit.id);
+    List<String> imagesList = await _blocInvoice.getInvoiceImages(invoiceToEdit.id);
     setState(() {
       imageList = imagesList;
     });

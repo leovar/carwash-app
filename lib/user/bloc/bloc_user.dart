@@ -73,6 +73,10 @@ class UserBloc implements Bloc {
     return _userRepository.getUserReferenceById(userId);
   }
 
+  Future<DocumentReference> getUserReferenceByUserName(String userName) async {
+    return _userRepository.getUserReferenceByUserName(userName);
+  }
+
   Stream<QuerySnapshot> getUsersByIdStream(String uid) {
     return _userRepository.getUsersByIdStream(uid);
   }

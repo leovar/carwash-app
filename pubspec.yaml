@@ -90,6 +90,7 @@ flutter:
     - assets/images/profile_placeholder.png
     - assets/images/icon_filter.png
     - assets/images/icon_filter1.png
+    - assets/images/logo-car-wash.png
 
 
   # The following line ensures that the Material Icons font is

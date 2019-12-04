@@ -253,6 +253,7 @@ class _AdditionalProductPage extends State<AdditionalProductPage> {
       _textAdditionalService.text,
       _valueAdditionalService.text,
       iva,
+      true,
     );
 
     _checkIva = false;

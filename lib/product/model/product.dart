@@ -18,6 +18,7 @@ class Product extends Equatable {
   final int vehicleTypeUid;
   bool isSelected;
   final bool isAdditional;
+  bool newProduct;
 
   Product({
     this.id,
@@ -31,6 +32,7 @@ class Product extends Equatable {
     this.vehicleTypeUid,
     this.isSelected,
     this.isAdditional,
+    this.newProduct,
   });
 
   factory Product.fromJson(Map<String, dynamic> json, {String id}) {

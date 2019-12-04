@@ -7,29 +7,39 @@ import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 class FieldsMenusInvoice extends StatefulWidget {
   final int listCountOperators;
   final int listCountCoordinators;
-  final Function(String) setOperator;
-  final Function(String) setCoordinator;
-  final Function(List<User>) cbSetOperatorsList;
-  final Function(List<User>) cbSetCoordinatorsList;
+  final int listCountBrands;
+  final int listCountColors;
+  final Function(String, int, int) cbHandlerOperator;
+  final Function(String, int, int) cbHandlerCoordinator;
+  final Function(String, int, int) cbHandlerVehicleBrand;
+  final Function(String, int, int) cbHandlerVehicleColor;
   final selectedOperator;
   final selectedCoordinator;
   final locationReference;
+  final selectedVehicleBrand;
+  final selectedVehicleColor;
+  final uidVehicleType;
   final bool enableForm;
-  final bool editForm;
+  final bool editOperator;
 
   FieldsMenusInvoice({
     Key key,
     this.listCountOperators,
     this.listCountCoordinators,
-    this.setOperator,
-    this.setCoordinator,
-    this.cbSetOperatorsList,
-    this.cbSetCoordinatorsList,
+    this.listCountBrands,
+    this.listCountColors,
+    this.cbHandlerOperator,
+    this.cbHandlerCoordinator,
+    this.cbHandlerVehicleBrand,
+    this.cbHandlerVehicleColor,
     this.selectedOperator,
     this.selectedCoordinator,
     this.locationReference,
+    this.selectedVehicleBrand,
+    this.selectedVehicleColor,
+    this.uidVehicleType,
     this.enableForm,
-    this.editForm,
+    this.editOperator,
   });
 
   @override
@@ -44,22 +54,26 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
   List<User> _listUsersCoordinators;
   List<String> _listOperators = <String>[];
   List<String> _listCoordinators = <String>[];
+  List<String> _listBrands = <String>[];
+  List<String> _listColors = <String>[];
 
   @override
   Widget build(BuildContext context) {
     _blocInvoice = BlocProvider.of(context);
     return Column(
       children: <Widget>[
-        getOperators(),
-        SizedBox(
-          height: 9,
-        ),
-        getCoordinators(),
+        _getBrandsStream(),
+        SizedBox(height: 9),
+        _getColorsStream(),
+        SizedBox(height: 9),
+        _getOperators(),
+        SizedBox(height: 9),
+        _getCoordinators(),
       ],
     );
   }
 
-  Widget getOperators() {
+  Widget _getOperators() {
     //El contador inicial arranca en 0, al consultra los usuarios operadores por primera vez
     // ya queda cargado con la cantidad de usuarios encontrados y no tiene que volver a hacer la consulta
     // cada vez que hace un set state.
@@ -76,40 +90,28 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
         },
       );
     } else {
-      return getOperatorsFromSimpleConsult();
+      return chargeOperatorsControl();
     }
   }
 
   Widget showPopUpOperators(AsyncSnapshot snapshot) {
     _listUsersOperators = _blocInvoice.buildOperators(snapshot.data.documents);
     _listOperators = _listUsersOperators.map((user) => user.name).toList();
-    widget.cbSetOperatorsList(_listUsersOperators);
+    widget.cbHandlerOperator('',_listUsersOperators.length, 2);
     return chargeOperatorsControl();
   }
 
   Widget chargeOperatorsControl() {
     return PopUpMenuWidget(
       popUpName: 'Operador',
-      selectValue: widget.setOperator,
+      selectValue: _cbSelectValueOperator,
       listString: _listOperators,
       valueSelect: widget.selectedOperator,
-      enableForm: widget.enableForm,
-      editForm: widget.editForm,
+      enableForm: (widget.editOperator || widget.enableForm)? true : false,
     );
   }
 
-  Widget getOperatorsFromSimpleConsult() {
-    return PopUpMenuWidget(
-      popUpName: 'Operador',
-      selectValue: widget.setOperator,
-      listString: _listOperators,
-      valueSelect: widget.selectedOperator,
-      enableForm: widget.enableForm,
-      editForm: widget.editForm,
-    );
-  }
-
-  Widget getCoordinators() {
+  Widget _getCoordinators() {
     if (widget.listCountCoordinators == 0) {
       return StreamBuilder(
         stream: _blocInvoice.coordinatorsStream(widget.locationReference),
@@ -132,17 +134,117 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
         _blocInvoice.buildCoordinators(snapshot.data.documents);
     _listCoordinators =
         _listUsersCoordinators.map((user) => user.name).toList();
-    widget.cbSetCoordinatorsList(_listUsersCoordinators);
+    widget.cbHandlerCoordinator('', _listUsersCoordinators.length, 2);
     return chargeCoordinatorsWidget();
   }
 
   Widget chargeCoordinatorsWidget() {
     return PopUpMenuWidget(
       popUpName: 'Coordinador',
-      selectValue: widget.setCoordinator,
+      selectValue: _cbSelectValueCoordinator,
       listString: _listCoordinators,
       valueSelect: widget.selectedCoordinator,
       enableForm: widget.enableForm,
     );
+  }
+
+  Widget _getBrandsStream() {
+    if (widget.listCountBrands == 0) {
+      int uidType;
+      if (widget.uidVehicleType == 2) {
+        uidType = 1;
+      } else {
+        uidType = widget.uidVehicleType;
+      }
+
+      return StreamBuilder(
+        stream: _blocInvoice.brandsStream(uidType),
+        builder: (BuildContext context, AsyncSnapshot snapshot) {
+          switch (snapshot.connectionState) {
+            case ConnectionState.waiting:
+              return CircularProgressIndicator();
+            default:
+              return _getListBrands(snapshot);
+          }
+        },
+      );
+    } else {
+      return _chargeListBrands();
+    }
+  }
+
+  Widget _getListBrands(AsyncSnapshot snapshot) {
+    _listBrands = _blocInvoice.buildBrands(snapshot.data.documents);
+    widget.cbHandlerVehicleBrand('', _listBrands.length, 2);
+    return _chargeListBrands();
+  }
+
+  Widget _chargeListBrands() {
+    return PopUpMenuWidget(
+      popUpName: 'Marca',
+      selectValue: _cbSelectValueBrands,
+      listString: _listBrands,
+      valueSelect: widget.selectedVehicleBrand,
+      enableForm: widget.enableForm,
+    );
+  }
+
+  Widget _getColorsStream() {
+    if (widget.listCountColors == 0) {
+      int uidType;
+      if (widget.uidVehicleType == 2) {
+        uidType = 1;
+      } else {
+        uidType = widget.uidVehicleType;
+      }
+
+      return StreamBuilder(
+        stream: _blocInvoice.colorsStream(uidType),
+        builder: (BuildContext context, AsyncSnapshot snapshot) {
+          switch (snapshot.connectionState) {
+            case ConnectionState.waiting:
+              return CircularProgressIndicator();
+            default:
+              return _getColorsList(snapshot);
+          }
+        },
+      );
+    } else {
+      return _chargeListColors();
+    }
+  }
+
+  Widget _getColorsList(AsyncSnapshot snapshot) {
+    _listColors = _blocInvoice.buildColors(snapshot.data.documents);
+    widget.cbHandlerVehicleColor('', _listColors.length, 2);
+    return _chargeListColors();
+  }
+
+  Widget _chargeListColors() {
+    return PopUpMenuWidget(
+      popUpName: 'Color',
+      selectValue: _cbSelectValueColor,
+      listString: _listColors,
+      valueSelect: widget.selectedVehicleColor,
+      enableForm: widget.enableForm,
+    );
+  }
+
+  /// Functions
+
+  void _cbSelectValueOperator(String valueSelect) {
+    widget.cbHandlerOperator(valueSelect, 0, 1);
+  }
+
+  void _cbSelectValueCoordinator(String valueSelect) {
+    widget.cbHandlerCoordinator(valueSelect, 0, 1);
+  }
+
+  void _cbSelectValueBrands(String valueSelect) {
+    widget.cbHandlerVehicleBrand(valueSelect, 0, 1);
+  }
+
+  void _cbSelectValueColor(String valueSelect) {
+    widget.cbHandlerVehicleColor(valueSelect, 0, 1);
   }
 }

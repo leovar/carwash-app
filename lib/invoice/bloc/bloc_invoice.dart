@@ -29,19 +29,23 @@ class BlocInvoice implements Bloc {
 
     if (invoice.invoiceImages != null && invoice.invoiceImages.length > 0 ) {
       for(String imageFilePath in invoice.invoiceImages) {
-        File imageFile = File(imageFilePath);
-        final pathImage = '$invoiceId/before/${basename(imageFilePath)}';
-        StorageTaskSnapshot storageTaskSnapshot = await _invoiceRepository.uploadImageInvoice(pathImage, imageFile);
-        String imageUrl = await storageTaskSnapshot.ref.getDownloadURL();
-        await _invoiceRepository.updateInvoiceImages(invoiceId, imageUrl);
+        if (!imageFilePath.contains('https://firebasestorage.')) {
+          File imageFile = File(imageFilePath);
+          final pathImage = '$invoiceId/before/${basename(imageFilePath)}';
+          StorageTaskSnapshot storageTaskSnapshot = await _invoiceRepository.uploadImageInvoice(pathImage, imageFile);
+          String imageUrl = await storageTaskSnapshot.ref.getDownloadURL();
+          await _invoiceRepository.updateInvoiceImages(invoiceId, imageUrl);
+        }
       }
     }
 
     if (invoice.imageFirm != null) {
-      final pathImage = '$invoiceId/before/firm';
-      StorageTaskSnapshot storageTaskSnapshot = await _invoiceRepository.uploadImageFirmInvoice(pathImage, invoice.imageFirm);
-      String imageUrl = await storageTaskSnapshot.ref.getDownloadURL();
-      await _invoiceRepository.updateInvoiceImages(invoiceId, imageUrl);
+      if (!invoice.imageFirm.contains('https://firebasestorage.')) {
+        final pathImage = '$invoiceId/before/firm';
+        StorageTaskSnapshot storageTaskSnapshot = await _invoiceRepository.uploadImageFirmInvoice(pathImage, invoice.imageFirm);
+        String imageUrl = await storageTaskSnapshot.ref.getDownloadURL();
+        await _invoiceRepository.updateInvoiceImages(invoiceId, imageUrl);
+      }
     }
 
     return ref;
@@ -51,6 +55,7 @@ class BlocInvoice implements Bloc {
     return _invoiceRepository.getVehicleTypeReference(vehicleType);
   }
 
+  /// Operators
   Stream<QuerySnapshot> operatorsStream(DocumentReference locationReference) {
     return locationReference != null ? _invoiceRepository.getListOperatorsStream(locationReference): QuerySnapshot;
   }
@@ -59,6 +64,7 @@ class BlocInvoice implements Bloc {
     return _invoiceRepository.getOperatorsUsers();
   }*/
 
+  /// Coordinators
   Stream<QuerySnapshot> coordinatorsStream(DocumentReference locationReference) {
     return locationReference != null ? _invoiceRepository.getListCoordinatorStream(locationReference): QuerySnapshot;
   }
@@ -67,6 +73,19 @@ class BlocInvoice implements Bloc {
     return _invoiceRepository.getCoordinatorUsers();
   }*/
 
+  /// Brands
+  Stream<QuerySnapshot> brandsStream(int uidVehicleType) {
+    return _invoiceRepository.getListBrandsStream(uidVehicleType);
+  }
+  List<String> buildBrands(List<DocumentSnapshot> brandsListSnapshot) => _invoiceRepository.buildBrands(brandsListSnapshot);
+
+  /// Colors
+  Stream<QuerySnapshot> colorsStream(int uidVehicleType) {
+    return _invoiceRepository.getListColorsStream(uidVehicleType);
+  }
+  List<String> buildColors(List<DocumentSnapshot> colorsListSnapshot) => _invoiceRepository.buildColors(colorsListSnapshot);
+
+  /// List Invoices per month
   Stream<QuerySnapshot> invoicesListByMonthStream(DocumentReference locationReference, DateTime date) {
     return _invoiceRepository.getListInvoicesByMonthStream(locationReference, date);
   }
@@ -75,7 +94,9 @@ class BlocInvoice implements Bloc {
 
   Future<void> saveInvoiceProduct(String invoiceId, List<Product> listProducts) async {
     listProducts.forEach((product) {
-      _invoiceRepository.saveInvoiceProduct(invoiceId, product);
+      if (product.newProduct??true) {
+        _invoiceRepository.saveInvoiceProduct(invoiceId, product);
+      }
     });
   }
 
@@ -95,6 +116,10 @@ class BlocInvoice implements Bloc {
 
   Future<List<String>> getInvoiceImages(String invoiceId) {
     return _invoiceRepository.getImagesByIdInvoice(invoiceId);
+  }
+
+  Future<Invoice> getInvoiceById(String invoiceId) {
+    return _invoiceRepository.getInvoiceByIdInvoice(invoiceId);
   }
 
 

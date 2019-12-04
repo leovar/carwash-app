@@ -30,6 +30,14 @@ class UserRepository {
     return _db.collection(FirestoreCollections.users).document(userId);
   }
 
+  Future<DocumentReference> getUserReferenceByUserName(String userName) async {
+    var querySnapshot = await _db
+        .collection(FirestoreCollections.users)
+        .where(FirestoreCollections.usersFieldName, isEqualTo: userName)
+        .getDocuments();
+    return querySnapshot.documents.first.reference;
+  }
+
   Future<User> getUserById(String userId) async {
     final querySnapshot = await this
         ._db
