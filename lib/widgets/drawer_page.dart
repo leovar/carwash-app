@@ -257,6 +257,7 @@ class _DrawerPage extends State<DrawerPage> {
                       width: 25,
                     ),
                     onTap: () {
+                      _deleteLocationPreference();
                       userBloc.singOut();
                     },
                   ),
@@ -275,5 +276,13 @@ class _DrawerPage extends State<DrawerPage> {
       _userName = pref.getString(Keys.userName);
       _userEmail = pref.getString(Keys.userEmail);
     });
+  }
+
+  void _deleteLocationPreference() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    pref.setString(Keys.idLocation, '');
+    pref.setString(Keys.locationName, '');
+    pref.setString(Keys.locationInitCount, '0');
+    pref.setString(Keys.locationFinalCount, '0');
   }
 }

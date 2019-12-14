@@ -405,13 +405,15 @@ class _LoginPage extends State<LoginPage> {
 
   /// Functions
 
-  bool _validations() {
-    //TODO validar que se haya seleccionado una sede, mostrar mensaje de debe seleccionar sede
-
-    if (_selectedLocation != null) {
-      return true;
+  bool _validations(String typeLogin) {
+    if (typeLogin == 'email') {
+      if (_textUser.text.isEmpty || _textPassword.text.isEmpty) {
+        MessagesUtils.showAlert(
+            context: context, title: 'Falta ingresar usuario u contraseña');
+        return false;
+      }
     }
-    return false;
+    return true;
   }
 
   void _registerLogin(FirebaseUser user) {
@@ -459,12 +461,10 @@ class _LoginPage extends State<LoginPage> {
 
   void _setLocationInPreferences(FirebaseUser user) async {
     SharedPreferences pref = await SharedPreferences.getInstance();
-    pref.setString(Keys.idLocation, _selectedLocation.id);
-    pref.setString(Keys.locationName, _selectedLocation.locationName);
-    pref.setString(
-        Keys.locationInitCount, _selectedLocation.initConcec.toString());
-    pref.setString(
-        Keys.locationFinalCount, _selectedLocation.finalConsec.toString());
+    pref.setString(Keys.idLocation, '');
+    pref.setString(Keys.locationName, '');
+    pref.setString(Keys.locationInitCount, '');
+    pref.setString(Keys.locationFinalCount, '');
     pref.setString(Keys.photoUserUrl, user.photoUrl);
     pref.setString(Keys.userId, user.uid);
     pref.setString(Keys.userName, user.displayName);
@@ -498,7 +498,7 @@ class _LoginPage extends State<LoginPage> {
   }
 
   void _googleLogin() async {
-    if (_validations()) {
+    if (_validations('google')) {
       try {
         userBloc.singOut();
         FirebaseUser user = await userBloc.signInGoogle();
@@ -514,7 +514,7 @@ class _LoginPage extends State<LoginPage> {
   }
 
   void _facebookLogin() async {
-    if (_validations()) {
+    if (_validations('facebook')) {
       try {
         FirebaseUser user = await userBloc.signInFacebook();
         if (user != null) {
@@ -529,7 +529,7 @@ class _LoginPage extends State<LoginPage> {
   }
 
   void _emailLogin() async {
-    if (_validations()) {
+    if (_validations('email')) {
       if (_textUser.text.isNotEmpty && _textPassword.text.isNotEmpty) {
         try {
           FirebaseUser user = await userBloc.signInEmail(_textUser.text.trim(), _textPassword.text.trim());

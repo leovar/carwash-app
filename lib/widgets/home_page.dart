@@ -1,10 +1,13 @@
 import 'package:car_wash_app/invoices_list/ui/screens/invoices_list_page.dart';
 import 'package:car_wash_app/location/bloc/bloc_location.dart';
+import 'package:car_wash_app/location/model/location.dart';
 import 'package:car_wash_app/user/bloc/bloc_user.dart';
 import 'package:car_wash_app/user/model/user.dart';
+import 'package:car_wash_app/user/ui/widgets/select_location_widget.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'gradient_back.dart';
 import 'package:car_wash_app/widgets/button_functions.dart';
@@ -13,6 +16,7 @@ import 'package:car_wash_app/invoice/ui/screens/invoice_page.dart';
 import 'package:car_wash_app/widgets/app_bar_widget.dart';
 
 import 'keys.dart';
+import 'messages_utils.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -28,6 +32,13 @@ class _HomePage extends State<HomePage> {
   User usuario;
   DocumentReference _locationReference;
   String _locationName = '';
+  Location _locationSelected = Location();
+
+  @override
+  void initState() {
+    super.initState();
+    _validateLocationPrefernece();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -207,4 +218,51 @@ class _HomePage extends State<HomePage> {
     _locationReference = await _locationBloc.getLocationReference(idLocation);
     _locationName = pref.getString(Keys.locationName);
   }
+
+  void _validateLocationPrefernece() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    String locationId = pref.getString(Keys.idLocation)??'';
+    if (locationId.isEmpty) {
+      Alert(
+        context: context,
+        title: 'Filtros',
+        style: MessagesUtils.alertStyle,
+        content: SelectLocationWidget(
+          locationSelected: _locationSelected,
+          selectLocation: _callBackSelectLocation,
+        ),
+        buttons: [
+          DialogButton(
+            color: Theme.of(context).primaryColor,
+            child: Text(
+              'ACEPTAR',
+              style: Theme.of(context).textTheme.button,
+            ),
+            onPressed: () {
+              Navigator.of(context).pop();
+              setState(() {
+
+              });
+            },
+          )
+        ],
+      ).show();
+    }
+  }
+
+  void _callBackSelectLocation(Location locationSelected) {
+    _locationSelected = locationSelected;
+    _serLocationPreference(locationSelected);
+  }
+
+  void _serLocationPreference(Location locationSelected) async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    pref.setString(Keys.idLocation, locationSelected.id);
+    pref.setString(Keys.locationName, locationSelected.locationName);
+    pref.setString(
+        Keys.locationInitCount, locationSelected.initConcec.toString());
+    pref.setString(
+        Keys.locationFinalCount, locationSelected.finalConsec.toString());
+  }
+
 }

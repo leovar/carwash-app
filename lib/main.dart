@@ -11,6 +11,7 @@ void main() {
         statusBarColor: Colors.transparent,
         statusBarBrightness: Brightness.light),
   );
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(MyApp());
 }
 

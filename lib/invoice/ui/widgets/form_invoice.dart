@@ -9,6 +9,7 @@ import 'package:car_wash_app/invoice/model/additional_product.dart';
 import 'package:car_wash_app/invoice/model/invoice.dart';
 import 'package:car_wash_app/invoice/ui/screens/draw_page.dart';
 import 'package:car_wash_app/invoice/ui/widgets/fields_products.dart';
+import 'package:car_wash_app/invoice/ui/widgets/print_invoice.dart';
 import 'package:car_wash_app/invoice/ui/widgets/radio_item.dart';
 import 'package:car_wash_app/location/bloc/bloc_location.dart';
 import 'package:car_wash_app/product/bloc/product_bloc.dart';
@@ -311,6 +312,8 @@ class _FormInvoice extends State<FormInvoice> {
                 child: _rePrintInvoice(),
               ),
               SizedBox(height: 9),
+              _printInvoice(),
+              SizedBox(height: 9),
             ],
           ),
         ),
@@ -417,6 +420,32 @@ class _FormInvoice extends State<FormInvoice> {
             ),
           ),
           onPressed: () {},
+        ),
+      ),
+    );
+  }
+
+  Widget _printInvoice() {
+    return Container(
+      height: 80,
+      child: Align(
+        alignment: Alignment.center,
+        child: RaisedButton(
+          padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
+          color: Color(0xFF59B258),
+          child: Text(
+            "IMPRIMIR TEST",
+            style: TextStyle(
+              fontFamily: "Lato",
+              decoration: TextDecoration.none,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              fontSize: 19,
+            ),
+          ),
+          onPressed: () {
+            Navigator.push(context, MaterialPageRoute(builder: (context)=> PrintInvoice()));
+          },
         ),
       ),
     );
