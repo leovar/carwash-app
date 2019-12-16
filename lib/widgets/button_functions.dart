@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 
 class ButtonFunctions extends StatefulWidget {
 
-  String buttonName = "";
-  String imageAsset = "";
+  final String buttonName;
+  final String imageAsset;
   final VoidCallback onPressed;
+  final bool buttonEnabled;
 
-  ButtonFunctions({Key key, @required this.onPressed, this.buttonName, this.imageAsset});
+  ButtonFunctions({Key key, @required this.onPressed, this.buttonName, this.imageAsset, this.buttonEnabled});
 
   @override
   State<StatefulWidget> createState() {
@@ -23,7 +24,7 @@ class _ButtonFunctions extends State<ButtonFunctions> {
     return Container(
       child: Material(
         child: InkWell(
-          onTap: widget.onPressed,
+          onTap: widget.buttonEnabled ? widget.onPressed : null,
           child: Container(
             height: 70.0,
             child: Align(
@@ -34,7 +35,7 @@ class _ButtonFunctions extends State<ButtonFunctions> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
                     Text(
-                      widget.buttonName,
+                      widget.buttonName??'',
                       style: TextStyle(
                         fontFamily: "Lato",
                         fontWeight: FontWeight.bold,
@@ -46,7 +47,7 @@ class _ButtonFunctions extends State<ButtonFunctions> {
                       alignment: Alignment.centerRight,
                       child: Ink.image(
                         image: AssetImage(
-                            widget.imageAsset),
+                            widget.imageAsset??''),
                         width: 30,
                         alignment: Alignment.centerRight,
                       ),

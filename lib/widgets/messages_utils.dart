@@ -33,7 +33,7 @@ class MessagesUtils {
       style: alertStyle,
       buttons: [
         DialogButton(
-          color: Theme.of(context).primaryColor,
+          color: Theme.of(context).accentColor,
           child: Text(
             'ACEPTAR',
             style: Theme.of(context).textTheme.button,

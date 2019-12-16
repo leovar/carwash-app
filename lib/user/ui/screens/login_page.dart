@@ -4,6 +4,7 @@ import 'package:car_wash_app/location/bloc/bloc_location.dart';
 import 'package:car_wash_app/location/model/location.dart';
 import 'package:car_wash_app/user/bloc/bloc_user.dart';
 import 'package:car_wash_app/user/model/user.dart';
+import 'package:car_wash_app/user/ui/widgets/select_location_widget.dart';
 import 'package:car_wash_app/widgets/home_page.dart';
 import 'package:car_wash_app/widgets/keys.dart';
 import 'package:car_wash_app/widgets/messages_utils.dart';
@@ -12,6 +13,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../widgets/gradient_back.dart';
@@ -30,7 +32,7 @@ class _LoginPage extends State<LoginPage> {
   final _textPassword = TextEditingController();
 
   List<DropdownMenuItem<Location>> _dropdownMenuItems;
-  Location _selectedLocation;
+  Location _selectedLocation = Location();
 
   @override
   void initState() {
@@ -55,11 +57,13 @@ class _LoginPage extends State<LoginPage> {
     return StreamBuilder(
       stream: userBloc.authStatus,
       builder: (BuildContext context, AsyncSnapshot snapshot) {
+
         //el snapshot tiene la data que se esta retornando
         print(snapshot);
         if (!snapshot.hasData || snapshot.hasError) {
           return loginScreen();
         } else {
+          _validateLocationPreferences();
           return BlocProvider(
             bloc: UserBloc(),
             child: HomePage(),
@@ -115,10 +119,10 @@ class _LoginPage extends State<LoginPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
-            dropDawnLocations(),
+            //dropDawnLocations(),
             inputUserName(),
             inputPassword(),
-            loginButton(),
+            _loginButton(),
             loginFacebookGoogle(),
             olvidoContrasena(),
             registrese(),
@@ -259,64 +263,68 @@ class _LoginPage extends State<LoginPage> {
         ),
       );
 
-  buttonGo() => Padding(
-        padding: EdgeInsets.symmetric(vertical: 49),
-        child: OutlineButton(
+  Widget _buttonGo() {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 49),
+      child: OutlineButton(
+        color: Colors.white,
+        padding: EdgeInsets.symmetric(
+          vertical: 15,
+          horizontal: 58,
+        ),
+        borderSide: BorderSide(
+          width: 1,
           color: Colors.white,
-          padding: EdgeInsets.symmetric(
-            vertical: 15,
-            horizontal: 58,
-          ),
-          borderSide: BorderSide(
-            width: 1,
+        ),
+        child: Text(
+          "INGRESAR",
+          style: TextStyle(
+            fontFamily: "Lato",
+            fontWeight: FontWeight.bold,
             color: Colors.white,
           ),
-          child: Text(
-            "INGRESAR",
-            style: TextStyle(
-              fontFamily: "Lato",
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-          onPressed: () {
+        ),
+        onPressed: () {
+          _emailLogin();
+        },
+      ),
+    );
+  }
+
+  Widget _loginButton() {
+    return Container(
+      margin: EdgeInsets.only(top: 49),
+      child: Material(
+        child: InkWell(
+          onTap: () {
             _emailLogin();
           },
-        ),
-      );
-
-  loginButton() => Container(
-        margin: EdgeInsets.only(top: 49),
-        child: Material(
-          child: InkWell(
-            onTap: () {
-              _emailLogin();
-            },
-            child: Container(
-              width: 190.0,
-              height: 42.0,
-              child: Center(
-                child: Text(
-                  'INGRESAR',
-                  style: TextStyle(
-                    fontFamily: "Lato",
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
+          child: Container(
+            width: 190.0,
+            height: 42.0,
+            child: Center(
+              child: Text(
+                'INGRESAR',
+                style: TextStyle(
+                  fontFamily: "Lato",
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
               ),
             ),
           ),
-          color: Colors.transparent,
         ),
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: Colors.white,
-            width: 1.0,
-          ),
-          borderRadius: BorderRadius.circular(7.0),
+        color: Colors.transparent,
+      ),
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: Colors.white,
+          width: 1.0,
         ),
-      );
+        borderRadius: BorderRadius.circular(7.0),
+      ),
+    );
+  }
 
   loginFacebookGoogle() => Padding(
         padding: EdgeInsets.only(top: 35),
@@ -543,5 +551,51 @@ class _LoginPage extends State<LoginPage> {
         }
       }
     }
+  }
+
+  void _validateLocationPreferences() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    String locationId = pref.getString(Keys.idLocation)??'';
+    if (locationId.isEmpty) {
+      Alert(
+        context: context,
+        title: 'Sede',
+        style: MessagesUtils.alertStyle,
+        content: SelectLocationWidget(
+          locationSelected: _selectedLocation,
+          selectLocation: _callBackSelectLocation,
+        ),
+        buttons: [
+          DialogButton(
+            color: Theme.of(context).accentColor,
+            child: Text(
+              'ACEPTAR',
+              style: Theme.of(context).textTheme.button,
+            ),
+            onPressed: () {
+              Navigator.of(context).pop();
+              setState(() {
+
+              });
+            },
+          )
+        ],
+      ).show();
+    }
+  }
+
+  void _callBackSelectLocation(Location locationSelected) {
+    _selectedLocation = locationSelected;
+    _serLocationPreference(locationSelected);
+  }
+
+  void _serLocationPreference(Location locationSelected) async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    pref.setString(Keys.idLocation, locationSelected.id);
+    pref.setString(Keys.locationName, locationSelected.locationName);
+    pref.setString(
+        Keys.locationInitCount, locationSelected.initConcec.toString());
+    pref.setString(
+        Keys.locationFinalCount, locationSelected.finalConsec.toString());
   }
 }

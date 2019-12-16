@@ -30,6 +30,15 @@ class MyApp extends StatelessWidget {
           accentColor: Color(0xFF59B258),
           cardColor: Color(0xFF787A71),
           cursorColor: Color(0xFFAEAEAE),
+          textTheme: TextTheme(
+            button: TextStyle(
+              fontFamily: "Lato",
+              decoration: TextDecoration.none,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              fontSize: 19,
+            ),
+          ),
         ),
         home: LoginPage(),
         //HomePage(),//LoginPage(),

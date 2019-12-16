@@ -321,7 +321,7 @@ class _FormInvoicesList extends State<FormInvoicesList> {
       ),
       buttons: [
         DialogButton(
-          color: Theme.of(context).primaryColor,
+          color: Theme.of(context).accentColor,
           child: Text(
             'ACEPTAR',
             style: Theme.of(context).textTheme.button,

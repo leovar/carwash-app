@@ -384,7 +384,7 @@ class _FormInvoice extends State<FormInvoice> {
         alignment: Alignment.center,
         child: RaisedButton(
           padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
-          color: Color(0xFF59B258),
+          color: Theme.of(context).accentColor,
           child: Text(
             "GUARDAR",
             style: TextStyle(
@@ -408,7 +408,7 @@ class _FormInvoice extends State<FormInvoice> {
         alignment: Alignment.center,
         child: RaisedButton(
           padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
-          color: Color(0xFF59B258),
+          color: Theme.of(context).accentColor,
           child: Text(
             "IMPRIMIR FACTURA",
             style: TextStyle(
@@ -432,7 +432,7 @@ class _FormInvoice extends State<FormInvoice> {
         alignment: Alignment.center,
         child: RaisedButton(
           padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
-          color: Color(0xFF59B258),
+          color: Theme.of(context).accentColor,
           child: Text(
             "IMPRIMIR TEST",
             style: TextStyle(
@@ -456,8 +456,8 @@ class _FormInvoice extends State<FormInvoice> {
   ///Image Functions
   void _menuSourceAddImage() {
     PopupMenu menu = PopupMenu(
-        backgroundColor: Color(0xFF59B258),
-        lineColor: Color(0xFF59B258),
+        backgroundColor: Theme.of(context).accentColor,
+        lineColor: Theme.of(context).accentColor,
         maxColumn: 1,
         items: [
           MenuItem(

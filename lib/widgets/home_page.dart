@@ -32,12 +32,10 @@ class _HomePage extends State<HomePage> {
   User usuario;
   DocumentReference _locationReference;
   String _locationName = '';
-  Location _locationSelected = Location();
 
   @override
   void initState() {
     super.initState();
-    _validateLocationPrefernece();
   }
 
   @override
@@ -89,7 +87,6 @@ class _HomePage extends State<HomePage> {
     return homePage();
   }
 
-
   indicadorDeProgreso() => Container(
         margin: EdgeInsets.only(
           left: 20.0,
@@ -121,67 +118,81 @@ class _HomePage extends State<HomePage> {
       );
 
   bodyContainer() => Column(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisSize: MainAxisSize.max,
         children: <Widget>[
-          Expanded(
-            child: backgroundImage(),
+          Flexible(
+            child: _backgroundImage(),
           ),
-          Expanded(
-            child: listOptions(),
+          Flexible(
+            child: Align(
+              alignment: FractionalOffset.bottomCenter,
+              child: _listOptions(),
+            ),
           ),
         ],
       );
 
-  backgroundImage() => Container(
-        margin: EdgeInsets.only(top: 40),
-        width: 360,
-        height: 300,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: Colors.transparent,
-          image: DecorationImage(
-            image: AssetImage("assets/images/img_landing.png"),
-          ),
+  Widget _backgroundImage() {
+    return Container(
+      margin: EdgeInsets.only(top: 60, bottom: 40),
+      width: 360,
+      height: 300,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: Colors.transparent,
+        image: DecorationImage(
+          image: AssetImage("assets/images/img_landing.png"),
         ),
-      );
+      ),
+    );
+  }
 
-  listOptions() => ListView(
-        padding: EdgeInsets.only(right: 17, left: 17, top: 10),
-        scrollDirection: Axis.vertical,
-        children: <Widget>[
-          ButtonFunctions(
-              onPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            InvoicePage(showDrawer: false)));
-              },
-              buttonName: "NUEVA FACTURA",
-              imageAsset: "assets/images/icon_nueva_factura.png"),
-          SizedBox(
-            height: 10.0,
-          ),
-          ButtonFunctions(
-              onPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => InvoicesListPage(
-                              user: usuario,
-                              locationReference: _locationReference,
-                            )));
-              },
-              buttonName: "FACTURAS",
-              imageAsset: "assets/images/icon_facturas.png"),
-          SizedBox(
-            height: 10.0,
-          ),
-          ButtonFunctions(
-              onPressed: () {},
-              buttonName: "INFORMES",
-              imageAsset: "assets/images/icon_informes.png"),
-        ],
-      );
+  Widget _listOptions() {
+    return ListView(
+      padding: EdgeInsets.only(right: 17, left: 17),
+      scrollDirection: Axis.vertical,
+      children: <Widget>[
+        ButtonFunctions(
+            onPressed: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => InvoicePage(showDrawer: false)));
+            },
+            buttonName: "NUEVA FACTURA",
+            imageAsset: "assets/images/icon_nueva_factura.png",
+            buttonEnabled: _locationName.isNotEmpty ? true : false,
+        ),
+        SizedBox(
+          height: 10.0,
+        ),
+        ButtonFunctions(
+            onPressed: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => InvoicesListPage(
+                        user: usuario,
+                        locationReference: _locationReference,
+                      )));
+            },
+            buttonName: "FACTURAS",
+            imageAsset: "assets/images/icon_facturas.png",
+            buttonEnabled: _locationName.isNotEmpty ? true : false,
+        ),
+        SizedBox(
+          height: 10.0,
+        ),
+        ButtonFunctions(
+            onPressed: () {},
+            buttonName: "INFORMES",
+            imageAsset: "assets/images/icon_informes.png",
+            buttonEnabled: _locationName.isNotEmpty ? true : false,
+        ),
+      ],
+    );
+  }
 
   Widget locationIndicator() {
     return Align(
@@ -218,51 +229,4 @@ class _HomePage extends State<HomePage> {
     _locationReference = await _locationBloc.getLocationReference(idLocation);
     _locationName = pref.getString(Keys.locationName);
   }
-
-  void _validateLocationPrefernece() async {
-    SharedPreferences pref = await SharedPreferences.getInstance();
-    String locationId = pref.getString(Keys.idLocation)??'';
-    if (locationId.isEmpty) {
-      Alert(
-        context: context,
-        title: 'Filtros',
-        style: MessagesUtils.alertStyle,
-        content: SelectLocationWidget(
-          locationSelected: _locationSelected,
-          selectLocation: _callBackSelectLocation,
-        ),
-        buttons: [
-          DialogButton(
-            color: Theme.of(context).primaryColor,
-            child: Text(
-              'ACEPTAR',
-              style: Theme.of(context).textTheme.button,
-            ),
-            onPressed: () {
-              Navigator.of(context).pop();
-              setState(() {
-
-              });
-            },
-          )
-        ],
-      ).show();
-    }
-  }
-
-  void _callBackSelectLocation(Location locationSelected) {
-    _locationSelected = locationSelected;
-    _serLocationPreference(locationSelected);
-  }
-
-  void _serLocationPreference(Location locationSelected) async {
-    SharedPreferences pref = await SharedPreferences.getInstance();
-    pref.setString(Keys.idLocation, locationSelected.id);
-    pref.setString(Keys.locationName, locationSelected.locationName);
-    pref.setString(
-        Keys.locationInitCount, locationSelected.initConcec.toString());
-    pref.setString(
-        Keys.locationFinalCount, locationSelected.finalConsec.toString());
-  }
-
 }
