@@ -240,19 +240,15 @@ class _AdditionalProductPage extends State<AdditionalProductPage> {
   }
 
   void _addAdditionalProduct() {
-    double iva = 0.0;
-    String valueService = _valueAdditionalService.text ?? '0';
-    if (_checkIva) {
-      double value = double.parse(valueService);
-      if (value > 0) {
-        iva = value * 0.19;
-      }
+    double _iva = 0;
+    if(_checkIva) {
+      _iva = 19;
     }
 
     AdditionalProduct product = AdditionalProduct(
       _textAdditionalService.text,
       _valueAdditionalService.text,
-      iva,
+      _iva,
       true,
     );
 

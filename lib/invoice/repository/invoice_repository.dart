@@ -201,7 +201,7 @@ class InvoiceRepository {
         .add(Product().toJsonInvoiceProduct(
           product.productName,
           product.price,
-          product.iva,
+          product.ivaPercent,
           false,
           product.id,
         ));
@@ -218,7 +218,7 @@ class InvoiceRepository {
         .add(Product().toJsonInvoiceProduct(
           additionalProduct.productName,
           double.parse(additionalProduct.productValue),
-          additionalProduct.productIva,
+          additionalProduct.ivaPercent,
           true,
           null,
         ));

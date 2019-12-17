@@ -33,7 +33,6 @@ class _ProductAdminPage extends State<ProductAdminPage> {
   bool _validatePrice = false;
   final _textProductName = TextEditingController();
   final _textPrice = TextEditingController();
-  final _textIva = TextEditingController();
   final _textIvaPercent = TextEditingController();
   final double _heightTextField = 60;
   final String _initialIvaPercent = '19';
@@ -48,7 +47,7 @@ class _ProductAdminPage extends State<ProductAdminPage> {
   @override
   void initState() {
     super.initState();
-    _textIvaPercent.text = _initialIvaPercent;
+    //_textIvaPercent.text = _initialIvaPercent;
     if (widget.currentProduct != null) {
       _productSelected = widget.currentProduct;
       _selectProductList();
@@ -120,7 +119,6 @@ class _ProductAdminPage extends State<ProductAdminPage> {
                 textInputFormatter: [
                   WhitelistingTextInputFormatter(RegExp("^[0-9.]*"))
                 ],
-                onFinalEditText: _onValueIvaPriceChanged,
               ),
             ),
             SizedBox(height: 9),
@@ -131,18 +129,6 @@ class _ProductAdminPage extends State<ProductAdminPage> {
                 textController: _textIvaPercent,
                 textValidate: 'Escriba el % de iva del producto',
                 inputType: TextInputType.number,
-                maxLength: 2,
-                onFinalEditText: _onValueIvaPriceChanged,
-              ),
-            ),
-            SizedBox(height: 9),
-            Container(
-              height: 48,
-              child: TextFieldInput(
-                labelText: 'Valor con Iva',
-                textController: _textIva,
-                inputType: TextInputType.number,
-                enable: false,
                 textInputFormatter: [
                   WhitelistingTextInputFormatter(RegExp("^[0-9.]*"))
                 ],
@@ -344,8 +330,7 @@ class _ProductAdminPage extends State<ProductAdminPage> {
     _validateName = false;
     _validatePrice = false;
     _textProductName.text = _productSelected.productName;
-    _textIvaPercent.text = _productSelected.ivaPercent;
-    _textIva.text = _productSelected.iva.toString();
+    _textIvaPercent.text = _productSelected.ivaPercent.toStringAsFixed(0);
     _textPrice.text = _productSelected.price.toStringAsFixed(2);
     _productActive = _productSelected.productActive ?? true;
     _selectedVehicleType = _lisVehicleType.length > 0
@@ -391,21 +376,6 @@ class _ProductAdminPage extends State<ProductAdminPage> {
     });
   }
 
-  void _onValueIvaPriceChanged() {
-    if (_textIvaPercent.text.isEmpty) _textIvaPercent.text = '0';
-    if (_textPrice.text.isNotEmpty && _textIvaPercent.text.isNotEmpty) {
-      double price = double.tryParse(_textPrice.text) ?? 0.0;
-      double ivaPercent = double.tryParse(_textIvaPercent.text) ?? 0.0;
-      setState(() {
-        _textIva.text = (price * (ivaPercent / 100)).toStringAsFixed(2);
-      });
-    } else {
-      setState(() {
-        _textIva.text = '0';
-      });
-    }
-  }
-
   bool _validateInputs() {
     bool canSave = true;
     bool listSedesEmpty = false;
@@ -444,7 +414,6 @@ class _ProductAdminPage extends State<ProductAdminPage> {
   void _clearData() {
     _textProductName.text = '';
     _textIvaPercent.text = _initialIvaPercent;
-    _textIva.text = '';
     _textPrice.text = '';
     _selectedVehicleType = null;
     _productSelected = null;
@@ -502,8 +471,7 @@ class _ProductAdminPage extends State<ProductAdminPage> {
           id: _productSelected != null ? _productSelected.id : null,
           productName: _textProductName.text.trim(),
           price: double.tryParse(_textPrice.text.trim()) ?? 0.0,
-          iva: double.tryParse(_textIva.text.trim()) ?? 0.0,
-          ivaPercent: _textIvaPercent.text.trim(),
+          ivaPercent: double.tryParse(_textIvaPercent.text.trim()) ?? 0.0,
           vehicleType: _vehicleTypeBloc
               .getVehicleTypeReferenceById(_selectedVehicleType.id),
           locations: _productSelected != null

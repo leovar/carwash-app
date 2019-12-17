@@ -10,8 +10,7 @@ class Product extends Equatable {
   final String id;
   final String productName;
   final double price;
-  final double iva;
-  final String ivaPercent;
+  final double ivaPercent;
   final DocumentReference vehicleType;
   final List<DocumentReference> locations;
   final bool productActive;
@@ -24,7 +23,6 @@ class Product extends Equatable {
     this.id,
     this.productName,
     this.price,
-    this.iva,
     this.ivaPercent,
     this.vehicleType,
     this.locations,
@@ -46,8 +44,7 @@ class Product extends Equatable {
       id: id,
       productName: json['productName'],
       price: json['price'].toDouble(),
-      iva: json['iva'].toDouble(),
-      ivaPercent: json['ivaPercent'],
+      ivaPercent: json['ivaPercent'].toDouble(),
       vehicleType: json['vehicleType'],
       productActive : json['productActive'],
       vehicleTypeUid : json['vehicleTypeUid'],
@@ -68,8 +65,7 @@ class Product extends Equatable {
       id: json['productId'],
       productName: json['productName'],
       price: json['price'].toDouble(),
-      iva: json['iva'].toDouble(),
-      ivaPercent: json['ivaPercent'],
+      ivaPercent: json['ivaPercent'].toDouble(),
       vehicleType: json['vehicleType'],
       productActive : json['productActive'],
       vehicleTypeUid : json['vehicleTypeUid'],
@@ -83,7 +79,6 @@ class Product extends Equatable {
     return {
       'productName': this.productName,
       'price': this.price,
-      'iva' : this.iva,
       'ivaPercent' : this.ivaPercent,
       'vehicleType' : this.vehicleType,
       'locations' : this.locations,
@@ -95,14 +90,14 @@ class Product extends Equatable {
   Map<String, dynamic> toJsonInvoiceProduct(
       String productName,
       double price,
-      double iva,
+      double ivaPercent,
       bool isAdditional,
       String productId,
       ) {
     return {
       'productName': productName,
       'price': price,
-      'iva': iva,
+      'ivaPercent': ivaPercent,
       'isAdditional': isAdditional,
       'productId': productId,
     };
@@ -112,14 +107,13 @@ class Product extends Equatable {
     @required Product origin,
     bool isSelected,
     double price,
-    double iva,
+    double ivaPercent,
   }) {
     return Product(
       id: origin.id,
       productName: origin.productName,
       price: price ?? origin.price,
-      iva: iva ?? origin.iva,
-      ivaPercent: origin.ivaPercent,
+      ivaPercent: ivaPercent ?? origin.ivaPercent,
       vehicleType: origin.vehicleType,
       locations: origin.locations,
       productActive: origin.productActive,
@@ -134,7 +128,6 @@ class Product extends Equatable {
     id,
     productName,
     price,
-    iva,
     ivaPercent,
     vehicleType,
     locations,

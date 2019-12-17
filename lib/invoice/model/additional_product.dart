@@ -1,13 +1,13 @@
 class AdditionalProduct {
   final String productName;
   final String productValue;
-  double productIva;
+  double ivaPercent;
   bool newProduct;
 
   AdditionalProduct(
     this.productName,
     this.productValue,
-    this.productIva,
+    this.ivaPercent,
     this.newProduct,
   );
 }

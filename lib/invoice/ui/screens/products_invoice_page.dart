@@ -89,7 +89,7 @@ class _ProductsInvoicePage extends State<ProductsInvoicePage> {
           origin: prod,
           isSelected: true,
           price: proFindSelect.price,
-          iva: proFindSelect.iva,
+          ivaPercent: proFindSelect.ivaPercent,
         );
         productGet.add(prodSelected);
       }

@@ -38,7 +38,7 @@ class _TotalFilterInvoicesWidget extends State<TotalFilterInvoicesWidget> {
                   fontFamily: "Lato",
                   fontWeight: FontWeight.bold,
                   fontSize: 17,
-                  color: Color(0xFF27AEBB),
+                  color: Theme.of(context).primaryColor,
                 ),
               ),
             ),
@@ -54,7 +54,7 @@ class _TotalFilterInvoicesWidget extends State<TotalFilterInvoicesWidget> {
                     fontFamily: "Lato",
                     fontWeight: FontWeight.normal,
                     fontSize: 15,
-                    color: Color(0xFF27AEBB),
+                    color: Theme.of(context).primaryColor,
                   ),
                 ),
                 Container(

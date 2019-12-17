@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ffi';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -747,12 +748,18 @@ class _FormInvoice extends State<FormInvoice> {
       _listProduct.forEach((product) {
         if (product.isSelected) {
           _total = _total + product.price;
-          _iva = _iva + product.iva;
+          double _subT = ((product.price * 100) / (100 + product.ivaPercent));
+          double _ivaProd = (_subT * product.ivaPercent) / 100;
+          _subTotal = _subTotal + _subT;
+          _iva = _iva + _ivaProd;
         }
       });
       _listAdditionalProducts.forEach((addProduct) {
         _total = _total + double.parse(addProduct.productValue ?? '0');
-        _iva = _iva + addProduct.productIva;
+        double _subT = ((double.parse(addProduct.productValue ?? '0') * 100) / (100 + addProduct.ivaPercent ?? 0));
+        double _ivaProd = (_subT * addProduct.ivaPercent ?? 0) / 100;
+        _subTotal = _subTotal + _subT;
+        _iva = _iva + _ivaProd;
       });
 
       //Get Consecutive
@@ -858,7 +865,7 @@ class _FormInvoice extends State<FormInvoice> {
         AdditionalProduct addProd = AdditionalProduct(
           prodSelected.productName,
           prodSelected.price.toString(),
-          prodSelected.iva,
+          prodSelected.ivaPercent,
           false,
         );
         _listAdditionalProducts.add(addProd);
