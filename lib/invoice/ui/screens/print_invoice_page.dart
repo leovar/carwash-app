@@ -12,6 +12,7 @@ import 'package:car_wash_app/location/bloc/bloc_location.dart';
 import 'package:car_wash_app/location/model/location.dart';
 import 'package:car_wash_app/product/model/product.dart';
 import 'package:car_wash_app/widgets/keys.dart';
+import 'package:car_wash_app/widgets/messages_utils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -615,6 +616,9 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
 
   void _capturePng() async {
     try {
+      MessagesUtils.showAlertWithLoading(context: context, title: 'Imprimiendo')
+          .show();
+
       print('inside');
       inside = true;
       RenderRepaintBoundary boundary =
@@ -665,7 +669,8 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
       setState(() {
         imageInMemory = pngBytes;
         inside = false;
-        Navigator.pop(context);
+        Navigator.pop(context);  //cierra el mensaje de loading
+        Navigator.pop(context);  //cierra la ventana
       });
     } catch (e) {
       print(e);

@@ -769,20 +769,21 @@ class _FormInvoice extends State<FormInvoice> {
       //Get products and values
       _listProduct.forEach((product) {
         if (product.isSelected) {
-          _total = _total + product.price;
           int _subT = ((product.price * 100) / (100 + product.ivaPercent)).round();
           int _ivaProd = ((_subT * product.ivaPercent) / 100).round();
-          _subTotal = _subTotal + _subT;
+          // se comenta por que por los decimales la suma de subtotal e iva no siempre da el total, por lo cual se seguira guardando el subtotal como una resta del total menos el iva
+          _subTotal = _subTotal + (product.price - _ivaProd);  //_subT
           _iva = _iva + _ivaProd;
+          _total = _total + product.price;
         }
       });
       _listAdditionalProducts.forEach((addProduct) {
-        _total = _total + double.parse(addProduct.productValue ?? '0');
         int _subT = ((double.parse(addProduct.productValue ?? '0') * 100) /
             (100 + addProduct.ivaPercent ?? 0)).round();
         int _ivaProd = ((_subT * addProduct.ivaPercent ?? 0) / 100).round();
-        _subTotal = _subTotal + _subT;
+        _subTotal = _subTotal + (double.parse(addProduct.productValue ?? '0') - _ivaProd); //_subT;
         _iva = _iva + _ivaProd;
+        _total = _total + double.parse(addProduct.productValue ?? '0');
       });
 
       //Get Consecutive
