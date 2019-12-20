@@ -35,7 +35,18 @@ class LocationRepository {
     return locationsList;
   }
 
-  ///Get all locations by id
+  ///Get all locations
+
+  Future<Location> getLocationById(String locationId) async {
+    final querySnapshot = await this
+        ._db
+        .collection(FirestoreCollections.locations)
+        .document(locationId)
+        .get();
+
+    return Location.fromJson(querySnapshot.data, id: querySnapshot.documentID);
+  }
+
   Stream<QuerySnapshot> getAllLocationsStream() {
     final querySnapshot = this
         ._db

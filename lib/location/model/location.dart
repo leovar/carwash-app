@@ -7,6 +7,8 @@ class Location extends Equatable {
   final String id;
   final String locationName;
   final String address;
+  final String phoneNumber;
+  final String director;
   final String nit;
   final String prefix;
   final String dianResolution;
@@ -20,6 +22,8 @@ class Location extends Equatable {
     this.id,
     this.locationName,
     this.address,
+    this.phoneNumber,
+    this.director,
     this.nit,
     this.prefix,
     this.dianResolution,
@@ -35,6 +39,8 @@ class Location extends Equatable {
       id: id,
       locationName: json['locationName'],
       address: json['address'],
+      phoneNumber: json['phoneNumber'],
+      director: json['director'],
       nit: json['nit'],
       prefix: json['prefix'],
       dianResolution: json['dianResolution'],
@@ -50,6 +56,8 @@ class Location extends Equatable {
     return {
       'locationName': this.locationName,
       'address': this.address,
+      'phoneNumber': this.phoneNumber,
+      'director': this.director,
       'nit' : this.nit,
       'prefix' : this.prefix,
       'dianResolution' : this.dianResolution,
@@ -66,6 +74,8 @@ class Location extends Equatable {
     id,
     locationName,
     address,
+    phoneNumber,
+    director,
     nit,
     prefix,
     dianResolution,

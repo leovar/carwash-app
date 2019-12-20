@@ -9,6 +9,7 @@ import 'package:car_wash_app/invoice/bloc/bloc_invoice.dart';
 import 'package:car_wash_app/invoice/model/additional_product.dart';
 import 'package:car_wash_app/invoice/model/invoice.dart';
 import 'package:car_wash_app/invoice/ui/screens/draw_page.dart';
+import 'package:car_wash_app/invoice/ui/screens/print_invoice_page.dart';
 import 'package:car_wash_app/invoice/ui/widgets/fields_products.dart';
 import 'package:car_wash_app/invoice/ui/widgets/print_invoice.dart';
 import 'package:car_wash_app/invoice/ui/widgets/radio_item.dart';
@@ -263,7 +264,7 @@ class _FormInvoice extends State<FormInvoice> {
                 finalEditPlaca: _onFinalEditPlaca,
                 enableForm: _enableForm,
                 focusClient: _clientFocusNode,
-                autofocusPlaca: widget.editInvoice == null ? true : false,
+                autofocusPlaca: (widget.editInvoice == null && _listCoordinatorsCount == 0) ? true : false,
                 editForm: _editForm,
               ),
               SizedBox(height: 9),
@@ -313,8 +314,8 @@ class _FormInvoice extends State<FormInvoice> {
                 child: _rePrintInvoice(),
               ),
               SizedBox(height: 9),
-              _printInvoice(),
-              SizedBox(height: 9),
+              //_printInvoiceTest(),
+              //SizedBox(height: 9),
             ],
           ),
         ),
@@ -346,33 +347,37 @@ class _FormInvoice extends State<FormInvoice> {
       height: 80,
       child: Align(
         alignment: Alignment.center,
-        child: RaisedButton(
-          padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
-          color: Color(0xFF59B258),
-          child: Text(
-            "FIRMAR",
-            style: TextStyle(
-              fontFamily: "Lato",
-              decoration: TextDecoration.none,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-              fontSize: 19,
+        child: ButtonTheme(
+          minWidth: 230.0,
+          height: 50,
+          child: RaisedButton(
+            padding: EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+            color: Color(0xFF59B258),
+            child: Text(
+              "FIRMAR",
+              style: TextStyle(
+                fontFamily: "Lato",
+                decoration: TextDecoration.none,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                fontSize: 19,
+              ),
             ),
+            onPressed: _enableForm
+                ? () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => DrawPage(
+                    changeValueApproveData: _callBackApproveDataprocessing,
+                    callBackChargeImageFirm: _callBackChargeFirm,
+                    approveDataProcessing: _approveDataProcessing,
+                  ),
+                ),
+              );
+            }
+                : null,
           ),
-          onPressed: _enableForm
-              ? () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => DrawPage(
-                        changeValueApproveData: _callBackApproveDataprocessing,
-                        callBackChargeImageFirm: _callBackChargeFirm,
-                        approveDataProcessing: _approveDataProcessing,
-                      ),
-                    ),
-                  );
-                }
-              : null,
         ),
       ),
     );
@@ -380,23 +385,27 @@ class _FormInvoice extends State<FormInvoice> {
 
   Widget _saveInvoiceButton() {
     return Container(
-      height: 100,
+      height: 80,
       child: Align(
         alignment: Alignment.center,
-        child: RaisedButton(
-          padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
-          color: Theme.of(context).accentColor,
-          child: Text(
-            "GUARDAR",
-            style: TextStyle(
-              fontFamily: "Lato",
-              decoration: TextDecoration.none,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-              fontSize: 19,
+        child: ButtonTheme(
+          minWidth: 230.0,
+          height: 50,
+          child: RaisedButton(
+            padding: EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+            color: Theme.of(context).accentColor,
+            child: Text(
+              "GUARDAR",
+              style: TextStyle(
+                fontFamily: "Lato",
+                decoration: TextDecoration.none,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                fontSize: 19,
+              ),
             ),
+            onPressed: (_editOperator || _enableForm) ? _saveInvoice : null,
           ),
-          onPressed: (_editOperator || _enableForm) ? _saveInvoice : null,
         ),
       ),
     );
@@ -407,26 +416,38 @@ class _FormInvoice extends State<FormInvoice> {
       height: 80,
       child: Align(
         alignment: Alignment.center,
-        child: RaisedButton(
-          padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
-          color: Theme.of(context).accentColor,
-          child: Text(
-            "IMPRIMIR FACTURA",
-            style: TextStyle(
-              fontFamily: "Lato",
-              decoration: TextDecoration.none,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-              fontSize: 19,
+        child: ButtonTheme(
+          minWidth: 230.0,
+          height: 50,
+          child: RaisedButton(
+            padding: EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+            color: Theme.of(context).accentColor,
+            child: Text(
+              "IMPRIMIR FACTURA",
+              style: TextStyle(
+                fontFamily: "Lato",
+                decoration: TextDecoration.none,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                fontSize: 19,
+              ),
             ),
+            onPressed: () {
+              if (widget.editInvoice != null) {
+                _printInvoice(
+                  widget.editInvoice,
+                  _listProduct.where((f) => f.isSelected).toList(),
+                  _listAdditionalProducts,
+                );
+              }
+            },
           ),
-          onPressed: () {},
         ),
       ),
     );
   }
 
-  Widget _printInvoice() {
+  Widget _printInvoiceTest() {
     return Container(
       height: 80,
       child: Align(
@@ -445,7 +466,8 @@ class _FormInvoice extends State<FormInvoice> {
             ),
           ),
           onPressed: () {
-            Navigator.push(context, MaterialPageRoute(builder: (context)=> PrintInvoice()));
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => PrintInvoice()));
           },
         ),
       ),
@@ -748,16 +770,17 @@ class _FormInvoice extends State<FormInvoice> {
       _listProduct.forEach((product) {
         if (product.isSelected) {
           _total = _total + product.price;
-          double _subT = ((product.price * 100) / (100 + product.ivaPercent));
-          double _ivaProd = (_subT * product.ivaPercent) / 100;
+          int _subT = ((product.price * 100) / (100 + product.ivaPercent)).round();
+          int _ivaProd = ((_subT * product.ivaPercent) / 100).round();
           _subTotal = _subTotal + _subT;
           _iva = _iva + _ivaProd;
         }
       });
       _listAdditionalProducts.forEach((addProduct) {
         _total = _total + double.parse(addProduct.productValue ?? '0');
-        double _subT = ((double.parse(addProduct.productValue ?? '0') * 100) / (100 + addProduct.ivaPercent ?? 0));
-        double _ivaProd = (_subT * addProduct.ivaPercent ?? 0) / 100;
+        int _subT = ((double.parse(addProduct.productValue ?? '0') * 100) /
+            (100 + addProduct.ivaPercent ?? 0)).round();
+        int _ivaProd = ((_subT * addProduct.ivaPercent ?? 0) / 100).round();
         _subTotal = _subTotal + _subT;
         _iva = _iva + _ivaProd;
       });
@@ -773,22 +796,35 @@ class _FormInvoice extends State<FormInvoice> {
 
       final invoice = Invoice(
         id: widget.editInvoice != null ? widget.editInvoice.id : null,
-        consecutive: widget.editInvoice != null ? widget.editInvoice.consecutive : _consecutive,
+        consecutive: widget.editInvoice != null
+            ? widget.editInvoice.consecutive
+            : _consecutive,
         customer: _customerReference,
         vehicle: _vehicleReference,
         placa: _textPlaca.text.trim(),
         uidVehicleType: vehicleTypeSelected.uid,
-        location: widget.editInvoice != null ? widget.editInvoice.location : _locationReference,
-        locationName: widget.editInvoice != null ? widget.editInvoice.locationName :_locationName,
-        totalPrice: widget.editInvoice != null ? widget.editInvoice.totalPrice : _total,
-        subtotal: widget.editInvoice != null ? widget.editInvoice.subtotal : _subTotal,
+        location: widget.editInvoice != null
+            ? widget.editInvoice.location
+            : _locationReference,
+        locationName: widget.editInvoice != null
+            ? widget.editInvoice.locationName
+            : _locationName,
+        totalPrice:
+            widget.editInvoice != null ? widget.editInvoice.totalPrice : _total,
+        subtotal: widget.editInvoice != null
+            ? widget.editInvoice.subtotal
+            : _subTotal,
         iva: widget.editInvoice != null ? widget.editInvoice.iva : _iva,
-        userOwner: widget.editInvoice != null ? widget.editInvoice.userOwner : _userRef,
+        userOwner: widget.editInvoice != null
+            ? widget.editInvoice.userOwner
+            : _userRef,
         userOperator: _operatorReference,
         userOperatorName: _selectOperator,
         userCoordinator: _coordinatorReference,
         userCoordinatorName: _selectCoordinator,
-        creationDate: widget.editInvoice != null ? widget.editInvoice.creationDate : Timestamp.now(),
+        creationDate: widget.editInvoice != null
+            ? widget.editInvoice.creationDate
+            : Timestamp.now(),
         invoiceImages: imageList,
         imageFirm: _imageFirmInMemory,
         approveDataProcessing: _approveDataProcessing,
@@ -817,6 +853,8 @@ class _FormInvoice extends State<FormInvoice> {
       //Close screen
       Navigator.pop(context); //Close popUp Save
       Navigator.pop(context); //Close form Create Invoice
+
+      _printInvoice(_currentInvoiceSaved, _selectedProducts, _listAdditionalProducts);
 
       //MessagesUtils.showAlert(context: context, title: 'Factura Guardada').show();
 
@@ -879,5 +917,19 @@ class _FormInvoice extends State<FormInvoice> {
     setState(() {
       imageList = imagesList;
     });
+  }
+
+  void _printInvoice(Invoice invoicePrint, List<Product> listProducts,
+      List<AdditionalProduct> listAddProducts) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PrintInvoicePage(
+          currentInvoice: invoicePrint,
+          selectedProducts: listProducts,
+          additionalProducts: listAddProducts,
+        ),
+      ),
+    );
   }
 }

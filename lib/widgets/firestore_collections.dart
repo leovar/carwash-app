@@ -49,6 +49,7 @@ class FirestoreCollections {
   static String invoiceFieldConsecutive = 'consecutive';
   static String invoiceFieldPlaca = 'placa';
   static String invoiceFieldUserOperatorName = 'userOperatorName';
+  static String invoiceFieldBrand = 'brand';
 
   /// Fields Brands
   static String brandFieldVehicleType = 'vehicleType';

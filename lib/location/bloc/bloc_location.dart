@@ -21,6 +21,10 @@ class BlocLocation implements Bloc {
     return await _locationRepository.getLocationReference(locationId);
   }
 
+  Future<Location> getLocationById(String locationId) async {
+    return await _locationRepository.getLocationById(locationId);
+  }
+
   Stream<QuerySnapshot> locationsListStream = Firestore.instance.collection(FirestoreCollections.locations).snapshots();
   Stream<QuerySnapshot> get locationsStream => locationsListStream;
 

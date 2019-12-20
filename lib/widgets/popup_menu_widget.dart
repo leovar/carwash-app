@@ -40,6 +40,7 @@ class _PopUpMenuWidget extends State<PopUpMenuWidget> {
 
     return PopupMenuButton(
       enabled: widget.enableForm ?? true,
+      color: Colors.white,
       itemBuilder: (BuildContext context) {
         return widget.listString.map((String valueList) {
           return PopupMenuItem<String>(

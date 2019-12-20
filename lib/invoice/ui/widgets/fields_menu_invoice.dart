@@ -16,9 +16,9 @@ class FieldsMenusInvoice extends StatefulWidget {
   final selectedOperator;
   final selectedCoordinator;
   final locationReference;
-  final selectedVehicleBrand;
-  final selectedVehicleColor;
-  final uidVehicleType;
+  final String selectedVehicleBrand;
+  final String selectedVehicleColor;
+  final int uidVehicleType;
   final bool enableForm;
   final bool editOperator;
 
@@ -56,6 +56,16 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
   List<String> _listCoordinators = <String>[];
   List<String> _listBrands = <String>[];
   List<String> _listColors = <String>[];
+  int _vehicleType = 0;
+  String _selectedBrand = '';
+
+  @override
+  void initState() {
+    super.initState();
+    setState(() {
+      _selectedBrand = widget.selectedVehicleBrand;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -149,13 +159,19 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
   }
 
   Widget _getBrandsStream() {
-    if (widget.listCountBrands == 0) {
+    if (widget.listCountBrands == 0 || _vehicleType != widget.uidVehicleType) {
+      //si estoy cambiando de tipo de vehiculo y no estoy en modo edición de factura, limpia el campo marca
+      if (_vehicleType != widget.uidVehicleType && widget.enableForm) {
+        _cbSelectValueBrands('');
+      }
+
       int uidType;
       if (widget.uidVehicleType == 2) {
         uidType = 1;
       } else {
         uidType = widget.uidVehicleType;
       }
+      _vehicleType = widget.uidVehicleType;
 
       return StreamBuilder(
         stream: _blocInvoice.brandsStream(uidType),
@@ -184,7 +200,7 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
       popUpName: 'Marca',
       selectValue: _cbSelectValueBrands,
       listString: _listBrands,
-      valueSelect: widget.selectedVehicleBrand,
+      valueSelect: _selectedBrand,
       enableForm: widget.enableForm,
     );
   }
@@ -241,6 +257,7 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
   }
 
   void _cbSelectValueBrands(String valueSelect) {
+    _selectedBrand = valueSelect;
     widget.cbHandlerVehicleBrand(valueSelect, 0, 1);
   }
 

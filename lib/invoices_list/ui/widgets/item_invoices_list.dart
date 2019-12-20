@@ -1,6 +1,5 @@
 import 'package:car_wash_app/invoice/model/invoice.dart';
 import 'package:car_wash_app/invoice/ui/screens/invoice_page.dart';
-import 'package:car_wash_app/invoices_list/model/invoice_list_model.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -71,8 +70,6 @@ class _ItemInvoicesList extends State<ItemInvoicesList> {
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        //crossAxisAlignment: CrossAxisAlignment.center,
-        //mainAxisSize: MainAxisSize.max,
         children: <Widget>[
           Row(
             children: <Widget>[

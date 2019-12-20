@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:car_wash_app/user/bloc/bloc_user.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
@@ -36,6 +37,13 @@ class MyApp extends StatelessWidget {
               decoration: TextDecoration.none,
               fontWeight: FontWeight.bold,
               color: Colors.white,
+              fontSize: 19,
+            ),
+            display1: TextStyle(
+              fontFamily: "Lato",
+              decoration: TextDecoration.none,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
               fontSize: 19,
             ),
           ),
