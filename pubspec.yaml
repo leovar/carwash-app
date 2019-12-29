@@ -23,6 +23,7 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^0.1.2
+  flutter_launcher_icons: ^0.7.4
   flutter_search_panel: ^1.0.1
   generic_bloc_provider: ^1.0.9
   equatable: ^0.6.1
@@ -66,6 +67,15 @@ dev_dependencies:
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
+flutter_icons:
+  image_path: "assets/images/logo-car-wash-launcher.png"
+  #image_path_android: "assets/images/icon-710x599-android.png"
+  #image_path_ios: "assets/images/icon-710x599-ios.png"
+  android: "launcher_icon" # can specify file name here e.g. "ic_launcher"
+  ios: true # can specify file name here e.g. "My-Launcher-Icon"
+  #adaptive_icon_background: "assets/images/christmas-background.png" # only available for Android 8.0 devices and above
+  #adaptive_icon_foreground: "assets/images/icon-foreground-432x432.png" # only available for Android 8.0 devices and above
+
 # The following section is specific to Flutter.
 flutter:
   assets:
@@ -95,6 +105,7 @@ flutter:
     - assets/images/icon_filter1.png
     - assets/images/logo-car-wash.png
     - assets/images/factura-impr-2.png
+    - assets/images/logo-car-wash-launcher.png
 
 
   # The following line ensures that the Material Icons font is

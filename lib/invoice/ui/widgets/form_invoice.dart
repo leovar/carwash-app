@@ -264,7 +264,10 @@ class _FormInvoice extends State<FormInvoice> {
                 finalEditPlaca: _onFinalEditPlaca,
                 enableForm: _enableForm,
                 focusClient: _clientFocusNode,
-                autofocusPlaca: (widget.editInvoice == null && _listCoordinatorsCount == 0) ? true : false,
+                autofocusPlaca:
+                    (widget.editInvoice == null && _listCoordinatorsCount == 0)
+                        ? true
+                        : false,
                 editForm: _editForm,
               ),
               SizedBox(height: 9),
@@ -365,17 +368,18 @@ class _FormInvoice extends State<FormInvoice> {
             ),
             onPressed: _enableForm
                 ? () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => DrawPage(
-                    changeValueApproveData: _callBackApproveDataprocessing,
-                    callBackChargeImageFirm: _callBackChargeFirm,
-                    approveDataProcessing: _approveDataProcessing,
-                  ),
-                ),
-              );
-            }
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => DrawPage(
+                          changeValueApproveData:
+                              _callBackApproveDataprocessing,
+                          callBackChargeImageFirm: _callBackChargeFirm,
+                          approveDataProcessing: _approveDataProcessing,
+                        ),
+                      ),
+                    );
+                  }
                 : null,
           ),
         ),
@@ -693,181 +697,212 @@ class _FormInvoice extends State<FormInvoice> {
 
   ///Functions Save Invoice
   void _saveInvoice() async {
-    //Open message Saving
-    MessagesUtils.showAlertWithLoading(context: context, title: 'Guardando')
-        .show();
+     String validateMessage = _validateFields();
+    if (validateMessage.isEmpty) {
+      //Open message Saving
+      MessagesUtils.showAlertWithLoading(context: context, title: 'Guardando')
+          .show();
 
-    try {
-      DocumentReference _vehicleTypeRef;
-      DocumentReference _customerReference;
-      DocumentReference _operatorReference;
-      DocumentReference _coordinatorReference;
-      double _total = 0;
-      double _iva = 0;
-      double _subTotal = 0;
+      try {
+        DocumentReference _vehicleTypeRef;
+        DocumentReference _customerReference;
+        DocumentReference _operatorReference;
+        DocumentReference _coordinatorReference;
+        double _total = 0;
+        double _iva = 0;
+        double _subTotal = 0;
 
-      //Get Current user reference
-      DocumentReference _userRef = await _userBloc.getCurrentUserReference();
+        //Get Current user reference
+        DocumentReference _userRef = await _userBloc.getCurrentUserReference();
 
-      //Get Operator reference
-      if (_selectOperator.isNotEmpty) {
-        _operatorReference =
-            await _userBloc.getUserReferenceByUserName(_selectOperator);
-      }
-
-      //Get Coordinator reference
-      if (_selectCoordinator.isNotEmpty) {
-        _coordinatorReference =
-            await _userBloc.getUserReferenceByUserName(_selectCoordinator);
-      }
-
-      //Get Vehicle reference, save if not exist
-      if (_vehicleReference == null) {
-        Vehicle updateVehicle = Vehicle(
-          brand: '',
-          model: '',
-          placa: _textPlaca.text.trim(),
-          color: '',
-          vehicleType: _vehicleTypeRef,
-          creationDate: Timestamp.now(),
-        );
-        DocumentReference vehicleRef =
-            await _blocVehicle.updateVehicle(updateVehicle);
-        _vehicleReference = vehicleRef;
-      }
-
-      //Get Customer reference or create customer or update customer
-      if (_customer == null) {
-        List<DocumentReference> listVehicles = <DocumentReference>[];
-        listVehicles.add(_vehicleReference);
-
-        Customer customer = Customer(
-          name: _textClient.text.trim(),
-          address: '',
-          phoneNumber: _textPhoneNumber.text.trim(),
-          email: _textEmail.text.trim(),
-          creationDate: Timestamp.now(),
-          vehicles: listVehicles,
-        );
-        DocumentReference customerRef =
-            await _customerBloc.updateCustomer(customer);
-        _customerReference = customerRef;
-      } else {
-        if (!_customer.vehicles.contains(_vehicleReference)) {
-          _customer.vehicles.add(_vehicleReference);
+        //Get Operator reference
+        if (_selectOperator.isNotEmpty) {
+          _operatorReference =
+              await _userBloc.getUserReferenceByUserName(_selectOperator);
         }
 
-        Customer customerUpdate = Customer.copyWith(
-          origin: _customer,
-          name: _textClient.text.trim(),
-          phoneNumber: _textPhoneNumber.text.trim(),
-          email: _textEmail.text.trim(),
-        );
-        _customerReference = await _customerBloc.updateCustomer(customerUpdate);
-      }
+        //Get Coordinator reference
+        if (_selectCoordinator.isNotEmpty) {
+          _coordinatorReference =
+              await _userBloc.getUserReferenceByUserName(_selectCoordinator);
+        }
 
-      //Get products and values
-      _listProduct.forEach((product) {
-        if (product.isSelected) {
-          int _subT = ((product.price * 100) / (100 + product.ivaPercent)).round();
-          int _ivaProd = ((_subT * product.ivaPercent) / 100).round();
-          // se comenta por que por los decimales la suma de subtotal e iva no siempre da el total, por lo cual se seguira guardando el subtotal como una resta del total menos el iva
-          _subTotal = _subTotal + (product.price - _ivaProd);  //_subT
+        //Get Vehicle reference, save if not exist
+        if (_vehicleReference == null) {
+          Vehicle updateVehicle = Vehicle(
+            brand: '',
+            model: '',
+            placa: _textPlaca.text.trim(),
+            color: '',
+            vehicleType: _vehicleTypeRef,
+            creationDate: Timestamp.now(),
+          );
+          DocumentReference vehicleRef =
+              await _blocVehicle.updateVehicle(updateVehicle);
+          _vehicleReference = vehicleRef;
+        }
+
+        //Get Customer reference or create customer or update customer
+        if (_customer == null) {
+          List<DocumentReference> listVehicles = <DocumentReference>[];
+          listVehicles.add(_vehicleReference);
+
+          Customer customer = Customer(
+            name: _textClient.text.trim(),
+            address: '',
+            phoneNumber: _textPhoneNumber.text.trim(),
+            email: _textEmail.text.trim(),
+            creationDate: Timestamp.now(),
+            vehicles: listVehicles,
+          );
+          DocumentReference customerRef =
+              await _customerBloc.updateCustomer(customer);
+          _customerReference = customerRef;
+        } else {
+          if (!_customer.vehicles.contains(_vehicleReference)) {
+            _customer.vehicles.add(_vehicleReference);
+          }
+
+          Customer customerUpdate = Customer.copyWith(
+            origin: _customer,
+            name: _textClient.text.trim(),
+            phoneNumber: _textPhoneNumber.text.trim(),
+            email: _textEmail.text.trim(),
+          );
+          _customerReference =
+              await _customerBloc.updateCustomer(customerUpdate);
+        }
+
+        //Get products and values
+        _listProduct.forEach((product) {
+          if (product.isSelected) {
+            int _subT =
+                ((product.price * 100) / (100 + product.ivaPercent)).round();
+            int _ivaProd = ((_subT * product.ivaPercent) / 100).round();
+            // se comenta por que por los decimales la suma de subtotal e iva no siempre da el total, por lo cual se seguira guardando el subtotal como una resta del total menos el iva
+            _subTotal = _subTotal + (product.price - _ivaProd); //_subT
+            _iva = _iva + _ivaProd;
+            _total = _total + product.price;
+          }
+        });
+        _listAdditionalProducts.forEach((addProduct) {
+          int _subT = ((double.parse(addProduct.productValue ?? '0') * 100) /
+                  (100 + addProduct.ivaPercent ?? 0))
+              .round();
+          int _ivaProd = ((_subT * addProduct.ivaPercent ?? 0) / 100).round();
+          _subTotal = _subTotal +
+              (double.parse(addProduct.productValue ?? '0') -
+                  _ivaProd); //_subT;
           _iva = _iva + _ivaProd;
-          _total = _total + product.price;
+          _total = _total + double.parse(addProduct.productValue ?? '0');
+        });
+
+        //Get Consecutive
+        int _consecutive =
+            await _blocInvoice.getLastConsecutiveByLocation(_locationReference);
+        if (_consecutive == 0) {
+          _consecutive = int.parse(_initConsecLocation);
+        } else {
+          _consecutive++;
         }
-      });
-      _listAdditionalProducts.forEach((addProduct) {
-        int _subT = ((double.parse(addProduct.productValue ?? '0') * 100) /
-            (100 + addProduct.ivaPercent ?? 0)).round();
-        int _ivaProd = ((_subT * addProduct.ivaPercent ?? 0) / 100).round();
-        _subTotal = _subTotal + (double.parse(addProduct.productValue ?? '0') - _ivaProd); //_subT;
-        _iva = _iva + _ivaProd;
-        _total = _total + double.parse(addProduct.productValue ?? '0');
-      });
 
-      //Get Consecutive
-      int _consecutive =
-          await _blocInvoice.getLastConsecutiveByLocation(_locationReference);
-      if (_consecutive == 0) {
-        _consecutive = int.parse(_initConsecLocation);
-      } else {
-        _consecutive++;
+        final invoice = Invoice(
+          id: widget.editInvoice != null ? widget.editInvoice.id : null,
+          consecutive: widget.editInvoice != null
+              ? widget.editInvoice.consecutive
+              : _consecutive,
+          customer: _customerReference,
+          vehicle: _vehicleReference,
+          placa: _textPlaca.text.trim(),
+          uidVehicleType: vehicleTypeSelected.uid,
+          location: widget.editInvoice != null
+              ? widget.editInvoice.location
+              : _locationReference,
+          locationName: widget.editInvoice != null
+              ? widget.editInvoice.locationName
+              : _locationName,
+          totalPrice: widget.editInvoice != null
+              ? widget.editInvoice.totalPrice
+              : _total,
+          subtotal: widget.editInvoice != null
+              ? widget.editInvoice.subtotal
+              : _subTotal,
+          iva: widget.editInvoice != null ? widget.editInvoice.iva : _iva,
+          userOwner: widget.editInvoice != null
+              ? widget.editInvoice.userOwner
+              : _userRef,
+          userOperator: _operatorReference,
+          userOperatorName: _selectOperator,
+          userCoordinator: _coordinatorReference,
+          userCoordinatorName: _selectCoordinator,
+          creationDate: widget.editInvoice != null
+              ? widget.editInvoice.creationDate
+              : Timestamp.now(),
+          invoiceImages: imageList,
+          imageFirm: _imageFirmInMemory,
+          approveDataProcessing: _approveDataProcessing,
+          vehicleBrand: _selectBrand,
+          vehicleColor: _selectColor,
+        );
+        DocumentReference invoiceReference =
+            await _blocInvoice.saveInvoice(invoice);
+        String invoiceId = invoiceReference.documentID;
+        Invoice _currentInvoiceSaved =
+            await _blocInvoice.getInvoiceById(invoiceId);
+
+        //Save products list
+        List<Product> _selectedProducts =
+            _listProduct.where((f) => f.isSelected).toList();
+        if (_selectedProducts.length > 0) {
+          _blocInvoice.saveInvoiceProduct(invoiceId, _selectedProducts);
+        }
+
+        //Save additional products list
+        if (_listAdditionalProducts.length > 0) {
+          _blocInvoice.saveInvoiceAdditionalProducts(
+              invoiceId, _listAdditionalProducts);
+        }
+
+        //Close screen
+        Navigator.pop(context); //Close popUp Save
+        Navigator.pop(context); //Close form Create Invoice
+
+        _printInvoice(
+            _currentInvoiceSaved, _selectedProducts, _listAdditionalProducts);
+
+        //MessagesUtils.showAlert(context: context, title: 'Factura Guardada').show();
+
+      } on PlatformException catch (e) {
+        print('$e');
+        MessagesUtils.showAlert(
+            context: context, title: 'Error al guardar la factura');
+      } catch (error) {
+        print('$error');
+        MessagesUtils.showAlert(
+            context: context, title: 'Error al guardar la factura');
       }
-
-      final invoice = Invoice(
-        id: widget.editInvoice != null ? widget.editInvoice.id : null,
-        consecutive: widget.editInvoice != null
-            ? widget.editInvoice.consecutive
-            : _consecutive,
-        customer: _customerReference,
-        vehicle: _vehicleReference,
-        placa: _textPlaca.text.trim(),
-        uidVehicleType: vehicleTypeSelected.uid,
-        location: widget.editInvoice != null
-            ? widget.editInvoice.location
-            : _locationReference,
-        locationName: widget.editInvoice != null
-            ? widget.editInvoice.locationName
-            : _locationName,
-        totalPrice:
-            widget.editInvoice != null ? widget.editInvoice.totalPrice : _total,
-        subtotal: widget.editInvoice != null
-            ? widget.editInvoice.subtotal
-            : _subTotal,
-        iva: widget.editInvoice != null ? widget.editInvoice.iva : _iva,
-        userOwner: widget.editInvoice != null
-            ? widget.editInvoice.userOwner
-            : _userRef,
-        userOperator: _operatorReference,
-        userOperatorName: _selectOperator,
-        userCoordinator: _coordinatorReference,
-        userCoordinatorName: _selectCoordinator,
-        creationDate: widget.editInvoice != null
-            ? widget.editInvoice.creationDate
-            : Timestamp.now(),
-        invoiceImages: imageList,
-        imageFirm: _imageFirmInMemory,
-        approveDataProcessing: _approveDataProcessing,
-        vehicleBrand: _selectBrand,
-        vehicleColor: _selectColor,
-      );
-      DocumentReference invoiceReference =
-          await _blocInvoice.saveInvoice(invoice);
-      String invoiceId = invoiceReference.documentID;
-      Invoice _currentInvoiceSaved =
-          await _blocInvoice.getInvoiceById(invoiceId);
-
-      //Save products list
-      List<Product> _selectedProducts =
-          _listProduct.where((f) => f.isSelected).toList();
-      if (_selectedProducts.length > 0) {
-        _blocInvoice.saveInvoiceProduct(invoiceId, _selectedProducts);
-      }
-
-      //Save additional products list
-      if (_listAdditionalProducts.length > 0) {
-        _blocInvoice.saveInvoiceAdditionalProducts(
-            invoiceId, _listAdditionalProducts);
-      }
-
-      //Close screen
-      Navigator.pop(context); //Close popUp Save
-      Navigator.pop(context); //Close form Create Invoice
-
-      _printInvoice(_currentInvoiceSaved, _selectedProducts, _listAdditionalProducts);
-
-      //MessagesUtils.showAlert(context: context, title: 'Factura Guardada').show();
-
-    } on PlatformException catch (e) {
-      print('$e');
-      MessagesUtils.showAlert(
-          context: context, title: 'Error al guardar la factura');
-    } catch (error) {
-      print('$error');
-      MessagesUtils.showAlert(
-          context: context, title: 'Error al guardar la factura');
+    } else {
+      MessagesUtils.showAlert(context: context, title: validateMessage)
+          .show();
     }
+  }
+
+  ///Validations fields
+  String _validateFields() {
+    //Validate products
+    List<Product> _selectedProducts =
+    _listProduct.where((f) => f.isSelected).toList();
+    if (_selectedProducts.length <= 0 && _listAdditionalProducts.length <= 0){
+      return 'Debe agregar servicios';
+    }
+    //Validate client
+    if (_textClient.text.trim().isEmpty || _textPhoneNumber.text.trim().isEmpty) {
+      return 'Falta llenar Telefono o Nombre del Cliente';
+    }
+    if (_selectCoordinator.isEmpty) {
+      return 'Debe selecionar un Coordinador';
+    }
+    return '';
   }
 
   ///Set Fields Invoice to Edit
