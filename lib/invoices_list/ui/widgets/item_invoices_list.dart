@@ -40,6 +40,10 @@ class _ItemInvoicesList extends State<ItemInvoicesList> {
         _imageWith = 34;
         _iconVehicle = 'assets/images/icon_motorcycle_admin.png';
         break;
+      case 4:
+        _imageWith = 34;
+        _iconVehicle = 'assets/images/icon_motorcycle_admin.png';
+        break;
     }
   }
 
