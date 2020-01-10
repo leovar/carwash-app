@@ -128,6 +128,11 @@ class BlocInvoice implements Bloc {
           List<DocumentSnapshot> invoicesListSnapshot) =>
       _invoiceRepository.buildInvoicesListByMonth(invoicesListSnapshot);
 
+  /// Get invoices list for placa
+  Future<List<Invoice>> getListInvoicesByVehicle(String vehicleId) async {
+    return await _invoiceRepository.getListInvoicesByVehicle(vehicleId);
+  }
+
   Future<void> saveInvoiceProduct(
       String invoiceId, List<Product> listProducts) async {
     listProducts.forEach((product) {

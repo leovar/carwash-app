@@ -46,6 +46,12 @@ class MyApp extends StatelessWidget {
               color: Colors.black,
               fontSize: 19,
             ),
+            display2: TextStyle(
+              fontFamily: "Lato",
+              decoration: TextDecoration.none,
+              color: Colors.black,
+              fontSize: 17,
+            )
           ),
         ),
         home: LoginPage(),

@@ -372,4 +372,25 @@ class InvoiceRepository {
 
     return Invoice.fromJson(querySnapshot.data, id: querySnapshot.documentID);
   }
+
+  /// Get List Invoices by Placa
+  Future<List<Invoice>> getListInvoicesByVehicle(String vehicleId) async {
+    var date = DateTime.now();
+    var newDate = DateTime(date.year, date.month + 2, date.day);
+    List<Invoice> listInvoices = [];
+    final querySnapshot = await this
+        ._db
+        .collection(FirestoreCollections.invoices)
+        .where(FirestoreCollections.invoiceFieldPlaca, isEqualTo: vehicleId)
+        .where(FirestoreCollections.invoiceFieldCreationDate, isLessThanOrEqualTo: newDate)
+        .getDocuments();
+
+    final documents = querySnapshot.documents;
+    if (documents.length > 0) {
+      documents.forEach((invoice) {
+        listInvoices.add(Invoice.fromJson(invoice.data, id: invoice.documentID));
+      });
+    }
+    return listInvoices;
+  }
 }

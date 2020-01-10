@@ -8,9 +8,11 @@ import 'package:car_wash_app/customer/model/customer.dart';
 import 'package:car_wash_app/invoice/bloc/bloc_invoice.dart';
 import 'package:car_wash_app/invoice/model/additional_product.dart';
 import 'package:car_wash_app/invoice/model/invoice.dart';
+import 'package:car_wash_app/invoice/model/invoice_history_list.dart';
 import 'package:car_wash_app/invoice/ui/screens/draw_page.dart';
 import 'package:car_wash_app/invoice/ui/screens/print_invoice_page.dart';
 import 'package:car_wash_app/invoice/ui/widgets/fields_products.dart';
+import 'package:car_wash_app/invoice/ui/widgets/info_last_services_by_vehicle.dart';
 import 'package:car_wash_app/invoice/ui/widgets/print_invoice.dart';
 import 'package:car_wash_app/invoice/ui/widgets/radio_item.dart';
 import 'package:car_wash_app/location/bloc/bloc_location.dart';
@@ -33,6 +35,7 @@ import 'package:image/image.dart' as imagePack;
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:popup_menu/popup_menu.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../model/header_services.dart';
@@ -653,6 +656,11 @@ class _FormInvoice extends State<FormInvoice> {
           .then((DocumentReference vehicleRef) {
         _vehicleReference = vehicleRef;
 
+        //Validate services from the last 2 months
+        if (_vehicleReference != null) {
+          _getInvoicesForPlaca(_placa);
+        }
+
         //Validate if Customer exist for this vehicle
         if (_vehicleReference != null) {
           _customerBloc
@@ -695,9 +703,50 @@ class _FormInvoice extends State<FormInvoice> {
     _locationReference = await _locationBloc.getLocationReference(_idLocation);
   }
 
+  // Get last invoices per vehicle
+  void _getInvoicesForPlaca(String placa) async {
+    List<Invoice> listInvoicesByVehicle =
+        await _blocInvoice.getListInvoicesByVehicle(placa) ?? [];
+    if (listInvoicesByVehicle.length > 0) {
+      List<InvoiceHistoryList> invoiceHistoryList = [];
+      listInvoicesByVehicle.forEach((vehicleInvoice) async {
+        List<Product> listProducts =
+            await _blocInvoice.getProductsByInvoice(vehicleInvoice.id);
+        InvoiceHistoryList invoiceHistory = InvoiceHistoryList(
+          vehicleInvoice.creationDate,
+          vehicleInvoice.consecutive.toString(),
+          listProducts.first.productName,
+        );
+        invoiceHistoryList.add(invoiceHistory);
+        if (invoiceHistoryList.length == listInvoicesByVehicle.length) {
+          Alert(
+              context: context,
+              title: 'Historia',
+              style: MessagesUtils.alertStyle,
+              content: InfoLastServicesByVehicle(
+                listHistoryInvoices: invoiceHistoryList,
+              ),
+              buttons: [
+                DialogButton(
+                  color: Theme.of(context).accentColor,
+                  child: Text(
+                    'ACEPTAR',
+                    style: Theme.of(context).textTheme.button,
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    setState(() {});
+                  },
+                )
+              ]).show();
+        }
+      });
+    }
+  }
+
   ///Functions Save Invoice
   void _saveInvoice() async {
-     String validateMessage = _validateFields();
+    String validateMessage = _validateFields();
     if (validateMessage.isEmpty) {
       //Open message Saving
       MessagesUtils.showAlertWithLoading(context: context, title: 'Guardando')
@@ -882,8 +931,7 @@ class _FormInvoice extends State<FormInvoice> {
             context: context, title: 'Error al guardar la factura');
       }
     } else {
-      MessagesUtils.showAlert(context: context, title: validateMessage)
-          .show();
+      MessagesUtils.showAlert(context: context, title: validateMessage).show();
     }
   }
 
@@ -891,13 +939,20 @@ class _FormInvoice extends State<FormInvoice> {
   String _validateFields() {
     //Validate products
     List<Product> _selectedProducts =
-    _listProduct.where((f) => f.isSelected).toList();
-    if (_selectedProducts.length <= 0 && _listAdditionalProducts.length <= 0){
+        _listProduct.where((f) => f.isSelected).toList();
+    if (_selectedProducts.length <= 0 && _listAdditionalProducts.length <= 0) {
       return 'Debe agregar servicios';
     }
     //Validate client
-    if (_textClient.text.trim().isEmpty || _textPhoneNumber.text.trim().isEmpty) {
+    if (_textClient.text.trim().isEmpty ||
+        _textPhoneNumber.text.trim().isEmpty) {
       return 'Falta llenar Telefono o Nombre del Cliente';
+    }
+    if (_textClient.text.trim().length < 3) {
+      return 'El nombre del cliente debe tener como mínimo 3 caracteres';
+    }
+    if (_textPhoneNumber.text.trim().length < 5) {
+      return 'El teléfono del cliente está incompleto';
     }
     if (_selectCoordinator.isEmpty) {
       return 'Debe selecionar un Coordinador';
