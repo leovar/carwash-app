@@ -101,7 +101,7 @@ class _FieldsInvoice extends State<FieldsInvoice> {
               activeColor: Color(0xFF59B258),
             ),
             Text(
-              "Enviar por correo electrónico",
+              "Enviar por whatsapp",
               style: TextStyle(
                 fontFamily: "Lato",
                 decoration: TextDecoration.none,

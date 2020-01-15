@@ -85,7 +85,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
         children: <Widget>[
           Container(
             decoration: BoxDecoration(color: Colors.white),
-            margin: EdgeInsets.only(top: 30),
+            margin: EdgeInsets.only(top: 20),
             child: Center(
               child: Image.asset(
                 'assets/images/logo-car-wash.png',
@@ -97,7 +97,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
               color: Colors.white,
               child: Column(
                 children: <Widget>[
-                  SizedBox(height: 9),
+                  SizedBox(height: 7),
                   Center(
                     child: Text(
                       'Spa Car Wash Móvil',
@@ -110,7 +110,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                       ),
                     ),
                   ),
-                  SizedBox(height: 8),
+                  SizedBox(height: 6),
                   Center(
                     child: Text(
                       _location.director ?? '',
@@ -123,7 +123,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                       ),
                     ),
                   ),
-                  SizedBox(height: 6),
+                  SizedBox(height: 4),
                   Center(
                     child: Text(
                       'Régimen Simplificado',
@@ -136,7 +136,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                       ),
                     ),
                   ),
-                  SizedBox(height: 6),
+                  SizedBox(height: 4),
                   Center(
                     child: Text(
                       _location.address ?? '',
@@ -149,7 +149,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                       ),
                     ),
                   ),
-                  SizedBox(height: 6),
+                  SizedBox(height: 4),
                   Center(
                     child: Text(
                       'Teléfono:  ${_location.phoneNumber}',
@@ -162,7 +162,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                       ),
                     ),
                   ),
-                  SizedBox(height: 6),
+                  SizedBox(height: 4),
                   Center(
                     child: Text(
                       'Nit:  ${_location.nit}',
@@ -331,6 +331,34 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
               ),
               Text(
                 _customer.name ?? '',
+                textAlign: TextAlign.right,
+                style: TextStyle(
+                  fontFamily: "Lato",
+                  decoration: TextDecoration.none,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.black,
+                  fontSize: 18,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 7),
+          Row(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Text(
+                'Telefono:',
+                style: TextStyle(
+                  fontFamily: "Lato",
+                  decoration: TextDecoration.none,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.black,
+                  fontSize: 18,
+                ),
+              ),
+              Text(
+                _customer.phoneNumber ?? '',
                 textAlign: TextAlign.right,
                 style: TextStyle(
                   fontFamily: "Lato",

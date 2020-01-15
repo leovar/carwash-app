@@ -69,6 +69,7 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
 
   @override
   Widget build(BuildContext context) {
+    _selectedBrand = widget.selectedVehicleBrand ?? _selectedBrand;
     _blocInvoice = BlocProvider.of(context);
     return Column(
       children: <Widget>[

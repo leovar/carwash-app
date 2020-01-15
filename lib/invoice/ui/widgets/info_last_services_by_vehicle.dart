@@ -38,6 +38,7 @@ class InfoLastServicesByVehicle extends StatelessWidget {
   }
 
   Widget _itemServices(BuildContext context, InvoiceHistoryList invoice) {
+    final formatterPrice = NumberFormat("#,###");
     return ConstrainedBox(
       constraints: BoxConstraints(minHeight: 30),
       child: Container(
@@ -56,6 +57,7 @@ class InfoLastServicesByVehicle extends StatelessWidget {
             Container(
               width: 90,
               child: Text(
+
                 formatter.format(invoice.creationDate.toDate()),
                 style: TextStyle(
                   fontFamily: "Lato",
@@ -94,7 +96,18 @@ class InfoLastServicesByVehicle extends StatelessWidget {
                   )
                 ],
               ),
-            )
+            ),
+            Flexible(
+              child: Text(
+                '\$${formatterPrice.format(invoice.price)}',
+                style: TextStyle(
+                  fontFamily: "Lato",
+                  decoration: TextDecoration.none,
+                  color: Colors.black,
+                  fontSize: 15,
+                ),
+              ),
+            ),
           ],
         ),
       ),

@@ -656,6 +656,14 @@ class _FormInvoice extends State<FormInvoice> {
           .then((DocumentReference vehicleRef) {
         _vehicleReference = vehicleRef;
 
+        _blocVehicle.getVehicleById(vehicleRef.documentID).then((vehicle){
+          _selectBrand = vehicle.brand;
+          _selectColor = vehicle.color;
+          setState(() {
+
+          });
+        });
+
         //Validate services from the last 2 months
         if (_vehicleReference != null) {
           _getInvoicesForPlaca(_placa);
@@ -716,6 +724,7 @@ class _FormInvoice extends State<FormInvoice> {
           vehicleInvoice.creationDate,
           vehicleInvoice.consecutive.toString(),
           listProducts.first.productName,
+            vehicleInvoice.totalPrice
         );
         invoiceHistoryList.add(invoiceHistory);
         if (invoiceHistoryList.length == listInvoicesByVehicle.length) {
@@ -779,10 +788,10 @@ class _FormInvoice extends State<FormInvoice> {
         //Get Vehicle reference, save if not exist
         if (_vehicleReference == null) {
           Vehicle updateVehicle = Vehicle(
-            brand: '',
+            brand: _selectBrand,
             model: '',
             placa: _textPlaca.text.trim(),
-            color: '',
+            color: _selectColor,
             vehicleType: _vehicleTypeRef,
             creationDate: Timestamp.now(),
           );
@@ -956,6 +965,9 @@ class _FormInvoice extends State<FormInvoice> {
     }
     if (_selectCoordinator.isEmpty) {
       return 'Debe selecionar un Coordinador';
+    }
+    if (_selectBrand.isEmpty) {
+      return 'Debe seleccionar la marca del vehículo';
     }
     return '';
   }
