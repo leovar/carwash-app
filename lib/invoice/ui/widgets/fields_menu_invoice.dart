@@ -13,11 +13,13 @@ class FieldsMenusInvoice extends StatefulWidget {
   final Function(String, int, int) cbHandlerCoordinator;
   final Function(String, int, int) cbHandlerVehicleBrand;
   final Function(String, int, int) cbHandlerVehicleColor;
+  final Function(String, int, int) cbHandlerTypeSex;
   final selectedOperator;
   final selectedCoordinator;
   final locationReference;
   final String selectedVehicleBrand;
   final String selectedVehicleColor;
+  final String selectedTypeSex;
   final int uidVehicleType;
   final bool enableForm;
   final bool editOperator;
@@ -32,11 +34,13 @@ class FieldsMenusInvoice extends StatefulWidget {
     this.cbHandlerCoordinator,
     this.cbHandlerVehicleBrand,
     this.cbHandlerVehicleColor,
+    this.cbHandlerTypeSex,
     this.selectedOperator,
     this.selectedCoordinator,
     this.locationReference,
     this.selectedVehicleBrand,
     this.selectedVehicleColor,
+    this.selectedTypeSex,
     this.uidVehicleType,
     this.enableForm,
     this.editOperator,
@@ -56,12 +60,17 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
   List<String> _listCoordinators = <String>[];
   List<String> _listBrands = <String>[];
   List<String> _listColors = <String>[];
+  List<String> _listTypeSex = <String>[];
   int _vehicleType = 0;
   String _selectedBrand = '';
 
   @override
   void initState() {
     super.initState();
+    if (_listTypeSex.length <= 0) {
+      _listTypeSex.add('Masculino');
+      _listTypeSex.add('Femenino');
+    }
     setState(() {
       _selectedBrand = widget.selectedVehicleBrand;
     });
@@ -73,6 +82,8 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
     _blocInvoice = BlocProvider.of(context);
     return Column(
       children: <Widget>[
+        _chargeListTypeSex(),
+        SizedBox(height: 9),
         _getBrandsStream(),
         SizedBox(height: 9),
         _getColorsStream(),
@@ -247,6 +258,16 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
     );
   }
 
+  Widget _chargeListTypeSex() {
+    return PopUpMenuWidget(
+      popUpName: 'Sexo',
+      selectValue: _cbSelectTypeSex,
+      listString: _listTypeSex,
+      valueSelect: widget.selectedTypeSex??'Sexo',
+      enableForm: widget.enableForm,
+    );
+  }
+
   /// Functions
 
   void _cbSelectValueOperator(String valueSelect) {
@@ -264,5 +285,9 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
 
   void _cbSelectValueColor(String valueSelect) {
     widget.cbHandlerVehicleColor(valueSelect, 0, 1);
+  }
+
+  void _cbSelectTypeSex(String valueSelected) {
+    widget.cbHandlerTypeSex(valueSelected, 0, 1);
   }
 }

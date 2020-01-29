@@ -34,6 +34,7 @@ import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 import 'package:image/image.dart' as imagePack;
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:popup_menu/popup_menu.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -89,11 +90,15 @@ class _FormInvoice extends State<FormInvoice> {
   String _finalConsecLocation;
   String _selectBrand = '';
   String _selectColor = '';
+  String _selectTypeSex = '';
 
   final _textPlaca = TextEditingController();
   final _textClient = TextEditingController();
   final _textEmail = TextEditingController();
   final _textPhoneNumber = TextEditingController();
+  final _textNeighborhood = TextEditingController();
+  final _textBirthDate = TextEditingController();
+  final _textTimeDelivery = TextEditingController();
   String _selectOperator = "";
   String _selectCoordinator = "";
   List<Product> _listProduct = <Product>[];
@@ -263,6 +268,9 @@ class _FormInvoice extends State<FormInvoice> {
                 textClient: _textClient,
                 textEmail: _textEmail,
                 textPhoneNumber: _textPhoneNumber,
+                textNeighborhood: _textNeighborhood,
+                textBirthDate: _textBirthDate,
+                textTimeDelivery: _textTimeDelivery,
                 sendEmail: _sendEmail,
                 finalEditPlaca: _onFinalEditPlaca,
                 enableForm: _enableForm,
@@ -283,11 +291,13 @@ class _FormInvoice extends State<FormInvoice> {
                 cbHandlerCoordinator: _setHandlerUserCoordinator,
                 cbHandlerVehicleBrand: _setHandlerVehicleBrand,
                 cbHandlerVehicleColor: _setHandlerVehicleColor,
+                cbHandlerTypeSex: _setHandlerTypeSex,
                 locationReference: _locationReference,
                 selectedOperator: _selectOperator,
                 selectedCoordinator: _selectCoordinator,
                 selectedVehicleBrand: _selectBrand,
                 selectedVehicleColor: _selectColor,
+                selectedTypeSex: _selectTypeSex,
                 uidVehicleType: vehicleTypeSelected.uid,
                 enableForm: _enableForm,
                 editOperator: _editOperator,
@@ -618,6 +628,11 @@ class _FormInvoice extends State<FormInvoice> {
     }
   }
 
+  //Type sex
+  void _setHandlerTypeSex(String typeSex, int countTypeSex, int operationType) {
+    _selectTypeSex = typeSex;
+  }
+
   ///Functions Image Firma
   void _callBackApproveDataprocessing(bool value) {
     _approveDataProcessing = value;
@@ -682,6 +697,9 @@ class _FormInvoice extends State<FormInvoice> {
                 _textClient.text = customer.name;
                 _textEmail.text = customer.email;
                 _textPhoneNumber.text = customer.phoneNumber;
+                _textNeighborhood.text = customer.neighborhood;
+                _textBirthDate.text = customer.birthDate;
+                _selectTypeSex = customer.typeSex;
               }
             });
           });
@@ -809,6 +827,9 @@ class _FormInvoice extends State<FormInvoice> {
             name: _textClient.text.trim(),
             address: '',
             phoneNumber: _textPhoneNumber.text.trim(),
+            birthDate: _textBirthDate.text,
+            neighborhood: _textNeighborhood.text,
+            typeSex: _selectTypeSex,
             email: _textEmail.text.trim(),
             creationDate: Timestamp.now(),
             vehicles: listVehicles,
@@ -988,6 +1009,9 @@ class _FormInvoice extends State<FormInvoice> {
     _textClient.text = editCustomer.name;
     _textEmail.text = editCustomer.email;
     _textPhoneNumber.text = editCustomer.phoneNumber;
+    _textBirthDate.text = editCustomer.birthDate;
+    _textNeighborhood.text = editCustomer.neighborhood;
+    _selectTypeSex = editCustomer.typeSex;
     vehicleTypeList.forEach((element) => element.isSelected = false);
     vehicleTypeSelected = vehicleTypeList
         .firstWhere((f) => f.uid == invoiceToEdit.uidVehicleType);

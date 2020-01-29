@@ -3,6 +3,7 @@ import 'package:car_wash_app/user/bloc/bloc_user.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 import 'user/ui/screens/login_page.dart';
 
@@ -22,6 +23,18 @@ class MyApp extends StatelessWidget {
     return BlocProvider(
       bloc: UserBloc(),
       child: MaterialApp(
+        localizationsDelegates: [
+          // ... app-specific localization delegate[s] here
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: [
+          const Locale('en'), // English
+          const Locale('es'), // Hebrew
+          const Locale.fromSubtags(languageCode: 'en'), // Chinese *See Advanced Locales below*
+          // ... other locales the app supports
+        ],
         debugShowCheckedModeBanner: false,
         title: 'Carwash Movil App',
         theme: ThemeData(

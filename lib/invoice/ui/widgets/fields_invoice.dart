@@ -1,12 +1,16 @@
 import 'package:car_wash_app/invoice/ui/widgets/text_field_input.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 
 class FieldsInvoice extends StatefulWidget {
   final textPlaca;
   final textClient;
   final textEmail;
   final textPhoneNumber;
+  final textNeighborhood;
+  final textBirthDate;
+  final textTimeDelivery;
   bool sendEmail = false;
   VoidCallback finalEditPlaca;
   final bool enableForm;
@@ -22,6 +26,9 @@ class FieldsInvoice extends StatefulWidget {
     this.textClient,
     this.textEmail,
     this.textPhoneNumber,
+    this.textNeighborhood,
+    this.textBirthDate,
+    this.textTimeDelivery,
     this.finalEditPlaca,
     this.enableForm,
     this.validatePlaca,
@@ -37,6 +44,14 @@ class FieldsInvoice extends StatefulWidget {
 }
 
 class _FieldsInvoice extends State<FieldsInvoice> {
+  DateTime _date = new DateTime.now();
+  TimeOfDay _time = new TimeOfDay.now();
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -85,6 +100,37 @@ class _FieldsInvoice extends State<FieldsInvoice> {
         SizedBox(
           height: 9,
         ),
+        TextFieldInput(
+          labelText: "Barrio",
+          textController: widget.textNeighborhood,
+          enable: widget.enableForm,
+        ),
+        SizedBox(height: 9),
+        GestureDetector(
+          onTap: widget.enableForm ? () => _selectDate(context) : null,
+          child: AbsorbPointer(
+            child: TextFieldInput(
+              labelText: "Fecha de Nacimiento",
+              textController: widget.textBirthDate,
+              inputType: TextInputType.datetime,
+              enable: widget.enableForm,
+            ),
+          ),
+        ),
+        SizedBox(
+          height: 9,
+        ),
+        GestureDetector(
+          onTap: widget.enableForm ? () => _selectTime(context) : null,
+          child: AbsorbPointer(
+            child: TextFieldInput(
+              labelText: "Hora Estimada de Entrega",
+              textController: widget.textTimeDelivery,
+              inputType: TextInputType.datetime,
+              enable: widget.enableForm,
+            ),
+          ),
+        ),
         SizedBox(
           height: 9,
         ),
@@ -92,16 +138,18 @@ class _FieldsInvoice extends State<FieldsInvoice> {
           children: <Widget>[
             Checkbox(
               value: widget.sendEmail,
-              onChanged: widget.enableForm ? (bool value) {
-                setState(() {
-                  widget.sendEmail = value;
-                });
-              } : null,
+              onChanged: widget.enableForm
+                  ? (bool value) {
+                      setState(() {
+                        widget.sendEmail = value;
+                      });
+                    }
+                  : null,
               checkColor: Colors.white,
               activeColor: Color(0xFF59B258),
             ),
             Text(
-              "Enviar por whatsapp",
+              "Enviar por correo electrónico",
               style: TextStyle(
                 fontFamily: "Lato",
                 decoration: TextDecoration.none,
@@ -113,5 +161,43 @@ class _FieldsInvoice extends State<FieldsInvoice> {
         ),
       ],
     );
+  }
+
+  /// Functions
+
+  Future<Null> _selectDate(BuildContext context) async {
+    final formatDate = DateFormat.yMd('ES');
+    Locale myLocale = Localizations.localeOf(context);
+    final DateTime picked = await showDatePicker(
+        context: context,
+        initialDate: _date,
+        locale: myLocale,
+        firstDate: DateTime(1901, 1),
+        lastDate: DateTime(2100));
+    if (picked != null && picked != _date)
+      setState(() {
+        _date = picked;
+        widget.textBirthDate.value =
+            TextEditingValue(text: formatDate.format(picked));
+      });
+  }
+
+  Future<Null> _selectTime(BuildContext context) async {
+    final formatTime = DateFormat.jm('ES');
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    final TimeOfDay picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+    if (picked != null && picked != _time)
+      setState(() {
+        _time = picked;
+        TimeOfDay elm = picked.replacing(hour: picked.hourOfPeriod);
+        DateTime elm1 = DateFormat('dd/MM/yyyy hh:mm').parse('${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year} ${picked.format(context)}');
+        print(elm1);
+        print(formatTime.format(elm1));
+        widget.textTimeDelivery.value =
+            TextEditingValue(text: picked.replacing(hour: picked.hourOfPeriod).format(context));
+      });
   }
 }

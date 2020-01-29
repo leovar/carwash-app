@@ -11,6 +11,9 @@ class Customer extends Equatable {
   final String email;
   final Timestamp creationDate;
   final List<DocumentReference> vehicles;
+  final String birthDate;
+  final String neighborhood;
+  final String typeSex;
 
   Customer({
     this.id,
@@ -20,6 +23,9 @@ class Customer extends Equatable {
     this.email,
     this.creationDate,
     this.vehicles,
+    this.birthDate,
+    this.neighborhood,
+    this.typeSex,
   });
 
   factory Customer.fromJson(Map<String, dynamic> json, {String id}) {
@@ -37,6 +43,9 @@ class Customer extends Equatable {
       email: json['email'],
       creationDate: json['creationDate'],
       vehicles: vehiclesListDb,
+      birthDate: json['birthDate'],
+      neighborhood: json['neighborhood'],
+      typeSex: json['typeSex'],
     );
   }
 
@@ -48,6 +57,9 @@ class Customer extends Equatable {
       'email': this.email,
       'creationDate': this.creationDate,
       'vehicles': this.vehicles,
+      'birthDate': this.birthDate,
+      'neighborhood': this.neighborhood,
+      'typeSex': this.typeSex,
     };
   }
 
@@ -62,11 +74,14 @@ class Customer extends Equatable {
     return Customer(
       id: origin.id,
       name: name ?? origin.name,
-      address: address?? origin.address,
+      address: address ?? origin.address,
       phoneNumber: phoneNumber ?? origin.phoneNumber,
       email: email ?? origin.email,
       creationDate: origin.creationDate,
       vehicles: vehicles ?? origin.vehicles,
+      birthDate: origin.birthDate,
+      neighborhood: origin.neighborhood,
+      typeSex: origin.typeSex,
     );
   }
 
@@ -79,5 +94,8 @@ class Customer extends Equatable {
         email,
         creationDate,
         vehicles,
+        birthDate,
+        neighborhood,
+        typeSex,
       ];
 }
