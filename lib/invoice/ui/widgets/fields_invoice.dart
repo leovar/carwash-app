@@ -140,10 +140,10 @@ class _FieldsInvoice extends State<FieldsInvoice> {
               value: widget.sendEmail,
               onChanged: widget.enableForm
                   ? (bool value) {
-                      setState(() {
-                        widget.sendEmail = value;
-                      });
-                    }
+                setState(() {
+                  widget.sendEmail = value;
+                });
+              }
                   : null,
               checkColor: Colors.white,
               activeColor: Color(0xFF59B258),
@@ -183,8 +183,7 @@ class _FieldsInvoice extends State<FieldsInvoice> {
   }
 
   Future<Null> _selectTime(BuildContext context) async {
-    final formatTime = DateFormat.jm('ES');
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    String text12Hour = '';
     final TimeOfDay picked = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.now(),
@@ -192,12 +191,20 @@ class _FieldsInvoice extends State<FieldsInvoice> {
     if (picked != null && picked != _time)
       setState(() {
         _time = picked;
-        TimeOfDay elm = picked.replacing(hour: picked.hourOfPeriod);
-        DateTime elm1 = DateFormat('dd/MM/yyyy hh:mm').parse('${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year} ${picked.format(context)}');
-        print(elm1);
-        print(formatTime.format(elm1));
-        widget.textTimeDelivery.value =
-            TextEditingValue(text: picked.replacing(hour: picked.hourOfPeriod).format(context));
+        TimeOfDay _hour12Format = picked.replacing(hour: picked.hourOfPeriod);
+        int hour24;
+        if (_time.format(context).length > 4) {
+          hour24 = int.parse(_time.format(context).substring(0, 2));
+        } else {
+          hour24 = int.parse(_time.format(context).substring(0, 1));
+        }
+
+        if (hour24 <= 12) {
+          text12Hour = '${_hour12Format.format(context)} A.M';
+        } else {
+          text12Hour = '${_hour12Format.format(context)} P.M';
+        }
+        widget.textTimeDelivery.value = TextEditingValue(text: text12Hour);
       });
   }
 }

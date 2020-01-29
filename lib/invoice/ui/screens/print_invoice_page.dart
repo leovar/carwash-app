@@ -97,7 +97,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
               color: Colors.white,
               child: Column(
                 children: <Widget>[
-                  SizedBox(height: 7),
+                  SizedBox(height: 3),
                   Center(
                     child: Text(
                       'Spa Car Wash Móvil',
@@ -230,6 +230,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
   }
 
   Widget _infoInvoice() {
+    var _timeDelivery = widget.currentInvoice.timeDelivery??'';
     return Container(
       color: Colors.white,
       padding: EdgeInsets.symmetric(horizontal: 20),
@@ -256,6 +257,37 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
               fontWeight: FontWeight.w400,
               color: Colors.black,
               fontSize: 18,
+            ),
+          ),
+          SizedBox(height: 7),
+          Visibility(
+            visible: _timeDelivery.isEmpty ? false : true,
+            child: Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Text(
+                  'Hora Estimada de Entrega:',
+                  style: TextStyle(
+                    fontFamily: "Lato",
+                    decoration: TextDecoration.none,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.black,
+                    fontSize: 18,
+                  ),
+                ),
+                Text(
+                  widget.currentInvoice.timeDelivery??'',
+                  textAlign: TextAlign.right,
+                  style: TextStyle(
+                    fontFamily: "Lato",
+                    decoration: TextDecoration.none,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.black,
+                    fontSize: 18,
+                  ),
+                ),
+              ],
             ),
           ),
           SizedBox(height: 7),

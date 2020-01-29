@@ -36,6 +36,7 @@ class Invoice extends Equatable {
   final String vehicleColor;
   final Uint8List imageFirm;
   final bool approveDataProcessing;
+  final String timeDelivery;
 
   Invoice({
     this.id,
@@ -61,6 +62,7 @@ class Invoice extends Equatable {
     this.vehicleColor,
     this.imageFirm,
     this.approveDataProcessing,
+    this.timeDelivery,
   });
 
   Map<String, dynamic> toJson() {
@@ -84,6 +86,7 @@ class Invoice extends Equatable {
       'vehicleColor': this.vehicleColor,
       'creationDate': this.creationDate,
       'approveDataProcessing': this.approveDataProcessing,
+      'timeDelivery': this.timeDelivery,
     };
   }
 
@@ -115,6 +118,7 @@ class Invoice extends Equatable {
       vehicleColor: json['vehicleColor'],
       creationDate: json['creationDate'],
       approveDataProcessing: json['approveDataProcessing'],
+      timeDelivery: json['timeDelivery'],
     );
   }
 
@@ -142,5 +146,6 @@ class Invoice extends Equatable {
     approveDataProcessing,
     vehicleBrand,
     vehicleColor,
+    timeDelivery,
   ];
 }

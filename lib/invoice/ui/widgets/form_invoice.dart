@@ -50,10 +50,7 @@ class FormInvoice extends StatefulWidget {
   FormInvoice(this.editInvoice);
 
   @override
-  State<StatefulWidget> createState() {
-    // TODO: implement createState
-    return _FormInvoice();
-  }
+  State<StatefulWidget> createState() => _FormInvoice();
 }
 
 class _FormInvoice extends State<FormInvoice> {
@@ -922,6 +919,7 @@ class _FormInvoice extends State<FormInvoice> {
           approveDataProcessing: _approveDataProcessing,
           vehicleBrand: _selectBrand,
           vehicleColor: _selectColor,
+          timeDelivery: _textTimeDelivery.text,
         );
         DocumentReference invoiceReference =
             await _blocInvoice.saveInvoice(invoice);
