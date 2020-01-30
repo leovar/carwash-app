@@ -92,6 +92,17 @@ class BlocInvoice implements Bloc {
     return brands;
   }
 
+  /// Brands References
+  Future<List<String>> getBrandReferences(String brand) async {
+    List<String> brandReferenceList = [];
+    if (brand.isNotEmpty) {
+      String brandId = await _invoiceRepository.getBrandByBrand(brand);
+      brandReferenceList = await _invoiceRepository.getBrandReferences(brandId);
+      brandReferenceList.sort((a,b) => a.toLowerCase().compareTo(b.toLowerCase()));
+    }
+    return brandReferenceList;
+  }
+
 
   /// Colors
   Stream<QuerySnapshot> colorsStream(int uidVehicleType) {

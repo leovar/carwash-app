@@ -140,7 +140,36 @@ class InvoiceRepository {
     return brandsList;
   }
 
-  /// Get Colors list by vehicleType
+  /// Get Brand Reference by brand
+
+  Future<String> getBrandByBrand(String brand) async {
+    final querySnapshot = await this
+        ._db
+        .collection(FirestoreCollections.brands)
+        .where(FirestoreCollections.brandFieldBrand, isEqualTo: brand)
+        .getDocuments();
+    return querySnapshot.documents.first.documentID;
+  }
+
+  Future<List<String>> getBrandReferences(String brandId) async {
+    List<String> referencesList = <String>[];
+    final querySnapshot = await this
+        ._db
+        .collection(FirestoreCollections.brands)
+        .document(brandId)
+        .collection(FirestoreCollections.brandReferences)
+        .getDocuments();
+
+    if (querySnapshot.documents.length > 0) {
+      querySnapshot.documents.forEach((doc){
+        String brandReference = doc.data['reference'];
+        referencesList.add(brandReference);
+      });
+    }
+    return referencesList;
+  }
+
+  /// Get Colors list by vehicleType (in this moment no filter by vehicle type)
   Stream<QuerySnapshot> getListColorsStream(int uidVehicleType) {
     final querySnapshot =
         this._db.collection(FirestoreCollections.colors).snapshots();

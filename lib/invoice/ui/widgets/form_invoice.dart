@@ -86,6 +86,7 @@ class _FormInvoice extends State<FormInvoice> {
   String _initConsecLocation;
   String _finalConsecLocation;
   String _selectBrand = '';
+  String _selectedBrandReference = '';
   String _selectColor = '';
   String _selectTypeSex = '';
 
@@ -106,6 +107,7 @@ class _FormInvoice extends State<FormInvoice> {
   int _listOperatorsCount = 0;
   int _listCoordinatorsCount = 0;
   int _countBrands = 0;
+  int _countBrandReferences = 0;
   int _countColors = 0;
 
   @override
@@ -284,15 +286,18 @@ class _FormInvoice extends State<FormInvoice> {
                 listCountCoordinators: _listCoordinatorsCount,
                 listCountBrands: _countBrands,
                 listCountColors: _countColors,
+                listCountBrandReference: _countBrandReferences,
                 cbHandlerOperator: _setHandlerUsersOperator,
                 cbHandlerCoordinator: _setHandlerUserCoordinator,
                 cbHandlerVehicleBrand: _setHandlerVehicleBrand,
+                cbHandlerVehicleBrandReference: _setHandlerBrandReferences,
                 cbHandlerVehicleColor: _setHandlerVehicleColor,
                 cbHandlerTypeSex: _setHandlerTypeSex,
                 locationReference: _locationReference,
                 selectedOperator: _selectOperator,
                 selectedCoordinator: _selectCoordinator,
                 selectedVehicleBrand: _selectBrand,
+                selectBehicleBrandReference: _selectedBrandReference,
                 selectedVehicleColor: _selectColor,
                 selectedTypeSex: _selectTypeSex,
                 uidVehicleType: vehicleTypeSelected.uid,
@@ -612,6 +617,16 @@ class _FormInvoice extends State<FormInvoice> {
       _selectBrand = brand;
     } else {
       _countBrands = countBrands;
+    }
+  }
+
+  //operationType 1=setBrand, 2= setCountBrands
+  void _setHandlerBrandReferences(
+      String brandReference, int countBrands, int operationType) {
+    if (operationType == 1) {
+      _selectedBrandReference = brandReference;
+    } else {
+      _countBrandReferences = countBrands;
     }
   }
 
