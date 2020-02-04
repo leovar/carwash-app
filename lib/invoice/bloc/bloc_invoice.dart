@@ -7,6 +7,7 @@ import 'package:car_wash_app/invoice/repository/invoice_repository.dart';
 import 'package:car_wash_app/product/model/product.dart';
 import 'package:car_wash_app/user/model/user.dart';
 import 'package:car_wash_app/vehicle/repository/vehicle_repository.dart';
+import 'package:car_wash_app/vehicle_type/model/brand.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
@@ -86,11 +87,18 @@ class BlocInvoice implements Bloc {
     return _invoiceRepository.getListBrandsStream(uidVehicleType);
   }
 
-  List<String> buildBrands(List<DocumentSnapshot> brandsListSnapshot) {
-    List<String> brands = _invoiceRepository.buildBrands(brandsListSnapshot);
+  List<String> buildBrandsInvoice(List<DocumentSnapshot> brandsListSnapshot) {
+    List<String> brands = _invoiceRepository.buildBrandsInvoice(brandsListSnapshot);
     brands.sort((a,b) => a.toLowerCase().compareTo(b.toLowerCase()));
     return brands;
   }
+
+  List<Brand> buildBrands(List<DocumentSnapshot> brandsListSnapshot) {
+    List<Brand> brands = _invoiceRepository.buildBrands(brandsListSnapshot);
+    brands.sort((a,b) => a.brand.toLowerCase().compareTo(b.brand.toLowerCase()));
+    return brands;
+  }
+
 
   /// Brands References
   Future<List<String>> getBrandReferences(String brand) async {

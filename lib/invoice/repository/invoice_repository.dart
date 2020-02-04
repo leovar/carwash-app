@@ -7,6 +7,7 @@ import 'package:car_wash_app/invoice/model/invoice.dart';
 import 'package:car_wash_app/product/model/product.dart';
 import 'package:car_wash_app/user/model/user.dart';
 import 'package:car_wash_app/vehicle/model/vehicle.dart';
+import 'package:car_wash_app/vehicle_type/model/brand.dart';
 import 'package:car_wash_app/vehicle_type/model/vehicleType.dart';
 import 'package:car_wash_app/widgets/firestore_collections.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -124,18 +125,29 @@ class InvoiceRepository {
   Stream<QuerySnapshot> getListBrandsStream(int uidVehicleType) {
     final querySnapshot = this
         ._db
-        .collection(FirestoreCollections.brands)
-        .where(FirestoreCollections.brandFieldVehicleType,
-            isEqualTo: uidVehicleType)
-        .snapshots();
-    return querySnapshot;
+        .collection(FirestoreCollections.brands);
+
+    if (uidVehicleType != 0) {
+      querySnapshot.where(FirestoreCollections.brandFieldVehicleType,isEqualTo: uidVehicleType);
+    }
+
+    return querySnapshot.snapshots();
   }
 
-  List<String> buildBrands(List<DocumentSnapshot> brandsListSnapshot) {
+  List<String> buildBrandsInvoice(List<DocumentSnapshot> brandsListSnapshot) {
     List<String> brandsList = <String>[];
     brandsListSnapshot.forEach((p) {
       String brand = p.data['brand'];
       brandsList.add(brand);
+    });
+    return brandsList;
+  }
+
+  List<Brand> buildBrands(List<DocumentSnapshot> brandsListSnapshot) {
+    List<Brand> brandsList = <Brand>[];
+    brandsListSnapshot.forEach((p) {
+      Brand _brand = Brand.fromJson(p.data, id: p.documentID);
+      brandsList.add(_brand);
     });
     return brandsList;
   }

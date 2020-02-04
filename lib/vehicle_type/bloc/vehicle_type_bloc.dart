@@ -1,3 +1,4 @@
+import 'package:car_wash_app/vehicle_type/model/brand_reference.dart';
 import 'package:car_wash_app/vehicle_type/model/vehicleType.dart';
 import 'package:car_wash_app/vehicle_type/repository/vehicle_type_repository.dart';
 import 'package:car_wash_app/widgets/firestore_collections.dart';
@@ -21,6 +22,16 @@ class VehicleTypeBloc extends Bloc {
   }
 
   DocumentReference getVehicleTypeReferenceById(String idVehicleType) => _vehicleTypeRepository.getVehicleTypeReferenceById(idVehicleType);
+
+
+  //Get Brand Reference
+  Stream<QuerySnapshot> vehicleBrandReferences(String brandId) => _vehicleTypeRepository.getListBrandReferencesStream(brandId);
+
+  List<BrandReference> buildBrandReference(List<DocumentSnapshot> brandRefSnapshot) => _vehicleTypeRepository.buildBrandReferences(brandRefSnapshot);
+
+  void updateBrandReference(String brandId, BrandReference brandReference) async {
+    return _vehicleTypeRepository.updateBrandReference(brandId, brandReference);
+  }
 
   @override
   void dispose() {

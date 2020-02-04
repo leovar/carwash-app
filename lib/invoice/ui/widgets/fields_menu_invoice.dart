@@ -225,7 +225,7 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
   }
 
   Widget _getListBrands(AsyncSnapshot snapshot) {
-    _listBrands = _blocInvoice.buildBrands(snapshot.data.documents);
+    _listBrands = _blocInvoice.buildBrandsInvoice(snapshot.data.documents);
     widget.cbHandlerVehicleBrand('', _listBrands.length, 2);
     return _chargeListBrands();
   }

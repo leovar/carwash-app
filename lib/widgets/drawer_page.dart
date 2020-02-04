@@ -1,11 +1,11 @@
 import 'package:car_wash_app/location/bloc/bloc_location.dart';
 import 'package:car_wash_app/location/ui/screens/locations_admin_page.dart';
 import 'package:car_wash_app/product/bloc/product_bloc.dart';
-import 'package:car_wash_app/product/ui/screens/product_admin_page.dart';
 import 'package:car_wash_app/product/ui/screens/product_list_admin_page.dart';
 import 'package:car_wash_app/user/bloc/bloc_user.dart';
-import 'package:car_wash_app/user/model/user.dart';
 import 'package:car_wash_app/user/ui/screens/users_admin_page.dart';
+import 'package:car_wash_app/vehicle_type/bloc/vehicle_type_bloc.dart';
+import 'package:car_wash_app/vehicle_type/ui/screens/admin_brand_reference.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
@@ -172,7 +172,7 @@ class _DrawerPage extends State<DrawerPage> {
                   ),
                 ),
                 Container(
-                  padding: EdgeInsets.only(left: 90, top: 17, bottom: 10),
+                  padding: EdgeInsets.only(left: 90, top: 17),
                   alignment: Alignment(-1.0, 0.0),
                   child: InkWell(
                     child: Text(
@@ -198,6 +198,33 @@ class _DrawerPage extends State<DrawerPage> {
                     },
                   ),
                 ),
+                Container(
+                  padding: EdgeInsets.only(left: 90, top: 17, bottom: 10),
+                  alignment: Alignment(-1.0, 0.0),
+                  child: InkWell(
+                    child: Text(
+                      "Referencias de Vehiculo",
+                      style: TextStyle(
+                        fontFamily: "Lato",
+                        fontWeight: FontWeight.normal,
+                        fontSize: 17,
+                        color: Color(0xFFAEAEAE),
+                      ),
+                    ),
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) {
+                          return BlocProvider<VehicleTypeBloc>(
+                            bloc: VehicleTypeBloc(),
+                            child: AdminBrandReference(),
+                          );
+                        }),
+                      );
+                    },
+                  ),
+                )
               ],
             ),
             ListTile(
