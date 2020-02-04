@@ -27,6 +27,16 @@ class _AdminBrandReference extends State<AdminBrandReference> {
   BrandReference _referenceToEdit;
 
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     _vehicleTypeBloc = BlocProvider.of(context);
     return Scaffold(
@@ -68,18 +78,19 @@ class _AdminBrandReference extends State<AdminBrandReference> {
           children: <Widget>[
             SizedBox(height: 12),
             Flexible(
+              child: _dropVehicleBrand(),
+            ),
+            SizedBox(height: 9),
+            Flexible(
               child: Container(
                 child: TextFieldInput(
+                  autofocus: false,
                   labelText: 'Nombre de Referenica',
                   textController: _textReferenceName,
                   validate: _validateReference,
                   textValidate: 'Escriba el nombre de la referencia',
                 ),
               ),
-            ),
-            SizedBox(height: 9),
-            Flexible(
-              child: _dropVehicleBrand(),
             ),
             SizedBox(height: 9),
             Flexible(
@@ -115,6 +126,7 @@ class _AdminBrandReference extends State<AdminBrandReference> {
 
     _dropdownBrands = _buildDropdownBrands(_listBrands);
     return DropdownButton(
+      autofocus: true,
       isExpanded: true,
       items: _dropdownBrands,
       value: _selectedBrand,
@@ -175,7 +187,7 @@ class _AdminBrandReference extends State<AdminBrandReference> {
       padding: EdgeInsets.only(top: 10, bottom: 17),
       child: StreamBuilder(
         stream: _vehicleTypeBloc.vehicleBrandReferences(
-            _selectedBrand == null ? '' : _selectedBrand.id),
+            _selectedBrand == null ? '1' : _selectedBrand.id),
         builder: (context, snapshot) {
           switch (snapshot.connectionState) {
             case ConnectionState.waiting:
