@@ -106,7 +106,7 @@ class _AdminBrandReference extends State<AdminBrandReference> {
 
   Widget _dropVehicleBrand() {
     return StreamBuilder(
-      stream: _blocInvoice.brandsStream(0),
+      stream: _blocInvoice.allBrandsStream(),
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.waiting:
@@ -206,17 +206,18 @@ class _AdminBrandReference extends State<AdminBrandReference> {
     _listBrandReference.sort((a, b) =>
         a.reference.toLowerCase().compareTo(b.reference.toLowerCase()));
     return ListView.builder(
-        itemCount: _listBrandReference.length,
-        scrollDirection: Axis.vertical,
-        shrinkWrap: true,
-        physics: NeverScrollableScrollPhysics(),
-        itemBuilder: (BuildContext context, int index) {
-          return ItemBrandReferenceList(
-            selectedBrand: _selectedBrand,
-            brandReference: _listBrandReference[index],
-            editBrandReference: _editBrandReference,
-          );
-        });
+      itemCount: _listBrandReference.length,
+      scrollDirection: Axis.vertical,
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      itemBuilder: (BuildContext context, int index) {
+        return ItemBrandReferenceList(
+          selectedBrand: _selectedBrand,
+          brandReference: _listBrandReference[index],
+          editBrandReference: _editBrandReference,
+        );
+      },
+    );
   }
 
   /// Functions

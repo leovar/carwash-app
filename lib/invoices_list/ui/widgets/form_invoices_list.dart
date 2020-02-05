@@ -10,8 +10,10 @@ import 'package:car_wash_app/widgets/gradient_back.dart';
 import 'package:car_wash_app/widgets/info_header_container.dart';
 import 'package:car_wash_app/widgets/keys.dart';
 import 'package:car_wash_app/widgets/messages_utils.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_sms/flutter_sms.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -165,6 +167,8 @@ class _FormInvoicesList extends State<FormInvoicesList> {
           listInvoices: _listInvoices,
           index: index,
           updateDate: true,
+          isAdmon: _showInfoAmounts,
+          closeInvoice: _closeInvoiceCallback,
         );
       },
     );
@@ -349,4 +353,69 @@ class _FormInvoicesList extends State<FormInvoicesList> {
     _dateFilterFinal = dateFinal;
   }
 
+  void _closeInvoiceCallback(Invoice _invoiceClose) {
+    if (_invoiceClose.userOperatorName.isEmpty) {
+      MessagesUtils.showAlert(context: context, title: 'Debe seleccionar el Operador de lavado para cerrar').show();
+    } else {
+      Alert(
+        context: context,
+        type: AlertType.info,
+        title: 'Esta seguro que desea cerrar la factura !',
+        style: MessagesUtils.alertStyle,
+        buttons: [
+          DialogButton(
+            color: Theme.of(context).accentColor,
+            child: Text(
+              'ACEPTAR',
+              style: Theme.of(context).textTheme.button,
+            ),
+            onPressed: () {
+              Navigator.of(context).pop();
+              _closeInvoice(_invoiceClose);
+            },
+          ),
+          DialogButton(
+            color: Theme.of(context).accentColor,
+            child: Text(
+              'CANCELAR',
+              style: Theme.of(context).textTheme.button,
+            ),
+            onPressed: () {
+              Navigator.of(context).pop();
+              setState(() {
+
+              });
+            },
+          ),
+        ],
+      ).show();
+    }
+  }
+
+  void _closeInvoice(Invoice invoiceToClose) async {
+    MessagesUtils.showAlertWithLoading(context: context, title: 'Guardando..').show();
+    Invoice invoice = Invoice.copyWith(
+      origin: invoiceToClose,
+      closedDate: Timestamp.now(),
+      invoiceClosed: true,
+
+    );
+    await _blocInvoice.saveInvoice(invoice);
+    if (invoiceToClose.phoneNumber.isNotEmpty) {
+      String message = "Spa CarWash Movil -- Su vehiculo ya se encuentra listo para ser recogido";
+      List<String> recipents = [invoiceToClose.phoneNumber];
+      _sendSMS(message, recipents);
+    }
+
+    Navigator.pop(context);
+  }
+
+  void _sendSMS(String message, List<String> recipents) async {
+    String _result = await FlutterSms
+        .sendSMS(message: message, recipients: recipents)
+        .catchError((onError) {
+      print(onError);
+    });
+    print(_result);
+  }
 }

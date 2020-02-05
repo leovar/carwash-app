@@ -8,12 +8,16 @@ class ItemInvoicesList extends StatefulWidget {
   final List<Invoice> listInvoices;
   final int index;
   final bool updateDate;
+  final bool isAdmon;
+  final Function(Invoice) closeInvoice;
 
   ItemInvoicesList(
       {Key key,
       this.listInvoices,
       this.index,
-      this.updateDate});
+      this.updateDate,
+      this.isAdmon,
+      this.closeInvoice});
 
   @override
   State<StatefulWidget> createState() => _ItemInvoicesList();
@@ -55,20 +59,22 @@ class _ItemInvoicesList extends State<ItemInvoicesList> {
     return InkWell(
       splashColor: Colors.white,
       onTap: () {
-        Navigator.push(context,
-          MaterialPageRoute(builder: (context) => InvoicePage(
-            showDrawer: false,
-            invoiceToEdit: widget.listInvoices[widget.index],
-          ))
-        );
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => InvoicePage(
+                      showDrawer: false,
+                      invoiceToEdit: widget.listInvoices[widget.index],
+                    )));
       },
       child: _itemDecoration(widget.listInvoices[widget.index]),
     );
   }
 
   Widget _itemDecoration(Invoice invoiceList) {
+    bool _visibleClosesText = invoiceList.invoiceClosed ?? false;
     return Container(
-      height: 63,
+      height: 83,
       decoration: BoxDecoration(
         color: (widget.index % 2 == 0) ? Colors.white : Color(0xFFF1F1F1),
       ),
@@ -78,7 +84,7 @@ class _ItemInvoicesList extends State<ItemInvoicesList> {
           Row(
             children: <Widget>[
               Container(
-                margin: EdgeInsets.only(left: 8, right: 22),
+                margin: EdgeInsets.only(left: 8, right: 18),
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Image.asset(_iconVehicle, width: _imageWith),
@@ -87,6 +93,18 @@ class _ItemInvoicesList extends State<ItemInvoicesList> {
               Wrap(
                 direction: Axis.vertical,
                 children: <Widget>[
+                  Text(
+                    invoiceList.consecutive.toString(),
+                    style: TextStyle(
+                      color: Color(0xFF59B258),
+                      fontFamily: "Lato",
+                      fontWeight: FontWeight.bold,
+                      fontSize: 17.0,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 5,
+                  ),
                   Text(
                     invoiceList.placa ?? '',
                     style: TextStyle(
@@ -124,18 +142,44 @@ class _ItemInvoicesList extends State<ItemInvoicesList> {
           ),
           //Text(invoiceList.totalPrice.toString()),
           Container(
-            margin: EdgeInsets.only(right: 8),
             alignment: Alignment.centerRight,
-            child: Text(
-              invoiceList.consecutive.toString(),
-              style: TextStyle(
-                color: Color(0xFF59B258),
-                fontFamily: "Lato",
-                fontWeight: FontWeight.bold,
-                fontSize: 17.0,
-              ),
-            ),
-          )
+            child: _visibleClosesText
+                ? Container(
+                    margin: EdgeInsets.only(
+                      right: 16,
+                    ),
+                    child: Text(
+                      'CERRADA',
+                      style: TextStyle(
+                        color: Theme.of(context).primaryColor,
+                        fontFamily: "Lato",
+                        fontWeight: FontWeight.normal,
+                        fontSize: 15,
+                      ),
+                    ),
+                  )
+                : Container(
+                    margin: EdgeInsets.only(right: 5),
+                    child: ButtonTheme(
+                      minWidth: 87,
+                      child: RaisedButton(
+                        shape: RoundedRectangleBorder(
+                            borderRadius: new BorderRadius.circular(18.0),
+                            side: BorderSide(
+                                color: Theme.of(context).accentColor)),
+                        color: Theme.of(context).accentColor,
+                        onPressed: () {
+                          widget.closeInvoice(invoiceList);
+                        },
+                        textColor: Colors.white,
+                        child: Text(
+                          'Terminar'.toUpperCase(),
+                          style: TextStyle(fontSize: 13),
+                        ),
+                      ),
+                    ),
+                  ),
+          ),
         ],
       ),
     );

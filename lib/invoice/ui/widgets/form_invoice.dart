@@ -859,6 +859,9 @@ class _FormInvoice extends State<FormInvoice> {
             name: _textClient.text.trim(),
             phoneNumber: _textPhoneNumber.text.trim(),
             email: _textEmail.text.trim(),
+            birthDate: _textBirthDate.text,
+            neighborhood: _textNeighborhood.text,
+            typeSex: _selectTypeSex,
           );
           _customerReference =
               await _customerBloc.updateCustomer(customerUpdate);
@@ -903,6 +906,7 @@ class _FormInvoice extends State<FormInvoice> {
               ? widget.editInvoice.consecutive
               : _consecutive,
           customer: _customerReference,
+          phoneNumber: _textPhoneNumber.text.trim(),
           vehicle: _vehicleReference,
           placa: _textPlaca.text.trim(),
           uidVehicleType: vehicleTypeSelected.uid,
@@ -959,8 +963,9 @@ class _FormInvoice extends State<FormInvoice> {
         Navigator.pop(context); //Close popUp Save
         Navigator.pop(context); //Close form Create Invoice
 
-        _printInvoice(
-            _currentInvoiceSaved, _selectedProducts, _listAdditionalProducts);
+        if (widget.editInvoice == null) {
+          _printInvoice(_currentInvoiceSaved, _selectedProducts, _listAdditionalProducts);
+        }
 
         //MessagesUtils.showAlert(context: context, title: 'Factura Guardada').show();
 

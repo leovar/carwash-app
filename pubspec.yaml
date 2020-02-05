@@ -31,6 +31,7 @@ dependencies:
   shared_preferences: ^0.5.4+1
   flutter_multiselect: ^0.4.0
   datetime_picker_formfield: ^1.0.0
+  flutter_sms: ^1.1.0
 
   #firebase
   firebase_auth:

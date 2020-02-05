@@ -69,6 +69,9 @@ class Customer extends Equatable {
     String address,
     String phoneNumber,
     String email,
+    String birthDate,
+    String neighborhood,
+    String typeSex,
     List<DocumentReference> vehicles,
   }) {
     return Customer(
@@ -79,9 +82,9 @@ class Customer extends Equatable {
       email: email ?? origin.email,
       creationDate: origin.creationDate,
       vehicles: vehicles ?? origin.vehicles,
-      birthDate: origin.birthDate,
-      neighborhood: origin.neighborhood,
-      typeSex: origin.typeSex,
+      birthDate: birthDate ?? origin.birthDate,
+      neighborhood: neighborhood ?? origin.neighborhood,
+      typeSex: typeSex ?? origin.typeSex,
     );
   }
 

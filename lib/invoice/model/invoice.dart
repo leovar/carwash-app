@@ -23,6 +23,7 @@ class Invoice extends Equatable {
   final DocumentReference userCoordinator;
   final String userCoordinatorName;
   final DocumentReference customer;
+  final String phoneNumber;
   final DocumentReference vehicle;
   final String placa;
   final int uidVehicleType;
@@ -37,6 +38,8 @@ class Invoice extends Equatable {
   final Uint8List imageFirm;
   final bool approveDataProcessing;
   final String timeDelivery;
+  final Timestamp closedDate;
+  final bool invoiceClosed;
 
   Invoice({
     this.id,
@@ -49,6 +52,7 @@ class Invoice extends Equatable {
     this.userCoordinator,
     this.userCoordinatorName,
     this.customer,
+    this.phoneNumber,
     this.vehicle,
     this.placa,
     this.uidVehicleType,
@@ -63,6 +67,8 @@ class Invoice extends Equatable {
     this.imageFirm,
     this.approveDataProcessing,
     this.timeDelivery,
+    this.closedDate,
+    this.invoiceClosed,
   });
 
   Map<String, dynamic> toJson() {
@@ -76,6 +82,7 @@ class Invoice extends Equatable {
       'userCoordinator': this.userCoordinator,
       'userCoordinatorName': this.userCoordinatorName,
       'customer': this.customer,
+      'phoneNumber': this.phoneNumber,
       'vehicle': this.vehicle,
       'placa': this.placa,
       'uidVehicleType': this.uidVehicleType,
@@ -87,6 +94,8 @@ class Invoice extends Equatable {
       'creationDate': this.creationDate,
       'approveDataProcessing': this.approveDataProcessing,
       'timeDelivery': this.timeDelivery,
+      'closedDate': this.closedDate,
+      'invoiceClosed': this.invoiceClosed,
     };
   }
 
@@ -108,6 +117,7 @@ class Invoice extends Equatable {
       userCoordinator: json['userCoordinator'],
       userCoordinatorName: json['userCoordinatorName'],
       customer: json['customer'],
+      phoneNumber: json['phoneNumber'],
       vehicle: json['vehicle'],
       placa: json['placa'],
       uidVehicleType: json['uidVehicleType'],
@@ -119,9 +129,43 @@ class Invoice extends Equatable {
       creationDate: json['creationDate'],
       approveDataProcessing: json['approveDataProcessing'],
       timeDelivery: json['timeDelivery'],
+      closedDate: json['closedDate'],
+      invoiceClosed: json['invoiceClosed'],
     );
   }
 
+  factory Invoice.copyWith({
+    @required Invoice origin,
+    Timestamp closedDate,
+    bool invoiceClosed,
+  }) {
+    return Invoice(
+      id: origin.id,
+      totalPrice: origin.totalPrice,
+      subtotal: origin.subtotal,
+      iva: origin.iva,
+      userOwner: origin.userOwner,
+      userOperator: origin.userOperator,
+      userOperatorName: origin.userOperatorName,
+      userCoordinator: origin.userCoordinator,
+      userCoordinatorName: origin.userCoordinatorName,
+      customer: origin.customer,
+      phoneNumber: origin.phoneNumber,
+      vehicle: origin.vehicle,
+      placa: origin.placa,
+      uidVehicleType: origin.uidVehicleType,
+      location: origin.location,
+      locationName: origin.locationName,
+      consecutive: origin.consecutive,
+      vehicleBrand: origin.vehicleBrand,
+      vehicleColor: origin.vehicleColor,
+      creationDate: origin.creationDate,
+      approveDataProcessing: origin.approveDataProcessing,
+      timeDelivery: origin.timeDelivery,
+      closedDate: closedDate ?? origin.closedDate,
+      invoiceClosed: invoiceClosed ?? origin.invoiceClosed,
+    );
+  }
 
   @override
   List<Object> get props => [
@@ -134,6 +178,7 @@ class Invoice extends Equatable {
     userOperatorName,
     userCoordinator,
     customer,
+    phoneNumber,
     vehicle,
     placa,
     uidVehicleType,
@@ -147,5 +192,7 @@ class Invoice extends Equatable {
     vehicleBrand,
     vehicleColor,
     timeDelivery,
+    closedDate,
+    invoiceClosed,
   ];
 }

@@ -87,6 +87,10 @@ class BlocInvoice implements Bloc {
     return _invoiceRepository.getListBrandsStream(uidVehicleType);
   }
 
+  Stream<QuerySnapshot> allBrandsStream() {
+    return _invoiceRepository.getListAllBrandsStream();
+  }
+
   List<String> buildBrandsInvoice(List<DocumentSnapshot> brandsListSnapshot) {
     List<String> brands = _invoiceRepository.buildBrandsInvoice(brandsListSnapshot);
     brands.sort((a,b) => a.toLowerCase().compareTo(b.toLowerCase()));

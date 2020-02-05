@@ -123,13 +123,16 @@ class InvoiceRepository {
 
   /// Get Brands list by vehicleType
   Stream<QuerySnapshot> getListBrandsStream(int uidVehicleType) {
-    final querySnapshot = this
-        ._db
-        .collection(FirestoreCollections.brands);
+    var querySnapshot = _db
+        .collection(FirestoreCollections.brands)
+        .where(FirestoreCollections.brandFieldVehicleType, isEqualTo: uidVehicleType);
 
-    if (uidVehicleType != 0) {
-      querySnapshot.where(FirestoreCollections.brandFieldVehicleType,isEqualTo: uidVehicleType);
-    }
+    return querySnapshot.snapshots();
+  }
+
+  Stream<QuerySnapshot> getListAllBrandsStream() {
+    var querySnapshot = _db
+        .collection(FirestoreCollections.brands);
 
     return querySnapshot.snapshots();
   }

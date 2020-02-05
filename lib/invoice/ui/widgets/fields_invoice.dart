@@ -87,6 +87,7 @@ class _FieldsInvoice extends State<FieldsInvoice> {
           textController: widget.textPhoneNumber,
           inputType: TextInputType.number,
           enable: widget.enableForm,
+          autofocus: false,
         ),
         SizedBox(
           height: 9,
@@ -96,6 +97,7 @@ class _FieldsInvoice extends State<FieldsInvoice> {
           textController: widget.textEmail,
           inputType: TextInputType.emailAddress,
           enable: widget.enableForm,
+          autofocus: false,
         ),
         SizedBox(
           height: 9,
@@ -104,6 +106,7 @@ class _FieldsInvoice extends State<FieldsInvoice> {
           labelText: "Barrio",
           textController: widget.textNeighborhood,
           enable: widget.enableForm,
+          autofocus: false,
         ),
         SizedBox(height: 9),
         GestureDetector(
@@ -114,6 +117,7 @@ class _FieldsInvoice extends State<FieldsInvoice> {
               textController: widget.textBirthDate,
               inputType: TextInputType.datetime,
               enable: widget.enableForm,
+              autofocus: false,
             ),
           ),
         ),
@@ -128,6 +132,7 @@ class _FieldsInvoice extends State<FieldsInvoice> {
               textController: widget.textTimeDelivery,
               inputType: TextInputType.datetime,
               enable: widget.enableForm,
+              autofocus: false,
             ),
           ),
         ),
