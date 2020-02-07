@@ -147,9 +147,9 @@ class BlocInvoice implements Bloc {
     );
   }
 
-  List<Invoice> buildInvoicesListByMonth(
-          List<DocumentSnapshot> invoicesListSnapshot) =>
-      _invoiceRepository.buildInvoicesListByMonth(invoicesListSnapshot);
+  List<Invoice> buildInvoicesListByMonth(List<DocumentSnapshot> invoicesListSnapshot) {
+    return _invoiceRepository.buildInvoicesListByMonth(invoicesListSnapshot);
+  }
 
   /// Get invoices list for placa
   Future<List<Invoice>> getListInvoicesByVehicle(String vehicleId) async {

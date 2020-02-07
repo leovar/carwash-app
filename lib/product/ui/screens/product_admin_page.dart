@@ -42,6 +42,8 @@ class _ProductAdminPage extends State<ProductAdminPage> {
   List<DropdownMenuItem<VehicleType>> _dropdownVehicleTypes;
   VehicleType _selectedVehicleType;
   bool _productActive = true;
+  bool _productTypeSpecial = false;
+  bool _productTypeSimple = false;
   Product _productSelected;
 
   @override
@@ -139,6 +141,54 @@ class _ProductAdminPage extends State<ProductAdminPage> {
             SizedBox(height: 9),
             Flexible(
               child: _dropVehicleType(),
+            ),
+            SizedBox(height: 9),
+            Flexible(
+              child: Row(
+                children: <Widget>[
+                  Checkbox(
+                    value: _productTypeSpecial,
+                    onChanged: (bool value) {
+                      _onChangeRol(1, value);
+                    },
+                    checkColor: Colors.white,
+                    activeColor: Color(0xFF59B258),
+                  ),
+                  Text(
+                    "Servicio Especial",
+                    style: TextStyle(
+                      fontFamily: "Lato",
+                      decoration: TextDecoration.none,
+                      color: Color(0xFFAEAEAE),
+                      fontSize: 15,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 9),
+            Flexible(
+              child: Row(
+                children: <Widget>[
+                  Checkbox(
+                    value: _productTypeSimple,
+                    onChanged: (bool value) {
+                      _onChangeRol(2, value);
+                    },
+                    checkColor: Colors.white,
+                    activeColor: Color(0xFF59B258),
+                  ),
+                  Text(
+                    "Servicio Sencillo",
+                    style: TextStyle(
+                      fontFamily: "Lato",
+                      decoration: TextDecoration.none,
+                      color: Color(0xFFAEAEAE),
+                      fontSize: 15,
+                    ),
+                  ),
+                ],
+              ),
             ),
             SizedBox(height: 9),
             Flexible(
@@ -333,6 +383,8 @@ class _ProductAdminPage extends State<ProductAdminPage> {
     _textIvaPercent.text = _productSelected.ivaPercent.toStringAsFixed(0);
     _textPrice.text = _productSelected.price.toStringAsFixed(2);
     _productActive = _productSelected.productActive ?? true;
+    _productTypeSimple = _productSelected.productType == 'Sencillo' ? true : false;
+    _productTypeSpecial = _productSelected.productType == 'Especial' ? true : false;
     _selectedVehicleType = _lisVehicleType.length > 0
         ? _lisVehicleType.firstWhere((f) => f.id == _productSelected.vehicleType.documentID)
         : null;
@@ -408,6 +460,13 @@ class _ProductAdminPage extends State<ProductAdminPage> {
       });
     }
 
+    if (!_productTypeSimple && !_productTypeSpecial) {
+      canSave = false;
+      setState(() {
+        MessagesUtils.showAlert(context: context, title: 'Debe seleccionar el tipo de Producto').show();
+      });
+    }
+
     return canSave;
   }
 
@@ -418,6 +477,8 @@ class _ProductAdminPage extends State<ProductAdminPage> {
     _selectedVehicleType = null;
     _productSelected = null;
     _productActive = true;
+    _productTypeSpecial = false;
+    _productTypeSimple = false;
     setState(() {
       _listLocation.forEach((f) {
         _listLocation[_listLocation.indexOf(f)].isSelected = false;
@@ -478,7 +539,9 @@ class _ProductAdminPage extends State<ProductAdminPage> {
               ? _productSelected.locations
               : _newListLocationsReferences,
           productActive: _productActive,
-          vehicleTypeUid: _selectedVehicleType.uid);
+          vehicleTypeUid: _selectedVehicleType.uid,
+          productType: _productTypeSimple ? 'Sencillo' : 'Especial',
+      );
 
       _productBloc.updateProduct(product);
 
@@ -487,5 +550,21 @@ class _ProductAdminPage extends State<ProductAdminPage> {
 
       _clearData();
     }
+  }
+
+  //1. product Special, 2. product simple
+  void _onChangeRol(int productType, bool value) {
+    setState(() {
+      switch (productType) {
+        case 1:
+          _productTypeSpecial = value;
+          _productTypeSimple = false;
+          break;
+        case 2:
+          _productTypeSpecial = false;
+          _productTypeSimple = value;
+          break;
+      }
+    });
   }
 }

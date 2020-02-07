@@ -45,6 +45,8 @@ class _FormInvoicesList extends State<FormInvoicesList> {
   var _dateFilterFinal = DateTime.now();
   User _operatorFilter = User();
   double _totalPriceFilters = 0.0;
+  String _productTypeSelected = '';
+
 
   @override
   void initState() {
@@ -319,9 +321,11 @@ class _FormInvoicesList extends State<FormInvoicesList> {
         dateInit: _dateFilterInit,
         dateFinal: _dateFilterFinal,
         operatorSelected: _operatorFilter,
+        productTypeSelected: _productTypeSelected,
         selectOperator: _callBackSelectOperatorFilter,
         selectDateInit: _setDateInitFilter,
         selectDateFinal: _setDateFinalFilter,
+        selectProductType: _callBackSelectProductTYpe,
       ),
       buttons: [
         DialogButton(
@@ -351,6 +355,13 @@ class _FormInvoicesList extends State<FormInvoicesList> {
 
   void _setDateFinalFilter(DateTime dateFinal) {
     _dateFilterFinal = dateFinal;
+  }
+
+  void _callBackSelectProductTYpe(String selectProductType) {
+    if(selectProductType == 'Typo de Servicio..')
+      _productTypeSelected = '';
+    else
+      _productTypeSelected = selectProductType;
   }
 
   void _closeInvoiceCallback(Invoice _invoiceClose) {

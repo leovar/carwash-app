@@ -15,6 +15,7 @@ import 'package:car_wash_app/invoice/ui/widgets/fields_products.dart';
 import 'package:car_wash_app/invoice/ui/widgets/info_last_services_by_vehicle.dart';
 import 'package:car_wash_app/invoice/ui/widgets/print_invoice.dart';
 import 'package:car_wash_app/invoice/ui/widgets/radio_item.dart';
+import 'package:car_wash_app/invoice/ui/widgets/text_field_input.dart';
 import 'package:car_wash_app/location/bloc/bloc_location.dart';
 import 'package:car_wash_app/product/bloc/product_bloc.dart';
 import 'package:car_wash_app/product/model/product.dart';
@@ -27,6 +28,7 @@ import 'package:car_wash_app/widgets/info_header_container.dart';
 import 'package:car_wash_app/widgets/keys.dart';
 import 'package:car_wash_app/widgets/messages_utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
@@ -38,6 +40,7 @@ import 'package:intl/intl.dart';
 import 'package:popup_menu/popup_menu.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:path_provider/path_provider.dart' as path_provider;
 
 import '../../model/header_services.dart';
 import 'carousel_cars_widget.dart';
@@ -97,6 +100,7 @@ class _FormInvoice extends State<FormInvoice> {
   final _textNeighborhood = TextEditingController();
   final _textBirthDate = TextEditingController();
   final _textTimeDelivery = TextEditingController();
+  final _textObservation = TextEditingController();
   String _selectOperator = "";
   String _selectCoordinator = "";
   List<Product> _listProduct = <Product>[];
@@ -303,6 +307,13 @@ class _FormInvoice extends State<FormInvoice> {
                 uidVehicleType: vehicleTypeSelected.uid,
                 enableForm: _enableForm,
                 editOperator: _editOperator,
+              ),
+              SizedBox(height: 9),
+              TextFieldInput(
+                textController: _textObservation,
+                labelText: 'Observaciones',
+                inputType: TextInputType.multiline,
+                maxLines: null,
               ),
               SizedBox(height: 9),
               FieldsProducts(
@@ -540,9 +551,20 @@ class _FormInvoice extends State<FormInvoice> {
         .catchError((onError) => print(onError));
 
     if (imageCapture != null) {
+      // Esta parte de compress se coloca por que no va con crop, si fuera con crop esta parte ya esta en el crop
+      final dir = await path_provider.getTemporaryDirectory();
+      final targetPath = dir.absolute.path + "/${imageCapture.path.substring(imageCapture.path.length-10 ,imageCapture.path.length)}"; //dir.absolute.path + "/temp${imageList.length}.jpg";
+      final fileCompress = await FlutterImageCompress.compressAndGetFile(
+          imageCapture.absolute.path,
+          targetPath,
+          quality: 30,
+          autoCorrectionAngle: true,
+          format: CompressFormat.jpeg,
+      );
       setState(() {
-        print(imageCapture.lengthSync());
-        _cropImage(imageCapture);
+        _imageSelect = fileCompress;
+        // el crop es comentado por que el cliente quiere que asi como se tome la foto quede.
+        //_cropImage(imageCapture);
       });
     }
   }
@@ -582,7 +604,7 @@ class _FormInvoice extends State<FormInvoice> {
       File fileCompress = await FlutterImageCompress.compressAndGetFile(
         croppedFile.absolute.path,
         croppedFile.path,
-        quality: 40,
+        quality: 40
       );
 
       setState(() {
@@ -785,6 +807,19 @@ class _FormInvoice extends State<FormInvoice> {
 
   ///Functions Save Invoice
   void _saveInvoice() async {
+
+    //validate internet connection if have images
+    if (imageList.length > 0) {
+      var connectivityResult = await (Connectivity().checkConnectivity());
+      var connectionMobile = connectivityResult == ConnectivityResult.mobile;
+      var connectionWifi = connectivityResult == ConnectivityResult.wifi;
+      if (!connectionMobile && !connectionWifi) {
+        MessagesUtils.showAlert(context: context, title: 'No tiene conexión a internet! no se pueden guardar las imagenes').show();
+        return;
+      }
+    }
+
+
     String validateMessage = _validateFields();
     if (validateMessage.isEmpty) {
       //Open message Saving
@@ -939,6 +974,7 @@ class _FormInvoice extends State<FormInvoice> {
           vehicleBrand: _selectBrand,
           vehicleColor: _selectColor,
           timeDelivery: _textTimeDelivery.text,
+          observation: _textObservation.text.trim(),
         );
         DocumentReference invoiceReference =
             await _blocInvoice.saveInvoice(invoice);
@@ -1022,6 +1058,7 @@ class _FormInvoice extends State<FormInvoice> {
       _editOperator = true;
     }
     _approveDataProcessing = invoiceToEdit.approveDataProcessing;
+    _textObservation.text = invoiceToEdit.observation;
     Customer editCustomer = await _customerBloc
         .getCustomerByIdCustomer(invoiceToEdit.customer.documentID);
     _textClient.text = editCustomer.name;

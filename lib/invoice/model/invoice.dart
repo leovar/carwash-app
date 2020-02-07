@@ -40,6 +40,7 @@ class Invoice extends Equatable {
   final String timeDelivery;
   final Timestamp closedDate;
   final bool invoiceClosed;
+  final String observation;
 
   Invoice({
     this.id,
@@ -69,6 +70,7 @@ class Invoice extends Equatable {
     this.timeDelivery,
     this.closedDate,
     this.invoiceClosed,
+    this.observation,
   });
 
   Map<String, dynamic> toJson() {
@@ -96,6 +98,7 @@ class Invoice extends Equatable {
       'timeDelivery': this.timeDelivery,
       'closedDate': this.closedDate,
       'invoiceClosed': this.invoiceClosed,
+      'observation': this.observation,
     };
   }
 
@@ -131,6 +134,7 @@ class Invoice extends Equatable {
       timeDelivery: json['timeDelivery'],
       closedDate: json['closedDate'],
       invoiceClosed: json['invoiceClosed'],
+      observation: json['observation'],
     );
   }
 
@@ -138,6 +142,7 @@ class Invoice extends Equatable {
     @required Invoice origin,
     Timestamp closedDate,
     bool invoiceClosed,
+    List<Product> listProducts,
   }) {
     return Invoice(
       id: origin.id,
@@ -160,10 +165,12 @@ class Invoice extends Equatable {
       vehicleBrand: origin.vehicleBrand,
       vehicleColor: origin.vehicleColor,
       creationDate: origin.creationDate,
+      invoiceProducts: listProducts ?? origin.invoiceProducts,
       approveDataProcessing: origin.approveDataProcessing,
       timeDelivery: origin.timeDelivery,
       closedDate: closedDate ?? origin.closedDate,
       invoiceClosed: invoiceClosed ?? origin.invoiceClosed,
+      observation: origin.observation,
     );
   }
 
@@ -194,5 +201,6 @@ class Invoice extends Equatable {
     timeDelivery,
     closedDate,
     invoiceClosed,
+    observation,
   ];
 }

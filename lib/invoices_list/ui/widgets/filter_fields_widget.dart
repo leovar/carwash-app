@@ -12,9 +12,11 @@ class FilterFieldsWidget extends StatefulWidget {
   final DateTime dateInit;
   final DateTime dateFinal;
   final User operatorSelected;
+  final String productTypeSelected;
   final Function(User) selectOperator;
   final Function(DateTime) selectDateInit;
   final Function(DateTime) selectDateFinal;
+  final Function(String) selectProductType;
 
   FilterFieldsWidget({Key key,
     this.placaController,
@@ -22,9 +24,11 @@ class FilterFieldsWidget extends StatefulWidget {
     this.dateInit,
     this.dateFinal,
     this.operatorSelected,
+    this.productTypeSelected,
     this.selectOperator,
     this.selectDateInit,
     this.selectDateFinal,
+    this.selectProductType,
   });
 
   @override
@@ -36,14 +40,21 @@ class _FilterFieldsWidget extends State<FilterFieldsWidget> {
   final _textDateInit = TextEditingController();
   final _textDateFinal = TextEditingController();
   List<DropdownMenuItem<User>> _dropdownMenuItems;
+  List<DropdownMenuItem<String>> _dropdownMenuItemsProductTypes;
+  List<String> _productsTypeList = [];
   User _selectedOperator;
   DateTime _dateTimeInit;
   DateTime _dateTimeFinal;
+  String _selectProductType;
   var formatter = new DateFormat('dd-MM-yyyy');
+  var _emptySelectionProductType = 'Typo de Servicio..';
 
   @override
   void initState() {
     super.initState();
+    _productsTypeList.add('Sencillo');
+    _productsTypeList.add('Especial');
+    _productsTypeList.add(_emptySelectionProductType);
     if(widget.operatorSelected.name != null) {
       _selectedOperator = widget.operatorSelected;
     }
@@ -51,6 +62,7 @@ class _FilterFieldsWidget extends State<FilterFieldsWidget> {
     _dateTimeFinal = widget.dateFinal;
     _textDateInit.text = formatter.format(_dateTimeInit);
     _textDateFinal.text = formatter.format(_dateTimeFinal);
+    _selectProductType = widget.productTypeSelected;
   }
 
   @override
@@ -87,6 +99,8 @@ class _FilterFieldsWidget extends State<FilterFieldsWidget> {
           ],
           keyboardType: TextInputType.number,
         ),
+        SizedBox(height: 10),
+        _selectProductTypeControl(),
       ],
     );
   }
@@ -167,6 +181,37 @@ class _FilterFieldsWidget extends State<FilterFieldsWidget> {
     );
   }
 
+  Widget _selectProductTypeControl() {
+    if (_selectProductType.isEmpty) {
+      _selectProductType = _emptySelectionProductType;
+    }
+    _dropdownMenuItemsProductTypes = _builtDropdownProductTypes();
+    return DropdownButton(
+      isExpanded: true,
+      items: _dropdownMenuItemsProductTypes,
+      value: _selectProductType,
+      onChanged: onChangeDropDawnProductTypes,
+      hint: Text(
+        "Typo de Servicio..",
+      ),
+      icon: Icon(
+        Icons.keyboard_arrow_down,
+        color: Theme.of(context).cardColor,
+      ),
+      iconSize: 24,
+      elevation: 16,
+      style: TextStyle(
+        fontFamily: "AvenirNext",
+        fontWeight: FontWeight.normal,
+        color: Theme.of(context).cardColor,
+      ),
+      underline: Container(
+        height: 1,
+        color: Theme.of(context).cursorColor,
+      ),
+    );
+  }
+
 
   ///Functions
 
@@ -189,6 +234,28 @@ class _FilterFieldsWidget extends State<FilterFieldsWidget> {
           value: documentLoc,
           child: Text(
             documentLoc.name,
+          ),
+        ),
+      );
+    }
+    return listItems;
+  }
+
+  onChangeDropDawnProductTypes(String selectedProductType) {
+    setState(() {
+      widget.selectProductType(selectedProductType);
+      _selectProductType = selectedProductType;
+    });
+  }
+
+  List<DropdownMenuItem<String>> _builtDropdownProductTypes() {
+    List<DropdownMenuItem<String>> listItems = List();
+    for (String documentLoc in _productsTypeList) {
+      listItems.add(
+        DropdownMenuItem(
+          value: documentLoc,
+          child: Text(
+            documentLoc,
           ),
         ),
       );

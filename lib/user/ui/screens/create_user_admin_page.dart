@@ -1,26 +1,16 @@
 import 'dart:io';
 
 import 'package:car_wash_app/invoice/ui/widgets/text_field_input.dart';
-import 'package:car_wash_app/location/bloc/bloc_location.dart';
-import 'package:car_wash_app/location/model/location.dart';
-import 'package:car_wash_app/location/ui/screens/locations_select_list_page.dart';
-import 'package:car_wash_app/product/bloc/product_bloc.dart';
-import 'package:car_wash_app/product/model/product.dart';
-import 'package:car_wash_app/product/ui/widgets/item_products_admin_list.dart';
 import 'package:car_wash_app/user/bloc/bloc_user.dart';
 import 'package:car_wash_app/user/model/user.dart';
-import 'package:car_wash_app/vehicle_type/bloc/vehicle_type_bloc.dart';
-import 'package:car_wash_app/vehicle_type/model/vehicleType.dart';
 import 'package:car_wash_app/widgets/messages_utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:intl/intl.dart';
 import 'package:popup_menu/popup_menu.dart';
 
 class CreateUserAdminPage extends StatefulWidget {
