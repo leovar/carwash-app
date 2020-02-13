@@ -785,6 +785,9 @@ class _FormInvoice extends State<FormInvoice> {
     _textClient.text = '';
     _textEmail.text = '';
     _textPhoneNumber.text = '';
+    _textBirthDate.text = '';
+    _textNeighborhood.text = '';
+    _selectTypeSex = '';
     //FocusScope.of(context).requestFocus(_clientFocusNode);
   }
 
@@ -1058,9 +1061,11 @@ class _FormInvoice extends State<FormInvoice> {
 
   ///Validations fields
   String _validateFields() {
-    //Validate caracteres de placa
-    if (_textPlaca.text.length < 6) {
-      return 'La placa debe tener minimo 6 caracteres';
+    //Validate caracteres de placa para autos y camionetas
+    if (vehicleTypeSelected.uid == 1 || vehicleTypeSelected.uid == 2) {
+      if (_textPlaca.text.length < 6) {
+        return 'La placa debe tener minimo 6 caracteres';
+      }
     }
     //Validate products
     List<Product> _selectedProducts =
@@ -1084,6 +1089,9 @@ class _FormInvoice extends State<FormInvoice> {
     }
     if (_selectBrand.isEmpty) {
       return 'Debe seleccionar la marca del vehículo';
+    }
+    if (_selectColor.isEmpty) {
+      return 'Debe seleccionar el color del vehículo';
     }
     return '';
   }

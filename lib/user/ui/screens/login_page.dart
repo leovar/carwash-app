@@ -468,6 +468,7 @@ class _LoginPage extends State<LoginPage> {
   }
 
   void _setLocationInPreferences(FirebaseUser user) async {
+    User userDatabase = await userBloc.getCurrentUser();
     SharedPreferences pref = await SharedPreferences.getInstance();
     pref.setString(Keys.idLocation, '');
     pref.setString(Keys.locationName, '');
@@ -477,6 +478,7 @@ class _LoginPage extends State<LoginPage> {
     pref.setString(Keys.userId, user.uid);
     pref.setString(Keys.userName, user.displayName);
     pref.setString(Keys.userEmail, user.email);
+    pref.setBool(Keys.isAdministrator, userDatabase.isAdministrator);
   }
 
   List<DropdownMenuItem<Location>> builDropdownMenuItems(List locations) {

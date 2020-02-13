@@ -413,7 +413,7 @@ class _FormInvoicesList extends State<FormInvoicesList> {
     );
     await _blocInvoice.saveInvoice(invoice);
     if (invoiceToClose.phoneNumber.isNotEmpty) {
-      String message = "Spa CarWash Movil -- Estimado cliente. Le informamos que el servicio de lavado de su vehículo, realizado en Spa Car Wash Móvil, ha terminado y está listo para ser entregado. Lo esperamos en nuestras instalaciones.";
+      String message = "Spa CarWash Movil -- Estimado cliente. Le informamos que el servicio de lavado de su vehículo ${invoiceToClose.placa}, ha terminado y está listo para ser entregado. Lo esperamos en nuestras instalaciones.";
       List<String> recipents = [invoiceToClose.phoneNumber];
       _sendSMS(message, recipents);
     }

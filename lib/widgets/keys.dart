@@ -7,4 +7,5 @@ class Keys {
   static String userId = 'userId';
   static String userName = 'userName';
   static String userEmail = 'userEmail';
+  static String isAdministrator = 'isAdministrator';
 }
