@@ -20,7 +20,7 @@ class FieldsMenusInvoice extends StatefulWidget {
   final selectedCoordinator;
   final locationReference;
   final String selectedVehicleBrand;
-  final String selectBehicleBrandReference;
+  final String selectVehicleBrandReference;
   final String selectedVehicleColor;
   final String selectedTypeSex;
   final int uidVehicleType;
@@ -44,7 +44,7 @@ class FieldsMenusInvoice extends StatefulWidget {
     this.selectedCoordinator,
     this.locationReference,
     this.selectedVehicleBrand,
-    this.selectBehicleBrandReference,
+    this.selectVehicleBrandReference,
     this.selectedVehicleColor,
     this.selectedTypeSex,
     this.uidVehicleType,
@@ -89,13 +89,23 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
       _selectOperator = widget.selectedOperator;
       _selectCoordinator = widget.selectedCoordinator;
       _selectTypeSex = widget.selectedTypeSex;
-      _selectBrandReference = widget.selectBehicleBrandReference;
+      _selectBrandReference = widget.selectVehicleBrandReference;
     });
   }
 
   @override
+  void didUpdateWidget(FieldsMenusInvoice oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _selectedBrand = widget.selectedVehicleBrand;
+    _selectBrandReference = widget.selectVehicleBrandReference;
+    _selectedColor = widget.selectedVehicleColor;
+    _selectTypeSex = widget.selectedTypeSex;
+    _getListBrandReferences(_selectedBrand, updateRef: _selectBrandReference);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    //_selectedBrand = widget.selectedVehicleBrand ?? _selectedBrand;
+    //_selectedBrand = widget.editFromInvoiceForm ? widget.selectedVehicleBrand : _selectedBrand;
     _blocInvoice = BlocProvider.of(context);
     return Column(
       children: <Widget>[
@@ -316,9 +326,9 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
   }
 
   void _cbSelectValueBrands(String valueSelect) {
-    _selectedBrand = valueSelect;
     _getListBrandReferences(valueSelect);
     widget.cbHandlerVehicleBrand(valueSelect, 0, 1);
+    _selectedBrand = valueSelect;
   }
 
   void _cbSelectValueBrandReference(String valueSelect) {
@@ -336,12 +346,15 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
     widget.cbHandlerTypeSex(valueSelected, 0, 1);
   }
 
-  void _getListBrandReferences(String brandSelected) {
+  void _getListBrandReferences(String brandSelected, {String updateRef = ''}) {
     _blocInvoice.getBrandReferences(brandSelected).then((result) {
       widget.cbHandlerVehicleBrandReference('', result.length, 2);
       setState(() {
-        _selectBrandReference = '';
         _listBrandReferences = result;
+        _selectBrandReference = '';
+        if (updateRef.isNotEmpty) {
+          _selectBrandReference = updateRef;
+        }
       });
     });
   }

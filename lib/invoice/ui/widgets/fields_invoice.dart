@@ -88,6 +88,7 @@ class _FieldsInvoice extends State<FieldsInvoice> {
           inputType: TextInputType.number,
           enable: widget.enableForm,
           autofocus: false,
+          maxLength: 10,
         ),
         SizedBox(
           height: 9,

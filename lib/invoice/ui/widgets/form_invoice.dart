@@ -66,6 +66,7 @@ class _FormInvoice extends State<FormInvoice> {
   bool _enableForm;
   bool _editForm = true;
   bool _editOperator = false;
+  bool _enablePerIncidence = false;
 
   ///global variables
   //Esta variable _scaffoldKey se usa para poder abrir el drawer desde un boton diferente al que se coloca por defecto en el AppBar
@@ -101,6 +102,7 @@ class _FormInvoice extends State<FormInvoice> {
   final _textBirthDate = TextEditingController();
   final _textTimeDelivery = TextEditingController();
   final _textObservation = TextEditingController();
+  final _textIncidence = TextEditingController();
   String _selectOperator = "";
   String _selectCoordinator = "";
   List<Product> _listProduct = <Product>[];
@@ -301,7 +303,7 @@ class _FormInvoice extends State<FormInvoice> {
                 selectedOperator: _selectOperator,
                 selectedCoordinator: _selectCoordinator,
                 selectedVehicleBrand: _selectBrand,
-                selectBehicleBrandReference: _selectedBrandReference,
+                selectVehicleBrandReference: _selectedBrandReference,
                 selectedVehicleColor: _selectColor,
                 selectedTypeSex: _selectTypeSex,
                 uidVehicleType: vehicleTypeSelected.uid,
@@ -314,6 +316,20 @@ class _FormInvoice extends State<FormInvoice> {
                 labelText: 'Observaciones',
                 inputType: TextInputType.multiline,
                 maxLines: null,
+                enable: _enableForm,
+              ),
+              Visibility(
+                visible: !_editForm,
+                child: Container(
+                  margin: EdgeInsets.only(top: 9.0),
+                  child: TextFieldInput(
+                    textController: _textIncidence,
+                    labelText: 'Incidentes',
+                    inputType: TextInputType.multiline,
+                    maxLines: null,
+                    enable: _enablePerIncidence,
+                  ),
+                ),
               ),
               SizedBox(height: 9),
               FieldsProducts(
@@ -335,7 +351,7 @@ class _FormInvoice extends State<FormInvoice> {
                 child: _showDraw(),
               ),
               Visibility(
-                visible: (_editOperator || _editForm) ? true : false,
+                visible: _validateEnableSave(),
                 child: _saveInvoiceButton(),
               ),
               Visibility(
@@ -353,7 +369,7 @@ class _FormInvoice extends State<FormInvoice> {
   }
 
   floatButtonAddImage() => Align(
-        alignment: Alignment(0.8, 0.8),
+        alignment: Alignment(0.8, 0.9),
         heightFactor: 6,
         child: Container(
           child: FloatingActionButton(
@@ -434,7 +450,7 @@ class _FormInvoice extends State<FormInvoice> {
                 fontSize: 19,
               ),
             ),
-            onPressed: (_editOperator || _enableForm) ? _saveInvoice : null,
+            onPressed: _validateEnableSave() ? _saveInvoice : null,
           ),
         ),
       ),
@@ -696,53 +712,72 @@ class _FormInvoice extends State<FormInvoice> {
         _enableForm = false;
       });
     } else {
-      _validatePlaca = false;
-      _enableForm = true;
+      if (_placa.length > 2) {
+        _validatePlaca = false;
+        _enableForm = true;
 
-      //Get vehicle if exist
-      _blocVehicle
-          .getVehicleReferenceByPlaca(_placa)
-          .then((DocumentReference vehicleRef) {
-        _vehicleReference = vehicleRef;
+        //Get vehicle if exist
+        _blocVehicle
+            .getVehicleReferenceByPlaca(_placa)
+            .then((DocumentReference vehicleRef) {
+          _vehicleReference = vehicleRef;
 
-        _blocVehicle.getVehicleById(vehicleRef.documentID).then((vehicle){
-          _selectBrand = vehicle.brand;
-          _selectColor = vehicle.color;
-          setState(() {
+          if (vehicleRef != null) {
+            _blocVehicle.getVehicleById(vehicleRef.documentID)
+                .then((vehicle){
+              _selectBrand = vehicle.brand;
+              _selectColor = vehicle.color;
+              _selectedBrandReference = vehicle.brandReference;
+              setState(() {
 
-          });
-        });
-
-        //Validate services from the last 2 months
-        if (_vehicleReference != null) {
-          _getInvoicesForPlaca(_placa);
-        }
-
-        //Validate if Customer exist for this vehicle
-        if (_vehicleReference != null) {
-          _customerBloc
-              .getCustomerByVehicle(_vehicleReference)
-              .then((Customer customer) {
-            setState(() {
-              if (customer == null) {
-                _cleanTextFields();
-              } else {
-                _customer = customer;
-                _textClient.text = customer.name;
-                _textEmail.text = customer.email;
-                _textPhoneNumber.text = customer.phoneNumber;
-                _textNeighborhood.text = customer.neighborhood;
-                _textBirthDate.text = customer.birthDate;
-                _selectTypeSex = customer.typeSex;
-              }
+              });
             });
-          });
-        } else {
-          setState(() {
-            _cleanTextFields();
-          });
-        }
-      });
+          } else {
+            _selectBrand = '';
+            _selectColor = '';
+            _selectedBrandReference = '';
+            setState(() {
+
+            });
+          }
+
+          //Validate services from the last 2 months
+          if (_vehicleReference != null) {
+            _getInvoicesForPlaca(_placa);
+          }
+
+          //Validate if Customer exist for this vehicle
+          if (_vehicleReference != null) {
+            _customerBloc
+                .getCustomerByVehicle(_vehicleReference)
+                .then((Customer customer) {
+              setState(() {
+                if (customer == null) {
+                  _cleanTextFields();
+                } else {
+                  _customer = customer;
+                  _textClient.text = customer.name;
+                  _textEmail.text = customer.email;
+                  _textPhoneNumber.text = customer.phoneNumber;
+                  _textNeighborhood.text = customer.neighborhood;
+                  _textBirthDate.text = customer.birthDate;
+                  _selectTypeSex = customer.typeSex;
+                }
+              });
+            });
+          } else {
+            setState(() {
+              _cleanTextFields();
+            });
+          }
+        });
+      } else {
+        setState(() {
+          _cleanTextFields();
+          //_validatePlaca = true;
+          _enableForm = false;
+        });
+      }
     }
   }
 
@@ -819,7 +854,6 @@ class _FormInvoice extends State<FormInvoice> {
       }
     }
 
-
     String validateMessage = _validateFields();
     if (validateMessage.isEmpty) {
       //Open message Saving
@@ -827,7 +861,7 @@ class _FormInvoice extends State<FormInvoice> {
           .show();
 
       try {
-        DocumentReference _vehicleTypeRef;
+        DocumentReference _vehicleTypeRef;  //esta referencia debe traerse de la bd, en el momento se construye en la app
         DocumentReference _customerReference;
         DocumentReference _operatorReference;
         DocumentReference _coordinatorReference;
@@ -857,8 +891,9 @@ class _FormInvoice extends State<FormInvoice> {
             model: '',
             placa: _textPlaca.text.trim(),
             color: _selectColor,
-            vehicleType: _vehicleTypeRef,
+            vehicleType: vehicleTypeSelected.text, //_vehicleTypeRef,
             creationDate: Timestamp.now(),
+            brandReference: _selectedBrandReference,
           );
           DocumentReference vehicleRef =
               await _blocVehicle.updateVehicle(updateVehicle);
@@ -972,9 +1007,11 @@ class _FormInvoice extends State<FormInvoice> {
           imageFirm: _imageFirmInMemory,
           approveDataProcessing: _approveDataProcessing,
           vehicleBrand: _selectBrand,
+          brandReference: _selectedBrandReference,
           vehicleColor: _selectColor,
           timeDelivery: _textTimeDelivery.text,
           observation: _textObservation.text.trim(),
+          incidence: _textIncidence.text.trim(),
         );
         DocumentReference invoiceReference =
             await _blocInvoice.saveInvoice(invoice);
@@ -1021,6 +1058,10 @@ class _FormInvoice extends State<FormInvoice> {
 
   ///Validations fields
   String _validateFields() {
+    //Validate caracteres de placa
+    if (_textPlaca.text.length < 6) {
+      return 'La placa debe tener minimo 6 caracteres';
+    }
     //Validate products
     List<Product> _selectedProducts =
         _listProduct.where((f) => f.isSelected).toList();
@@ -1035,7 +1076,7 @@ class _FormInvoice extends State<FormInvoice> {
     if (_textClient.text.trim().length < 3) {
       return 'El nombre del cliente debe tener como mínimo 3 caracteres';
     }
-    if (_textPhoneNumber.text.trim().length < 5) {
+    if (_textPhoneNumber.text.trim().length < 10) {
       return 'El teléfono del cliente está incompleto';
     }
     if (_selectCoordinator.isEmpty) {
@@ -1053,20 +1094,28 @@ class _FormInvoice extends State<FormInvoice> {
     _selectOperator = invoiceToEdit.userOperatorName;
     _selectCoordinator = invoiceToEdit.userCoordinatorName;
     _selectBrand = invoiceToEdit.vehicleBrand ?? '';
+    _selectedBrandReference = invoiceToEdit.brandReference ?? '';
     _selectColor = invoiceToEdit.vehicleColor ?? '';
     if (_selectOperator.isEmpty) {
       _editOperator = true;
     }
     _approveDataProcessing = invoiceToEdit.approveDataProcessing;
+    _textTimeDelivery.text = invoiceToEdit.timeDelivery;
     _textObservation.text = invoiceToEdit.observation;
-    Customer editCustomer = await _customerBloc
+    _textIncidence.text = invoiceToEdit.incidence;
+
+    //get vehicle reference
+    _vehicleReference = await _blocVehicle.getVehicleReferenceByPlaca(invoiceToEdit.placa);
+
+    //get customer information
+    _customer = await _customerBloc
         .getCustomerByIdCustomer(invoiceToEdit.customer.documentID);
-    _textClient.text = editCustomer.name;
-    _textEmail.text = editCustomer.email;
-    _textPhoneNumber.text = editCustomer.phoneNumber;
-    _textBirthDate.text = editCustomer.birthDate;
-    _textNeighborhood.text = editCustomer.neighborhood;
-    _selectTypeSex = editCustomer.typeSex;
+    _textClient.text = _customer.name;
+    _textEmail.text = _customer.email;
+    _textPhoneNumber.text = _customer.phoneNumber;
+    _textBirthDate.text = _customer.birthDate;
+    _textNeighborhood.text = _customer.neighborhood;
+    _selectTypeSex = _customer.typeSex;
     vehicleTypeList.forEach((element) => element.isSelected = false);
     vehicleTypeSelected = vehicleTypeList
         .firstWhere((f) => f.uid == invoiceToEdit.uidVehicleType);
@@ -1113,5 +1162,20 @@ class _FormInvoice extends State<FormInvoice> {
         ),
       ),
     );
+  }
+
+  bool _validateEnableSave() {
+    if (widget.editInvoice != null) {
+      //valido que la factura no tenga mas de 3 dias para permitir agregar un incidente
+      String _incidence = widget.editInvoice.incidence ?? '';
+      var dateInvoice = widget.editInvoice.creationDate;
+      var daysAfterInvoice = dateInvoice.toDate().add(Duration(days: 3));
+      int _validDate = DateTime.now().compareTo(daysAfterInvoice);
+      if (_incidence.isEmpty && _validDate < 0) {
+        _enablePerIncidence = true;
+      }
+    }
+
+    return (_editOperator || _editForm || _enablePerIncidence) ? true : false;
   }
 }

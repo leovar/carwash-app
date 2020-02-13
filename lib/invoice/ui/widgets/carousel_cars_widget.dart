@@ -63,7 +63,7 @@ class _CarouselCarsWidget extends State<CarouselCarsWidget> {
         return Container(
           //margin: EdgeInsets.only(left: 5.0, right: 5.0),
           child: ClipRRect(
-            borderRadius: BorderRadius.all(Radius.circular(5.0)),
+            //borderRadius: BorderRadius.all(Radius.circular(5.0)),
             child: Stack(children: <Widget>[
               _getImageProvider(i),
               Positioned(

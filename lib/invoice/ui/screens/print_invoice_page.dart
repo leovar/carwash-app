@@ -23,6 +23,7 @@ import 'package:image_picker_saver/image_picker_saver.dart';
 import 'package:intl/intl.dart';
 import 'package:image/image.dart' as im;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:path_provider/path_provider.dart' as path_provider;
 
 class PrintInvoicePage extends StatefulWidget {
   final Invoice currentInvoice;
@@ -702,8 +703,11 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
       //Save resized image
       File(filePath).writeAsBytesSync(im.encodePng(thumbnail));
 
+      final dir = await path_provider.getTemporaryDirectory();
+      final targetPath = dir.absolute.path + "/${filePath.substring(filePath.length-10 ,filePath.length)}"; //dir.absolute.path + "/temp${imageList.length}.jpg";
+
       var resultCompress = await FlutterImageCompress.compressAndGetFile(
-          filePath, filePath,
+          filePath, targetPath,
           minWidth: 260, quality: 90);
 /*
       var filePath2 = await ImagePickerSaver.saveFile(

@@ -34,6 +34,7 @@ class Invoice extends Equatable {
   final List<String> invoiceImages;
   final List<Product> invoiceProducts;
   final String vehicleBrand;
+  final String brandReference;
   final String vehicleColor;
   final Uint8List imageFirm;
   final bool approveDataProcessing;
@@ -41,6 +42,7 @@ class Invoice extends Equatable {
   final Timestamp closedDate;
   final bool invoiceClosed;
   final String observation;
+  final String incidence;
 
   Invoice({
     this.id,
@@ -64,6 +66,7 @@ class Invoice extends Equatable {
     this.invoiceImages,
     this.invoiceProducts,
     this.vehicleBrand,
+    this.brandReference,
     this.vehicleColor,
     this.imageFirm,
     this.approveDataProcessing,
@@ -71,6 +74,7 @@ class Invoice extends Equatable {
     this.closedDate,
     this.invoiceClosed,
     this.observation,
+    this.incidence,
   });
 
   Map<String, dynamic> toJson() {
@@ -92,6 +96,7 @@ class Invoice extends Equatable {
       'locationName': this.locationName,
       'consecutive': this.consecutive,
       'vehicleBrand': this.vehicleBrand,
+      'brandReference': this.brandReference,
       'vehicleColor': this.vehicleColor,
       'creationDate': this.creationDate,
       'approveDataProcessing': this.approveDataProcessing,
@@ -99,6 +104,7 @@ class Invoice extends Equatable {
       'closedDate': this.closedDate,
       'invoiceClosed': this.invoiceClosed,
       'observation': this.observation,
+      'incidence': this.incidence,
     };
   }
 
@@ -128,6 +134,7 @@ class Invoice extends Equatable {
       locationName: json['locationName'],
       consecutive: json['consecutive'],
       vehicleBrand: json['vehicleBrand'],
+      brandReference: json['brandReference'],
       vehicleColor: json['vehicleColor'],
       creationDate: json['creationDate'],
       approveDataProcessing: json['approveDataProcessing'],
@@ -135,6 +142,7 @@ class Invoice extends Equatable {
       closedDate: json['closedDate'],
       invoiceClosed: json['invoiceClosed'],
       observation: json['observation'],
+      incidence: json['incidence'],
     );
   }
 
@@ -163,6 +171,7 @@ class Invoice extends Equatable {
       locationName: origin.locationName,
       consecutive: origin.consecutive,
       vehicleBrand: origin.vehicleBrand,
+      brandReference: origin.brandReference,
       vehicleColor: origin.vehicleColor,
       creationDate: origin.creationDate,
       invoiceProducts: listProducts ?? origin.invoiceProducts,
@@ -171,6 +180,7 @@ class Invoice extends Equatable {
       closedDate: closedDate ?? origin.closedDate,
       invoiceClosed: invoiceClosed ?? origin.invoiceClosed,
       observation: origin.observation,
+      incidence: origin.incidence,
     );
   }
 
@@ -197,10 +207,12 @@ class Invoice extends Equatable {
     invoiceProducts,
     approveDataProcessing,
     vehicleBrand,
+    brandReference,
     vehicleColor,
     timeDelivery,
     closedDate,
     invoiceClosed,
     observation,
+    incidence,
   ];
 }

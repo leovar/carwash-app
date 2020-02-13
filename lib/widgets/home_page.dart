@@ -196,6 +196,37 @@ class _HomePage extends State<HomePage> {
 
   Widget locationIndicator() {
     return Align(
+      alignment: Alignment.topCenter,
+      child: Container(
+        width: MediaQuery.of(context).size.width,
+        height: 40,
+        padding: EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+        decoration: BoxDecoration(color: Colors.white,
+            //borderRadius: BorderRadius.all(Radius.circular(50))
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Text(
+              'Sede : $_locationName',
+              style: TextStyle(
+                fontFamily: "Lato",
+                decoration: TextDecoration.none,
+                fontWeight: FontWeight.normal,
+                color: Theme.of(context).primaryColor,
+                fontSize: 17,
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  /*
+  // este tramo de codigo mostraba la sede lateralmente con un fondo ovalado
+  Align(
       alignment: Alignment(-0.93, -0.97),
       child: Container(
         padding: EdgeInsets.symmetric(vertical: 6, horizontal: 12),
@@ -218,8 +249,8 @@ class _HomePage extends State<HomePage> {
           ],
         ),
       ),
-    );
-  }
+    )
+  */
 
   ///Functions
 
