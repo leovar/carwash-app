@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:ui';
 
+import 'package:car_wash_app/invoice/ui/screens/image_viewer_page.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 
@@ -12,14 +13,14 @@ class CarouselCarsWidget extends StatefulWidget {
   final Function(String) callbackDeleteImage;
 
   CarouselCarsWidget(
-      {Key key, @required this.callbackDeleteImage, this.imgList, this.editForm})
+      {Key key,
+      @required this.callbackDeleteImage,
+      this.imgList,
+      this.editForm})
       : super(key: key);
 
   @override
-  State<StatefulWidget> createState() {
-    // TODO: implement createState
-    return _CarouselCarsWidget();
-  }
+  State<StatefulWidget> createState() => _CarouselCarsWidget();
 }
 
 class _CarouselCarsWidget extends State<CarouselCarsWidget> {
@@ -33,11 +34,12 @@ class _CarouselCarsWidget extends State<CarouselCarsWidget> {
   }
 
   placeholder() => Container(
-    child: Image.asset("assets/images/background_ph_image.png",
-      width: MediaQuery.of(context).size.width,
-      fit: BoxFit.cover,
-    ),
-  );
+        child: Image.asset(
+          "assets/images/background_ph_image.png",
+          width: MediaQuery.of(context).size.width,
+          fit: BoxFit.cover,
+        ),
+      );
 
   carouselCars() {
     return CarouselSlider(
@@ -65,7 +67,12 @@ class _CarouselCarsWidget extends State<CarouselCarsWidget> {
           child: ClipRRect(
             //borderRadius: BorderRadius.all(Radius.circular(5.0)),
             child: Stack(children: <Widget>[
-              _getImageProvider(i),
+              InkWell(
+                onTap: () {
+                  _openImageViewer(i);
+                },
+                child: _getImageProvider(i),
+              ),
               Positioned(
                 bottom: 0.0,
                 left: 0.0,
@@ -114,11 +121,13 @@ class _CarouselCarsWidget extends State<CarouselCarsWidget> {
                         color: Colors.white,
                       ),
                       iconSize: 28,
-                      onPressed: widget.editForm ? () {
-                        setState(() {
-                          widget.callbackDeleteImage(i);
-                        });
-                      } : null,
+                      onPressed: widget.editForm
+                          ? () {
+                              setState(() {
+                                widget.callbackDeleteImage(i);
+                              });
+                            }
+                          : null,
                     ),
                   ),
                 ),
@@ -130,10 +139,14 @@ class _CarouselCarsWidget extends State<CarouselCarsWidget> {
     ).toList();
   }
 
-  Widget _getImageProvider(String imagePath){
+  Widget _getImageProvider(String imagePath) {
     if (imagePath.isNotEmpty &&
         imagePath.contains('https://firebasestorage.')) {
-      return Image.network(imagePath, width: 1000.0, fit: BoxFit.cover,);
+      return Image.network(
+        imagePath,
+        width: 1000.0,
+        fit: BoxFit.cover,
+      );
     } else if (imagePath.isNotEmpty) {
       return Image.file(
         File(imagePath),
@@ -141,7 +154,8 @@ class _CarouselCarsWidget extends State<CarouselCarsWidget> {
         fit: BoxFit.cover,
       );
     } else {
-      return Image.asset("assets/images/background_ph_image.png",
+      return Image.asset(
+        "assets/images/background_ph_image.png",
         width: MediaQuery.of(context).size.width,
         fit: BoxFit.cover,
       );
@@ -154,5 +168,28 @@ class _CarouselCarsWidget extends State<CarouselCarsWidget> {
       result.add(handler(i, list[i]));
     }
     return result;
+  }
+
+  void _openImageViewer(String imagePath) {
+    if (imagePath.isNotEmpty &&
+        imagePath.contains('https://firebasestorage.')) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ImageViewerPage(
+            NetworkImage(imagePath),
+          ),
+        ),
+      );
+    } else if (imagePath.isNotEmpty) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ImageViewerPage(
+            FileImage(File(imagePath)),
+          ),
+        ),
+      );
+    }
   }
 }
