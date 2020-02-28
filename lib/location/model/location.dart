@@ -16,6 +16,7 @@ class Location extends Equatable {
   final int finalConsec;
   final Timestamp creationDate;
   final bool active;
+  final bool sendMessageSms;
   bool isSelected;
 
   Location({
@@ -31,25 +32,26 @@ class Location extends Equatable {
     this.finalConsec,
     this.creationDate,
     this.isSelected,
-    this.active
+    this.active,
+    this.sendMessageSms,
   });
 
   factory Location.fromJson(Map<String, dynamic> json, {String id}) {
     return Location(
-      id: id,
-      locationName: json['locationName'],
-      address: json['address'],
-      phoneNumber: json['phoneNumber'],
-      director: json['director'],
-      nit: json['nit'],
-      prefix: json['prefix'],
-      dianResolution: json['dianResolution'],
-      initConcec: json['initConcec'],
-      finalConsec: json['finalConsec'],
-      creationDate: json['creationDate'],
-      active: json['active'],
-      isSelected: false
-    );
+        id: id,
+        locationName: json['locationName'],
+        address: json['address'],
+        phoneNumber: json['phoneNumber'],
+        director: json['director'],
+        nit: json['nit'],
+        prefix: json['prefix'],
+        dianResolution: json['dianResolution'],
+        initConcec: json['initConcec'],
+        finalConsec: json['finalConsec'],
+        creationDate: json['creationDate'],
+        active: json['active'],
+        sendMessageSms: json['sendMessageSms'],
+        isSelected: false);
   }
 
   Map<String, dynamic> toJson() {
@@ -58,30 +60,31 @@ class Location extends Equatable {
       'address': this.address,
       'phoneNumber': this.phoneNumber,
       'director': this.director,
-      'nit' : this.nit,
-      'prefix' : this.prefix,
-      'dianResolution' : this.dianResolution,
-      'initConcec' : this.initConcec,
-      'finalConsec' : this.finalConsec,
-      'creationDate' : Timestamp.now(),
-      'active' : this.active,
+      'nit': this.nit,
+      'prefix': this.prefix,
+      'dianResolution': this.dianResolution,
+      'initConcec': this.initConcec,
+      'finalConsec': this.finalConsec,
+      'creationDate': Timestamp.now(),
+      'active': this.active,
+      'sendMessageSms': this.sendMessageSms,
     };
   }
 
-
   @override
   List<Object> get props => [
-    id,
-    locationName,
-    address,
-    phoneNumber,
-    director,
-    nit,
-    prefix,
-    dianResolution,
-    initConcec,
-    finalConsec,
-    creationDate,
-    active,
-  ];
+        id,
+        locationName,
+        address,
+        phoneNumber,
+        director,
+        nit,
+        prefix,
+        dianResolution,
+        initConcec,
+        finalConsec,
+        creationDate,
+        active,
+        sendMessageSms,
+      ];
 }

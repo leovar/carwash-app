@@ -4,6 +4,8 @@ import 'package:car_wash_app/invoices_list/model/invoice_list_model.dart';
 import 'package:car_wash_app/invoices_list/ui/widgets/filter_fields_widget.dart';
 import 'package:car_wash_app/invoices_list/ui/widgets/item_invoices_list.dart';
 import 'package:car_wash_app/invoices_list/ui/widgets/total_filter_invoices_widget.dart';
+import 'package:car_wash_app/location/bloc/bloc_location.dart';
+import 'package:car_wash_app/location/model/location.dart';
 import 'package:car_wash_app/user/bloc/bloc_user.dart';
 import 'package:car_wash_app/user/model/user.dart';
 import 'package:car_wash_app/widgets/gradient_back.dart';
@@ -13,6 +15,7 @@ import 'package:car_wash_app/widgets/messages_utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_open_whatsapp/flutter_open_whatsapp.dart';
 import 'package:flutter_sms/flutter_sms.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
@@ -30,6 +33,7 @@ class FormInvoicesList extends StatefulWidget {
 
 class _FormInvoicesList extends State<FormInvoicesList> {
   BlocInvoice _blocInvoice;
+  final _locationBloc = BlocLocation();
   UserBloc _blocUser = UserBloc();
   List<Invoice> _listInvoices = <Invoice>[];
   List<InvoiceListModel> _listModel = <InvoiceListModel>[];
@@ -37,6 +41,8 @@ class _FormInvoicesList extends State<FormInvoicesList> {
   bool _showInfoAmounts = false;
   double _totalDay = 0.0;
   double _totalMonth = 0.0;
+  String _idLocation = '';
+  Location _location;
 
   ///Filter Keys
   final _textPlaca = TextEditingController();
@@ -64,6 +70,7 @@ class _FormInvoicesList extends State<FormInvoicesList> {
   @override
   void dispose() {
     _blocInvoice.dispose();
+    _locationBloc.dispose();
     super.dispose();
   }
 
@@ -278,6 +285,10 @@ class _FormInvoicesList extends State<FormInvoicesList> {
   void _getPreferences() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
     String userId = pref.getString(Keys.userId);
+    if (_idLocation.isEmpty) {
+      _idLocation = pref.getString(Keys.idLocation);
+      _locationBloc.getLocationById(_idLocation).then((loc) => _location = loc);
+    }
   }
 
   void _countAmountPerDayMonth() {
@@ -415,18 +426,34 @@ class _FormInvoicesList extends State<FormInvoicesList> {
     if (invoiceToClose.phoneNumber.isNotEmpty) {
       String message = "Spa CarWash Movil -- Estimado cliente. Le informamos que el servicio de lavado de su vehículo ${invoiceToClose.placa}, ha terminado y está listo para ser entregado. Lo esperamos en nuestras instalaciones.";
       List<String> recipents = [invoiceToClose.phoneNumber];
-      _sendSMS(message, recipents);
+      if (_location != null) {
+        if (_location.sendMessageSms??false) {
+          _sendSMS(message, recipents);
+        } else {
+          _sendWhatsAppMessage(message, invoiceToClose.phoneNumber);
+        }
+      }
     }
-
     Navigator.pop(context);
   }
 
   void _sendSMS(String message, List<String> recipents) async {
-    String _result = await FlutterSms
-        .sendSMS(message: message, recipients: recipents)
-        .catchError((onError) {
-      print(onError);
-    });
-    print(_result);
+    try {
+      String _result = await FlutterSms
+          .sendSMS(message: message, recipients: recipents)
+          .catchError((onError) {
+        print(onError);
+      });
+    } catch(_){
+
+    }
+  }
+
+  void _sendWhatsAppMessage(String message, String phoneNumber) {
+    try {
+      FlutterOpenWhatsapp.sendSingleMessage('57'+phoneNumber, message);
+    } catch(_) {
+
+    }
   }
 }

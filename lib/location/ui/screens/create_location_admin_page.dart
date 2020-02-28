@@ -36,6 +36,8 @@ class _CreateLocationAdminPage extends State<CreateLocationAdminPage> {
   final _textPrefix = TextEditingController();
   final double _heightTextField = 60;
   bool _locationActive = true;
+  bool _sendSms = true;
+  bool _sendWp = false;
   Location _locationSelected;
 
   @override
@@ -196,6 +198,54 @@ class _CreateLocationAdminPage extends State<CreateLocationAdminPage> {
             ),
             SizedBox(height: 9),
             Flexible(
+              child: Row(
+                children: <Widget>[
+                  Checkbox(
+                    value: _sendSms,
+                    onChanged: (bool value) {
+                      _onChangeSendNotification(1, value);
+                    },
+                    checkColor: Colors.white,
+                    activeColor: Color(0xFF59B258),
+                  ),
+                  Text(
+                    "Enviar Notificación por SMS",
+                    style: TextStyle(
+                      fontFamily: "Lato",
+                      decoration: TextDecoration.none,
+                      color: Color(0xFFAEAEAE),
+                      fontSize: 15,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 9),
+            Flexible(
+              child: Row(
+                children: <Widget>[
+                  Checkbox(
+                    value: _sendWp,
+                    onChanged: (bool value) {
+                      _onChangeSendNotification(2, value);
+                    },
+                    checkColor: Colors.white,
+                    activeColor: Color(0xFF59B258),
+                  ),
+                  Text(
+                    "Enviar Notificación por WhatsApp",
+                    style: TextStyle(
+                      fontFamily: "Lato",
+                      decoration: TextDecoration.none,
+                      color: Color(0xFFAEAEAE),
+                      fontSize: 15,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 9),
+            Flexible(
               child: _buttonSave(),
             ),
             SizedBox(height: 9),
@@ -249,6 +299,8 @@ class _CreateLocationAdminPage extends State<CreateLocationAdminPage> {
     _textFinalConsec.text = _locationSelected.finalConsec.toString();
     _textPrefix.text = _locationSelected.prefix;
     _locationActive = _locationSelected.active;
+    _sendSms = _locationSelected.sendMessageSms?? false;
+    _sendWp = _locationSelected.sendMessageSms??true ? false : true;
   }
 
   bool _validateInputs() {
@@ -298,6 +350,22 @@ class _CreateLocationAdminPage extends State<CreateLocationAdminPage> {
     return canSave;
   }
 
+  //1. send Sms, 2. send WhatsApp
+  void _onChangeSendNotification(int notificationType, bool value) {
+    setState(() {
+      switch (notificationType) {
+        case 1:
+          _sendSms = value;
+          _sendWp = false;
+          break;
+        case 2:
+          _sendSms = false;
+          _sendWp = value;
+          break;
+      }
+    });
+  }
+
   void _saveUser() async {
     if (_validateInputs()) {
       MessagesUtils.showAlertWithLoading(context: context, title: 'Guardando')
@@ -314,6 +382,7 @@ class _CreateLocationAdminPage extends State<CreateLocationAdminPage> {
         prefix: _textPrefix.text.trim(),
         active: _locationActive,
         creationDate: Timestamp.now(),
+        sendMessageSms: _sendSms,
       );
 
       _blocLocation.updateLocationData(location);
