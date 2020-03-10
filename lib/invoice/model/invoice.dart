@@ -43,6 +43,7 @@ class Invoice extends Equatable {
   final bool invoiceClosed;
   final String observation;
   final String incidence;
+  final bool haveSpecialService;
 
   Invoice({
     this.id,
@@ -75,6 +76,7 @@ class Invoice extends Equatable {
     this.invoiceClosed,
     this.observation,
     this.incidence,
+    this.haveSpecialService,
   });
 
   Map<String, dynamic> toJson() {
@@ -105,6 +107,7 @@ class Invoice extends Equatable {
       'invoiceClosed': this.invoiceClosed,
       'observation': this.observation,
       'incidence': this.incidence,
+      'haveSpecialService': this.haveSpecialService,
     };
   }
 
@@ -143,6 +146,7 @@ class Invoice extends Equatable {
       invoiceClosed: json['invoiceClosed'],
       observation: json['observation'],
       incidence: json['incidence'],
+      haveSpecialService: json['haveSpecialService'],
     );
   }
 
@@ -181,6 +185,7 @@ class Invoice extends Equatable {
       invoiceClosed: invoiceClosed ?? origin.invoiceClosed,
       observation: origin.observation,
       incidence: origin.incidence,
+      haveSpecialService: origin.haveSpecialService,
     );
   }
 
@@ -214,5 +219,6 @@ class Invoice extends Equatable {
     invoiceClosed,
     observation,
     incidence,
+    haveSpecialService,
   ];
 }

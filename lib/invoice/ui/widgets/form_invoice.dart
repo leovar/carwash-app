@@ -70,6 +70,8 @@ class _FormInvoice extends State<FormInvoice> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey();
   GlobalKey btnAddImage = GlobalKey();
   List<String> imageList = [];
+  String _tagSpecialService = 'Especial';
+  String _tagSimpleService = 'Sencillo';
   bool _sendEmail = false;
   bool _approveDataProcessing = false;
   Uint8List _imageFirmInMemory;
@@ -173,11 +175,20 @@ class _FormInvoice extends State<FormInvoice> {
       _imageSelect = null;
     }
 
-    return Stack(
-      children: <Widget>[
-        GradientBack(),
-        bodyContainer(),
-      ],
+    return WillPopScope(
+      child: Stack(
+        children: <Widget>[
+          GradientBack(),
+          bodyContainer(),
+        ],
+      ),
+      onWillPop: () {
+        if (_textPlaca.text.isNotEmpty) {
+          return _alertBackButton();
+        } else {
+          return Future(() => true);
+        }
+      },
     );
   }
 
@@ -843,6 +854,7 @@ class _FormInvoice extends State<FormInvoice> {
   ///Functions Save Invoice
   void _saveInvoice() async {
 
+    bool _haveServiceSpecial = false;
     //validate internet connection if have images
     if (imageList.length > 0) {
       var connectivityResult = await (Connectivity().checkConnectivity());
@@ -939,6 +951,11 @@ class _FormInvoice extends State<FormInvoice> {
 
         //Get products and values
         _listProduct.forEach((product) {
+          //If at least only one services is special
+          if (product.productType == _tagSpecialService)
+            _haveServiceSpecial = true;
+
+          // Get pricing information
           if (product.isSelected) {
             int _subT =
                 ((product.price * 100) / (100 + product.ivaPercent)).round();
@@ -1012,6 +1029,7 @@ class _FormInvoice extends State<FormInvoice> {
           timeDelivery: _textTimeDelivery.text,
           observation: _textObservation.text.trim(),
           incidence: _textIncidence.text.trim(),
+          haveSpecialService: _haveServiceSpecial,
         );
         DocumentReference invoiceReference =
             await _blocInvoice.saveInvoice(invoice);
@@ -1182,5 +1200,40 @@ class _FormInvoice extends State<FormInvoice> {
     }
 
     return (_editOperator || _editForm || _enablePerIncidence) ? true : false;
+  }
+
+  Future<bool> _alertBackButton() {
+    Alert(
+      context: context,
+      type: AlertType.info,
+      title: 'Esta seguro que desea salir de la factura !',
+      style: MessagesUtils.alertStyle,
+      buttons: [
+        DialogButton(
+          color: Theme.of(context).accentColor,
+          child: Text(
+            'ACEPTAR',
+            style: Theme.of(context).textTheme.button,
+          ),
+          onPressed: () {
+            Navigator.of(context).pop();
+            Navigator.pop(context);
+          },
+        ),
+        DialogButton(
+          color: Theme.of(context).accentColor,
+          child: Text(
+            'CANCELAR',
+            style: Theme.of(context).textTheme.button,
+          ),
+          onPressed: () {
+            Navigator.of(context).pop();
+            return false;
+          },
+        ),
+      ],
+    ).show();
+    //return false;
+    //return showDialog(context: context, builder:(context) => AlertDialog(title: Text('back pressed'),));
   }
 }

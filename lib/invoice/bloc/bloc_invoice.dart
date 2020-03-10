@@ -92,17 +92,18 @@ class BlocInvoice implements Bloc {
   }
 
   List<String> buildBrandsInvoice(List<DocumentSnapshot> brandsListSnapshot) {
-    List<String> brands = _invoiceRepository.buildBrandsInvoice(brandsListSnapshot);
-    brands.sort((a,b) => a.toLowerCase().compareTo(b.toLowerCase()));
+    List<String> brands =
+        _invoiceRepository.buildBrandsInvoice(brandsListSnapshot);
+    brands.sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
     return brands;
   }
 
   List<Brand> buildBrands(List<DocumentSnapshot> brandsListSnapshot) {
     List<Brand> brands = _invoiceRepository.buildBrands(brandsListSnapshot);
-    brands.sort((a,b) => a.brand.toLowerCase().compareTo(b.brand.toLowerCase()));
+    brands
+        .sort((a, b) => a.brand.toLowerCase().compareTo(b.brand.toLowerCase()));
     return brands;
   }
-
 
   /// Brands References
   Future<List<String>> getBrandReferences(String brand) async {
@@ -110,11 +111,11 @@ class BlocInvoice implements Bloc {
     if (brand.isNotEmpty) {
       String brandId = await _invoiceRepository.getBrandByBrand(brand);
       brandReferenceList = await _invoiceRepository.getBrandReferences(brandId);
-      brandReferenceList.sort((a,b) => a.toLowerCase().compareTo(b.toLowerCase()));
+      brandReferenceList
+          .sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
     }
     return brandReferenceList;
   }
-
 
   /// Colors
   Stream<QuerySnapshot> colorsStream(int uidVehicleType) {
@@ -123,10 +124,9 @@ class BlocInvoice implements Bloc {
 
   List<String> buildColors(List<DocumentSnapshot> colorsListSnapshot) {
     List<String> colors = _invoiceRepository.buildColors(colorsListSnapshot);
-    colors.sort((a,b) => a.toLowerCase().compareTo(b.toLowerCase()));
+    colors.sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
     return colors;
   }
-
 
   /// List Invoices per month
   Stream<QuerySnapshot> invoicesListByMonthStream(
@@ -135,7 +135,8 @@ class BlocInvoice implements Bloc {
     DateTime dateFinal,
     String placa,
     String operator,
-      String consecutive,
+    String consecutive,
+    String productTypeSelected,
   ) {
     return _invoiceRepository.getListInvoicesByMonthStream(
       locationReference,
@@ -144,10 +145,12 @@ class BlocInvoice implements Bloc {
       placa,
       operator,
       consecutive,
+      productTypeSelected,
     );
   }
 
-  List<Invoice> buildInvoicesListByMonth(List<DocumentSnapshot> invoicesListSnapshot) {
+  List<Invoice> buildInvoicesListByMonth(
+      List<DocumentSnapshot> invoicesListSnapshot) {
     return _invoiceRepository.buildInvoicesListByMonth(invoicesListSnapshot);
   }
 

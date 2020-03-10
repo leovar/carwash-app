@@ -13,17 +13,20 @@ import 'package:car_wash_app/location/model/location.dart';
 import 'package:car_wash_app/product/model/product.dart';
 import 'package:car_wash_app/widgets/keys.dart';
 import 'package:car_wash_app/widgets/messages_utils.dart';
+import 'package:file_utils/file_utils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:image_picker_saver/image_picker_saver.dart';
 import 'package:intl/intl.dart';
 import 'package:image/image.dart' as im;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path_provider/path_provider.dart' as path_provider;
+import 'package:permission_handler/permission_handler.dart';
 
 class PrintInvoicePage extends StatefulWidget {
   final Invoice currentInvoice;
@@ -56,6 +59,9 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
     super.initState();
     _getPreferences();
     _getCustomer(widget.currentInvoice.customer.documentID);
+    PermissionHandler().requestPermissions(<PermissionGroup>[
+      PermissionGroup.storage,
+    ]);
   }
 
   @override
@@ -231,7 +237,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
   }
 
   Widget _infoInvoice() {
-    var _timeDelivery = widget.currentInvoice.timeDelivery??'';
+    var _timeDelivery = widget.currentInvoice.timeDelivery ?? '';
     return Container(
       color: Colors.white,
       padding: EdgeInsets.symmetric(horizontal: 20),
@@ -278,7 +284,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                   ),
                 ),
                 Text(
-                  widget.currentInvoice.timeDelivery??'',
+                  widget.currentInvoice.timeDelivery ?? '',
                   textAlign: TextAlign.right,
                   style: TextStyle(
                     fontFamily: "Lato",
@@ -696,47 +702,56 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
         description: 'Factura Carwash',
       );
 
-      //Resize image
-      im.Image imageDecode = im.decodePng(pngBytes);
-      im.Image thumbnail = im.copyResize(imageDecode, width: 500);
+      if (filePath.isEmpty) {
+        var filePathResult = await ImageGallerySaver.saveImage(pngBytes);
+        filePath = filePathResult.substring(
+            filePathResult.indexOf('storage') - 1, filePathResult.length);
+      } else {
+        im.Image imageDecode = im.decodePng(pngBytes);
+        im.Image thumbnail = im.copyResize(imageDecode, width: 500);
 
-      //Save resized image
-      File(filePath).writeAsBytesSync(im.encodePng(thumbnail));
+        //Save resized image
+        File(filePath).writeAsBytesSync(im.encodePng(thumbnail));
+        /*
+        final dir = await path_provider.getTemporaryDirectory();
+        final targetPath = dir.absolute.path + "/${filePath.substring(filePath.length-10 ,filePath.length)}"; //dir.absolute.path + "/temp${imageList.length}.jpg";
 
-      final dir = await path_provider.getTemporaryDirectory();
-      final targetPath = dir.absolute.path + "/${filePath.substring(filePath.length-10 ,filePath.length)}"; //dir.absolute.path + "/temp${imageList.length}.jpg";
+        var resultCompress = await FlutterImageCompress.compressAndGetFile(
+            filePath, targetPath,
+            minWidth: 260, quality: 90);
 
-      var resultCompress = await FlutterImageCompress.compressAndGetFile(
-          filePath, targetPath,
-          minWidth: 260, quality: 90);
-/*
-      var filePath2 = await ImagePickerSaver.saveFile(
-        fileData: resultCompress.readAsBytesSync(),
-        title: 'Factura#${widget.currentInvoice.consecutive.toString()}',
-        description: 'Factura Carwash',
-      );
-      
- */
-      //Set new name based in invoice number
-      final partialNewPath =
-          filePath.substring(0, filePath.lastIndexOf('/') + 1);
-      final fileExtension =
-          filePath.substring(filePath.lastIndexOf('.'), filePath.length);
-      final newPath = partialNewPath +
-          'Factura#${widget.currentInvoice.consecutive.toString()}' +
-          fileExtension;
+        var filePath2 = await ImagePickerSaver.saveFile(
+          fileData: resultCompress.readAsBytesSync(),
+          title: 'Factura#${widget.currentInvoice.consecutive.toString()}',
+          description: 'Factura Carwash',
+        );
+        */
 
-      //Rename Image
-      await File(filePath).rename(newPath);
+        //Set new name based in invoice number
+        final partialNewPath =
+        filePath.substring(0, filePath.lastIndexOf('/') + 1);
+        final fileExtension =
+        filePath.substring(filePath.lastIndexOf('.'), filePath.length);
+        final newPath = partialNewPath +
+            'Factura#${widget.currentInvoice.consecutive.toString()}' +
+            fileExtension;
+
+        //Rename Image
+        await File(filePath).rename(newPath);
+      }
 
       print('png done');
       setState(() {
         imageInMemory = pngBytes;
         inside = false;
-        Navigator.pop(context);  //cierra el mensaje de loading
-        Navigator.pop(context);  //cierra la ventana
+        Navigator.pop(context); //cierra el mensaje de loading
+        Navigator.pop(context); //cierra la ventana
       });
     } catch (e) {
+      Navigator.pop(context);
+      MessagesUtils.showAlert(
+              context: context, title: 'Error guardando la imagen')
+          .show();
       print(e);
     }
   }

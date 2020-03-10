@@ -276,6 +276,7 @@ class InvoiceRepository {
     String placa,
     String operator,
     String consecutive,
+      String productTypeSelected,
   ) {
     DateTime dateFinalModify =
         DateTime(dateFinal.year, dateFinal.month, dateFinal.day, 23, 59);
@@ -305,6 +306,12 @@ class InvoiceRepository {
       querySnapshot = querySnapshot.where(
           FirestoreCollections.invoiceFieldConsecutive,
           isEqualTo: int.parse(consecutive) );
+    }
+
+    if (productTypeSelected.isNotEmpty) {
+      querySnapshot = querySnapshot.where(
+          FirestoreCollections.invoiceFieldHaveSpecialService,
+          isEqualTo: productTypeSelected == 'Especial' ? true : false );
     }
 
     return querySnapshot.snapshots();

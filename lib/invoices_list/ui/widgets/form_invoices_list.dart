@@ -111,6 +111,7 @@ class _FormInvoicesList extends State<FormInvoicesList> {
         _textPlaca.text,
         _operatorFilter.name??'',
         _textConsecutive.text,
+        _productTypeSelected,
       ),
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         return _containerList(snapshot);
