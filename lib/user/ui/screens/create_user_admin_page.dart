@@ -12,6 +12,7 @@ import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:popup_menu/popup_menu.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 
 class CreateUserAdminPage extends StatefulWidget {
   final User currentUser;
@@ -498,33 +499,45 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
 
   void _saveUser() async {
     if (_validateInputs()) {
-      MessagesUtils.showAlertWithLoading(context: context, title: 'Guardando')
-          .show();
+      try {
+        MessagesUtils.showAlertWithLoading(context: context, title: 'Guardando')
+            .show();
 
-      //New User save in firestore
-      String userNewRegister;
-      if(_userSelected == null) {
-        userNewRegister = await _userBloc.registerEmailUser(_textEmail.text.trim(), _textPassword.text.trim());
+        //New User save in firestore
+        String userNewRegister;
+        if(_userSelected == null) {
+          userNewRegister = await _userBloc.registerEmailUser(_textEmail.text.trim(), _textPassword.text.trim());
+        }
+
+        final user = User(
+          uid: _userSelected != null ? _userSelected.uid : userNewRegister,
+          name: _textUserName.text.trim(),
+          email: _textEmail.text.trim(),
+          photoUrl: _imageUrl,
+          lastSignIn: Timestamp.now(),
+          active: _userActive,
+          locations: [],
+          isAdministrator: _userAdministrator,
+          isCoordinator: _userCoordinator,
+          isOperator: _userOperator,
+        );
+
+        _userBloc.updateUserData(user);
+
+        Navigator.pop(context);
+        Navigator.pop(context);
+      } on PlatformException catch(_) {
+        Navigator.pop(context);
+        print(_);
+        if (_.message == 'The email address is already in use by another account.') {
+          MessagesUtils.showAlert(
+            context: context,
+            title:
+            'El usuario ya se encuentra registrado',
+            alertType: AlertType.info,
+          ).show();
+        }
       }
-
-      final user = User(
-        uid: _userSelected != null ? _userSelected.uid : userNewRegister,
-        name: _textUserName.text.trim(),
-        email: _textEmail.text.trim(),
-        photoUrl: _imageUrl,
-        lastSignIn: Timestamp.now(),
-        active: _userActive,
-        locations: [],
-        isAdministrator: _userAdministrator,
-        isCoordinator: _userCoordinator,
-        isOperator: _userOperator,
-      );
-
-      _userBloc.updateUserData(user);
-
-      Navigator.pop(context);
-      Navigator.pop(context);
-
       //_clearData();
     }
   }

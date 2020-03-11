@@ -18,7 +18,6 @@ class TextFieldInput extends StatefulWidget {
   final int maxLines;
   final bool isPassword;
   final Color colorText;
-  final String hintText;
 
   TextFieldInput({
     Key key,
@@ -37,7 +36,6 @@ class TextFieldInput extends StatefulWidget {
     this.maxLines = 1,
     this.isPassword = false,
     this.colorText,
-    this.hintText,
   });
 
   @override
@@ -61,7 +59,7 @@ class _TextFieldInput extends State<TextFieldInput> {
       textCapitalization: widget.isUpperCase ?? false
           ? TextCapitalization.characters
           : TextCapitalization.sentences,
-      cursorColor: widget.colorText ?? Color(0xFFAEAEAE),
+      cursorColor: widget.colorText??Color(0xFFAEAEAE),
       onChanged: (value) {
         widget.onFinalEditText();
       },
@@ -69,45 +67,27 @@ class _TextFieldInput extends State<TextFieldInput> {
       style: TextStyle(
         fontFamily: "Lato",
         decoration: TextDecoration.none,
-        color: widget.colorText ?? Color(0xFFAEAEAE),
+        color: widget.colorText??Color(0xFFAEAEAE),
         fontSize: 18,
       ),
       decoration: InputDecoration(
         contentPadding: EdgeInsets.symmetric(vertical: 17, horizontal: 15),
         labelText: widget.labelText,
         errorText: widget.validate ? widget.textValidate : null,
-        hintText: widget.hintText??null,
-        hintStyle: TextStyle(
-          decoration: TextDecoration.none,
-          fontFamily: "Lato",
-          color: widget.colorText ?? Color(0xFFAEAEAE),
-        ),
         labelStyle: TextStyle(
           decoration: TextDecoration.none,
           fontFamily: "Lato",
-          color: widget.colorText ?? Color(0xFFAEAEAE),
+          color: widget.colorText??Color(0xFFAEAEAE),
         ),
         border: OutlineInputBorder(
           borderSide: BorderSide(
-            color: widget.colorText ?? Color(0xFFAEAEAE),
+            color: widget.colorText??Color(0xFFAEAEAE),
           ),
         ),
         focusedBorder: OutlineInputBorder(
           borderSide: BorderSide(
             width: 2,
-            color: widget.colorText ?? Color(0xFFAEAEAE),
-          ),
-        ),
-        disabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(
-            width: 1,
-            color: widget.colorText ?? Color(0xFFAEAEAE),
-          ),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(
-            width: 1,
-            color: widget.colorText ?? Color(0xFFAEAEAE),
+            color: widget.colorText??Color(0xFFAEAEAE),
           ),
         ),
       ),

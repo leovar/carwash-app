@@ -4,6 +4,7 @@ import 'package:car_wash_app/location/bloc/bloc_location.dart';
 import 'package:car_wash_app/location/model/location.dart';
 import 'package:car_wash_app/user/bloc/bloc_user.dart';
 import 'package:car_wash_app/user/model/user.dart';
+import 'package:car_wash_app/user/ui/screens/register_user.dart';
 import 'package:car_wash_app/user/ui/widgets/select_location_widget.dart';
 import 'package:car_wash_app/widgets/home_page.dart';
 import 'package:car_wash_app/widgets/keys.dart';
@@ -57,7 +58,6 @@ class _LoginPage extends State<LoginPage> {
     return StreamBuilder(
       stream: userBloc.authStatus,
       builder: (BuildContext context, AsyncSnapshot snapshot) {
-
         //el snapshot tiene la data que se esta retornando
         print(snapshot);
         if (!snapshot.hasData || snapshot.hasError) {
@@ -396,20 +396,29 @@ class _LoginPage extends State<LoginPage> {
         ),
       );
 
-  registrese() => Container(
-        child: FlatButton(
-          onPressed: () {},
-          child: Text(
-            "¿Aún no se ha registrado?",
-            style: TextStyle(
-              fontFamily: "AvenirNext",
-              fontWeight: FontWeight.w300,
-              color: Colors.white,
-              fontSize: 15,
+  Widget registrese() {
+    return Container(
+      child: FlatButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => RegisterUser(),
             ),
+          );
+        },
+        child: Text(
+          "¿Aún no se ha registrado?",
+          style: TextStyle(
+            fontFamily: "AvenirNext",
+            fontWeight: FontWeight.w300,
+            color: Colors.white,
+            fontSize: 15,
           ),
         ),
-      );
+      ),
+    );
+  }
 
   /// Functions
 
@@ -516,9 +525,11 @@ class _LoginPage extends State<LoginPage> {
           this._registerLogin(user);
           _clearTextLogin();
         }
-      } on PlatformException catch(e) {
+      } on PlatformException catch (e) {
         print('error desde google login  $e');
-        MessagesUtils.showAlert(context: context, title: 'Error en login con Google').show();
+        MessagesUtils.showAlert(
+                context: context, title: 'Error en login con Google')
+            .show();
       }
     }
   }
@@ -531,9 +542,12 @@ class _LoginPage extends State<LoginPage> {
           this._registerLogin(user);
           _clearTextLogin();
         }
-      } on PlatformException catch(e){
+      } on PlatformException catch (e) {
         print('error desde facebook login  $e');
-        MessagesUtils.showAlert(context: context, title: 'Error en login con Facebook, vuelva a Intentarlo').show();
+        MessagesUtils.showAlert(
+                context: context,
+                title: 'Error en login con Facebook, vuelva a Intentarlo')
+            .show();
       }
     }
   }
@@ -542,14 +556,19 @@ class _LoginPage extends State<LoginPage> {
     if (_validations('email')) {
       if (_textUser.text.isNotEmpty && _textPassword.text.isNotEmpty) {
         try {
-          FirebaseUser user = await userBloc.signInEmail(_textUser.text.trim(), _textPassword.text.trim());
+          FirebaseUser user = await userBloc.signInEmail(
+              _textUser.text.trim(), _textPassword.text.trim());
           if (user != null) {
             this._registerLogin(user);
             _clearTextLogin();
           }
         } on PlatformException catch (e) {
-          print('error desde email login  $e');
-          MessagesUtils.showAlert(context: context, title: 'Usuario o Contraseña incorrectos').show();
+          MessagesUtils.showAlert(
+            context: context,
+            title:
+                'Usuario o Contraseña incorrectos, recuerde que debe registrarte primero!',
+            alertType: AlertType.warning,
+          ).show();
         }
       }
     }
@@ -557,7 +576,7 @@ class _LoginPage extends State<LoginPage> {
 
   void _validateLocationPreferences() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
-    String locationId = pref.getString(Keys.idLocation)??'';
+    String locationId = pref.getString(Keys.idLocation) ?? '';
     if (locationId.isEmpty) {
       Alert(
         context: context,
@@ -576,9 +595,7 @@ class _LoginPage extends State<LoginPage> {
             ),
             onPressed: () {
               Navigator.of(context).pop();
-              setState(() {
-
-              });
+              setState(() {});
             },
           )
         ],

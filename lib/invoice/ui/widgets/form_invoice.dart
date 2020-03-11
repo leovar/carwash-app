@@ -30,14 +30,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
-import 'package:image/image.dart' as imagePack;
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:popup_menu/popup_menu.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:path_provider/path_provider.dart' as path_provider;
 
 import '../../model/header_services.dart';
 import 'carousel_cars_widget.dart';
