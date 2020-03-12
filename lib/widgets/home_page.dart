@@ -45,8 +45,6 @@ class _HomePage extends State<HomePage> {
     return StreamBuilder(
       stream: userBloc.streamFirebase,
       builder: (BuildContext context, AsyncSnapshot snapshot) {
-        print('user snapshot $snapshot');
-        print(snapshot.connectionState);
         switch (snapshot.connectionState) {
           /*case ConnectionState.waiting:
             return indicadorDeProgreso();*/
@@ -62,7 +60,6 @@ class _HomePage extends State<HomePage> {
     if (!snapshot.hasData || snapshot.hasError) {
       return indicadorDeProgreso();
     } else {
-      print(snapshot.data);
       return _getUserDb(snapshot);
     }
   }
@@ -82,9 +79,15 @@ class _HomePage extends State<HomePage> {
   }
 
   Widget _chargeHome(AsyncSnapshot snapshot) {
-    User user = userBloc.buildUsersById(snapshot.data.documents);
-    usuario = user;
-    return homePage();
+    if (snapshot.data.documents.length > 0) {
+      User user = userBloc.buildUsersById(snapshot.data.documents);
+      usuario = user;
+      return homePage();
+    } else {
+      _deleteLocationPreference();
+      userBloc.singOut();
+      return indicadorDeProgreso();
+    }
   }
 
   indicadorDeProgreso() => Container(
@@ -259,5 +262,13 @@ class _HomePage extends State<HomePage> {
     String idLocation = pref.getString(Keys.idLocation);
     _locationReference = await _locationBloc.getLocationReference(idLocation);
     _locationName = pref.getString(Keys.locationName);
+  }
+
+  void _deleteLocationPreference() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    pref.setString(Keys.idLocation, '');
+    pref.setString(Keys.locationName, '');
+    pref.setString(Keys.locationInitCount, '0');
+    pref.setString(Keys.locationFinalCount, '0');
   }
 }

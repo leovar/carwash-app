@@ -440,9 +440,9 @@ class _LoginPage extends State<LoginPage> {
         userBloc.updateUserData(
           User(
             uid: user.uid,
-            name: user.displayName,
+            name: user.displayName??'',
             email: user.email,
-            photoUrl: user.photoUrl,
+            photoUrl: user.photoUrl??'',
             lastSignIn: Timestamp.now(),
             active: true,
             isAdministrator: false,
@@ -453,6 +453,7 @@ class _LoginPage extends State<LoginPage> {
       } else {
         userBloc.updateUserData(
           User(
+            id: currentUser.id,
             uid: currentUser.uid,
             name: user.displayName,
             email: user.email,
@@ -483,11 +484,11 @@ class _LoginPage extends State<LoginPage> {
     pref.setString(Keys.locationName, '');
     pref.setString(Keys.locationInitCount, '');
     pref.setString(Keys.locationFinalCount, '');
-    pref.setString(Keys.photoUserUrl, user.photoUrl);
-    pref.setString(Keys.userId, user.uid);
-    pref.setString(Keys.userName, user.displayName);
-    pref.setString(Keys.userEmail, user.email);
-    pref.setBool(Keys.isAdministrator, userDatabase.isAdministrator);
+    pref.setString(Keys.photoUserUrl, user.photoUrl??'');
+    pref.setString(Keys.userId, user.uid??'');
+    pref.setString(Keys.userName, user.displayName??'');
+    pref.setString(Keys.userEmail, user.email??'');
+    pref.setBool(Keys.isAdministrator, userDatabase.isAdministrator??false);
   }
 
   List<DropdownMenuItem<Location>> builDropdownMenuItems(List locations) {

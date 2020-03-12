@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 @immutable
 class User extends Equatable {
+  final String id;
   final String uid;
   final String name;
   final String email;
@@ -20,6 +21,7 @@ class User extends Equatable {
     @required this.uid,
     @required this.name,
     @required this.email,
+    this.id,
     this.photoUrl,
     this.lastSignIn,
     this.active,
@@ -37,7 +39,8 @@ class User extends Equatable {
     });
 
     return User(
-      uid: id,
+      id: id ?? '',
+      uid: json['uid'],
       name: json['name'],
       email: json['email'],
       photoUrl: json['photoUrl'],
@@ -74,6 +77,7 @@ class User extends Equatable {
     Timestamp lastSignIn,
   }) {
     return User(
+      id : origin.id,
       uid: uid ?? origin.uid,
       name: name ?? origin.name,
       email: email ?? origin.email,
@@ -87,6 +91,7 @@ class User extends Equatable {
 
   @override
   List<Object> get props => [
+    id,
     uid,
     name,
     email,

@@ -47,11 +47,11 @@ class UserBloc implements Bloc {
     return _auth_repository.registerEmailUser(email, password);
   }
 
-  void updateUserData(User user) async {
+  Future<void> updateUserData(User user) async {
 
     if (user.photoUrl.isNotEmpty && !user.photoUrl.contains('https://')) {
       File imageFile = File(user.photoUrl);
-      final pathImage = '${user.uid}/profile/${basename(user.photoUrl)}';
+      final pathImage = '${user.id}/profile/${basename(user.photoUrl)}';
       StorageTaskSnapshot storageTaskSnapshot = await _userRepository.uploadProfileImageUser(pathImage, imageFile);
       String imageUrl = await storageTaskSnapshot.ref.getDownloadURL();
       user.photoUrl = imageUrl;

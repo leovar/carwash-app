@@ -1,11 +1,19 @@
+import 'package:car_wash_app/invoice/bloc/bloc_invoice.dart';
 import 'package:car_wash_app/invoice/ui/widgets/text_field_input.dart';
 import 'package:car_wash_app/user/bloc/bloc_user.dart';
+import 'package:car_wash_app/user/model/user.dart';
 import 'package:car_wash_app/widgets/gradient_back.dart';
+import 'package:car_wash_app/widgets/messages_utils.dart';
+import 'package:car_wash_app/widgets/text_field_input_validate.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 import 'package:intl/intl.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 
 class RegisterUser extends StatefulWidget {
   @override
@@ -23,8 +31,11 @@ class _RegisterUser extends State<RegisterUser> {
   final _textBirthDate = TextEditingController();
   final _textPlaca = TextEditingController();
 
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  bool _autoValidate = false;
   bool _obscureText = true;
   DateTime _date = new DateTime.now();
+  String _oldTextBirthDay = '';
 
   @override
   void initState() {
@@ -61,89 +72,114 @@ class _RegisterUser extends State<RegisterUser> {
           vertical: 16,
         ),
         child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: <Widget>[
-              Container(
-                margin: EdgeInsets.only(bottom: 16),
-                height: 65,
-                child: Center(
-                  child: Text(
-                    'REGISTRATE',
-                    style: TextStyle(
-                      fontFamily: "Lato",
-                      fontWeight: FontWeight.bold,
-                      fontSize: 21,
-                      color: Colors.white,
+          child: Form(
+            key: _formKey,
+            autovalidate: _autoValidate,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: <Widget>[
+                this.loginHeader(),
+                SizedBox(height: 34),
+                Container(
+                  margin: EdgeInsets.only(bottom: 16),
+                  height: 65,
+                  child: Center(
+                    child: Text(
+                      'REGISTRATE',
+                      style: TextStyle(
+                        fontFamily: "Lato",
+                        fontWeight: FontWeight.bold,
+                        fontSize: 21,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),
-              ),
-              TextFieldInput(
-                labelText: "Correo Electrónico",
-                textController: _textEmail,
-                inputType: TextInputType.emailAddress,
-                enable: true,
-                autofocus: false,
-                colorText: Colors.white,
-              ),
-              SizedBox(height: 16),
-              this._inputTextPassword(),
-              SizedBox(height: 16),
-              TextFieldInput(
-                labelText: "Nombre",
-                textController: _textUserName,
-                maxLines: 1,
-                colorText: Colors.white,
-              ),
-              SizedBox(height: 16),
-              TextFieldInput(
-                labelText: "Telefono",
-                textController: _textPhone,
-                inputType: TextInputType.number,
-                autofocus: false,
-                maxLength: 10,
-                colorText: Colors.white,
-              ),
-              SizedBox(height: 16),
-              TextFieldInput(
-                labelText: "Barrio",
-                textController: _textNeighborhood,
-                maxLines: 1,
-                colorText: Colors.white,
-              ),
-              SizedBox(height: 16),
-              TextFieldInput(
-                labelText: "Fecha de Nacimiento - (dd/mm/aaaa)",
-                textController: _textBirthDate,
-                colorText: Colors.white,
-                hintText: 'dd/mm/aaaa',
-                inputType: TextInputType.datetime,
-                textInputFormatter: [
-                  WhitelistingTextInputFormatter(
-                      RegExp('^[0-9]*\/*[0-9]*\/*[0-9]*'))
-                ],
-                onFinalEditText: _onChangeTextBirthDate,
-              ),
-              SizedBox(height: 16),
-              TextFieldInput(
-                labelText: "Placa",
-                textController: _textPlaca,
-                isUpperCase: true,
-                textInputFormatter: [
-                  WhitelistingTextInputFormatter(RegExp("^[a-zA-Z0-9]*"))
-                ],
-                colorText: Colors.white,
-              ),
-            ],
+                TextFieldInputValidate(
+                  labelText: "Correo Electrónico",
+                  textController: _textEmail,
+                  inputType: TextInputType.emailAddress,
+                  enable: true,
+                  autofocus: false,
+                  colorText: Colors.white,
+                  validateType: 1,
+                ),
+                SizedBox(height: 16),
+                this._inputTextPassword(),
+                /*
+                SizedBox(height: 16),
+                TextFieldInputValidate(
+                  labelText: "Nombre",
+                  textController: _textUserName,
+                  maxLines: 1,
+                  colorText: Colors.white,
+                  validateType: 2,
+                ),
+                SizedBox(height: 16),
+                TextFieldInputValidate(
+                  labelText: "Telefono",
+                  textController: _textPhone,
+                  inputType: TextInputType.number,
+                  autofocus: false,
+                  maxLength: 10,
+                  colorText: Colors.white,
+                  validateType: 3,
+                ),
+                SizedBox(height: 16),
+                TextFieldInput(
+                  labelText: "Barrio",
+                  textController: _textNeighborhood,
+                  maxLines: 1,
+                  colorText: Colors.white,
+                ),
+                SizedBox(height: 16),
+
+                 */
+                //TextFieldInput(
+                //  labelText: "Fecha de Nacimiento (dd/mm/aaaa)",
+                //  textController: _textBirthDate,
+                //  colorText: Colors.white,
+                //  hintText: 'dd/mm/aaaa',
+                //  inputType: TextInputType.datetime,
+                  //textInputFormatter: [WhitelistingTextInputFormatter(RegExp('^[0-9]*\/*[0-9]*\/*[0-9]*'))],
+                //  onFinalEditText: _onChangeTextBirthDate,
+                //),
+                //SizedBox(height: 16),
+                //TextFieldInput(
+                //  labelText: "Placa de su vehículo",
+                //  textController: _textPlaca,
+                //  isUpperCase: true,
+                //  textInputFormatter: [
+                    //WhitelistingTextInputFormatter(RegExp("^[a-zA-Z0-9]*"))
+                //  ],
+                //  colorText: Colors.white,
+                //),
+                SizedBox(height: 34),
+                this._registerUserButton(),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
+  Widget loginHeader() {
+    return Container(
+      margin: EdgeInsets.only(top: 40),
+      width: 250,
+      height: 86,
+      decoration: BoxDecoration(
+          image: DecorationImage(
+            fit: BoxFit.cover,
+            image: AssetImage("assets/images/car_wash_movil_logo_blanco.png"),
+          ),
+          shape: BoxShape.rectangle),
+    );
+  }
+
   Widget _inputTextPassword() {
-    return TextField(
+    return TextFormField(
       controller: _textPassword,
       maxLines: 1,
       obscureText: _obscureText,
@@ -201,6 +237,47 @@ class _RegisterUser extends State<RegisterUser> {
           ),
         ),
       ),
+      validator: (String args) {
+        if (args.isEmpty)
+          return 'El campo no puede estar vacio';
+        else
+          return null;
+      },
+    );
+  }
+
+  Widget _registerUserButton() {
+    return Container(
+      margin: EdgeInsets.only(top: 10),
+      child: Material(
+        child: InkWell(
+          onTap: () {
+            this._registerUser();
+          },
+          child: Container(
+            width: 190.0,
+            height: 42.0,
+            child: Center(
+              child: Text(
+                'GUARDAR',
+                style: TextStyle(
+                  fontFamily: "Lato",
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+        ),
+        color: Colors.transparent,
+      ),
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: Colors.white,
+          width: 1.0,
+        ),
+        borderRadius: BorderRadius.circular(7.0),
+      ),
     );
   }
 
@@ -209,37 +286,57 @@ class _RegisterUser extends State<RegisterUser> {
   void _onChangeTextBirthDate() {
     var text = _textBirthDate.text;
     var val = _textBirthDate.text.split('/');
-    var val1 = int.tryParse(val[0]??0);
+    var val1 = int.tryParse(val[0] ?? 0);
     var val2 = int.tryParse(val.length > 1 ? val[1] : '0');
     var val3 = int.tryParse(val.length > 2 ? val[2] : '0');
 
-    if (text.length > 0 && text.length < 3) {
-      _textBirthDate.text = val1.toString();
-      _textBirthDate.selection = TextSelection.fromPosition(TextPosition(offset: _textBirthDate.text.length));
-    } else if (text.length > 2 && text.length < 4) {
-      _textBirthDate.text = text.substring(0,2) + '/' + text.substring(2, text.length);
-      _textBirthDate.selection = TextSelection.fromPosition(TextPosition(offset: _textBirthDate.text.length));
-    } else if (text.length > 5 && text.length < 7) {
-      _textBirthDate.text = text.substring(0,5) + '/' + text.substring(5, text.length);
-      _textBirthDate.selection = TextSelection.fromPosition(TextPosition(offset: _textBirthDate.text.length));
+    if (text.length > 10) {
+      _textBirthDate.text = _oldTextBirthDay;
+      _textBirthDate.selection = TextSelection.fromPosition(
+          TextPosition(offset: _textBirthDate.text.length));
+      return;
     }
 
-
-    if (val1 > 0 && val1 < 10) {  //first number
-      if (text.length > 1) {
-        //_textBirthDate.text = text.substring(0,1) + '/' + text.substring(1, text.length);
-        //_textBirthDate.selection = TextSelection.fromPosition(TextPosition(offset: _textBirthDate.text.length));
-      } else {
-
+    if (text.length > _oldTextBirthDay.length) {
+      if (text.length > 2 && text.length < 4) {
+        _textBirthDate.text =
+            text.substring(0, 2) + '/' + text.substring(2, text.length);
+        _textBirthDate.selection = TextSelection.fromPosition(
+            TextPosition(offset: _textBirthDate.text.length));
+      } else if (text.length > 5 && text.length < 7) {
+        _textBirthDate.text =
+            text.substring(0, 5) + '/' + text.substring(5, text.length);
+        _textBirthDate.selection = TextSelection.fromPosition(
+            TextPosition(offset: _textBirthDate.text.length));
       }
-    } else if (val1 > 9 && val1 < 32) {
 
-    } else { //second number
-      //message de day not superate 31 days
+      if (val1 > 31 && val1.toString().length == 2) {
+        MessagesUtils.showAlert(
+                context: context,
+                title: 'El dia no puede ser superior a 31',
+                alertType: AlertType.warning)
+            .show();
+      }
+
+      if (val2 > 12 && val2.toString().length == 2) {
+        MessagesUtils.showAlert(
+                context: context,
+                title: 'El mes no puede ser superior a 12',
+                alertType: AlertType.warning)
+            .show();
+      }
+
+      if (val3 > 0 &&
+          val3.toString().length == 4 &&
+          (val3 < 1900 || val3 >= DateTime.now().year)) {
+        MessagesUtils.showAlert(
+                context: context,
+                title: 'Ingrese un año válido',
+                alertType: AlertType.warning)
+            .show();
+      }
     }
-
-
-
+    _oldTextBirthDay = text;
   }
 
   void clearData() {
@@ -274,5 +371,66 @@ class _RegisterUser extends State<RegisterUser> {
         _textBirthDate.value =
             TextEditingValue(text: formatDate.format(picked));
       });
+  }
+
+  bool _validations() {
+    bool emailValid = RegExp(
+            r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+        .hasMatch(_textEmail.text.trim());
+    if (!emailValid) {
+      MessagesUtils.showAlert(
+              context: context,
+              title: 'Por favor digite un correo valido',
+              alertType: AlertType.warning)
+          .show();
+      return false;
+    }
+
+    return true;
+  }
+
+  void _registerUser() async {
+    if (_formKey.currentState.validate()) {
+      if (_validations()) {
+        if (_textEmail.text.isNotEmpty && _textPassword.text.isNotEmpty) {
+          try {
+            await _userBloc
+                .registerEmailUser(
+                    _textEmail.text.trim(), _textPassword.text.trim())
+                .then((registerUid) {
+                      Navigator.pop(context);
+                      MessagesUtils.showAlert(
+                          context: context,
+                          title: 'Usuario Registrado',
+                          alertType: AlertType.success)
+                          .show();
+
+                    });
+
+            _formKey.currentState.save();
+          } on PlatformException catch (e) {
+            if (e.message ==
+                'The email address is already in use by another account.') {
+              MessagesUtils.showAlert(
+                context: context,
+                title: 'El usuario ya se encuentra registrado',
+                alertType: AlertType.warning,
+              ).show();
+            } else if (e.message ==
+                'The given password is invalid. [ Password should be at least 6 characters ]') {
+              MessagesUtils.showAlert(
+                context: context,
+                title: 'La contraseña debe tener al menos 6 caracteres.',
+                alertType: AlertType.warning,
+              ).show();
+            }
+          }
+        }
+      }
+    } else {
+      setState(() {
+        _autoValidate = true;
+      });
+    }
   }
 }

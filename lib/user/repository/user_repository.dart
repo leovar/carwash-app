@@ -22,8 +22,11 @@ class UserRepository {
 
   Future<User> getCurrentUser() async {
     FirebaseUser user = await FirebaseAuth.instance.currentUser();
-    final querySnapshot = await _db.collection(FirestoreCollections.users).document(user.uid).get();
-    return User.fromJson(querySnapshot.data, id: querySnapshot.documentID);
+    final querySnapshot = await _db
+        .collection(FirestoreCollections.users)
+        .where(FirestoreCollections.usersFieldUid, isEqualTo: user.uid)
+        .getDocuments();
+    return User.fromJson(querySnapshot.documents.first.data, id: querySnapshot.documents.first.documentID);
   }
 
   Future<DocumentReference> getUserReferenceById(String userId) async {
@@ -49,7 +52,7 @@ class UserRepository {
   }
 
   void updateUserDataRepository(User user) async {
-    DocumentReference ref = _db.collection(FirestoreCollections.users).document(user.uid);
+    DocumentReference ref = _db.collection(FirestoreCollections.users).document(user.id);
     return await ref.setData(user.toJson(), merge: true);
   }
 
