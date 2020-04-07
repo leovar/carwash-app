@@ -39,18 +39,31 @@ class CustomerRepository {
     );
   }
 
-  Future<DocumentReference> getCustomerFilter(String telephoneNumber, String email, String name) async {
-    final querySnapshot = await this
+  Future<List<Customer>> getCustomerFilter(String telephoneNumber, String email) async {
+    List<Customer> customerList = [];
+    QuerySnapshot querySnapshot;
+    var queryFirestore = this
         ._db
         .collection(FirestoreCollections.customers)
-        .where(FirestoreCollections.customerFieldPhoneNumber, isEqualTo: telephoneNumber)
-        .getDocuments();
+        .where(FirestoreCollections.customerFieldCreationDate, isLessThan: Timestamp.now());
 
-    final documents = querySnapshot.documents;
-    if (documents.length > 0) {
-      return documents.first.reference;
+    if (telephoneNumber.isNotEmpty) {
+      queryFirestore = queryFirestore.where(FirestoreCollections.customerFieldPhoneNumber, isEqualTo: telephoneNumber);
     }
-    return null;
+
+    if (email.isNotEmpty) {
+      queryFirestore = queryFirestore.where(FirestoreCollections.customerFieldEmail, isEqualTo: email.toLowerCase());
+    }
+
+    querySnapshot = await queryFirestore.getDocuments();
+    if (querySnapshot.documents.length > 0) {
+      querySnapshot.documents.forEach((doc) {
+        final customer = Customer.fromJson(doc.data, id: doc.documentID);
+        customerList.add(customer);
+      });
+    }
+
+    return customerList;
   }
 
   Future<DocumentReference> updateCustomer(Customer customer) async {

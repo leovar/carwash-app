@@ -1,46 +1,48 @@
 import 'dart:io';
 
+import 'package:car_wash_app/customer/bloc/bloc_customer.dart';
+import 'package:car_wash_app/customer/model/customer.dart';
 import 'package:car_wash_app/invoice/ui/widgets/text_field_input.dart';
 import 'package:car_wash_app/user/bloc/bloc_user.dart';
 import 'package:car_wash_app/user/model/user.dart';
+import 'package:car_wash_app/widgets/keys.dart';
 import 'package:car_wash_app/widgets/messages_utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
-import 'package:path_provider/path_provider.dart' as path_provider;
-import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:popup_menu/popup_menu.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class CreateUserAdminPage extends StatefulWidget {
-  final User currentUser;
-
-  CreateUserAdminPage({Key key, this.currentUser});
+class UserProfilePage extends StatefulWidget {
 
   @override
-  State<StatefulWidget> createState() => _CreateUserAdminPage();
+  State<StatefulWidget> createState() => _UserProfilePage();
 }
 
-class _CreateUserAdminPage extends State<CreateUserAdminPage> {
-  UserBloc _userBloc;
+class _UserProfilePage extends State<UserProfilePage> {
+  UserBloc _userBloc = UserBloc();
+  BlocCustomer _customerBloc = BlocCustomer();
 
   GlobalKey btnChangeImageProfile = GlobalKey();
   bool _validateName = false;
-  bool _validateEmail = false;
-  bool _validatePassword = false;
   final _textUserName = TextEditingController();
   final _textEmail = TextEditingController();
   final _textPassword = TextEditingController();
+  final _textPhone = TextEditingController();
+  final _textNeighborhood = TextEditingController();
+  final _textBirthDate = TextEditingController();
   final double _heightTextField = 60;
   String _imageUrl = '';
-  bool _userActive = true;
-  bool _userAdministrator = false;
-  bool _userCoordinator = false;
-  bool _userOperator = false;
-  User _userSelected;
+  User _currentUser;
+  Customer _currentCustomer = Customer();
+  bool _obscureText = true;
+  DateTime _date = new DateTime.now();
+  String _oldTextBirthDay = '';
   final String _cameraTag = "Camera";
   final String _galleryTag = "Gallery";
   String _selectSourceImagePicker = "Camara";
@@ -48,16 +50,12 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
   @override
   void initState() {
     super.initState();
-    if (widget.currentUser != null) {
-      _userSelected = widget.currentUser;
-      _imageUrl = _userSelected.photoUrl;
-      _selectUserList();
-    }
+    this._getUser();
   }
 
   @override
   Widget build(BuildContext context) {
-    _userBloc = BlocProvider.of(context);
+    //_userBloc = BlocProvider.of(context);
     PopupMenu.context = context;
     return Scaffold(
       appBar: AppBar(
@@ -67,7 +65,7 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          "Usuario",
+          "Perfil",
           style: TextStyle(
             fontFamily: "Lato",
             decoration: TextDecoration.none,
@@ -117,119 +115,38 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
               child: TextFieldInput(
                 labelText: 'Correo',
                 textController: _textEmail,
-                validate: _validateEmail,
-                textValidate: 'Escriba un correo valido',
                 inputType: TextInputType.emailAddress,
+                enable: false,
               ),
             ),
             SizedBox(height: 9),
+            /* no se implementa el update pasword para esta versión por que no funciona correctamente
             Container(
               height: _heightTextField,
-              child: TextFieldInput(
-                labelText: 'Contraseña',
-                textController: _textPassword,
-                validate: _validatePassword,
-                textValidate: 'Escriba una contraseña',
-                isPassword: true,
-              ),
+              child: this._inputTextPassword(),
+            ),
+            SizedBox(height: 9),*/
+            TextFieldInput(
+              labelText: "Telefono",
+              textController: _textPhone,
+              inputType: TextInputType.number,
+              autofocus: false,
+              maxLength: 10,
             ),
             SizedBox(height: 9),
-            Flexible(
-              child: Row(
-                children: <Widget>[
-                  Checkbox(
-                    value: _userAdministrator,
-                    onChanged: (bool value) {
-                      _onChangeRol(1, value);
-                    },
-                    checkColor: Colors.white,
-                    activeColor: Color(0xFF59B258),
-                  ),
-                  Text(
-                    "Usuario Administrador",
-                    style: TextStyle(
-                      fontFamily: "Lato",
-                      decoration: TextDecoration.none,
-                      color: Color(0xFFAEAEAE),
-                      fontSize: 15,
-                    ),
-                  ),
-                ],
-              ),
+            TextFieldInput(
+              labelText: "Barrio",
+              textController: _textNeighborhood,
+              maxLines: 1,
             ),
             SizedBox(height: 9),
-            Flexible(
-              child: Row(
-                children: <Widget>[
-                  Checkbox(
-                    value: _userCoordinator,
-                    onChanged: (bool value) {
-                      _onChangeRol(2, value);
-                    },
-                    checkColor: Colors.white,
-                    activeColor: Color(0xFF59B258),
-                  ),
-                  Text(
-                    "Usuario Coordinador",
-                    style: TextStyle(
-                      fontFamily: "Lato",
-                      decoration: TextDecoration.none,
-                      color: Color(0xFFAEAEAE),
-                      fontSize: 15,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(height: 9),
-            Flexible(
-              child: Row(
-                children: <Widget>[
-                  Checkbox(
-                    value: _userOperator,
-                    onChanged: (bool value) {
-                      _onChangeRol(3, value);
-                    },
-                    checkColor: Colors.white,
-                    activeColor: Color(0xFF59B258),
-                  ),
-                  Text(
-                    "Usuario Operador",
-                    style: TextStyle(
-                      fontFamily: "Lato",
-                      decoration: TextDecoration.none,
-                      color: Color(0xFFAEAEAE),
-                      fontSize: 15,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(height: 9),
-            Flexible(
-              child: Row(
-                children: <Widget>[
-                  Checkbox(
-                    value: _userActive,
-                    onChanged: (bool value) {
-                      setState(() {
-                        _userActive = value;
-                      });
-                    },
-                    checkColor: Colors.white,
-                    activeColor: Color(0xFF59B258),
-                  ),
-                  Text(
-                    "Usuario Activo",
-                    style: TextStyle(
-                      fontFamily: "Lato",
-                      decoration: TextDecoration.none,
-                      color: Color(0xFFAEAEAE),
-                      fontSize: 15,
-                    ),
-                  ),
-                ],
-              ),
+            TextFieldInput(
+              labelText: "Fecha de Nacimiento (dd/mm/aaaa)",
+              textController: _textBirthDate,
+              hintText: 'dd/mm/aaaa',
+              inputType: TextInputType.datetime,
+              textInputFormatter: [WhitelistingTextInputFormatter(RegExp('^[0-9]*\/*[0-9]*\/*[0-9]*'))],
+              onFinalEditText: _onChangeTextBirthDate,
             ),
             SizedBox(height: 9),
             Flexible(
@@ -288,6 +205,74 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _inputTextPassword() {
+    return TextFormField(
+      controller: _textPassword,
+      maxLines: 1,
+      obscureText: _obscureText,
+      cursorColor: Color(0xFFAEAEAE),
+      style: TextStyle(
+        fontFamily: "Lato",
+        decoration: TextDecoration.none,
+        color: Color(0xFFAEAEAE),
+        fontSize: 18,
+      ),
+      decoration: InputDecoration(
+        contentPadding: EdgeInsets.symmetric(vertical: 17, horizontal: 15),
+        labelText: 'Nueva contraseña',
+        labelStyle: TextStyle(
+          decoration: TextDecoration.none,
+          fontFamily: "Lato",
+          color: Color(0xFFAEAEAE),
+        ),
+        border: OutlineInputBorder(
+          borderSide: BorderSide(
+            color: Color(0xFFAEAEAE),
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(
+            width: 2,
+            color: Color(0xFFAEAEAE),
+          ),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(
+            width: 1,
+            color: Color(0xFFAEAEAE),
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(
+            width: 1,
+            color: Color(0xFFAEAEAE),
+          ),
+        ),
+        suffixIcon: InkWell(
+          onTap: () => this._togglePassword(),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 10),
+            child: _obscureText
+                ? Icon(
+              Icons.visibility,
+              color: Color(0xFFAEAEAE),
+            )
+                : Icon(
+              Icons.visibility_off,
+              color: Color(0xFFAEAEAE),
+            ),
+          ),
+        ),
+      ),
+      validator: (String args) {
+        if (args.isEmpty)
+          return 'El campo no puede estar vacio';
+        else
+          return null;
+      },
     );
   }
 
@@ -413,7 +398,7 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
       File fileCompress = await FlutterImageCompress.compressAndGetFile(
         croppedFile.absolute.path,
         targetPath,
-        quality: 40,
+        quality: 30,
       );
 
       setState(() {
@@ -422,41 +407,96 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
     }
   }
 
-  //1. administrator, 2. coordinator, 3. Operator
-  void _onChangeRol(int rol, bool value) {
+  // Toggles the password show status
+  void _togglePassword() {
     setState(() {
-      switch (rol) {
-        case 1:
-          _userAdministrator = value;
-          _userOperator = false;
-          _userCoordinator = false;
-          break;
-        case 2:
-          _userAdministrator = false;
-          _userOperator = false;
-          _userCoordinator = value;
-          break;
-        case 3:
-          _userAdministrator = false;
-          _userOperator = value;
-          _userCoordinator = false;
-          break;
-      }
+      _obscureText = !_obscureText;
     });
+  }
+
+  //Change Text Birth Date
+  void _onChangeTextBirthDate() {
+    var text = _textBirthDate.text;
+    var val = _textBirthDate.text.split('/');
+    var val1 = int.tryParse(val[0] ?? 0);
+    var val2 = int.tryParse(val.length > 1 ? val[1] : '0');
+    var val3 = int.tryParse(val.length > 2 ? val[2] : '0');
+
+    if (text.length > 10) {
+      _textBirthDate.text = _oldTextBirthDay;
+      _textBirthDate.selection = TextSelection.fromPosition(
+          TextPosition(offset: _textBirthDate.text.length));
+      return;
+    }
+
+    if (text.length > _oldTextBirthDay.length) {
+      if (text.length > 2 && text.length < 4) {
+        _textBirthDate.text =
+            text.substring(0, 2) + '/' + text.substring(2, text.length);
+        _textBirthDate.selection = TextSelection.fromPosition(
+            TextPosition(offset: _textBirthDate.text.length));
+      } else if (text.length > 5 && text.length < 7) {
+        _textBirthDate.text =
+            text.substring(0, 5) + '/' + text.substring(5, text.length);
+        _textBirthDate.selection = TextSelection.fromPosition(
+            TextPosition(offset: _textBirthDate.text.length));
+      }
+
+      if (val1 > 31 && val1.toString().length == 2) {
+        MessagesUtils.showAlert(
+            context: context,
+            title: 'El dia no puede ser superior a 31',
+            alertType: AlertType.warning)
+            .show();
+      }
+
+      if (val2 > 12 && val2.toString().length == 2) {
+        MessagesUtils.showAlert(
+            context: context,
+            title: 'El mes no puede ser superior a 12',
+            alertType: AlertType.warning)
+            .show();
+      }
+
+      if (val3 > 0 &&
+          val3.toString().length == 4 &&
+          (val3 < 1900 || val3 >= DateTime.now().year)) {
+        MessagesUtils.showAlert(
+            context: context,
+            title: 'Ingrese un año válido',
+            alertType: AlertType.warning)
+            .show();
+      }
+    }
+    _oldTextBirthDay = text;
   }
 
   ///Function user selected
   void _selectUserList() {
     _validateName = false;
-    _validateEmail = false;
-    _validatePassword = false;
-    _textUserName.text = _userSelected.name;
-    _textEmail.text = _userSelected.email;
+    _textUserName.text = _currentUser.name??'';
+    _textEmail.text = _currentUser.email;
     _textPassword.text = '';
-    _userActive = _userSelected.active;
-    _userAdministrator = _userSelected.isAdministrator;
-    _userCoordinator = _userSelected.isCoordinator;
-    _userOperator = _userSelected.isOperator;
+    _textPhone.text = _currentCustomer.phoneNumber??'';
+    _textNeighborhood.text = _currentCustomer.neighborhood??'';
+    _textBirthDate.text = _currentCustomer.birthDate??'';
+    setState(() {
+      _imageUrl = _currentUser.photoUrl??'';
+    });
+  }
+
+  void _getUser() {
+    _userBloc.getCurrentUser().then((User user) {
+      _currentUser = user;
+      _updatePreference();
+      this._selectUserList();
+      _customerBloc.getCustomerFilter('', user.email).then((customer) {
+        if (customer.length > 0) {
+          _currentCustomer = customer[0];
+          this._selectUserList();
+        }
+      });
+    });
   }
 
   bool _validateInputs() {
@@ -467,19 +507,13 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
     } else
       _validateName = false;
 
+    /*
     if (_textEmail.text.isEmpty) {
       _validateEmail = true;
       canSave = false;
     } else
       _validateEmail = false;
-
-    if (widget.currentUser == null) {
-      if (_textPassword.text.isEmpty) {
-        _validatePassword = true;
-        canSave = false;
-      } else
-        _validatePassword = false;
-    }
+     */
 
     if (canSave == false) {
       setState(() {
@@ -490,63 +524,80 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
     return canSave;
   }
 
-  void _clearData() {
-    _textUserName.text = '';
-    _textEmail.text = '';
-    _textPassword.text = '';
-    _userAdministrator = false;
-    _userCoordinator = false;
-    _userOperator = false;
-    _userActive = true;
+  void _updatePreference() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    pref.setString(Keys.photoUserUrl, _currentUser.photoUrl);
+    pref.setString(Keys.userName, _currentUser.name);
+    pref.setString(Keys.userEmail, _currentUser.email);
   }
+
 
   Future<void> _saveUser() async {
     if (_validateInputs()) {
       try {
-        MessagesUtils.showAlertWithLoading(context: context, title: 'Guardando')
-            .show();
+        MessagesUtils.showAlertWithLoading(context: context, title: 'Guardando').show();
 
-        //New User save in firestore
-        String userNewRegister;
-        if(_userSelected == null) {
-          userNewRegister = await _userBloc.registerEmailUser(_textEmail.text.trim(), _textPassword.text.trim());
+        //Update email if is required
+        if (_currentUser.email != _textEmail.text.trim()) {
+          await _userBloc.updateEmailUser(_textEmail.text.trim().toLowerCase());
         }
 
-        final user = User(
-          id: _userSelected != null ? _userSelected.id : null,
-          uid: _userSelected != null ? _userSelected.uid : userNewRegister,
+        //Update password if is required, 'el update password no funciona correctamente en flutter'
+        if (_textPassword.text.trim().isNotEmpty) {
+          await _userBloc.updatePasswordUser(_textEmail.text.trim());
+        }
+
+        // Update user db Info
+        final user = User.copyWith(
+          origin: _currentUser,
           name: _textUserName.text.trim(),
           email: _textEmail.text.trim(),
           photoUrl: _imageUrl,
-          lastSignIn: Timestamp.now(),
-          active: _userActive,
-          locations: [],
-          isAdministrator: _userAdministrator,
-          isCoordinator: _userCoordinator,
-          isOperator: _userOperator,
         );
-
         await _userBloc.updateUserData(user);
 
+        // Update Customer
+        if (_currentCustomer == null || _currentCustomer.id == null) {
+          final customer = Customer(
+            email: _textEmail.text.trim().toLowerCase(),
+            name: _textUserName.text.trim(),
+            phoneNumber: _textPhone.text.trim(),
+            neighborhood: _textNeighborhood.text.trim(),
+            birthDate: _textBirthDate.text.trim(),
+            creationDate: Timestamp.now(),
+            address: '',
+            typeSex: '',
+            vehicles: [],
+          );
+          await _customerBloc.updateCustomer(customer);
+        } else {
+          final customerCopy = Customer.copyWith(
+              origin: _currentCustomer,
+              phoneNumber: _textPhone.text.trim(),
+              neighborhood: _textNeighborhood.text.trim(),
+              birthDate: _textBirthDate.text.trim(),
+          );
+           await _customerBloc.updateCustomer(customerCopy);
+        }
+        _getUser();
+
+        Navigator.pop(context);
+        //Navigator.of(context, rootNavigator: true)..pop()..pop();
+        MessagesUtils.showAlert(
+          context: context,
+          title:
+          'Perfil guardado',
+          alertType: AlertType.success,
+        ).show();
+
+      } catch(error) {
         Navigator.pop(context);
         MessagesUtils.showAlert(
           context: context,
           title:
-          'Usuario guardado',
-          alertType: AlertType.success,
+          'Error actualizando el perfil',
+          alertType: AlertType.info,
         ).show();
-
-      } on PlatformException catch(_) {
-        Navigator.pop(context);
-        print(_);
-        if (_.message == 'The email address is already in use by another account.') {
-          MessagesUtils.showAlert(
-            context: context,
-            title:
-            'El usuario ya se encuentra registrado',
-            alertType: AlertType.info,
-          ).show();
-        }
       }
       //_clearData();
     }

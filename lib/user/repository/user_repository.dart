@@ -117,4 +117,21 @@ class UserRepository {
     return storageUploadTask.onComplete;
   }
 
+  /// Update email user
+  Future<void> updateEmailUser(String email) async {
+    FirebaseUser user = await FirebaseAuth.instance.currentUser();
+    user.updateEmail(email);
+  }
+
+  /// Update password user
+  Future<void> updatePasswordUser(String password) async {
+    FirebaseUser user = await FirebaseAuth.instance.currentUser();
+    user.updatePassword(password);
+  }
+
+  /// Reset password user
+  Future<void> resetPasswordUser(String email) async {
+    await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+  }
+
 }

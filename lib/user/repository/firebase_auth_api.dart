@@ -43,7 +43,8 @@ class FirebaseAuthApi {
             Permissions: ${accessToken.permissions}
             Declined permissions: ${accessToken.declinedPermissions}""");
         AuthResult authResult = await _authApi.signInWithCredential(
-            FacebookAuthProvider.getCredential(accessToken: accessToken.token));
+            FacebookAuthProvider.getCredential(accessToken: accessToken.token),
+        );
         FirebaseUser user = authResult.user;
         return user;
         break;

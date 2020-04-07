@@ -79,6 +79,7 @@ class User extends Equatable {
     return User(
       id : origin.id,
       uid: uid ?? origin.uid,
+      active: origin.active,
       name: name ?? origin.name,
       email: email ?? origin.email,
       photoUrl: photoUrl ?? origin.photoUrl,

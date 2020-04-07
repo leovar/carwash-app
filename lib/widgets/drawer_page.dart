@@ -4,6 +4,7 @@ import 'package:car_wash_app/product/bloc/product_bloc.dart';
 import 'package:car_wash_app/product/ui/screens/product_list_admin_page.dart';
 import 'package:car_wash_app/user/bloc/bloc_user.dart';
 import 'package:car_wash_app/user/model/user.dart';
+import 'package:car_wash_app/user/ui/screens/user_profile_page.dart';
 import 'package:car_wash_app/user/ui/screens/users_admin_page.dart';
 import 'package:car_wash_app/vehicle_type/bloc/vehicle_type_bloc.dart';
 import 'package:car_wash_app/vehicle_type/ui/screens/admin_brand_reference.dart';
@@ -253,20 +254,29 @@ class _DrawerPage extends State<DrawerPage> {
                       width: 25,
                     ),
                   ),
-                  ListTile(
-                    title: Text(
-                      "Perfil",
-                      style: TextStyle(
-                        fontFamily: "Lato",
-                        fontWeight: FontWeight.normal,
-                        fontSize: 17,
-                        color: Color(0xFF27AEBB),
+                  InkWell(
+                    child: ListTile(
+                      title: Text(
+                        "Perfil",
+                        style: TextStyle(
+                          fontFamily: "Lato",
+                          fontWeight: FontWeight.normal,
+                          fontSize: 17,
+                          color: Color(0xFF27AEBB),
+                        ),
+                      ),
+                      leading: Icon(
+                        Icons.perm_identity,
+                        color: Color(0xFF59B258),
                       ),
                     ),
-                    leading: Icon(
-                      Icons.perm_identity,
-                      color: Color(0xFF59B258),
-                    ),
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => UserProfilePage()),
+                      );
+                    },
                   ),
                 ],
               ),
@@ -315,8 +325,9 @@ class _DrawerPage extends State<DrawerPage> {
                               width: 25,
                             ),
                             onTap: () {
+                              Navigator.pop(context);
                               _deleteLocationPreference();
-                              userBloc.singOut();
+                              _logOut();
                             },
                           ),
                         ),
@@ -341,11 +352,15 @@ class _DrawerPage extends State<DrawerPage> {
     });
   }
 
-  void _deleteLocationPreference() async {
+  Future<void> _deleteLocationPreference() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
     pref.setString(Keys.idLocation, '');
     pref.setString(Keys.locationName, '');
     pref.setString(Keys.locationInitCount, '0');
     pref.setString(Keys.locationFinalCount, '0');
+  }
+
+  Future<void> _logOut() async {
+    await userBloc.singOut();
   }
 }

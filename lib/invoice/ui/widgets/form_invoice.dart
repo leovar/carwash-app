@@ -157,12 +157,13 @@ class _FormInvoice extends State<FormInvoice> {
   @override
   void dispose() {
     _clientFocusNode.dispose();
+    _blocInvoice.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    this._blocInvoice = BlocProvider.of(context);
+    this._blocInvoice = BlocProvider.of<BlocInvoice>(context);
     PopupMenu.context = context;
     getPreferences();
 

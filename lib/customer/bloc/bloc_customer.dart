@@ -21,10 +21,9 @@ class BlocCustomer implements Bloc {
     return await _customerRepository.getCustomerByIdCustomer(idCustomer);
   }
 
-  Future<DocumentReference> getCustomerFilter(
-      String telephoneNumber, String email, String name) async {
-    return await _customerRepository.getCustomerFilter(
-        telephoneNumber, email, name);
+  Future<List<Customer>> getCustomerFilter(
+      String telephoneNumber, String email) async {
+    return await _customerRepository.getCustomerFilter(telephoneNumber, email);
   }
 
   Future<DocumentReference> updateCustomer(Customer customer) async {

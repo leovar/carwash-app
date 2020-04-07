@@ -27,7 +27,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPage extends State<LoginPage> {
-  UserBloc userBloc;
+  UserBloc _userBloc;
   final blocLocation = BlocLocation();
   final _textUser = TextEditingController();
   final _textPassword = TextEditingController();
@@ -49,20 +49,21 @@ class _LoginPage extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    userBloc = BlocProvider.of(context);
+    _userBloc = BlocProvider.of(context);
     return _handleCurrentSession();
   }
 
   ///Valido si el usuario ya se encuentra logueado y lo mando directamente al Home
   Widget _handleCurrentSession() {
     return StreamBuilder(
-      stream: userBloc.authStatus,
+      stream: _userBloc.authStatus,
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         //el snapshot tiene la data que se esta retornando
-        print(snapshot);
+        print('Snapshot Login   $snapshot');
         if (!snapshot.hasData || snapshot.hasError) {
           return loginScreen();
         } else {
+          _selectedLocation = Location();
           _validateLocationPreferences();
           return BlocProvider(
             bloc: UserBloc(),
@@ -182,6 +183,7 @@ class _LoginPage extends State<LoginPage> {
         child: TextField(
           maxLines: 1,
           controller: _textUser,
+          keyboardType: TextInputType.emailAddress,
           autofocus: false,
           decoration: InputDecoration(
             contentPadding: const EdgeInsetsDirectional.only(top: 8),
@@ -383,7 +385,9 @@ class _LoginPage extends State<LoginPage> {
   olvidoContrasena() => Container(
         padding: EdgeInsets.only(top: 11),
         child: FlatButton(
-          onPressed: () {},
+          onPressed: () {
+            this._reloadPasswordPressed(_textUser.text.trim());
+          },
           child: Text(
             "¿Olvidó su contraseña?",
             style: TextStyle(
@@ -433,41 +437,56 @@ class _LoginPage extends State<LoginPage> {
     return true;
   }
 
-  void _registerLogin(FirebaseUser user) {
-    _setLocationInPreferences(user);
-    userBloc.searchUserByEmail(user.email).then((User currentUser) {
-      if (currentUser == null) {
-        userBloc.updateUserData(
-          User(
-            uid: user.uid,
-            name: user.displayName??'',
-            email: user.email,
-            photoUrl: user.photoUrl??'',
-            lastSignIn: Timestamp.now(),
-            active: true,
-            isAdministrator: false,
-            isCoordinator: false,
-            isOperator: false,
-          ),
-        );
-      } else {
-        userBloc.updateUserData(
-          User(
-            id: currentUser.id,
-            uid: currentUser.uid,
-            name: user.displayName,
-            email: user.email,
-            photoUrl: user.photoUrl,
-            lastSignIn: Timestamp.now(),
-            active: currentUser.active,
-            locations: currentUser.locations,
-            isAdministrator: currentUser.isAdministrator,
-            isCoordinator: currentUser.isCoordinator,
-            isOperator: currentUser.isOperator,
-          ),
-        );
-      }
-    });
+  Future<void> _registerLogin(FirebaseUser user) async {
+    String _imageUserProfile = '';
+    String _userName = '';
+    User currentUser = await _userBloc.searchUserByEmail(user.email);
+
+    // Select photoUrl
+    if (currentUser != null && (currentUser.photoUrl??'').isNotEmpty)
+      _imageUserProfile = currentUser.photoUrl;
+    else
+      _imageUserProfile = user.photoUrl??'';
+
+    // Select userName
+    if (currentUser != null && (currentUser.name??'').isNotEmpty)
+      _userName = currentUser.name;
+    else
+      _userName = user.displayName;
+
+    if (currentUser == null) {
+      _userBloc.updateUserData(
+        User(
+          uid: user.uid,
+          name: user.displayName??'',
+          email: user.email,
+          photoUrl: user.photoUrl??'',
+          lastSignIn: Timestamp.now(),
+          active: true,
+          isAdministrator: false,
+          isCoordinator: false,
+          isOperator: false,
+        ),
+      );
+    } else {
+      _userBloc.updateUserData(
+        User(
+          id: currentUser.id,
+          uid: currentUser.uid,
+          name: _userName,
+          email: user.email,
+          photoUrl: _imageUserProfile,
+          lastSignIn: Timestamp.now(),
+          active: currentUser.active,
+          locations: currentUser.locations,
+          isAdministrator: currentUser.isAdministrator,
+          isCoordinator: currentUser.isCoordinator,
+          isOperator: currentUser.isOperator,
+        ),
+      );
+    }
+
+    _setLocationInPreferences(user, _imageUserProfile, _userName);
     // TODO este navigate se debe quitar si se coloca la app a validar primero si el usuario esta logueado
     /* Navigator.push(
       context,
@@ -477,16 +496,16 @@ class _LoginPage extends State<LoginPage> {
     ); */
   }
 
-  void _setLocationInPreferences(FirebaseUser user) async {
-    User userDatabase = await userBloc.getCurrentUser();
+  Future<void> _setLocationInPreferences(FirebaseUser user, String imageUserProfile, String userName) async {
+    User userDatabase = await _userBloc.getCurrentUser();
     SharedPreferences pref = await SharedPreferences.getInstance();
     pref.setString(Keys.idLocation, '');
     pref.setString(Keys.locationName, '');
     pref.setString(Keys.locationInitCount, '');
     pref.setString(Keys.locationFinalCount, '');
-    pref.setString(Keys.photoUserUrl, user.photoUrl??'');
+    pref.setString(Keys.photoUserUrl, imageUserProfile);
     pref.setString(Keys.userId, user.uid??'');
-    pref.setString(Keys.userName, user.displayName??'');
+    pref.setString(Keys.userName, userName);
     pref.setString(Keys.userEmail, user.email??'');
     pref.setBool(Keys.isAdministrator, userDatabase.isAdministrator??false);
   }
@@ -520,10 +539,10 @@ class _LoginPage extends State<LoginPage> {
   void _googleLogin() async {
     if (_validations('google')) {
       try {
-        userBloc.singOut();
-        FirebaseUser user = await userBloc.signInGoogle();
+        _userBloc.singOut();
+        FirebaseUser user = await _userBloc.signInGoogle();
         if (user != null) {
-          this._registerLogin(user);
+           this._registerLogin(user);
           _clearTextLogin();
         }
       } on PlatformException catch (e) {
@@ -538,7 +557,7 @@ class _LoginPage extends State<LoginPage> {
   void _facebookLogin() async {
     if (_validations('facebook')) {
       try {
-        FirebaseUser user = await userBloc.signInFacebook();
+        FirebaseUser user = await _userBloc.signInFacebook();
         if (user != null) {
           this._registerLogin(user);
           _clearTextLogin();
@@ -557,7 +576,7 @@ class _LoginPage extends State<LoginPage> {
     if (_validations('email')) {
       if (_textUser.text.isNotEmpty && _textPassword.text.isNotEmpty) {
         try {
-          FirebaseUser user = await userBloc.signInEmail(
+          FirebaseUser user = await _userBloc.signInEmail(
               _textUser.text.trim(), _textPassword.text.trim());
           if (user != null) {
             this._registerLogin(user);
@@ -617,5 +636,46 @@ class _LoginPage extends State<LoginPage> {
         Keys.locationInitCount, locationSelected.initConcec.toString());
     pref.setString(
         Keys.locationFinalCount, locationSelected.finalConsec.toString());
+  }
+
+  void _reloadPasswordPressed(String userEmail) {
+    if (userEmail.isNotEmpty) {
+      Alert(
+        context: context,
+        title: 'Olvido su Contraseña',
+        style: MessagesUtils.alertStyle,
+        content: Text(
+            'Desea restaurar la contraseña para el usuario $userEmail ?'
+        ),
+        buttons: [
+          DialogButton(
+            color: Theme.of(context).accentColor,
+            child: Text(
+              'ACEPTAR',
+              style: Theme.of(context).textTheme.button,
+            ),
+            onPressed: () {
+              _sendEmailResetPassword(userEmail);
+              Navigator.of(context).pop();
+            },
+          ),
+          DialogButton(
+            color: Theme.of(context).accentColor,
+            child: Text(
+              'CANCELAR',
+              style: Theme.of(context).textTheme.button,
+            ),
+            onPressed: () {
+              Navigator.of(context).pop();
+              return false;
+            },
+          ),
+        ],
+      ).show();
+    }
+  }
+
+  void _sendEmailResetPassword(String userEmail) {
+    _userBloc.resetPasswordUser(userEmail);
   }
 }

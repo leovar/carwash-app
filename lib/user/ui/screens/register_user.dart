@@ -389,7 +389,12 @@ class _RegisterUser extends State<RegisterUser> {
     return true;
   }
 
-  void _registerUser() async {
+  void _cleanData() {
+    _textEmail.text = '';
+    _textPassword.text = '';
+  }
+
+  Future<void> _registerUser() async {
     if (_formKey.currentState.validate()) {
       if (_validations()) {
         if (_textEmail.text.isNotEmpty && _textPassword.text.isNotEmpty) {
@@ -398,7 +403,7 @@ class _RegisterUser extends State<RegisterUser> {
                 .registerEmailUser(
                     _textEmail.text.trim(), _textPassword.text.trim())
                 .then((registerUid) {
-                      Navigator.pop(context);
+                      _cleanData();
                       MessagesUtils.showAlert(
                           context: context,
                           title: 'Usuario Registrado',

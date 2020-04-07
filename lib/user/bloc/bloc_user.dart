@@ -39,8 +39,8 @@ class UserBloc implements Bloc {
     return _auth_repository.signInEmail(email, password);
   }
 
-  singOut() {
-    return _auth_repository.singOut();
+  singOut() async {
+    return await _auth_repository.singOut();
   }
 
   Future<String> registerEmailUser(String email, String password) {
@@ -57,6 +57,18 @@ class UserBloc implements Bloc {
       user.photoUrl = imageUrl;
     }
     _userRepository.updateUserDataRepository(user);
+  }
+
+  Future<void> updateEmailUser(String email) async {
+    return await _userRepository.updateEmailUser(email);
+  }
+
+  Future<void> updatePasswordUser(String password) async {
+    return await _userRepository.updatePasswordUser(password);
+  }
+
+  Future<void> resetPasswordUser(String email) async {
+    return await _userRepository.resetPasswordUser(email);
   }
 
   Future<User> getUserById(String userId) async => await _userRepository.getUserById(userId);

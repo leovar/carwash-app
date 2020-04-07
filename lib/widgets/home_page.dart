@@ -29,7 +29,8 @@ class _HomePage extends State<HomePage> {
   GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey();
   final _locationBloc = BlocLocation();
   UserBloc userBloc;
-  User usuario;
+  User _currentUser;
+  String _photoUrl = '';
   DocumentReference _locationReference;
   String _locationName = '';
 
@@ -81,11 +82,12 @@ class _HomePage extends State<HomePage> {
   Widget _chargeHome(AsyncSnapshot snapshot) {
     if (snapshot.data.documents.length > 0) {
       User user = userBloc.buildUsersById(snapshot.data.documents);
-      usuario = user;
+      this._currentUser = user;
+      this._currentUser.photoUrl = _photoUrl;
       return homePage();
     } else {
       _deleteLocationPreference();
-      userBloc.singOut();
+      this._logOut();
       return indicadorDeProgreso();
     }
   }
@@ -108,7 +110,7 @@ class _HomePage extends State<HomePage> {
         key: _scaffoldKey,
         appBar: PreferredSize(
           preferredSize: Size(MediaQuery.of(context).size.width, 65),
-          child: AppBarWidget(_scaffoldKey, usuario.photoUrl, true),
+          child: AppBarWidget(_scaffoldKey, _currentUser.photoUrl, true),
         ),
         body: Stack(
           children: <Widget>[
@@ -176,7 +178,7 @@ class _HomePage extends State<HomePage> {
                   context,
                   MaterialPageRoute(
                       builder: (context) => InvoicesListPage(
-                        user: usuario,
+                        user: _currentUser,
                         locationReference: _locationReference,
                       )));
             },
@@ -257,18 +259,23 @@ class _HomePage extends State<HomePage> {
 
   ///Functions
 
-  void _getPreferences() async {
+  Future<void> _getPreferences() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
     String idLocation = pref.getString(Keys.idLocation);
     _locationReference = await _locationBloc.getLocationReference(idLocation);
     _locationName = pref.getString(Keys.locationName);
+    _photoUrl = pref.getString(Keys.photoUserUrl);
   }
 
-  void _deleteLocationPreference() async {
+  Future<void> _deleteLocationPreference() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
     pref.setString(Keys.idLocation, '');
     pref.setString(Keys.locationName, '');
     pref.setString(Keys.locationInitCount, '0');
     pref.setString(Keys.locationFinalCount, '0');
   }
-}
+
+  Future<void> _logOut() async {
+    await userBloc.singOut();
+  }
+ }
