@@ -1,0 +1,53 @@
+import 'package:car_wash_app/reports/ui/screens/customers_report.dart';
+import 'package:car_wash_app/reports/ui/screens/earnings_report.dart';
+import 'package:car_wash_app/reports/ui/screens/productivity_report.dart';
+import 'package:car_wash_app/widgets/app_bar_widget.dart';
+import 'package:car_wash_app/widgets/app_bar_widget_simple.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+
+class ReportsPage extends StatefulWidget {
+  @override
+  State<StatefulWidget> createState() => _ReportsPage();
+}
+
+class _ReportsPage extends State<ReportsPage> {
+
+  int _currentTabIndex = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    final _tabPages = <Widget> [
+      ProductivityReport(),
+      EarningsReport(),
+      CustomersReport(),
+    ];
+
+    final _tabItems = <BottomNavigationBarItem>[
+      BottomNavigationBarItem(icon: Icon(Icons.supervisor_account), title: Text('productividad')),
+      BottomNavigationBarItem(icon: Icon(Icons.trending_up), title: Text('ganancias')),
+      BottomNavigationBarItem(icon: Icon(Icons.contacts), title: Text('clientes')),
+    ];
+    assert(_tabPages.length == _tabItems.length);
+    final bottomNavBar = BottomNavigationBar(
+      items: _tabItems,
+      currentIndex: _currentTabIndex,
+      type: BottomNavigationBarType.fixed,
+      onTap: (int index) {
+        setState(() {
+          _currentTabIndex = index;
+        });
+      },
+    );
+
+    return Scaffold(
+      appBar: PreferredSize(
+        preferredSize: Size(MediaQuery.of(context).size.width, 65),
+        child: SimpleAppBarWidget(),
+      ),
+      body: _tabPages[_currentTabIndex],
+      bottomNavigationBar: bottomNavBar,
+
+    );
+  }
+}

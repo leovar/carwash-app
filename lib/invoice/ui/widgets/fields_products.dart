@@ -60,15 +60,6 @@ class _FieldsProducts extends State<FieldsProducts> {
                   ),
                 ),
               ),
-              /*Align(
-                alignment: Alignment.centerRight,
-                child: IconButton(
-                  icon: Icon(
-                    Icons.keyboard_arrow_down,
-                    size: 30,
-                  ),
-                ),
-              ),*/
             ],
           ),
           decoration: BoxDecoration(

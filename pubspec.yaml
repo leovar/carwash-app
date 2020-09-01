@@ -60,6 +60,9 @@ dependencies:
   photo_view: ^0.9.2
   image_gallery_saver: ^1.2.2
 
+  #charts
+  syncfusion_flutter_charts: ^18.2.55
+
   #Conectivity
   connectivity: ^0.4.6+2
 

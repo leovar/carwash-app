@@ -1,6 +1,7 @@
 import 'package:car_wash_app/invoices_list/ui/screens/invoices_list_page.dart';
 import 'package:car_wash_app/location/bloc/bloc_location.dart';
 import 'package:car_wash_app/location/model/location.dart';
+import 'package:car_wash_app/reports/ui/screens/reports_page.dart';
 import 'package:car_wash_app/user/bloc/bloc_user.dart';
 import 'package:car_wash_app/user/model/user.dart';
 import 'package:car_wash_app/user/ui/widgets/select_location_widget.dart';
@@ -180,7 +181,9 @@ class _HomePage extends State<HomePage> {
                       builder: (context) => InvoicesListPage(
                         user: _currentUser,
                         locationReference: _locationReference,
-                      )));
+                      ),
+                  ),
+              );
             },
             buttonName: "FACTURAS",
             imageAsset: "assets/images/icon_facturas.png",
@@ -190,7 +193,14 @@ class _HomePage extends State<HomePage> {
           height: 10.0,
         ),
         ButtonFunctions(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ReportsPage()
+                ),
+              );
+            },
             buttonName: "INFORMES",
             imageAsset: "assets/images/icon_informes.png",
             buttonEnabled: _locationName.isNotEmpty ? true : false,

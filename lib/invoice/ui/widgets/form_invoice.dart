@@ -701,7 +701,9 @@ class _FormInvoice extends State<FormInvoice> {
 
   ///Functions Services or Products
   void _setProductsDb(List<Product> productListSelected) {
-    _listProduct = productListSelected;
+    setState(() {
+      _listProduct = productListSelected;
+    });
   }
 
   void _setAdditionalProducts(List<AdditionalProduct> additionalProductList) {
