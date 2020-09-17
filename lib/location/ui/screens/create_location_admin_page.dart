@@ -38,6 +38,7 @@ class _CreateLocationAdminPage extends State<CreateLocationAdminPage> {
   bool _locationActive = true;
   bool _sendSms = true;
   bool _sendWp = false;
+  bool _printIva = true;
   Location _locationSelected;
 
   @override
@@ -246,6 +247,32 @@ class _CreateLocationAdminPage extends State<CreateLocationAdminPage> {
             ),
             SizedBox(height: 9),
             Flexible(
+              child: Row(
+                children: <Widget>[
+                  Checkbox(
+                    value: _printIva,
+                    onChanged: (bool value) {
+                      setState(() {
+                        _printIva = value;
+                      });
+                    },
+                    checkColor: Colors.white,
+                    activeColor: Color(0xFF59B258),
+                  ),
+                  Text(
+                    "Imprimir Iva",
+                    style: TextStyle(
+                      fontFamily: "Lato",
+                      decoration: TextDecoration.none,
+                      color: Color(0xFFAEAEAE),
+                      fontSize: 15,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 9),
+            Flexible(
               child: _buttonSave(),
             ),
             SizedBox(height: 9),
@@ -301,6 +328,7 @@ class _CreateLocationAdminPage extends State<CreateLocationAdminPage> {
     _locationActive = _locationSelected.active;
     _sendSms = _locationSelected.sendMessageSms?? false;
     _sendWp = _locationSelected.sendMessageSms??true ? false : true;
+    _printIva = _locationSelected.printIva;
   }
 
   bool _validateInputs() {
@@ -383,6 +411,7 @@ class _CreateLocationAdminPage extends State<CreateLocationAdminPage> {
         active: _locationActive,
         creationDate: Timestamp.now(),
         sendMessageSms: _sendSms,
+        printIva: _printIva,
       );
 
       _blocLocation.updateLocationData(location);

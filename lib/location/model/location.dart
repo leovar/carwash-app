@@ -17,6 +17,7 @@ class Location extends Equatable {
   final Timestamp creationDate;
   final bool active;
   final bool sendMessageSms;
+  final bool printIva;
   bool isSelected;
 
   Location({
@@ -34,6 +35,7 @@ class Location extends Equatable {
     this.isSelected,
     this.active,
     this.sendMessageSms,
+    this.printIva,
   });
 
   factory Location.fromJson(Map<String, dynamic> json, {String id}) {
@@ -51,6 +53,7 @@ class Location extends Equatable {
         creationDate: json['creationDate'],
         active: json['active'],
         sendMessageSms: json['sendMessageSms'],
+        printIva: json['printIva'],
         isSelected: false);
   }
 
@@ -68,6 +71,7 @@ class Location extends Equatable {
       'creationDate': Timestamp.now(),
       'active': this.active,
       'sendMessageSms': this.sendMessageSms,
+      'printIva': this.printIva,
     };
   }
 
@@ -86,5 +90,6 @@ class Location extends Equatable {
         creationDate,
         active,
         sendMessageSms,
+        printIva,
       ];
 }

@@ -92,11 +92,11 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
         children: <Widget>[
           Container(
             decoration: BoxDecoration(color: Colors.white),
-            margin: EdgeInsets.only(top: 20),
+            margin: EdgeInsets.only(top: 40),
             child: Center(
               child: Image.asset(
                 'assets/images/logo-car-wash.png',
-                width: 250,
+                width: 290,
               ),
             ),
           ),
@@ -137,7 +137,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                       style: TextStyle(
                         fontFamily: "Lato",
                         decoration: TextDecoration.none,
-                        fontWeight: FontWeight.w300,
+                        fontWeight: FontWeight.w400,
                         color: Colors.black,
                         fontSize: 18,
                       ),
@@ -150,7 +150,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                       style: TextStyle(
                         fontFamily: "Lato",
                         decoration: TextDecoration.none,
-                        fontWeight: FontWeight.w300,
+                        fontWeight: FontWeight.w400,
                         color: Colors.black,
                         fontSize: 18,
                       ),
@@ -163,7 +163,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                       style: TextStyle(
                         fontFamily: "Lato",
                         decoration: TextDecoration.none,
-                        fontWeight: FontWeight.w300,
+                        fontWeight: FontWeight.w400,
                         color: Colors.black,
                         fontSize: 18,
                       ),
@@ -176,7 +176,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                       style: TextStyle(
                         fontFamily: "Lato",
                         decoration: TextDecoration.none,
-                        fontWeight: FontWeight.w300,
+                        fontWeight: FontWeight.w400,
                         color: Colors.black,
                         fontSize: 18,
                       ),
@@ -224,10 +224,23 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
             color: Colors.white,
           ),
           Container(
+            margin: EdgeInsets.only(right: 50, left: 50),
             child: Center(
-              child: Image.asset(
-                'assets/images/factura-impr-2.png',
-                //width: 250,
+              child: Flexible(
+                child: Text(
+                  'El operador y la empresa no se hacen responsables por: 1.fallas eléctricas o mecánicas del vehiculo. /2. '
+                  'Robo total o parcial del mismo. /3. Bienes olvidados dentro o fuera del vehículo sin inventario. /4. '
+                  'No se responde por afectaciones que no se vean debido al polvo. *No se aceptan reclamaciones posteriores '
+                  'a la entrega del servicio. *El servicio es independiente al centro comercial.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontFamily: "Lato",
+                    decoration: TextDecoration.none,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black,
+                    fontSize: 16,
+                  ),
+                ),
               ),
             ),
           ),
@@ -250,9 +263,9 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
             style: TextStyle(
               fontFamily: "Lato",
               decoration: TextDecoration.none,
-              fontWeight: FontWeight.w400,
+              fontWeight: FontWeight.w500,
               color: Colors.black,
-              fontSize: 18,
+              fontSize: 19,
             ),
           ),
           SizedBox(height: 7),
@@ -263,7 +276,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
               decoration: TextDecoration.none,
               fontWeight: FontWeight.w400,
               color: Colors.black,
-              fontSize: 18,
+              fontSize: 19,
             ),
           ),
           SizedBox(height: 7),
@@ -280,7 +293,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                     decoration: TextDecoration.none,
                     fontWeight: FontWeight.w400,
                     color: Colors.black,
-                    fontSize: 18,
+                    fontSize: 19,
                   ),
                 ),
                 Text(
@@ -291,7 +304,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                     decoration: TextDecoration.none,
                     fontWeight: FontWeight.w400,
                     color: Colors.black,
-                    fontSize: 18,
+                    fontSize: 19,
                   ),
                 ),
               ],
@@ -309,7 +322,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                   decoration: TextDecoration.none,
                   fontWeight: FontWeight.w400,
                   color: Colors.black,
-                  fontSize: 18,
+                  fontSize: 19,
                 ),
               ),
               Text(
@@ -320,7 +333,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                   decoration: TextDecoration.none,
                   fontWeight: FontWeight.w400,
                   color: Colors.black,
-                  fontSize: 18,
+                  fontSize: 19,
                 ),
               ),
             ],
@@ -337,7 +350,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                   decoration: TextDecoration.none,
                   fontWeight: FontWeight.w400,
                   color: Colors.black,
-                  fontSize: 18,
+                  fontSize: 19,
                 ),
               ),
               Text(
@@ -348,7 +361,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                   decoration: TextDecoration.none,
                   fontWeight: FontWeight.w400,
                   color: Colors.black,
-                  fontSize: 18,
+                  fontSize: 19,
                 ),
               ),
             ],
@@ -365,7 +378,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                   decoration: TextDecoration.none,
                   fontWeight: FontWeight.w400,
                   color: Colors.black,
-                  fontSize: 18,
+                  fontSize: 19,
                 ),
               ),
               Text(
@@ -376,7 +389,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                   decoration: TextDecoration.none,
                   fontWeight: FontWeight.w400,
                   color: Colors.black,
-                  fontSize: 18,
+                  fontSize: 19,
                 ),
               ),
             ],
@@ -393,7 +406,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                   decoration: TextDecoration.none,
                   fontWeight: FontWeight.w400,
                   color: Colors.black,
-                  fontSize: 18,
+                  fontSize: 19,
                 ),
               ),
               Text(
@@ -404,7 +417,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                   decoration: TextDecoration.none,
                   fontWeight: FontWeight.w400,
                   color: Colors.black,
-                  fontSize: 18,
+                  fontSize: 19,
                 ),
               ),
             ],
@@ -421,7 +434,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                   decoration: TextDecoration.none,
                   fontWeight: FontWeight.w400,
                   color: Colors.black,
-                  fontSize: 18,
+                  fontSize: 19,
                 ),
               ),
               Text(
@@ -432,7 +445,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                   decoration: TextDecoration.none,
                   fontWeight: FontWeight.w400,
                   color: Colors.black,
-                  fontSize: 18,
+                  fontSize: 19,
                 ),
               ),
             ],
@@ -444,9 +457,9 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
             style: TextStyle(
               fontFamily: "Lato",
               decoration: TextDecoration.none,
-              fontWeight: FontWeight.w400,
+              fontWeight: FontWeight.bold,
               color: Colors.black,
-              fontSize: 18,
+              fontSize: 19,
             ),
           ),
         ],
@@ -466,6 +479,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
           return ConstrainedBox(
             constraints: BoxConstraints(minHeight: 27),
             child: Container(
+              margin: EdgeInsets.only(bottom: 8),
               color: Colors.white,
               padding: EdgeInsets.symmetric(horizontal: 20),
               child: Row(
@@ -480,7 +494,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                         decoration: TextDecoration.none,
                         fontWeight: FontWeight.w400,
                         color: Colors.black,
-                        fontSize: 18,
+                        fontSize: 19,
                       ),
                     ),
                   ),
@@ -493,7 +507,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                         decoration: TextDecoration.none,
                         fontWeight: FontWeight.w400,
                         color: Colors.black,
-                        fontSize: 18,
+                        fontSize: 19,
                       ),
                     ),
                   ),
@@ -518,6 +532,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
           return ConstrainedBox(
             constraints: BoxConstraints(minHeight: 27),
             child: Container(
+              margin: EdgeInsets.only(bottom: 8),
               color: Colors.white,
               padding: EdgeInsets.symmetric(horizontal: 20),
               child: Row(
@@ -532,7 +547,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                         decoration: TextDecoration.none,
                         fontWeight: FontWeight.w400,
                         color: Colors.black,
-                        fontSize: 18,
+                        fontSize: 19,
                       ),
                     ),
                   ),
@@ -545,7 +560,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                         decoration: TextDecoration.none,
                         fontWeight: FontWeight.w400,
                         color: Colors.black,
-                        fontSize: 18,
+                        fontSize: 19,
                       ),
                     ),
                   ),
@@ -564,60 +579,66 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
       padding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
       child: Column(
         children: <Widget>[
-          Row(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Text(
-                'Subtotal:',
-                style: TextStyle(
-                  fontFamily: "Lato",
-                  decoration: TextDecoration.none,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                  fontSize: 18,
+          Visibility(
+            visible: _location.printIva ?? true,
+            child: Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Text(
+                  'Subtotal:',
+                  style: TextStyle(
+                    fontFamily: "Lato",
+                    decoration: TextDecoration.none,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                    fontSize: 19,
+                  ),
                 ),
-              ),
-              Text(
-                '\$${numberFormatter.format(widget.currentInvoice.subtotal)}',
-                textAlign: TextAlign.right,
-                style: TextStyle(
-                  fontFamily: "Lato",
-                  decoration: TextDecoration.none,
-                  fontWeight: FontWeight.w400,
-                  color: Colors.black,
-                  fontSize: 18,
+                Text(
+                  '\$${numberFormatter.format(widget.currentInvoice.subtotal)}',
+                  textAlign: TextAlign.right,
+                  style: TextStyle(
+                    fontFamily: "Lato",
+                    decoration: TextDecoration.none,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.black,
+                    fontSize: 19,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           SizedBox(height: 7),
-          Row(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Text(
-                'Iva:',
-                style: TextStyle(
-                  fontFamily: "Lato",
-                  decoration: TextDecoration.none,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                  fontSize: 18,
+          Visibility(
+            visible: _location.printIva ?? true,
+            child: Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Text(
+                  'Iva:',
+                  style: TextStyle(
+                    fontFamily: "Lato",
+                    decoration: TextDecoration.none,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                    fontSize: 19,
+                  ),
                 ),
-              ),
-              Text(
-                '\$${numberFormatter.format(widget.currentInvoice.iva)}',
-                textAlign: TextAlign.right,
-                style: TextStyle(
-                  fontFamily: "Lato",
-                  decoration: TextDecoration.none,
-                  fontWeight: FontWeight.w400,
-                  color: Colors.black,
-                  fontSize: 18,
+                Text(
+                  '\$${numberFormatter.format(widget.currentInvoice.iva)}',
+                  textAlign: TextAlign.right,
+                  style: TextStyle(
+                    fontFamily: "Lato",
+                    decoration: TextDecoration.none,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.black,
+                    fontSize: 19,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           SizedBox(height: 7),
           Row(
@@ -631,7 +652,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                   decoration: TextDecoration.none,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
-                  fontSize: 18,
+                  fontSize: 19,
                 ),
               ),
               Text(
@@ -642,7 +663,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                   decoration: TextDecoration.none,
                   fontWeight: FontWeight.w400,
                   color: Colors.black,
-                  fontSize: 18,
+                  fontSize: 19,
                 ),
               ),
             ],
@@ -708,7 +729,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
             filePathResult.indexOf('storage') - 1, filePathResult.length);
       } else {
         im.Image imageDecode = im.decodePng(pngBytes);
-        im.Image thumbnail = im.copyResize(imageDecode, width: 500);
+        im.Image thumbnail = im.copyResize(imageDecode, width: 560);
 
         //Save resized image
         File(filePath).writeAsBytesSync(im.encodePng(thumbnail));

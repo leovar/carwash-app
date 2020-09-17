@@ -194,12 +194,14 @@ class _HomePage extends State<HomePage> {
         ),
         ButtonFunctions(
             onPressed: () {
+              /*
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => ReportsPage()
                 ),
               );
+              */
             },
             buttonName: "INFORMES",
             imageAsset: "assets/images/icon_informes.png",
