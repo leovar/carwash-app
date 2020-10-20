@@ -29,11 +29,12 @@ class HomePage extends StatefulWidget {
 class _HomePage extends State<HomePage> {
   GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey();
   final _locationBloc = BlocLocation();
-  UserBloc userBloc;
+  UserBloc _userBloc;
   User _currentUser;
   String _photoUrl = '';
   DocumentReference _locationReference;
   String _locationName = '';
+  bool _showReportsButton = false;
 
   @override
   void initState() {
@@ -42,10 +43,10 @@ class _HomePage extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    userBloc = BlocProvider.of(context);
+    _userBloc = BlocProvider.of(context);
     this._getPreferences();
     return StreamBuilder(
-      stream: userBloc.streamFirebase,
+      stream: _userBloc.streamFirebase,
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         switch (snapshot.connectionState) {
           /*case ConnectionState.waiting:
@@ -68,7 +69,7 @@ class _HomePage extends State<HomePage> {
 
   Widget _getUserDb(AsyncSnapshot snapshot) {
     return StreamBuilder(
-      stream: userBloc.getUsersByIdStream(snapshot.data.uid),
+      stream: _userBloc.getUsersByIdStream(snapshot.data.uid),
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.waiting:
@@ -82,9 +83,12 @@ class _HomePage extends State<HomePage> {
 
   Widget _chargeHome(AsyncSnapshot snapshot) {
     if (snapshot.data.documents.length > 0) {
-      User user = userBloc.buildUsersById(snapshot.data.documents);
+      User user = _userBloc.buildUsersById(snapshot.data.documents);
       this._currentUser = user;
       this._currentUser.photoUrl = _photoUrl;
+      if (user.isAdministrator) {
+        _showReportsButton = true;
+      }
       return homePage();
     } else {
       _deleteLocationPreference();
@@ -192,18 +196,21 @@ class _HomePage extends State<HomePage> {
         SizedBox(
           height: 10.0,
         ),
-        ButtonFunctions(
+        Visibility(
+          visible: _showReportsButton,
+          child: ButtonFunctions(
             onPressed: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ReportsPage()
+                    builder: (context) => ReportsPage()
                 ),
               );
             },
             buttonName: "INFORMES",
             imageAsset: "assets/images/icon_informes.png",
             buttonEnabled: _locationName.isNotEmpty ? true : false,
+          ),
         ),
       ],
     );
@@ -286,6 +293,6 @@ class _HomePage extends State<HomePage> {
   }
 
   Future<void> _logOut() async {
-    await userBloc.singOut();
+    await _userBloc.singOut();
   }
  }

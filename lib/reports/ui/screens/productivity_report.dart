@@ -1,10 +1,19 @@
+import 'package:car_wash_app/invoice/bloc/bloc_invoice.dart';
+import 'package:car_wash_app/invoice/model/invoice.dart';
 import 'package:car_wash_app/location/bloc/bloc_location.dart';
 import 'package:car_wash_app/location/model/location.dart';
+import 'package:car_wash_app/product/model/product.dart';
 import 'package:car_wash_app/reports/bloc/bloc_reports.dart';
+import 'package:car_wash_app/reports/model/card_report.dart';
+import 'package:car_wash_app/reports/model/products_card_detail.dart';
+import 'package:car_wash_app/reports/ui/widgets/info_detail_card_productivity.dart';
+import 'package:car_wash_app/reports/ui/widgets/item_productivity_report_list.dart';
+import 'package:car_wash_app/widgets/messages_utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 class ProductivityReport extends StatefulWidget {
@@ -15,8 +24,11 @@ class ProductivityReport extends StatefulWidget {
 class _ProductivityReport extends State<ProductivityReport> {
   BlocReports _blocReports  = BlocReports();
   BlocLocation _blocLocation = BlocLocation();
+  BlocInvoice _blocInvoice = BlocInvoice();
   List<DropdownMenuItem<Location>> _dropdownMenuItems;
   Location _selectedLocation;
+  List<CardReport> _listCardReport = [];
+  List<Invoice> _listInvoices = [];
 
   final _textDateInit = TextEditingController();
   final _textDateFinal = TextEditingController();
@@ -34,21 +46,24 @@ class _ProductivityReport extends State<ProductivityReport> {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      padding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-      scrollDirection: Axis.vertical,
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      mainAxisSize: MainAxisSize.max,
       children: <Widget>[
         _filterParamsReport(),
         SizedBox(
-          height: 10.0,
+          height: 8.0,
         ),
-        _getDataReport(),
+        Expanded(
+          child: _getDataReport(),
+        ),
       ],
     );
   }
 
   Widget _filterParamsReport() {
     return Container(
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
@@ -102,15 +117,37 @@ class _ProductivityReport extends State<ProductivityReport> {
   Widget _containerList(AsyncSnapshot snapshot) {
     switch (snapshot.connectionState) {
       case ConnectionState.waiting:
-        break;
+        return Center(
+          child: CircularProgressIndicator(),
+        );
       default:
-        final _listInvoices = _blocReports.buildProductivityReportList(snapshot.data.documents);
-        _listInvoices.sort((a, b) => b.consecutive.compareTo(a.consecutive));
+        _listInvoices = _blocReports.buildProductivityReportList(snapshot.data.documents);
+        _updateInvoices(_listInvoices);  //TODO esta llamada se debe comentar o eliminar cuando se actualizce al app en los celulares que la usan
+        _listCardReport = _processInvoicesOperator(_listInvoices);
+        _listCardReport.sort((a, b) => b.countServices.compareTo(a.countServices));
     }
 
-    return Container();
+    if (_listInvoices.length > 0 && _selectedLocation != null) {
+      return ListView.builder(
+        itemCount: _listCardReport.length,
+        scrollDirection: Axis.vertical,
+        itemBuilder: (BuildContext context, int index) {
+          return ItemProductivityReportList(
+              cardReport: _listCardReport[index],
+              servicesDetail: _openServicesDetail
+          );
+        },
+      );
+    } else {
+      return Container(
+        child: Center(
+          child: Text('No hay información para mostrar'),
+        ),
+      );
+    }
   }
 
+  /// Locations filter section
   Widget _locationsList() {
     return StreamBuilder(
       stream: _blocLocation.locationsStream,
@@ -127,7 +164,6 @@ class _ProductivityReport extends State<ProductivityReport> {
     );
   }
 
-  /// Locations filter section
   Widget _chargeDropLocations(AsyncSnapshot snapshot) {
     List<Location> locationList =
     _blocLocation.buildLocations(snapshot.data.documents);
@@ -175,7 +211,6 @@ class _ProductivityReport extends State<ProductivityReport> {
   }
 
   /// Functions
-
   onChangeDropDawn(Location selectedLocation) async {
     _locationReference = await _blocLocation.getLocationReference(selectedLocation.id);
     setState(() {
@@ -213,5 +248,113 @@ class _ProductivityReport extends State<ProductivityReport> {
     }
   }
 
+  List<CardReport> _processInvoicesOperator (List<Invoice> _listInvoices) {
+    List<CardReport> _cardList = [];
+    int count  = 0;
+    try {
+      _listInvoices.forEach((item) {
+        count++;
+        if (_cardList.length > 0) {
+          CardReport cardInfo = _cardList.firstWhere((x) => x.operatorReference == item.userOperator && x.locationName == item.locationName, orElse: () => null,);
+          if(cardInfo == null) {
+            final newOperatorCard = CardReport(
+                item.userOperatorName,
+                item.userOperator,
+                item.locationName,
+                item.countProducts + item.countAdditionalProducts,
+                item.totalPrice
+            );
+            _cardList.add(newOperatorCard);
+          } else {
+            cardInfo.countServices = cardInfo.countServices + item.countProducts + item.countAdditionalProducts;
+            cardInfo.totalPrice = cardInfo.totalPrice + item.totalPrice;
+            int indexData = _cardList.indexOf(cardInfo);
+            _cardList[indexData] = cardInfo;
+          }
+        } else {
+          final newOperatorCard = CardReport(
+              item.userOperatorName,
+              item.userOperator,
+              item.locationName,
+              item.countProducts + item.countAdditionalProducts,
+              item.totalPrice
+          );
+          _cardList.add(newOperatorCard);
+        }
+      });
+      return _cardList;
+    } catch(_error) {
+      print(_error.message);
+    }
+  }
 
+  Future<void> _openServicesDetail(DocumentReference operatorReference) async {
+    List<ProductsCardDetail> _productList = [];
+    final operatorInvoices = _listInvoices.where((f) => f.userOperator == operatorReference);
+    Alert(
+        context: context,
+        title: '',
+        style: MessagesUtils.alertStyle,
+        content: Center(
+          child: CircularProgressIndicator(),
+        ),
+        buttons: []).show();
+    final dataProducts = await _blocReports.getProductsByInvoicesReport(operatorInvoices);
+
+    dataProducts.forEach((e) {
+      if (_productList.length == 0) {
+        final productDetail = ProductsCardDetail(
+            e.productName,
+            1,
+            e.price
+        );
+        _productList.add(productDetail);
+      } else {
+        ProductsCardDetail _productInfo = _productList.firstWhere((x) => x.productName == e.productName, orElse: () => null,);
+        if (_productInfo == null) {
+          final productDetail = ProductsCardDetail(
+              e.productName,
+              1,
+              e.price
+          );
+          _productList.add(productDetail);
+        } else {
+          _productInfo.countServices = _productInfo.countServices + 1;
+          _productInfo.totalPrice = _productInfo.totalPrice + e.price;
+          int indexData = _productList.indexOf(_productInfo);
+          _productList[indexData] = _productInfo;
+        }
+      }
+    });
+
+    if (dataProducts.length > 0) {
+      Navigator.pop(context);
+      Alert(
+          context: context,
+          title: 'Detalle de productos',
+          style: MessagesUtils.alertStyle,
+          content: InfoDetailCardProductivity(
+            productivityProducts: _productList,
+          ),
+          buttons: [
+            DialogButton(
+              color: Theme.of(context).accentColor,
+              child: Text(
+                'ACEPTAR',
+                style: Theme.of(context).textTheme.button,
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+                setState(() {});
+              },
+            )
+          ]).show();
+
+    }
+  }
+
+  void _updateInvoices(List<Invoice> _invoice) async {
+    ///TODO este metodo se llama para agregar los campos de countProducts a las facturas que no lo tienen aun
+    _blocReports.updateInfoInvoices(_invoice);
+  }
 }

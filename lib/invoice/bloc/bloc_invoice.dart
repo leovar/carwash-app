@@ -149,7 +149,7 @@ class BlocInvoice implements Bloc {
     );
   }
 
-  List<Invoice> buildInvoicesListByMonth(
+    List<Invoice> buildInvoicesListByMonth(
       List<DocumentSnapshot> invoicesListSnapshot) {
     return _invoiceRepository.buildInvoicesListByMonth(invoicesListSnapshot);
   }

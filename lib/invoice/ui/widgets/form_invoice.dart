@@ -53,7 +53,6 @@ class FormInvoice extends StatefulWidget {
 
 class _FormInvoice extends State<FormInvoice> {
   BlocInvoice _blocInvoice;
-  final _productBloc = ProductBloc();
   final _customerBloc = BlocCustomer();
   final _blocVehicle = BlocVehicle();
   final _userBloc = UserBloc();
@@ -881,6 +880,8 @@ class _FormInvoice extends State<FormInvoice> {
         double _total = 0;
         double _iva = 0;
         double _subTotal = 0;
+        int _countProducts = 0;
+        int _countAdditionalProducts = 0;
 
         //Get Current user reference
         DocumentReference _userRef = await _userBloc.getCurrentUserReference();
@@ -950,7 +951,7 @@ class _FormInvoice extends State<FormInvoice> {
               await _customerBloc.updateCustomer(customerUpdate);
         }
 
-        //Get products and values
+        //Obtiene los valores de los productos para calcular el subtotal, iva y total
         _listProduct.forEach((product) {
           //If at least only one services is special
           if (product.productType == _tagSpecialService)
@@ -979,6 +980,11 @@ class _FormInvoice extends State<FormInvoice> {
           _total = _total + double.parse(addProduct.productValue ?? '0');
         });
 
+        //Get count products
+        _countProducts = _listProduct.where((f) => f.isSelected).toList().length;
+        _countAdditionalProducts = _listAdditionalProducts.length;
+
+
         //Get Consecutive
         int _consecutive =
             await _blocInvoice.getLastConsecutiveByLocation(_locationReference);
@@ -988,7 +994,7 @@ class _FormInvoice extends State<FormInvoice> {
           _consecutive++;
         }
 
-        final invoice = Invoice(
+        final _invoice = Invoice(
           id: widget.editInvoice != null ? widget.editInvoice.id : null,
           consecutive: widget.editInvoice != null
               ? widget.editInvoice.consecutive
@@ -1031,9 +1037,11 @@ class _FormInvoice extends State<FormInvoice> {
           observation: _textObservation.text.trim(),
           incidence: _textIncidence.text.trim(),
           haveSpecialService: _haveServiceSpecial,
+          countProducts: _countProducts,
+          countAdditionalProducts: _countAdditionalProducts,
         );
         DocumentReference invoiceReference =
-            await _blocInvoice.saveInvoice(invoice);
+            await _blocInvoice.saveInvoice(_invoice);
         String invoiceId = invoiceReference.documentID;
         Invoice _currentInvoiceSaved =
             await _blocInvoice.getInvoiceById(invoiceId);
