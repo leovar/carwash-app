@@ -248,6 +248,7 @@ class InvoiceRepository {
           product.ivaPercent,
           false,
           product.id,
+          product.productType,
         ));
   }
 
@@ -265,7 +266,26 @@ class InvoiceRepository {
           additionalProduct.ivaPercent,
           true,
           null,
+          additionalProduct.productType,
         ));
+  }
+
+  /// Update Invoice Products
+  Future<void> updateInvoiceProduct(String invoiceId, Product product) async {
+    DocumentReference ref =
+    _db
+        .collection(FirestoreCollections.invoices)
+        .document(invoiceId)
+        .collection(FirestoreCollections.products)
+        .document(product.productInvoiceId);
+    ref.setData(Product().toJsonInvoiceProduct(
+      product.productName,
+      product.price,
+      product.ivaPercent,
+      product.isAdditional,
+      product.id,
+      product.productType,
+    ), merge: true);
   }
 
   ///Get invoices list from current Month
@@ -339,8 +359,7 @@ class InvoiceRepository {
     final documents = querySnapshot.documents;
     if (documents.length > 0) {
       documents.forEach((document) {
-        Product product =
-            Product.fromJson(document.data, id: document.documentID);
+        Product product = Product.fromJson(document.data, id: document.documentID);
         productList.add(product);
       });
     }

@@ -177,6 +177,7 @@ class _ProductsInvoicePage extends State<ProductsInvoicePage> {
                       setCbAdditionalProducts: widget.cbAdditionalProducts,
                       additionalProductsList: widget.additionalProductListCb,
                       editForm: widget.editForm,
+                      vehicleTypeSelect: widget.vehicleTypeSelect,
                     ),
                   ),
                 );

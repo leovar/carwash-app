@@ -1,5 +1,6 @@
 
 import 'package:car_wash_app/invoice/model/invoice.dart';
+import 'package:car_wash_app/product/model/product.dart';
 import 'package:car_wash_app/widgets/firestore_collections.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 

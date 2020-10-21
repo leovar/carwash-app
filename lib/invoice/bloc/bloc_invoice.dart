@@ -194,6 +194,10 @@ class BlocInvoice implements Bloc {
     return _invoiceRepository.getInvoiceByIdInvoice(invoiceId);
   }
 
+  Future<void> updateInvoiceProduct(String invoiceId, Product product) {
+    return _invoiceRepository.updateInvoiceProduct(invoiceId, product);
+  }
+
   @override
   void dispose() {}
 }

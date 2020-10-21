@@ -250,10 +250,8 @@ class _ProductivityReport extends State<ProductivityReport> {
 
   List<CardReport> _processInvoicesOperator (List<Invoice> _listInvoices) {
     List<CardReport> _cardList = [];
-    int count  = 0;
     try {
       _listInvoices.forEach((item) {
-        count++;
         if (_cardList.length > 0) {
           CardReport cardInfo = _cardList.firstWhere((x) => x.operatorReference == item.userOperator && x.locationName == item.locationName, orElse: () => null,);
           if(cardInfo == null) {
@@ -290,7 +288,7 @@ class _ProductivityReport extends State<ProductivityReport> {
 
   Future<void> _openServicesDetail(DocumentReference operatorReference) async {
     List<ProductsCardDetail> _productList = [];
-    final operatorInvoices = _listInvoices.where((f) => f.userOperator == operatorReference);
+    final operatorInvoices = _listInvoices.where((f) => f.userOperator == operatorReference).toList();
     Alert(
         context: context,
         title: '',
@@ -304,16 +302,16 @@ class _ProductivityReport extends State<ProductivityReport> {
     dataProducts.forEach((e) {
       if (_productList.length == 0) {
         final productDetail = ProductsCardDetail(
-            e.productName,
+            e.productType??'Adicional',
             1,
             e.price
         );
         _productList.add(productDetail);
       } else {
-        ProductsCardDetail _productInfo = _productList.firstWhere((x) => x.productName == e.productName, orElse: () => null,);
+        ProductsCardDetail _productInfo = _productList.firstWhere((x) => x.typeProductName == (e.productType??'Adicional'), orElse: () => null,);
         if (_productInfo == null) {
           final productDetail = ProductsCardDetail(
-              e.productName,
+              e.productType??'Adicional',
               1,
               e.price
           );
@@ -355,6 +353,7 @@ class _ProductivityReport extends State<ProductivityReport> {
 
   void _updateInvoices(List<Invoice> _invoice) async {
     ///TODO este metodo se llama para agregar los campos de countProducts a las facturas que no lo tienen aun
-    _blocReports.updateInfoInvoices(_invoice);
+    //_blocReports.updateInfoInvoices(_invoice);
+    //_blocReports.updateInfoProductsInvoice(_invoice);
   }
 }

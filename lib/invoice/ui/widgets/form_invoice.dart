@@ -1168,6 +1168,7 @@ class _FormInvoice extends State<FormInvoice> {
           prodSelected.price.toString(),
           prodSelected.ivaPercent,
           false,
+          prodSelected.productType,
         );
         _listAdditionalProducts.add(addProd);
       }

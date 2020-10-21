@@ -19,10 +19,10 @@ class InfoDetailCardProductivity extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Text(
-              '${_listProducts.length} diferentes productos',
+              '${_listProducts.length} tipos de servicio',
               style: Theme.of(context).textTheme.display2),
           Container(
-            height: 300,
+            height: 160,
             width: _widthContainer,
             child: ListView.builder(
               itemCount: _listProducts.length,
@@ -74,7 +74,7 @@ class InfoDetailCardProductivity extends StatelessWidget {
                 children: <Widget>[
                   Flexible(
                     child: Text(
-                      product.productName,
+                      product.typeProductName,
                       style: TextStyle(
                         fontFamily: "Lato",
                         decoration: TextDecoration.none,

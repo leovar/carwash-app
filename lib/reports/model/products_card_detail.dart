@@ -1,10 +1,10 @@
 class ProductsCardDetail {
-  final String productName;
+  final String typeProductName;
   int countServices;
   double totalPrice;
 
   ProductsCardDetail(
-      this.productName,
+      this.typeProductName,
       this.countServices,
       this.totalPrice,
       );
