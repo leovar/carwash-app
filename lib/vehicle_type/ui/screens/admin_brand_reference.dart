@@ -3,9 +3,9 @@ import 'package:car_wash_app/invoice/ui/widgets/text_field_input.dart';
 import 'package:car_wash_app/vehicle_type/bloc/vehicle_type_bloc.dart';
 import 'package:car_wash_app/vehicle_type/model/brand.dart';
 import 'package:car_wash_app/vehicle_type/model/brand_reference.dart';
+import 'package:car_wash_app/vehicle_type/ui/screens/admin_create_brand.dart';
 import 'package:car_wash_app/vehicle_type/ui/widgets/item_brand_reference_list.dart';
 import 'package:car_wash_app/widgets/messages_utils.dart';
-import 'package:car_wash_app/widgets/popup_menu_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
@@ -76,7 +76,11 @@ class _AdminBrandReference extends State<AdminBrandReference> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            SizedBox(height: 12),
+            SizedBox(height: 10),
+            Flexible(
+              child: _addNewBrandButton(),
+            ),
+            SizedBox(height: 10),
             Flexible(
               child: _dropVehicleBrand(),
             ),
@@ -101,6 +105,44 @@ class _AdminBrandReference extends State<AdminBrandReference> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _addNewBrandButton() {
+    return Row(
+      children: <Widget>[
+        FloatingActionButton(
+          child: Icon(
+            Icons.add,
+            color: Colors.white,
+            size: 30,
+          ),
+          backgroundColor: Theme.of(context).accentColor,
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) {
+                return BlocProvider<VehicleTypeBloc>(
+                  bloc: VehicleTypeBloc(),
+                  child: AdminCreateBrand(),
+                );
+              }),
+            );
+          },
+        ),
+        Container(
+          margin: EdgeInsets.only(left: 15),
+          child: Text(
+            "Agregar Marcas",
+            style: TextStyle(
+              fontFamily: "Lato",
+              decoration: TextDecoration.none,
+              color: Color(0xFFAEAEAE),
+              fontSize: 15,
+            ),
+          ),
+        ),
+      ],
     );
   }
 
