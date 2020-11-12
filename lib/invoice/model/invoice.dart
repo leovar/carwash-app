@@ -44,6 +44,8 @@ class Invoice extends Equatable {
   final String observation;
   final String incidence;
   final bool haveSpecialService;
+  final int countProducts;
+  final int countAdditionalProducts;
 
   Invoice({
     this.id,
@@ -77,6 +79,8 @@ class Invoice extends Equatable {
     this.observation,
     this.incidence,
     this.haveSpecialService,
+    this.countProducts,
+    this.countAdditionalProducts,
   });
 
   Map<String, dynamic> toJson() {
@@ -108,6 +112,8 @@ class Invoice extends Equatable {
       'observation': this.observation,
       'incidence': this.incidence,
       'haveSpecialService': this.haveSpecialService,
+      'countProducts': this.countProducts,
+      'countAdditionalProducts': this.countAdditionalProducts,
     };
   }
 
@@ -147,6 +153,8 @@ class Invoice extends Equatable {
       observation: json['observation'],
       incidence: json['incidence'],
       haveSpecialService: json['haveSpecialService'],
+      countProducts: json['countProducts'],
+      countAdditionalProducts: json['countAdditionalProducts'],
     );
   }
 
@@ -155,6 +163,8 @@ class Invoice extends Equatable {
     Timestamp closedDate,
     bool invoiceClosed,
     List<Product> listProducts,
+    int countProducts,
+    int countAdditionalProducts,
   }) {
     return Invoice(
       id: origin.id,
@@ -186,6 +196,8 @@ class Invoice extends Equatable {
       observation: origin.observation,
       incidence: origin.incidence,
       haveSpecialService: origin.haveSpecialService,
+      countProducts: countProducts ?? origin.countProducts,
+      countAdditionalProducts: countAdditionalProducts ?? origin.countAdditionalProducts,
     );
   }
 
@@ -220,5 +232,7 @@ class Invoice extends Equatable {
     observation,
     incidence,
     haveSpecialService,
+    countProducts,
+    countAdditionalProducts,
   ];
 }

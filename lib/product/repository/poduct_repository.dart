@@ -53,4 +53,15 @@ class ProductRepository {
         _db.collection(FirestoreCollections.products).document(product.id);
     return await ref.setData(product.toJson(), merge: true);
   }
+
+  /// Get Vehicle Reference
+  Future<Product> getProductById(String productId) async {
+    final querySnapshot = await this
+        ._db
+        .collection(FirestoreCollections.products)
+        .document(productId)
+        .get();
+
+    return Product.fromJson(querySnapshot.data, id: querySnapshot.documentID);
+  }
 }

@@ -1,4 +1,5 @@
 import 'package:car_wash_app/invoice/model/additional_product.dart';
+import 'package:car_wash_app/invoice/model/header_services.dart';
 import 'package:car_wash_app/invoice/ui/widgets/text_field_input.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -6,10 +7,11 @@ import 'package:flutter/services.dart';
 class AdditionalProductPage extends StatefulWidget {
   final Function(List<AdditionalProduct>) setCbAdditionalProducts;
   final List<AdditionalProduct> additionalProductsList;
+  final HeaderServices vehicleTypeSelect;
   final bool editForm;
 
   AdditionalProductPage(
-      {Key key, this.setCbAdditionalProducts, this.additionalProductsList, this.editForm});
+      {Key key, this.setCbAdditionalProducts, this.additionalProductsList, this.editForm, this.vehicleTypeSelect,});
 
   @override
   State<StatefulWidget> createState() {
@@ -240,9 +242,14 @@ class _AdditionalProductPage extends State<AdditionalProductPage> {
   }
 
   void _addAdditionalProduct() {
+    String productType = 'Sencillo';
     double _iva = 0;
     if(_checkIva) {
       _iva = 19;
+    }
+    
+    if (widget.vehicleTypeSelect.uid.toString().contains('1') || widget.vehicleTypeSelect.uid.toString().contains('2')) {
+      productType = 'Especial';
     }
 
     AdditionalProduct product = AdditionalProduct(
@@ -250,6 +257,7 @@ class _AdditionalProductPage extends State<AdditionalProductPage> {
       _valueAdditionalService.text,
       _iva,
       true,
+      productType
     );
 
     _checkIva = false;

@@ -1,3 +1,4 @@
+import 'package:car_wash_app/vehicle_type/model/brand.dart';
 import 'package:car_wash_app/vehicle_type/model/brand_reference.dart';
 import 'package:car_wash_app/vehicle_type/model/vehicleType.dart';
 import 'package:car_wash_app/vehicle_type/repository/vehicle_type_repository.dart';
@@ -36,6 +37,10 @@ class VehicleTypeBloc extends Bloc {
   void updateBrandReference(
       String brandId, BrandReference brandReference) async {
     return _vehicleTypeRepository.updateBrandReference(brandId, brandReference);
+  }
+
+  void updateBrand(Brand brand) async {
+    return _vehicleTypeRepository.updateBrand(brand);
   }
 
   @override

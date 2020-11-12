@@ -21,6 +21,13 @@ class Brand extends Equatable {
     );
   }
 
+  Map<String, dynamic> toJson() {
+    return {
+      'brand': this.brand,
+      'vehicleType': this.vehicleType,
+    };
+  }
+
   @override
   List<Object> get props => [
     id,

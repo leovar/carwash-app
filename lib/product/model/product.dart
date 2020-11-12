@@ -19,6 +19,7 @@ class Product extends Equatable {
   final bool isAdditional;
   bool newProduct;
   final String productType;
+  final String productInvoiceId;
 
   Product({
     this.id,
@@ -33,6 +34,7 @@ class Product extends Equatable {
     this.isAdditional,
     this.newProduct,
     this.productType,
+    this.productInvoiceId,
   });
 
   factory Product.fromJson(Map<String, dynamic> json, {String id}) {
@@ -76,6 +78,7 @@ class Product extends Equatable {
       locations: locationsListDb,
       isSelected: true,
       productType: json['productType'],
+      productInvoiceId : id,
     );
   }
 
@@ -98,6 +101,7 @@ class Product extends Equatable {
       double ivaPercent,
       bool isAdditional,
       String productId,
+      String productType,
       ) {
     return {
       'productName': productName,
@@ -105,6 +109,7 @@ class Product extends Equatable {
       'ivaPercent': ivaPercent,
       'isAdditional': isAdditional,
       'productId': productId,
+      'productType': productType,
     };
   }
 
@@ -113,6 +118,8 @@ class Product extends Equatable {
     bool isSelected,
     double price,
     double ivaPercent,
+    String productType,
+    String productInvoiceId,
   }) {
     return Product(
       id: origin.id,
@@ -125,7 +132,8 @@ class Product extends Equatable {
       vehicleTypeUid: origin.vehicleTypeUid,
       isSelected: isSelected ?? origin.isSelected,
       isAdditional: origin.isAdditional,
-      productType: origin.productType,
+      productType: productType ?? origin.productType,
+      productInvoiceId: productInvoiceId??'',
     );
   }
 
@@ -141,5 +149,6 @@ class Product extends Equatable {
     vehicleTypeUid,
     isSelected,
     productType,
+    productInvoiceId,
   ];
 }

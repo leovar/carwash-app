@@ -433,13 +433,13 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
           break;
         case 2:
           _userAdministrator = false;
-          _userOperator = false;
+          //_userOperator = false; // Se comenta por que un uusario coordinador también puede ser operador
           _userCoordinator = value;
           break;
         case 3:
           _userAdministrator = false;
           _userOperator = value;
-          _userCoordinator = false;
+          //_userCoordinator = false;
           break;
       }
     });
@@ -516,7 +516,7 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
           id: _userSelected != null ? _userSelected.id : null,
           uid: _userSelected != null ? _userSelected.uid : userNewRegister,
           name: _textUserName.text.trim(),
-          email: _textEmail.text.trim(),
+          email: _textEmail.text.toLowerCase().trim(),
           photoUrl: _imageUrl,
           lastSignIn: Timestamp.now(),
           active: _userActive,

@@ -1,3 +1,4 @@
+import 'package:car_wash_app/vehicle_type/model/brand.dart';
 import 'package:car_wash_app/vehicle_type/model/brand_reference.dart';
 import 'package:car_wash_app/vehicle_type/model/vehicleType.dart';
 import 'package:car_wash_app/widgets/firestore_collections.dart';
@@ -79,5 +80,14 @@ class VehicleTypeRepository {
         .collection(FirestoreCollections.brandReferences)
         .document(product.id);
     return await ref.setData(product.toJson(), merge: true);
+  }
+
+  // Save Brand
+  void updateBrand(Brand brand) async {
+    DocumentReference ref =
+    _db
+        .collection(FirestoreCollections.brands)
+        .document(brand.id);
+    return await ref.setData(brand.toJson(), merge: true);
   }
 }

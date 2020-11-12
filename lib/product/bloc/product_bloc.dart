@@ -17,6 +17,10 @@ class ProductBloc implements Bloc {
     return _productRepository.updateProduct(product);
   }
 
+  Future<Product> getProductById(String productId) {
+    return _productRepository.getProductById(productId);
+  }
+
 
   @override
   void dispose() {

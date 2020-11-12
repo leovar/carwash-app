@@ -23,6 +23,7 @@ class BlocInvoice implements Bloc {
   //3. guardar las url de las fotos en la factura creada
   //4. consultar y generar nuevo consecutivo
 
+  /// Save Invoice and products
   Future<DocumentReference> saveInvoice(Invoice invoice) async {
     DocumentReference ref = await _invoiceRepository.updateInvoiceData(invoice);
     String invoiceId = ref.documentID;
@@ -51,6 +52,22 @@ class BlocInvoice implements Bloc {
     }
 
     return ref;
+  }
+
+  Future<void> saveInvoiceProduct(
+      String invoiceId, List<Product> listProducts) async {
+    listProducts.forEach((product) {
+      if (product.newProduct ?? true) {
+        _invoiceRepository.saveInvoiceProduct(invoiceId, product);
+      }
+    });
+  }
+
+  Future<void> saveInvoiceAdditionalProducts(
+      String invoiceId, List<AdditionalProduct> additionalProducts) async {
+    additionalProducts.forEach((addProduct) {
+      _invoiceRepository.saveInvoiceAdditionalProducts(invoiceId, addProduct);
+    });
   }
 
   Future<DocumentReference> getVehicleTypeReference(String vehicleType) {
@@ -149,7 +166,7 @@ class BlocInvoice implements Bloc {
     );
   }
 
-  List<Invoice> buildInvoicesListByMonth(
+    List<Invoice> buildInvoicesListByMonth(
       List<DocumentSnapshot> invoicesListSnapshot) {
     return _invoiceRepository.buildInvoicesListByMonth(invoicesListSnapshot);
   }
@@ -157,22 +174,6 @@ class BlocInvoice implements Bloc {
   /// Get invoices list for placa
   Future<List<Invoice>> getListInvoicesByVehicle(String vehicleId) async {
     return await _invoiceRepository.getListInvoicesByVehicle(vehicleId);
-  }
-
-  Future<void> saveInvoiceProduct(
-      String invoiceId, List<Product> listProducts) async {
-    listProducts.forEach((product) {
-      if (product.newProduct ?? true) {
-        _invoiceRepository.saveInvoiceProduct(invoiceId, product);
-      }
-    });
-  }
-
-  Future<void> saveInvoiceAdditionalProducts(
-      String invoiceId, List<AdditionalProduct> additionalProducts) async {
-    additionalProducts.forEach((addProduct) {
-      _invoiceRepository.saveInvoiceAdditionalProducts(invoiceId, addProduct);
-    });
   }
 
   Future<List<Product>> getInvoiceProducts(String idInvoice) =>
@@ -192,6 +193,10 @@ class BlocInvoice implements Bloc {
 
   Future<Invoice> getInvoiceById(String invoiceId) {
     return _invoiceRepository.getInvoiceByIdInvoice(invoiceId);
+  }
+
+  Future<void> updateInvoiceProduct(String invoiceId, Product product) {
+    return _invoiceRepository.updateInvoiceProduct(invoiceId, product);
   }
 
   @override
