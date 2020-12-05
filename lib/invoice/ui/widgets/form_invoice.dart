@@ -736,8 +736,11 @@ class _FormInvoice extends State<FormInvoice> {
               _selectBrand = vehicle.brand;
               _selectColor = vehicle.color;
               _selectedBrandReference = vehicle.brandReference;
+              HeaderServices vehicleTypeFind = vehicleTypeList.where((f) => f.text == vehicle.vehicleType).first;
+              vehicleTypeSelected = vehicleTypeFind;
               setState(() {
-
+                vehicleTypeList.forEach((element) => element.isSelected = false);
+                vehicleTypeList[vehicleTypeList.indexOf(vehicleTypeSelected)].isSelected = true;
               });
             });
           } else {

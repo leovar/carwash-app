@@ -22,7 +22,7 @@ class ProductivityReport extends StatefulWidget {
 }
 
 class _ProductivityReport extends State<ProductivityReport> {
-  BlocReports _blocReports  = BlocReports();
+  BlocReports _blocReports = BlocReports();
   BlocLocation _blocLocation = BlocLocation();
   BlocInvoice _blocInvoice = BlocInvoice();
   List<DropdownMenuItem<Location>> _dropdownMenuItems;
@@ -78,7 +78,7 @@ class _ProductivityReport extends State<ProductivityReport> {
               ),
               keyboardType: TextInputType.datetime,
               readOnly: true,
-              onTap: (){
+              onTap: () {
                 _datePickerFrom();
               },
             ),
@@ -91,7 +91,7 @@ class _ProductivityReport extends State<ProductivityReport> {
               ),
               keyboardType: TextInputType.datetime,
               readOnly: true,
-              onTap: (){
+              onTap: () {
                 _datePickerFinal();
               },
             ),
@@ -102,15 +102,27 @@ class _ProductivityReport extends State<ProductivityReport> {
   }
 
   Widget _getDataReport() {
-    return StreamBuilder(
-      stream: _blocReports.productivityReportListStream(
-        _locationReference,
-        _dateTimeInit,
-        _dateTimeFinal,
+    if (_locationReference == null) {
+      return _emptyLocation();
+    } else {
+      return StreamBuilder(
+        stream: _blocReports.productivityReportListStream(
+          _locationReference,
+          _dateTimeInit,
+          _dateTimeFinal,
+        ),
+        builder: (BuildContext context, AsyncSnapshot snapshot) {
+          return _containerList(snapshot);
+        },
+      );
+    }
+  }
+
+  Widget _emptyLocation() {
+    return Container(
+      child: Center(
+        child: Text('No hay información para mostrar'),
       ),
-      builder: (BuildContext context, AsyncSnapshot snapshot) {
-        return _containerList(snapshot);
-      },
     );
   }
 
@@ -121,10 +133,13 @@ class _ProductivityReport extends State<ProductivityReport> {
           child: CircularProgressIndicator(),
         );
       default:
-        _listInvoices = _blocReports.buildProductivityReportList(snapshot.data.documents);
-        _updateInvoices(_listInvoices);  //TODO esta llamada se debe comentar o eliminar cuando se actualizce al app en los celulares que la usan
+        _listInvoices =
+            _blocReports.buildProductivityReportList(snapshot.data.documents);
+        _updateInvoices(
+            _listInvoices); //TODO esta llamada se debe comentar o eliminar cuando se actualizce al app en los celulares que la usan
         _listCardReport = _processInvoicesOperator(_listInvoices);
-        _listCardReport.sort((a, b) => b.countServices.compareTo(a.countServices));
+        _listCardReport
+            .sort((a, b) => b.countServices.compareTo(a.countServices));
     }
 
     if (_listInvoices.length > 0 && _selectedLocation != null) {
@@ -134,16 +149,11 @@ class _ProductivityReport extends State<ProductivityReport> {
         itemBuilder: (BuildContext context, int index) {
           return ItemProductivityReportList(
               cardReport: _listCardReport[index],
-              servicesDetail: _openServicesDetail
-          );
+              servicesDetail: _openServicesDetail);
         },
       );
     } else {
-      return Container(
-        child: Center(
-          child: Text('No hay información para mostrar'),
-        ),
-      );
+      return _emptyLocation();
     }
   }
 
@@ -166,7 +176,7 @@ class _ProductivityReport extends State<ProductivityReport> {
 
   Widget _chargeDropLocations(AsyncSnapshot snapshot) {
     List<Location> locationList =
-    _blocLocation.buildLocations(snapshot.data.documents);
+        _blocLocation.buildLocations(snapshot.data.documents);
     _dropdownMenuItems = builtDropdownMenuItems(locationList);
 
     return DropdownButton(
@@ -212,14 +222,16 @@ class _ProductivityReport extends State<ProductivityReport> {
 
   /// Functions
   onChangeDropDawn(Location selectedLocation) async {
-    _locationReference = await _blocLocation.getLocationReference(selectedLocation.id);
+    _locationReference =
+        await _blocLocation.getLocationReference(selectedLocation.id);
     setState(() {
       _selectedLocation = selectedLocation;
     });
   }
 
   Future<Null> _datePickerFrom() async {
-    final DateTime picked = await showDatePicker(context: context,
+    final DateTime picked = await showDatePicker(
+      context: context,
       initialDate: _dateTimeInit,
       firstDate: DateTime(1970),
       lastDate: DateTime(2100),
@@ -234,7 +246,8 @@ class _ProductivityReport extends State<ProductivityReport> {
   }
 
   Future<Null> _datePickerFinal() async {
-    final DateTime picked = await showDatePicker(context: context,
+    final DateTime picked = await showDatePicker(
+      context: context,
       initialDate: _dateTimeFinal,
       firstDate: DateTime(1970),
       lastDate: DateTime(2100),
@@ -248,23 +261,29 @@ class _ProductivityReport extends State<ProductivityReport> {
     }
   }
 
-  List<CardReport> _processInvoicesOperator (List<Invoice> _listInvoices) {
+  List<CardReport> _processInvoicesOperator(List<Invoice> _listInvoices) {
     List<CardReport> _cardList = [];
     try {
       _listInvoices.forEach((item) {
         if (_cardList.length > 0) {
-          CardReport cardInfo = _cardList.firstWhere((x) => x.operatorReference == item.userOperator && x.locationName == item.locationName, orElse: () => null,);
-          if(cardInfo == null) {
+          CardReport cardInfo = _cardList.firstWhere(
+            (x) =>
+                x.operatorReference == item.userOperator &&
+                x.locationName == item.locationName,
+            orElse: () => null,
+          );
+          if (cardInfo == null) {
             final newOperatorCard = CardReport(
                 item.userOperatorName,
                 item.userOperator,
                 item.locationName,
                 item.countProducts + item.countAdditionalProducts,
-                item.totalPrice
-            );
+                item.totalPrice);
             _cardList.add(newOperatorCard);
           } else {
-            cardInfo.countServices = cardInfo.countServices + item.countProducts + item.countAdditionalProducts;
+            cardInfo.countServices = cardInfo.countServices +
+                item.countProducts +
+                item.countAdditionalProducts;
             cardInfo.totalPrice = cardInfo.totalPrice + item.totalPrice;
             int indexData = _cardList.indexOf(cardInfo);
             _cardList[indexData] = cardInfo;
@@ -275,20 +294,21 @@ class _ProductivityReport extends State<ProductivityReport> {
               item.userOperator,
               item.locationName,
               item.countProducts + item.countAdditionalProducts,
-              item.totalPrice
-          );
+              item.totalPrice);
           _cardList.add(newOperatorCard);
         }
       });
       return _cardList;
-    } catch(_error) {
+    } catch (_error) {
       print(_error.message);
     }
   }
 
   Future<void> _openServicesDetail(DocumentReference operatorReference) async {
     List<ProductsCardDetail> _productList = [];
-    final operatorInvoices = _listInvoices.where((f) => f.userOperator == operatorReference).toList();
+    final operatorInvoices = _listInvoices
+        .where((f) => f.userOperator == operatorReference)
+        .toList();
     Alert(
         context: context,
         title: '',
@@ -297,24 +317,22 @@ class _ProductivityReport extends State<ProductivityReport> {
           child: CircularProgressIndicator(),
         ),
         buttons: []).show();
-    final dataProducts = await _blocReports.getProductsByInvoicesReport(operatorInvoices);
+    final dataProducts =
+        await _blocReports.getProductsByInvoicesReport(operatorInvoices);
 
     dataProducts.forEach((e) {
       if (_productList.length == 0) {
-        final productDetail = ProductsCardDetail(
-            e.productType??'Adicional',
-            1,
-            e.price
-        );
+        final productDetail =
+            ProductsCardDetail(e.productType ?? 'Adicional', 1, e.price);
         _productList.add(productDetail);
       } else {
-        ProductsCardDetail _productInfo = _productList.firstWhere((x) => x.typeProductName == (e.productType??'Adicional'), orElse: () => null,);
+        ProductsCardDetail _productInfo = _productList.firstWhere(
+          (x) => x.typeProductName == (e.productType ?? 'Adicional'),
+          orElse: () => null,
+        );
         if (_productInfo == null) {
-          final productDetail = ProductsCardDetail(
-              e.productType??'Adicional',
-              1,
-              e.price
-          );
+          final productDetail =
+              ProductsCardDetail(e.productType ?? 'Adicional', 1, e.price);
           _productList.add(productDetail);
         } else {
           _productInfo.countServices = _productInfo.countServices + 1;
@@ -347,7 +365,6 @@ class _ProductivityReport extends State<ProductivityReport> {
               },
             )
           ]).show();
-
     }
   }
 

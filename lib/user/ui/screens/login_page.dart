@@ -548,7 +548,7 @@ class _LoginPage extends State<LoginPage> {
       } on PlatformException catch (e) {
         print('error desde google login  $e');
         MessagesUtils.showAlert(
-                context: context, title: 'Error en login con Google')
+                context: context, title: 'Error en login con Google $e')
             .show();
       }
     }
