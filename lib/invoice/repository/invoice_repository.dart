@@ -137,6 +137,22 @@ class InvoiceRepository {
     return querySnapshot.snapshots();
   }
 
+  Future<List<String>> getListAllBrandsInvoiceRepo() async {
+    List<String> brandList = <String> [];
+    var querySnapshot = await this
+      ._db
+      .collection(FirestoreCollections.brands)
+      .getDocuments();
+
+    if (querySnapshot.documents.length > 0) {
+      querySnapshot.documents.forEach((doc){
+        String brandData = doc.data['brand'];
+        brandList.add(brandData);
+      });
+    }
+    return brandList;
+  }
+
   List<String> buildBrandsInvoice(List<DocumentSnapshot> brandsListSnapshot) {
     List<String> brandsList = <String>[];
     brandsListSnapshot.forEach((p) {

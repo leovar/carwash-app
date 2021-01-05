@@ -12,6 +12,7 @@ class FieldsInvoice extends StatefulWidget {
   final textBirthDate;
   final textTimeDelivery;
   bool sendEmail = false;
+  final Function(bool) cbHandlerSendEmail;
   VoidCallback finalEditPlaca;
   final bool enableForm;
   final bool validatePlaca;
@@ -23,6 +24,7 @@ class FieldsInvoice extends StatefulWidget {
     Key key,
     this.textPlaca,
     this.sendEmail,
+    this.cbHandlerSendEmail,
     this.textClient,
     this.textEmail,
     this.textPhoneNumber,
@@ -46,10 +48,14 @@ class FieldsInvoice extends StatefulWidget {
 class _FieldsInvoice extends State<FieldsInvoice> {
   DateTime _date = new DateTime.now();
   TimeOfDay _time = new TimeOfDay.now();
+  bool _sendEmail = false;
 
   @override
   void initState() {
     super.initState();
+    setState(() {
+      _sendEmail = widget.sendEmail;
+    });
   }
 
   @override
@@ -143,12 +149,13 @@ class _FieldsInvoice extends State<FieldsInvoice> {
         Row(
           children: <Widget>[
             Checkbox(
-              value: widget.sendEmail,
+              value: _sendEmail,
               onChanged: widget.enableForm
                   ? (bool value) {
                 setState(() {
-                  widget.sendEmail = value;
+                  _sendEmail = value;
                 });
+                widget.cbHandlerSendEmail(value);
               }
                   : null,
               checkColor: Colors.white,

@@ -122,6 +122,13 @@ class BlocInvoice implements Bloc {
     return brands;
   }
 
+  Future<List<String>> getAllBrandsInvoice() async {
+    List<String> brandList = [];
+    brandList = await _invoiceRepository.getListAllBrandsInvoiceRepo();
+    brandList.sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+    return brandList;
+  }
+
   /// Brands References
   Future<List<String>> getBrandReferences(String brand) async {
     List<String> brandReferenceList = [];

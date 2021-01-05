@@ -27,17 +27,23 @@ import 'package:image/image.dart' as im;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:permission_handler/permission_handler.dart';
+import 'package:mailer/mailer.dart' as ml;
+import 'package:mailer/smtp_server.dart';
+import 'package:mailer/smtp_server/gmail.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class PrintInvoicePage extends StatefulWidget {
   final Invoice currentInvoice;
   final List<Product> selectedProducts;
   final List<AdditionalProduct> additionalProducts;
+  final String customerEmail;
 
   PrintInvoicePage(
       {Key key,
       this.currentInvoice,
       this.selectedProducts,
-      this.additionalProducts});
+      this.additionalProducts,
+      this.customerEmail});
 
   @override
   State<StatefulWidget> createState() => _PrintInvoicePage();
@@ -61,6 +67,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
     _getCustomer(widget.currentInvoice.customer.documentID);
     PermissionHandler().requestPermissions(<PermissionGroup>[
       PermissionGroup.storage,
+      PermissionGroup.photos,
     ]);
   }
 
@@ -704,16 +711,14 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
 
   void _capturePng() async {
     try {
-      MessagesUtils.showAlertWithLoading(context: context, title: 'Imprimiendo')
-          .show();
+      MessagesUtils.showAlertWithLoading(context: context, title: 'Imprimiendo Factura').show();
 
       print('inside');
       inside = true;
       RenderRepaintBoundary boundary =
-          globalKeyBoundary.currentContext.findRenderObject();
+      globalKeyBoundary.currentContext.findRenderObject();
       ui.Image image = await boundary.toImage(pixelRatio: 2.5);
-      ByteData byteData =
-          await image.toByteData(format: ui.ImageByteFormat.png);
+      ByteData byteData = await image.toByteData(format: ui.ImageByteFormat.png);
       Uint8List pngBytes = byteData.buffer.asUint8List();
 
       //Save Image
@@ -724,41 +729,30 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
       );
 
       if (filePath.isEmpty) {
-        var filePathResult = await ImageGallerySaver.saveImage(pngBytes);
-        filePath = filePathResult.substring(
-            filePathResult.indexOf('storage') - 1, filePathResult.length);
-      } else {
-        im.Image imageDecode = im.decodePng(pngBytes);
-        im.Image thumbnail = im.copyResize(imageDecode, width: 560);
+        final Map<dynamic,dynamic> filePathGet = await ImageGallerySaver.saveImage(pngBytes);
+        //Fluttertoast.showToast(msg: "$filePathGet", toastLength: Toast.LENGTH_LONG);
+        filePath = filePathGet['filePath'].substring(filePathGet['filePath'].indexOf('storage') - 1, filePathGet['filePath'].length);
+      }
 
-        //Save resized image
-        File(filePath).writeAsBytesSync(im.encodePng(thumbnail));
-        /*
-        final dir = await path_provider.getTemporaryDirectory();
-        final targetPath = dir.absolute.path + "/${filePath.substring(filePath.length-10 ,filePath.length)}"; //dir.absolute.path + "/temp${imageList.length}.jpg";
+      //Save resized image
+      im.Image imageDecode = im.decodePng(pngBytes);
+      im.Image thumbnail = im.copyResize(imageDecode, width: 560);
+      File(filePath).writeAsBytesSync(im.encodePng(thumbnail));
 
-        var resultCompress = await FlutterImageCompress.compressAndGetFile(
-            filePath, targetPath,
-            minWidth: 260, quality: 90);
+      //Set new name based in invoice number
+      final partialNewPath =
+      filePath.substring(0, filePath.lastIndexOf('/') + 1);
+      final fileExtension =
+      filePath.substring(filePath.lastIndexOf('.'), filePath.length);
+      final newPath = partialNewPath +
+          'Factura#${widget.currentInvoice.consecutive.toString()}' +
+          fileExtension;
 
-        var filePath2 = await ImagePickerSaver.saveFile(
-          fileData: resultCompress.readAsBytesSync(),
-          title: 'Factura#${widget.currentInvoice.consecutive.toString()}',
-          description: 'Factura Carwash',
-        );
-        */
+      //Rename Image
+      await File(filePath).rename(newPath);
 
-        //Set new name based in invoice number
-        final partialNewPath =
-        filePath.substring(0, filePath.lastIndexOf('/') + 1);
-        final fileExtension =
-        filePath.substring(filePath.lastIndexOf('.'), filePath.length);
-        final newPath = partialNewPath +
-            'Factura#${widget.currentInvoice.consecutive.toString()}' +
-            fileExtension;
-
-        //Rename Image
-        await File(filePath).rename(newPath);
+      if(widget.currentInvoice.sendEmailInvoice != null && widget.currentInvoice.sendEmailInvoice) {
+        _sendMail(newPath);
       }
 
       print('png done');
@@ -770,10 +764,39 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
       });
     } catch (e) {
       Navigator.pop(context);
-      MessagesUtils.showAlert(
-              context: context, title: 'Error guardando la imagen')
-          .show();
-      print(e);
+      MessagesUtils.showAlert(context: context, title: 'Error guardando la imagen $e').show();
+    }
+  }
+
+  Iterable<ml.Attachment> toAt(Iterable<String> attachments) =>
+      (attachments ?? []).map((a) => ml.FileAttachment(File(a)));
+
+  void _sendMail(String imagePath) async {
+    String username = 'spacarwashmobilapp@gmail.com';
+    String password = 'Spadeautos2019';
+    String domainSmtp = 'smtp.gmail.com';
+
+    if (widget.customerEmail.isNotEmpty) {
+      final smtpServer = gmail(username, password);
+      final message = ml.Message()
+        ..from = ml.Address(username, 'Spa Car Wash Movil')
+        ..recipients.add(widget.customerEmail)
+      //..ccRecipients.addAll(['destCc1@example.com', 'destCc2@example.com'])
+      //..bccRecipients.add(Address('bccAddress@example.com'))
+        ..subject = 'Tu factura Spa Car Wash Movil :: 😀 :: ${DateTime.now()}'
+        ..text = 'This is the plain text.\nThis is line 2 of the text part.'
+        ..html = "<h1>Hola</h1>\n<p>Estamos felices con tu visita en nuestro Spa de Autos. Gracias por elegirnos. Adjuntamos la factura del servicio realizado.</p>"
+        ..attachments.addAll(toAt([imagePath] as Iterable<String>));
+
+      try {
+        final sendReport = await ml.send(message, smtpServer, timeout: Duration(seconds: 15));
+        print('Message sent: ' + sendReport.toString());
+      } on ml.MailerException catch (e) {
+        print('Message not sent.');
+        for (var p in e.problems) {
+          print('Problem: ${p.code}: ${p.msg}');
+        }
+      }
     }
   }
 

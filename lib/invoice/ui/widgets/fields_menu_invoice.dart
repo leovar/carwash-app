@@ -101,6 +101,7 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
     _selectedColor = widget.selectedVehicleColor;
     _selectTypeSex = widget.selectedTypeSex;
     _getListBrandReferences(_selectedBrand, updateRef: _selectBrandReference);
+    _getAllListBrands(_selectedBrand);
   }
 
   @override
@@ -111,7 +112,7 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
       children: <Widget>[
         _chargeListTypeSex(),
         SizedBox(height: 9),
-        _getBrandsStream(),
+        _chargeListBrands(), //_getBrandsStream(),  //se comenta por que se carga todas las referencias
         SizedBox(height: 9),
         _chargeListBrandReferences(),
         SizedBox(height: 9),
@@ -201,37 +202,32 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
 
   // List Brands
   Widget _getBrandsStream() {
-    if (true) {
-      //(widget.listCountBrands == 0 || _vehicleType != widget.uidVehicleType) //esto estaba dentro del if antes de agregar la referencia del vehiculo
-      //si estoy cambiando de tipo de vehiculo y no estoy en modo edición de factura, cambia la marca segun el tipo de vehiculo
-      if (_vehicleType != widget.uidVehicleType && widget.enableForm) {
-        _cbSelectValueBrands('');
-      }
-
-      // if vehicle type is 4x4 trucks(2) select the same vehicle type (1), to charge the same brands
-      int uidType;
-      if (widget.uidVehicleType == 2) {
-        uidType = 1;
-      } else {
-        uidType = widget.uidVehicleType;
-      }
-      _vehicleType = widget.uidVehicleType;
-
-      return StreamBuilder(
-        stream: _blocInvoice.brandsStream(uidType),
-        builder: (BuildContext context, AsyncSnapshot snapshot) {
-          switch (snapshot.connectionState) {
-            case ConnectionState.waiting:
-              return CircularProgressIndicator();
-            default:
-              return _getListBrands(snapshot);
-          }
-        },
-      );
+    //si estoy cambiando de tipo de vehiculo y no estoy en modo edición de factura, cambia la marca segun el tipo de vehiculo
+    //Borro la marca que estaba seleccionada si se cambia el tipo de vehiculo
+    if (_vehicleType != widget.uidVehicleType && widget.enableForm) {
+      _cbSelectValueBrands('');
     }
-    //else {
-    //  return _chargeListBrands();
-    //}
+
+    // if vehicle type is 4x4 trucks(2) select the same vehicle type (1), to charge the same brands
+    int uidType;
+    if (widget.uidVehicleType == 2) {
+      uidType = 1;
+    } else {
+      uidType = widget.uidVehicleType;
+    }
+    _vehicleType = widget.uidVehicleType;
+
+    return StreamBuilder(
+      stream: _blocInvoice.brandsStream(uidType),
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        switch (snapshot.connectionState) {
+          case ConnectionState.waiting:
+            return CircularProgressIndicator();
+          default:
+            return _getListBrands(snapshot);
+        }
+      },
+    );
   }
 
   Widget _getListBrands(AsyncSnapshot snapshot) {
@@ -355,6 +351,15 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
         if (updateRef.isNotEmpty) {
           _selectBrandReference = updateRef;
         }
+      });
+    });
+  }
+
+  void _getAllListBrands(String brandSelected) {
+    _blocInvoice.getAllBrandsInvoice().then((result) {
+      widget.cbHandlerVehicleBrand('', result.length, 2);
+      setState(() {
+        _listBrands = result;
       });
     });
   }

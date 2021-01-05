@@ -283,6 +283,7 @@ class _FormInvoice extends State<FormInvoice> {
                 textBirthDate: _textBirthDate,
                 textTimeDelivery: _textTimeDelivery,
                 sendEmail: _sendEmail,
+                cbHandlerSendEmail: _setHandlerSendEmailInvoice,
                 finalEditPlaca: _onFinalEditPlaca,
                 enableForm: _enableForm,
                 focusClient: _clientFocusNode,
@@ -490,6 +491,7 @@ class _FormInvoice extends State<FormInvoice> {
                   widget.editInvoice,
                   _listProduct.where((f) => f.isSelected).toList(),
                   _listAdditionalProducts,
+                  _textEmail.text.trim()
                 );
               }
             },
@@ -687,6 +689,10 @@ class _FormInvoice extends State<FormInvoice> {
   //Type sex
   void _setHandlerTypeSex(String typeSex, int countTypeSex, int operationType) {
     _selectTypeSex = typeSex;
+  }
+
+  void _setHandlerSendEmailInvoice(bool value) {
+    _sendEmail = value;
   }
 
   ///Functions Image Firma
@@ -1042,6 +1048,7 @@ class _FormInvoice extends State<FormInvoice> {
           haveSpecialService: _haveServiceSpecial,
           countProducts: _countProducts,
           countAdditionalProducts: _countAdditionalProducts,
+          sendEmailInvoice: _sendEmail,
         );
         DocumentReference invoiceReference =
             await _blocInvoice.saveInvoice(_invoice);
@@ -1067,7 +1074,7 @@ class _FormInvoice extends State<FormInvoice> {
         Navigator.pop(context); //Close form Create Invoice
 
         if (widget.editInvoice == null) {
-          _printInvoice(_currentInvoiceSaved, _selectedProducts, _listAdditionalProducts);
+          _printInvoice(_currentInvoiceSaved, _selectedProducts, _listAdditionalProducts, _textEmail.text.trim());
         }
 
         //MessagesUtils.showAlert(context: context, title: 'Factura Guardada').show();
@@ -1187,7 +1194,7 @@ class _FormInvoice extends State<FormInvoice> {
   }
 
   void _printInvoice(Invoice invoicePrint, List<Product> listProducts,
-      List<AdditionalProduct> listAddProducts) {
+      List<AdditionalProduct> listAddProducts, String customerEmail) {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -1195,6 +1202,7 @@ class _FormInvoice extends State<FormInvoice> {
           currentInvoice: invoicePrint,
           selectedProducts: listProducts,
           additionalProducts: listAddProducts,
+          customerEmail: customerEmail,
         ),
       ),
     );
