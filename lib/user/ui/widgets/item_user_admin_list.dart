@@ -107,7 +107,7 @@ class _ItemUserAdminList extends State<ItemUserAdminList> {
                       children: <Widget>[
                         Flexible(
                           child: Text(
-                            _itemUser.name,
+                            _itemUser.name??'',
                             style: TextStyle(
                               fontFamily: "Lato",
                               color: Theme.of(context).primaryColor,
