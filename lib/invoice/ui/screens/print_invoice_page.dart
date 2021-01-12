@@ -60,6 +60,16 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
   var formatter = new DateFormat('dd/MM/yyyy hh:mm aaa');
   final numberFormatter = NumberFormat("#,###");
 
+  double _logoSize = 290;
+  double _invoiceTitle = 26;
+  double _textInfoLocationSize = 18;
+  double _spaceInfoToServices = 14;
+  double _spaceServicesToPrice = 24;
+  double _spacePriceNotes = 15;
+  double _spaceMarginButton = 16;
+  double _textInfoSize = 19;
+  double _spaceInfoInvoice = 7;
+
   @override
   void initState() {
     super.initState();
@@ -73,6 +83,20 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
 
   @override
   Widget build(BuildContext context) {
+    double width = MediaQuery.of(context). size. width;
+    print(width);
+    if(width > 610) {
+      _logoSize = 460;
+      _invoiceTitle = 42;
+      _textInfoLocationSize = 30;
+      _spaceInfoToServices = 16;
+      _spaceServicesToPrice = 25;
+      _spacePriceNotes = 16;
+      _spaceMarginButton = 27;
+      _textInfoSize = 31;
+      _spaceInfoInvoice = 10;
+    }
+
     return Scaffold(
       body: SafeArea(
         child: Stack(
@@ -103,7 +127,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
             child: Center(
               child: Image.asset(
                 'assets/images/logo-car-wash.png',
-                width: 290,
+                width: _logoSize,
               ),
             ),
           ),
@@ -120,7 +144,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                         decoration: TextDecoration.none,
                         fontWeight: FontWeight.w400,
                         color: Colors.black,
-                        fontSize: 26,
+                        fontSize: _invoiceTitle,
                       ),
                     ),
                   ),
@@ -133,7 +157,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                         decoration: TextDecoration.none,
                         fontWeight: FontWeight.w300,
                         color: Colors.black,
-                        fontSize: 18,
+                        fontSize: _textInfoLocationSize,
                       ),
                     ),
                   ),
@@ -146,7 +170,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                         decoration: TextDecoration.none,
                         fontWeight: FontWeight.w400,
                         color: Colors.black,
-                        fontSize: 18,
+                        fontSize: _textInfoLocationSize,
                       ),
                     ),
                   ),
@@ -159,7 +183,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                         decoration: TextDecoration.none,
                         fontWeight: FontWeight.w400,
                         color: Colors.black,
-                        fontSize: 18,
+                        fontSize: _textInfoLocationSize,
                       ),
                     ),
                   ),
@@ -172,7 +196,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                         decoration: TextDecoration.none,
                         fontWeight: FontWeight.w400,
                         color: Colors.black,
-                        fontSize: 18,
+                        fontSize: _textInfoLocationSize,
                       ),
                     ),
                   ),
@@ -185,7 +209,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                         decoration: TextDecoration.none,
                         fontWeight: FontWeight.w400,
                         color: Colors.black,
-                        fontSize: 18,
+                        fontSize: _textInfoLocationSize,
                       ),
                     ),
                   ),
@@ -194,13 +218,13 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
               )),
           _infoInvoice(),
           Container(
-            height: 14,
+            height: _spaceInfoToServices,
             color: Colors.white,
           ),
           _listServices(),
           _listAdditionalServices(),
           Container(
-            height: 24,
+            height: _spaceServicesToPrice,
             color: Colors.white,
           ),
           Container(
@@ -227,7 +251,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
           ),
           _infoPrice(),
           Container(
-            height: 15,
+            height: _spacePriceNotes,
             color: Colors.white,
           ),
           Container(
@@ -245,7 +269,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                     decoration: TextDecoration.none,
                     fontWeight: FontWeight.w500,
                     color: Colors.black,
-                    fontSize: 16,
+                    fontSize: _spaceMarginButton,
                   ),
                 ),
               ),
@@ -272,10 +296,10 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
               decoration: TextDecoration.none,
               fontWeight: FontWeight.w500,
               color: Colors.black,
-              fontSize: 19,
+              fontSize: _textInfoSize,
             ),
           ),
-          SizedBox(height: 7),
+          SizedBox(height: _spaceInfoInvoice),
           Text(
             formatter.format(widget.currentInvoice.creationDate.toDate()),
             style: TextStyle(
@@ -283,10 +307,10 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
               decoration: TextDecoration.none,
               fontWeight: FontWeight.w400,
               color: Colors.black,
-              fontSize: 19,
+              fontSize: _textInfoSize,
             ),
           ),
-          SizedBox(height: 7),
+          SizedBox(height: _spaceInfoInvoice),
           Visibility(
             visible: _timeDelivery.isEmpty ? false : true,
             child: Row(
@@ -300,7 +324,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                     decoration: TextDecoration.none,
                     fontWeight: FontWeight.w400,
                     color: Colors.black,
-                    fontSize: 19,
+                    fontSize: _textInfoSize,
                   ),
                 ),
                 Text(
@@ -311,13 +335,13 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                     decoration: TextDecoration.none,
                     fontWeight: FontWeight.w400,
                     color: Colors.black,
-                    fontSize: 19,
+                    fontSize: _textInfoSize,
                   ),
                 ),
               ],
             ),
           ),
-          SizedBox(height: 7),
+          SizedBox(height: _spaceInfoInvoice),
           Row(
             mainAxisSize: MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -329,7 +353,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                   decoration: TextDecoration.none,
                   fontWeight: FontWeight.w400,
                   color: Colors.black,
-                  fontSize: 19,
+                  fontSize: _textInfoSize,
                 ),
               ),
               Text(
@@ -340,12 +364,12 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                   decoration: TextDecoration.none,
                   fontWeight: FontWeight.w400,
                   color: Colors.black,
-                  fontSize: 19,
+                  fontSize: _textInfoSize,
                 ),
               ),
             ],
           ),
-          SizedBox(height: 7),
+          SizedBox(height: _spaceInfoInvoice),
           Row(
             mainAxisSize: MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -357,7 +381,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                   decoration: TextDecoration.none,
                   fontWeight: FontWeight.w400,
                   color: Colors.black,
-                  fontSize: 19,
+                  fontSize: _textInfoSize,
                 ),
               ),
               Text(
@@ -368,12 +392,12 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                   decoration: TextDecoration.none,
                   fontWeight: FontWeight.w400,
                   color: Colors.black,
-                  fontSize: 19,
+                  fontSize: _textInfoSize,
                 ),
               ),
             ],
           ),
-          SizedBox(height: 7),
+          SizedBox(height: _spaceInfoInvoice),
           Row(
             mainAxisSize: MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -385,7 +409,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                   decoration: TextDecoration.none,
                   fontWeight: FontWeight.w400,
                   color: Colors.black,
-                  fontSize: 19,
+                  fontSize: _textInfoSize,
                 ),
               ),
               Text(
@@ -396,12 +420,12 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                   decoration: TextDecoration.none,
                   fontWeight: FontWeight.w400,
                   color: Colors.black,
-                  fontSize: 19,
+                  fontSize: _textInfoSize,
                 ),
               ),
             ],
           ),
-          SizedBox(height: 7),
+          SizedBox(height: _spaceInfoInvoice),
           Row(
             mainAxisSize: MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -413,7 +437,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                   decoration: TextDecoration.none,
                   fontWeight: FontWeight.w400,
                   color: Colors.black,
-                  fontSize: 19,
+                  fontSize: _textInfoSize,
                 ),
               ),
               Text(
@@ -424,12 +448,12 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                   decoration: TextDecoration.none,
                   fontWeight: FontWeight.w400,
                   color: Colors.black,
-                  fontSize: 19,
+                  fontSize: _textInfoSize,
                 ),
               ),
             ],
           ),
-          SizedBox(height: 7),
+          SizedBox(height: _spaceInfoInvoice),
           Row(
             mainAxisSize: MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -441,23 +465,25 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                   decoration: TextDecoration.none,
                   fontWeight: FontWeight.w400,
                   color: Colors.black,
-                  fontSize: 19,
+                  fontSize: _textInfoSize,
                 ),
               ),
-              Text(
-                widget.currentInvoice.userCoordinatorName,
-                textAlign: TextAlign.right,
-                style: TextStyle(
-                  fontFamily: "Lato",
-                  decoration: TextDecoration.none,
-                  fontWeight: FontWeight.w400,
-                  color: Colors.black,
-                  fontSize: 19,
+              Flexible(
+                child: Text(
+                  widget.currentInvoice.userCoordinatorName,
+                  textAlign: TextAlign.right,
+                  style: TextStyle(
+                    fontFamily: "Lato",
+                    decoration: TextDecoration.none,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.black,
+                    fontSize: _textInfoSize,
+                  ),
                 ),
               ),
             ],
           ),
-          SizedBox(height: 7),
+          SizedBox(height: _spaceInfoInvoice),
           Text(
             'Servicio de lavado de Autos:',
             textAlign: TextAlign.right,
@@ -466,7 +492,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
               decoration: TextDecoration.none,
               fontWeight: FontWeight.bold,
               color: Colors.black,
-              fontSize: 19,
+              fontSize: _textInfoSize,
             ),
           ),
         ],
@@ -486,7 +512,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
           return ConstrainedBox(
             constraints: BoxConstraints(minHeight: 27),
             child: Container(
-              margin: EdgeInsets.only(bottom: 8),
+              margin: EdgeInsets.only(bottom: _spaceInfoInvoice),
               color: Colors.white,
               padding: EdgeInsets.symmetric(horizontal: 20),
               child: Row(
@@ -501,7 +527,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                         decoration: TextDecoration.none,
                         fontWeight: FontWeight.w400,
                         color: Colors.black,
-                        fontSize: 19,
+                        fontSize: _textInfoSize,
                       ),
                     ),
                   ),
@@ -514,7 +540,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                         decoration: TextDecoration.none,
                         fontWeight: FontWeight.w400,
                         color: Colors.black,
-                        fontSize: 19,
+                        fontSize: _textInfoSize,
                       ),
                     ),
                   ),
@@ -539,7 +565,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
           return ConstrainedBox(
             constraints: BoxConstraints(minHeight: 27),
             child: Container(
-              margin: EdgeInsets.only(bottom: 8),
+              margin: EdgeInsets.only(bottom: _spaceInfoInvoice),
               color: Colors.white,
               padding: EdgeInsets.symmetric(horizontal: 20),
               child: Row(
@@ -554,7 +580,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                         decoration: TextDecoration.none,
                         fontWeight: FontWeight.w400,
                         color: Colors.black,
-                        fontSize: 19,
+                        fontSize: _textInfoSize,
                       ),
                     ),
                   ),
@@ -567,7 +593,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                         decoration: TextDecoration.none,
                         fontWeight: FontWeight.w400,
                         color: Colors.black,
-                        fontSize: 19,
+                        fontSize: _textInfoSize,
                       ),
                     ),
                   ),
@@ -599,7 +625,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                     decoration: TextDecoration.none,
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
-                    fontSize: 19,
+                    fontSize: _textInfoSize,
                   ),
                 ),
                 Text(
@@ -610,13 +636,13 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                     decoration: TextDecoration.none,
                     fontWeight: FontWeight.w400,
                     color: Colors.black,
-                    fontSize: 19,
+                    fontSize: _textInfoSize,
                   ),
                 ),
               ],
             ),
           ),
-          SizedBox(height: 7),
+          SizedBox(height: _spaceInfoInvoice),
           Visibility(
             visible: _location.printIva ?? true,
             child: Row(
@@ -630,7 +656,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                     decoration: TextDecoration.none,
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
-                    fontSize: 19,
+                    fontSize: _textInfoSize,
                   ),
                 ),
                 Text(
@@ -641,13 +667,13 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                     decoration: TextDecoration.none,
                     fontWeight: FontWeight.w400,
                     color: Colors.black,
-                    fontSize: 19,
+                    fontSize: _textInfoSize,
                   ),
                 ),
               ],
             ),
           ),
-          SizedBox(height: 7),
+          SizedBox(height: _spaceInfoInvoice),
           Row(
             mainAxisSize: MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -659,7 +685,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                   decoration: TextDecoration.none,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
-                  fontSize: 19,
+                  fontSize: _textInfoSize,
                 ),
               ),
               Text(
@@ -670,7 +696,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                   decoration: TextDecoration.none,
                   fontWeight: FontWeight.w400,
                   color: Colors.black,
-                  fontSize: 19,
+                  fontSize: _textInfoSize,
                 ),
               ),
             ],
