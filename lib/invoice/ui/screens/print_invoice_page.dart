@@ -412,15 +412,17 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                   fontSize: _textInfoSize,
                 ),
               ),
-              Text(
-                _customer.name ?? '',
-                textAlign: TextAlign.right,
-                style: TextStyle(
-                  fontFamily: "Lato",
-                  decoration: TextDecoration.none,
-                  fontWeight: FontWeight.w400,
-                  color: Colors.black,
-                  fontSize: _textInfoSize,
+              Flexible(
+                child: Text(
+                  _customer.name ?? '',
+                  textAlign: TextAlign.right,
+                  style: TextStyle(
+                    fontFamily: "Lato",
+                    decoration: TextDecoration.none,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.black,
+                    fontSize: _textInfoSize,
+                  ),
                 ),
               ),
             ],
@@ -803,11 +805,12 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
     String domainSmtp = 'smtp.gmail.com';
 
     if (widget.customerEmail.isNotEmpty) {
+      final emailSplit = widget.customerEmail.split(',');
       final smtpServer = gmail(username, password);
       final message = ml.Message()
         ..from = ml.Address(username, 'Spa Car Wash Movil')
-        ..recipients.add(widget.customerEmail)
-      //..ccRecipients.addAll(['destCc1@example.com', 'destCc2@example.com'])
+      //..recipients.add(element.trim())
+        ..ccRecipients.addAll(emailSplit.map((e) => e.trim()))
       //..bccRecipients.add(Address('bccAddress@example.com'))
         ..subject = 'Tu factura Spa Car Wash Movil :: 😀 :: ${DateTime.now()}'
         ..text = 'This is the plain text.\nThis is line 2 of the text part.'
@@ -817,11 +820,10 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
       try {
         final sendReport = await ml.send(message, smtpServer, timeout: Duration(seconds: 15));
         print('Message sent: ' + sendReport.toString());
+        Fluttertoast.showToast(msg: "Correo enviado", toastLength: Toast.LENGTH_LONG);
       } on ml.MailerException catch (e) {
         print('Message not sent.');
-        for (var p in e.problems) {
-          print('Problem: ${p.code}: ${p.msg}');
-        }
+        Fluttertoast.showToast(msg: "Error enviando el correo: ${e.message}", toastLength: Toast.LENGTH_LONG);
       }
     }
   }

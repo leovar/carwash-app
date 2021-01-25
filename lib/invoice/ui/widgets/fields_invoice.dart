@@ -103,7 +103,7 @@ class _FieldsInvoice extends State<FieldsInvoice> {
           labelText: "Correo Electrónico",
           textController: widget.textEmail,
           inputType: TextInputType.emailAddress,
-          enable: widget.enableForm,
+          //enable: widget.enableForm,
           autofocus: false,
         ),
         SizedBox(
@@ -150,7 +150,7 @@ class _FieldsInvoice extends State<FieldsInvoice> {
           children: <Widget>[
             Checkbox(
               value: _sendEmail,
-              onChanged: widget.enableForm
+              onChanged: true //widget.enableForm
                   ? (bool value) {
                 setState(() {
                   _sendEmail = value;
