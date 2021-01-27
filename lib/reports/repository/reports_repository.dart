@@ -1,11 +1,13 @@
 
 import 'package:car_wash_app/invoice/model/invoice.dart';
+import 'package:car_wash_app/invoice/repository/invoice_repository.dart';
 import 'package:car_wash_app/product/model/product.dart';
 import 'package:car_wash_app/widgets/firestore_collections.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ReportsRepository {
   final Firestore _db = Firestore.instance;
+  final _invoiceRepository = InvoiceRepository();
 
   ///Get productivity report list
   Stream<QuerySnapshot> getListProductivityReportStream(
@@ -33,6 +35,7 @@ class ReportsRepository {
     List<Invoice> invoicesList = <Invoice>[];
     invoicesListSnapshot.forEach((p) {
       Invoice invoice = Invoice.fromJson(p.data, id: p.documentID);
+
       invoicesList.add(invoice);
     });
     return invoicesList;

@@ -137,6 +137,25 @@ class Product extends Equatable {
     );
   }
 
+  //Copy Product to add product in new invoice at save
+  factory Product.copyProductToSaveInvoice({
+    String id,
+    String productName,
+    double price,
+    double ivaPercent,
+    bool isAdditional,
+    String productType,
+  }) {
+    return Product(
+      id: id,
+      productName: productName,
+      price: price,
+      ivaPercent: ivaPercent,
+      isAdditional: isAdditional ?? true,
+      productType: productType,
+    );
+  }
+
   @override
   List<Object> get props => [
     id,

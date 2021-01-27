@@ -989,10 +989,41 @@ class _FormInvoice extends State<FormInvoice> {
           _total = _total + double.parse(addProduct.productValue ?? '0');
         });
 
+        //Save products list
+        List<Product> _selectedProducts = _listProduct.where((f) => f.isSelected).toList();
+        List<Product> _productToSave = [];
+        if (_selectedProducts.length > 0) {
+          _selectedProducts.forEach((product) {
+            if (product.newProduct ?? true) {
+              var prodSave = Product.copyProductToSaveInvoice(
+                id: product.id,
+                productName: product.productName,
+                price: product.price,
+                ivaPercent : product.ivaPercent,
+                isAdditional: false,
+                productType: product.productType,
+              );
+              _productToSave.add(prodSave);
+            }
+          });
+        }
+        if (_listAdditionalProducts.length > 0) {
+          _listAdditionalProducts.forEach((addProduct) {
+            var prodSave = Product.copyProductToSaveInvoice(
+              id: null,
+              productName: addProduct.productName,
+              price: double.parse(addProduct.productValue),
+              ivaPercent : addProduct.ivaPercent,
+              isAdditional: true,
+              productType: addProduct.productType,
+            );
+            _productToSave.add(prodSave);
+          });
+        }
+
         //Get count products
         _countProducts = _listProduct.where((f) => f.isSelected).toList().length;
         _countAdditionalProducts = _listAdditionalProducts.length;
-
 
         //Get Consecutive
         int _consecutive =
@@ -1049,25 +1080,22 @@ class _FormInvoice extends State<FormInvoice> {
           countProducts: _countProducts,
           countAdditionalProducts: _countAdditionalProducts,
           sendEmailInvoice: _sendEmail,
+          invoiceProducts: _productToSave,
         );
-        DocumentReference invoiceReference =
-            await _blocInvoice.saveInvoice(_invoice);
+        DocumentReference invoiceReference = await _blocInvoice.saveInvoice(_invoice);
         String invoiceId = invoiceReference.documentID;
-        Invoice _currentInvoiceSaved =
-            await _blocInvoice.getInvoiceById(invoiceId);
+        Invoice _currentInvoiceSaved = await _blocInvoice.getInvoiceById(invoiceId);
 
         //Save products list
-        List<Product> _selectedProducts =
-            _listProduct.where((f) => f.isSelected).toList();
+        /*List<Product> _selectedProducts = _listProduct.where((f) => f.isSelected).toList();
         if (_selectedProducts.length > 0) {
           _blocInvoice.saveInvoiceProduct(invoiceId, _selectedProducts);
-        }
+        }*/
 
         //Save additional products list
-        if (_listAdditionalProducts.length > 0) {
-          _blocInvoice.saveInvoiceAdditionalProducts(
-              invoiceId, _listAdditionalProducts);
-        }
+        /*if (_listAdditionalProducts.length > 0) {
+          _blocInvoice.saveInvoiceAdditionalProducts(invoiceId, _listAdditionalProducts);
+        }*/
 
         //Close screen
         Navigator.pop(context); //Close popUp Save

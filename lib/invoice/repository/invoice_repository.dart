@@ -23,9 +23,22 @@ class InvoiceRepository {
 
   /// Save and Update Invoice
   Future<DocumentReference> updateInvoiceData(Invoice invoice) async {
-    DocumentReference ref =
-        _db.collection(FirestoreCollections.invoices).document(invoice.id);
-    ref.setData(invoice.toJson(), merge: true);
+    var jsonInvoice = invoice.toJson();
+    var mapProducts = [];
+    invoice.invoiceProducts.forEach((element) {
+      var mapProduct = Product().toJsonInvoiceProduct(
+        element.productName,
+        element.price,
+        element.ivaPercent,
+        element.isAdditional,
+        element.id,
+        element.productType,
+      );
+      mapProducts.add(mapProduct);
+    });
+    jsonInvoice['invoiceProducts'] = mapProducts;
+    DocumentReference ref = _db.collection(FirestoreCollections.invoices).document(invoice.id);
+    ref.setData(jsonInvoice, merge: true);
     return ref;
   }
 

@@ -134,6 +134,10 @@ class _ProductivityReport extends State<ProductivityReport> {
         );
       default:
         _listInvoices = _blocReports.buildProductivityReportList(snapshot.data.documents);
+        List<Invoice> _getList = <Invoice>[];
+        //_getInvoicesAndProducts(snapshot.data.documents).then((List<Invoice> value) {
+        //  _getList.addAll(value);
+        //});
         _updateInvoices(_listInvoices); //TODO esta llamada se debe comentar o eliminar cuando se actualizce al app en los celulares que la usan
         _listCardReport = _processInvoicesOperator(_listInvoices);
         _listCardReport.sort((a, b) => b.countServices.compareTo(a.countServices));
@@ -152,6 +156,10 @@ class _ProductivityReport extends State<ProductivityReport> {
     } else {
       return _emptyLocation();
     }
+  }
+
+  Future<List<Invoice>> _getInvoicesAndProducts(List<DocumentSnapshot> documents) async {
+    return await _blocReports.getInvoiceAndProductsReport(documents);
   }
 
   /// Locations filter section
