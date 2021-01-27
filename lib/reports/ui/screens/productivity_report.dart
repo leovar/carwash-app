@@ -133,13 +133,10 @@ class _ProductivityReport extends State<ProductivityReport> {
           child: CircularProgressIndicator(),
         );
       default:
-        _listInvoices =
-            _blocReports.buildProductivityReportList(snapshot.data.documents);
-        _updateInvoices(
-            _listInvoices); //TODO esta llamada se debe comentar o eliminar cuando se actualizce al app en los celulares que la usan
+        _listInvoices = _blocReports.buildProductivityReportList(snapshot.data.documents);
+        _updateInvoices(_listInvoices); //TODO esta llamada se debe comentar o eliminar cuando se actualizce al app en los celulares que la usan
         _listCardReport = _processInvoicesOperator(_listInvoices);
-        _listCardReport
-            .sort((a, b) => b.countServices.compareTo(a.countServices));
+        _listCardReport.sort((a, b) => b.countServices.compareTo(a.countServices));
     }
 
     if (_listInvoices.length > 0 && _selectedLocation != null) {
@@ -300,7 +297,8 @@ class _ProductivityReport extends State<ProductivityReport> {
       });
       return _cardList;
     } catch (_error) {
-      print(_error.message);
+      print(_error);
+      return _cardList;
     }
   }
 
@@ -317,22 +315,16 @@ class _ProductivityReport extends State<ProductivityReport> {
           child: CircularProgressIndicator(),
         ),
         buttons: []).show();
-    final dataProducts =
-        await _blocReports.getProductsByInvoicesReport(operatorInvoices);
+    final dataProducts = await _blocReports.getProductsByInvoicesReport(operatorInvoices);
 
     dataProducts.forEach((e) {
       if (_productList.length == 0) {
-        final productDetail =
-            ProductsCardDetail(e.productType ?? 'Adicional', 1, e.price);
+        final productDetail = ProductsCardDetail(e.productType ?? 'Adicional', 1, e.price);
         _productList.add(productDetail);
       } else {
-        ProductsCardDetail _productInfo = _productList.firstWhere(
-          (x) => x.typeProductName == (e.productType ?? 'Adicional'),
-          orElse: () => null,
-        );
+        ProductsCardDetail _productInfo = _productList.firstWhere((x) => x.typeProductName == (e.productType ?? 'Adicional'), orElse: () => null,);
         if (_productInfo == null) {
-          final productDetail =
-              ProductsCardDetail(e.productType ?? 'Adicional', 1, e.price);
+          final productDetail = ProductsCardDetail(e.productType ?? 'Adicional', 1, e.price);
           _productList.add(productDetail);
         } else {
           _productInfo.countServices = _productInfo.countServices + 1;

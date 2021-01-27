@@ -56,7 +56,7 @@ class InfoDetailCardProductivity extends StatelessWidget {
         child: Row(
           children: <Widget>[
             Container(
-              width: 25,
+              width: 35,
               child: Text(
                 product.countServices.toString(),
                 style: TextStyle(

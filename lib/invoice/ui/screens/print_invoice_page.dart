@@ -813,7 +813,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
         ..ccRecipients.addAll(emailSplit.map((e) => e.trim()))
       //..bccRecipients.add(Address('bccAddress@example.com'))
         ..subject = 'Tu factura Spa Car Wash Movil :: 😀 :: ${DateTime.now()}'
-        ..text = 'This is the plain text.\nThis is line 2 of the text part.'
+      //..text = 'This is the plain text.\nThis is line 2 of the text part.'
         ..html = "<h1>Hola</h1>\n<p>Estamos felices con tu visita en nuestro Spa de Autos. Gracias por elegirnos. Adjuntamos la factura del servicio realizado.</p>"
         ..attachments.addAll(toAt([imagePath] as Iterable<String>));
 
