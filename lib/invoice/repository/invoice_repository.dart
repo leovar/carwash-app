@@ -264,6 +264,7 @@ class InvoiceRepository {
     return null;
   }
 
+  //TODO esta metodo caducaria cuando el producto se guarde en la misma factura
   /// Save Invoice Products
   Future<void> saveInvoiceProduct(String invoiceId, Product product) async {
     await this
@@ -281,6 +282,7 @@ class InvoiceRepository {
         ));
   }
 
+  //TODO esta metodo caducaria cuando el producto se guarde en la misma factura
   /// Save Invoice Additional Products
   Future<void> saveInvoiceAdditionalProducts(
       String invoiceId, AdditionalProduct additionalProduct) async {
@@ -299,6 +301,7 @@ class InvoiceRepository {
         ));
   }
 
+  //TODO actulizar el metodo para que actualice los productos en la tabla de invoice
   /// Update Invoice Products
   Future<void> updateInvoiceProduct(String invoiceId, Product product) async {
     DocumentReference ref =
@@ -376,6 +379,7 @@ class InvoiceRepository {
     return invoicesList;
   }
 
+  //TODO esta metodo caducaria cuando el producto se guarde en la misma factura
   Future<List<Product>> getInvoiceProducts(String idInvoice) async {
     List<Product> productList = <Product>[];
     var querySnapshot = await this
@@ -420,6 +424,7 @@ class InvoiceRepository {
     return 0;
   }
 
+  //TODO esta metodo caducaria cuando el producto se guarde en la misma factura
   /// Get products per invoice
   Future<List<Product>> getProductsByIdInvoice(String invoiceId) async {
     List<Product> productList = <Product>[];

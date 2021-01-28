@@ -43,6 +43,7 @@ class BlocReports implements Bloc {
         origin: item,
         countProducts: listProducts.where((f) => !f.isAdditional).length,
         countAdditionalProducts: listProducts.where((f) => f.isAdditional).length,
+        listProducts: listProducts,
       );
       DocumentReference ref = await _invoiceRepository.updateInvoiceData(_invoice);
     });
@@ -68,42 +69,7 @@ class BlocReports implements Bloc {
     });
   }
 
-  Future<List<Product>> getProductsByInvoicesReport(var invoices) async {
-    List<Product> productList = [];
-    int countInvoices = 0;
-    for (var item in invoices) {
-      countInvoices++;
-      List<Product> products = await _blocInvoice.getProductsByInvoice(item.id);
-      productList.addAll(products);
-      if (countInvoices == invoices.length) {
-        return productList;
-      }
-    }
-  }
-
-  Future<List<Invoice>> getInvoiceAndProductsReport(List<DocumentSnapshot> invoicesListSnapshot) async {
-    List<Invoice> invoices = _reportsRepository.buildListProductivityReport(invoicesListSnapshot);
-    List<Invoice> newInvoicesList = <Invoice>[];
-    List<Product> productList = [];
-    int countInvoices = 0;
-    for (var item in invoices) {
-      countInvoices++;
-      List<Product> products = await _blocInvoice.getProductsByInvoice(item.id);
-      final _invoiceData = Invoice.copyWith(
-        origin: item, listProducts: products
-      );
-      newInvoicesList.add(_invoiceData);
-      productList.addAll(products);
-      if (countInvoices == invoices.length) {
-
-        return newInvoicesList; // productList;
-      }
-    }
-  }
-
-
   @override
   void dispose() {
   }
-
 }

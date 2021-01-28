@@ -820,18 +820,15 @@ class _FormInvoice extends State<FormInvoice> {
 
   // Get last invoices per vehicle
   void _getInvoicesForPlaca(String placa) async {
-    List<Invoice> listInvoicesByVehicle =
-        await _blocInvoice.getListInvoicesByVehicle(placa) ?? [];
+    List<Invoice> listInvoicesByVehicle = await _blocInvoice.getListInvoicesByVehicle(placa) ?? [];
     if (listInvoicesByVehicle.length > 0) {
       List<InvoiceHistoryList> invoiceHistoryList = [];
       listInvoicesByVehicle.forEach((vehicleInvoice) async {
-        List<Product> listProducts =
-            await _blocInvoice.getProductsByInvoice(vehicleInvoice.id);
         InvoiceHistoryList invoiceHistory = InvoiceHistoryList(
           vehicleInvoice.creationDate,
           vehicleInvoice.consecutive.toString(),
-          listProducts.first.productName,
-            vehicleInvoice.totalPrice
+          vehicleInvoice.invoiceProducts[0].productName,
+          vehicleInvoice.totalPrice
         );
         invoiceHistoryList.add(invoiceHistory);
         if (invoiceHistoryList.length == listInvoicesByVehicle.length) {
@@ -1193,8 +1190,7 @@ class _FormInvoice extends State<FormInvoice> {
       vehicleTypeList[vehicleTypeList.indexOf(vehicleTypeSelected)].isSelected =
           true;
     });
-    List<Product> listProducts =
-        await _blocInvoice.getProductsByInvoice(invoiceToEdit.id);
+    List<Product> listProducts = invoiceToEdit.invoiceProducts;
     List<Product> productEditList = <Product>[];
     listProducts.forEach((prodSelected) {
       if (!prodSelected.isAdditional) {

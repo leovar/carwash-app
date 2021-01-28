@@ -43,9 +43,14 @@ class Product extends Equatable {
     locationsList?.forEach((drLocation) {
       locationsListDb.add(drLocation);
     });
+    bool additional = json['isAdditional'];
+    String newId = json['productId'];
+    if (additional) {
+      newId = '';
+    }
 
     return Product(
-      id: id,
+      id: newId,
       productName: json['productName'],
       price: json['price'].toDouble(),
       ivaPercent: json['ivaPercent'].toDouble(),
@@ -82,6 +87,18 @@ class Product extends Equatable {
     );
   }
 
+  factory Product.fromJsonProductIntoInvoice(Map<dynamic, dynamic> json) {
+    return Product(
+      id: json['Id'],
+      productName: json['productName'],
+      price: json['price'].toDouble(),
+      ivaPercent: json['ivaPercent'].toDouble(),
+      isAdditional: json['isAdditional'],
+      isSelected: true,
+      productType: json['productType'],
+    );
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'productName': this.productName,
@@ -108,7 +125,7 @@ class Product extends Equatable {
       'price': price,
       'ivaPercent': ivaPercent,
       'isAdditional': isAdditional,
-      'productId': productId,
+      'Id': productId,
       'productType': productType,
     };
   }

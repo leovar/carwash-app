@@ -35,7 +35,6 @@ class ReportsRepository {
     List<Invoice> invoicesList = <Invoice>[];
     invoicesListSnapshot.forEach((p) {
       Invoice invoice = Invoice.fromJson(p.data, id: p.documentID);
-
       invoicesList.add(invoice);
     });
     return invoicesList;
