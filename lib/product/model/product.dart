@@ -45,7 +45,7 @@ class Product extends Equatable {
     });
     bool additional = json['isAdditional'];
     String newId = json['productId'];
-    if (additional) {
+    if (additional??false) {
       newId = '';
     }
 

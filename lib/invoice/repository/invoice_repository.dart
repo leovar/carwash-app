@@ -45,8 +45,8 @@ class InvoiceRepository {
   /// Save invoice images in firebase storage
   Future<StorageTaskSnapshot> uploadImageInvoice(
       String path, File imageFile) async {
-    StorageUploadTask storageUploadTask = _storageReference.child(path).putData(
-          imageFile.readAsBytesSync(),
+    StorageUploadTask storageUploadTask = _storageReference.child(path).putFile(
+          imageFile,  //imageFile.readAsBytesSync(),
           StorageMetadata(
             contentType: 'image/jpeg',
           ),

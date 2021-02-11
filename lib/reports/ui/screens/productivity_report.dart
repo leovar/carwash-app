@@ -366,7 +366,7 @@ class _ProductivityReport extends State<ProductivityReport> {
 
   void _updateInvoices(List<Invoice> _invoice) async {
     ///TODO este metodo se llama para agregar los campos de countProducts a las facturas que no lo tienen aun
-    _blocReports.updateInfoInvoices(_invoice);
+    //_blocReports.updateInfoInvoices(_invoice);
     //_blocReports.updateInfoProductsInvoice(_invoice);
   }
 }

@@ -78,6 +78,7 @@ class _FormInvoice extends State<FormInvoice> {
   final String cameraTag = "Camara";
   final String galleryTag = "Galeria";
   String _selectSourceImagePicker = "Camara";
+  final picker = ImagePicker();
   File _imageSelect;
   FocusNode _clientFocusNode;
   DocumentReference _locationReference;
@@ -568,10 +569,10 @@ class _FormInvoice extends State<FormInvoice> {
   }
 
   Future _addImageTour() async {
-    var imageCapture = await ImagePicker.pickImage(
+    var imageCapture = await picker.getImage(
             source: _selectSourceImagePicker == cameraTag
                 ? ImageSource.camera
-                : ImageSource.gallery)
+                : ImageSource.gallery, imageQuality: 80)
         .catchError((onError) => print(onError));
 
     if (imageCapture != null) {
@@ -579,9 +580,9 @@ class _FormInvoice extends State<FormInvoice> {
       final dir = await path_provider.getTemporaryDirectory();
       final targetPath = dir.absolute.path + "/${imageCapture.path.substring(imageCapture.path.length-10 ,imageCapture.path.length)}"; //dir.absolute.path + "/temp${imageList.length}.jpg";
       final fileCompress = await FlutterImageCompress.compressAndGetFile(
-          imageCapture.absolute.path,
+          imageCapture.path,
           targetPath,
-          quality: 30,
+          quality: 50,
           autoCorrectionAngle: true,
           format: CompressFormat.jpeg,
       );

@@ -34,6 +34,10 @@ class BlocCustomer implements Bloc {
     return await _customerRepository.getCustomerReference(customerId);
   }
 
+  Future<List<Customer>> getListCustomerReportByLocation(DocumentReference locationReference) async {
+    return await _customerRepository.getCustomersByLocation(locationReference);
+  }
+
   @override
   void dispose() {}
 }
