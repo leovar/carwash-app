@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:car_wash_app/widgets/messages_utils.dart';
 import 'package:path/path.dart' as path_prov;
 import 'package:car_wash_app/customer/bloc/bloc_customer.dart';
 import 'package:car_wash_app/customer/model/customer.dart';
@@ -90,7 +91,7 @@ class _CustomersReport extends State<CustomersReport> {
 
   Widget _chargeDropLocations(AsyncSnapshot snapshot) {
     List<Location> locationList =
-    _blocLocation.buildLocations(snapshot.data.documents);
+        _blocLocation.buildLocations(snapshot.data.documents);
     _dropdownMenuItems = builtDropdownMenuItems(locationList);
 
     return DropdownButton(
@@ -136,37 +137,71 @@ class _CustomersReport extends State<CustomersReport> {
 
   /// Functions
   onChangeDropDawn(Location selectedLocation) async {
-    _locationReference = await _blocLocation.getLocationReference(selectedLocation.id);
+    _locationReference =
+        await _blocLocation.getLocationReference(selectedLocation.id);
     setState(() {
       _selectedLocation = selectedLocation;
     });
   }
 
   void _generateCustomerReport() async {
-    if(_selectedLocation != null) {
-      List<Customer> _listCustomers = await _blocCustomer.getListCustomerReportByLocation(_locationReference);
+    if (_selectedLocation != null) {
+      //Open message Saving
+      MessagesUtils.showAlertWithLoading(
+              context: context, title: 'Generando reporte')
+          .show();
+      List<Customer> _listCustomers = await _blocCustomer
+          .getListCustomerReportByLocation(_locationReference);
       List<Customer> _newListCustomer = [];
       _newListCustomer = _listCustomers.toSet().toList();
+      _newListCustomer.sort((a, b) => a.name.compareTo(b.name));
 
       var excel = Excel.createExcel();
       var sheetObject = excel["Sheet1"];
+
+      if (_newListCustomer.length > 0) {
+        List<String> header = [
+          "Nombre",
+          "Dirección",
+          "Teléfono",
+          "Correo",
+          "Fecha de cumpleaños",
+          "Barrio",
+          "Genero",
+          "Sede"
+        ];
+        sheetObject.appendRow(header);
+        _newListCustomer.forEach((item) {
+          List<String> row = [
+            "${item.name}",
+            "${item.address}",
+            "${item.phoneNumber}",
+            "${item.email}",
+            "${item.birthDate}",
+            "${item.neighborhood}",
+            "${item.typeSex}",
+            "${_selectedLocation.locationName}"
+          ];
+          sheetObject.appendRow(row);
+        });
+      }
+
       excel.rename("Sheet1", "Hoja1");
-      List<String> dataList = ["Google", "loves", "Flutter", "and", "Flutter", "loves", "Google"];
-      sheetObject.insertRowIterables(dataList, 0);
-      sheetObject.appendRow(["Flutter", "till", "Eternity"]);
-      //Sheet sheetObject = excel['Hoja1'];
 
-
-      String outputFile = "/storage/emulated/0/Download/ReporteClientes_${_selectedLocation.locationName}.xlsx";
+      String outputFile =
+          "/storage/emulated/0/Download/ReporteClientes_${_selectedLocation.locationName}.xlsx";
       excel.encode().then((onValue) {
         File(path_prov.join(outputFile))
           ..createSync(recursive: true)
           ..writeAsBytesSync(onValue);
       });
-      Fluttertoast.showToast(msg: "Su reporte ha sido descargado en: ${outputFile}", toastLength: Toast.LENGTH_LONG);
+      Navigator.pop(context); //Close popUp Save
+      Fluttertoast.showToast(
+          msg: "Su reporte ha sido descargado en: ${outputFile}",
+          toastLength: Toast.LENGTH_LONG);
     } else {
-      Fluttertoast.showToast(msg: "Primero seleccione una sede", toastLength: Toast.LENGTH_LONG);
+      Fluttertoast.showToast(
+          msg: "Primero seleccione una sede", toastLength: Toast.LENGTH_LONG);
     }
   }
-
 }
