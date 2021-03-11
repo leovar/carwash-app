@@ -237,6 +237,7 @@ class _AdditionalProductPage extends State<AdditionalProductPage> {
       setState(() {
         widget.additionalProductsList.removeAt(index);
         widget.setCbAdditionalProducts(widget.additionalProductsList);
+        FocusScope.of(context).requestFocus(nameFocusNode);
       });
     }
   }

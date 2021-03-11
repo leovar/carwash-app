@@ -32,6 +32,7 @@ import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:popup_menu/popup_menu.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
@@ -168,8 +169,15 @@ class _FormInvoice extends State<FormInvoice> {
     getPreferences();
 
     if (_imageSelect != null) {
-      if (!imageList.contains(_imageSelect.path)) {
-        imageList.add(_imageSelect.path);
+      if (_imageSelect.path.contains('imageFirm')) {
+        var _imagePath = _imageSelect.path;
+        var _oldImageFirmPath = imageList.where((e) => e.contains('imageFirm')).toList();
+        _deleteImageList(_oldImageFirmPath.length > 0 ? _oldImageFirmPath[0].toString(): '');
+        imageList.add(_imagePath);
+      } else {
+        if (!imageList.contains(_imageSelect.path)) {
+          imageList.add(_imageSelect.path);
+        }
       }
       _imageSelect = null;
     }
@@ -489,11 +497,10 @@ class _FormInvoice extends State<FormInvoice> {
             onPressed: () {
               if (widget.editInvoice != null) {
                 _printInvoice(
-                  widget.editInvoice,
-                  _listProduct.where((f) => f.isSelected).toList(),
-                  _listAdditionalProducts,
-                  _textEmail.text.trim()
-                );
+                    widget.editInvoice,
+                    _listProduct.where((f) => f.isSelected).toList(),
+                    _listAdditionalProducts,
+                    _textEmail.text.trim());
               }
             },
           ),
@@ -569,22 +576,25 @@ class _FormInvoice extends State<FormInvoice> {
   }
 
   Future _addImageTour() async {
-    var imageCapture = await picker.getImage(
+    var imageCapture = await picker
+        .getImage(
             source: _selectSourceImagePicker == cameraTag
                 ? ImageSource.camera
-                : ImageSource.gallery, imageQuality: 80)
+                : ImageSource.gallery,
+            imageQuality: 80)
         .catchError((onError) => print(onError));
 
     if (imageCapture != null) {
       // Esta parte de compress se coloca por que no va con crop, si fuera con crop esta parte ya esta en el crop
       final dir = await path_provider.getTemporaryDirectory();
-      final targetPath = dir.absolute.path + "/${imageCapture.path.substring(imageCapture.path.length-10 ,imageCapture.path.length)}"; //dir.absolute.path + "/temp${imageList.length}.jpg";
+      final targetPath = dir.absolute.path +
+          "/${imageCapture.path.substring(imageCapture.path.length - 10, imageCapture.path.length)}"; //dir.absolute.path + "/temp${imageList.length}.jpg";
       final fileCompress = await FlutterImageCompress.compressAndGetFile(
-          imageCapture.path,
-          targetPath,
-          quality: 50,
-          autoCorrectionAngle: true,
-          format: CompressFormat.jpeg,
+        imageCapture.path,
+        targetPath,
+        quality: 50,
+        autoCorrectionAngle: true,
+        format: CompressFormat.jpeg,
       );
       setState(() {
         _imageSelect = fileCompress;
@@ -627,10 +637,8 @@ class _FormInvoice extends State<FormInvoice> {
     );
     if (croppedFile != null) {
       File fileCompress = await FlutterImageCompress.compressAndGetFile(
-        croppedFile.absolute.path,
-        croppedFile.path,
-        quality: 40
-      );
+          croppedFile.absolute.path, croppedFile.path,
+          quality: 40);
 
       setState(() {
         _imageSelect = fileCompress;
@@ -701,8 +709,17 @@ class _FormInvoice extends State<FormInvoice> {
     _approveDataProcessing = value;
   }
 
-  void _callBackChargeFirm(Uint8List imageFirm) {
+  // la variable _imageFirmInMemory ya no se usa por que la firma se esta agregarndo dentro de la lista de imagenes.
+  void _callBackChargeFirm(Uint8List imageFirm) async {
     _imageFirmInMemory = imageFirm;
+    String formattedDate = DateFormat('kk_mm_ss').format(DateTime.now());
+    final dir = await path_provider.getTemporaryDirectory();
+    final file = await new File('${dir.absolute.path}/imageFirm$formattedDate.jpg').create();
+    file.writeAsBytesSync(imageFirm);
+    print(file.path);
+    setState(() {
+      _imageSelect = file;
+    });
   }
 
   ///Functions Services or Products
@@ -713,7 +730,9 @@ class _FormInvoice extends State<FormInvoice> {
   }
 
   void _setAdditionalProducts(List<AdditionalProduct> additionalProductList) {
-    _listAdditionalProducts = additionalProductList;
+    setState(() {
+      _listAdditionalProducts = additionalProductList;
+    });
   }
 
   ///Function validate exist customer
@@ -738,25 +757,26 @@ class _FormInvoice extends State<FormInvoice> {
           _vehicleReference = vehicleRef;
 
           if (vehicleRef != null) {
-            _blocVehicle.getVehicleById(vehicleRef.documentID)
-                .then((vehicle){
+            _blocVehicle.getVehicleById(vehicleRef.documentID).then((vehicle) {
               _selectBrand = vehicle.brand;
               _selectColor = vehicle.color;
               _selectedBrandReference = vehicle.brandReference;
-              HeaderServices vehicleTypeFind = vehicleTypeList.where((f) => f.text == vehicle.vehicleType).first;
+              HeaderServices vehicleTypeFind = vehicleTypeList
+                  .where((f) => f.text == vehicle.vehicleType)
+                  .first;
               vehicleTypeSelected = vehicleTypeFind;
               setState(() {
-                vehicleTypeList.forEach((element) => element.isSelected = false);
-                vehicleTypeList[vehicleTypeList.indexOf(vehicleTypeSelected)].isSelected = true;
+                vehicleTypeList
+                    .forEach((element) => element.isSelected = false);
+                vehicleTypeList[vehicleTypeList.indexOf(vehicleTypeSelected)]
+                    .isSelected = true;
               });
             });
           } else {
             _selectBrand = '';
             _selectColor = '';
             _selectedBrandReference = '';
-            setState(() {
-
-            });
+            setState(() {});
           }
 
           //Validate services from the last 2 months
@@ -821,16 +841,16 @@ class _FormInvoice extends State<FormInvoice> {
 
   // Get last invoices per vehicle
   void _getInvoicesForPlaca(String placa) async {
-    List<Invoice> listInvoicesByVehicle = await _blocInvoice.getListInvoicesByVehicle(placa) ?? [];
+    List<Invoice> listInvoicesByVehicle =
+        await _blocInvoice.getListInvoicesByVehicle(placa) ?? [];
     if (listInvoicesByVehicle.length > 0) {
       List<InvoiceHistoryList> invoiceHistoryList = [];
       listInvoicesByVehicle.forEach((vehicleInvoice) async {
         InvoiceHistoryList invoiceHistory = InvoiceHistoryList(
-          vehicleInvoice.creationDate,
-          vehicleInvoice.consecutive.toString(),
-          vehicleInvoice.invoiceProducts[0].productName,
-          vehicleInvoice.totalPrice
-        );
+            vehicleInvoice.creationDate,
+            vehicleInvoice.consecutive.toString(),
+            vehicleInvoice.invoiceProducts[0].productName,
+            vehicleInvoice.totalPrice);
         invoiceHistoryList.add(invoiceHistory);
         if (invoiceHistoryList.length == listInvoicesByVehicle.length) {
           Alert(
@@ -860,7 +880,6 @@ class _FormInvoice extends State<FormInvoice> {
 
   ///Functions Save Invoice
   void _saveInvoice() async {
-
     bool _haveServiceSpecial = false;
     //validate internet connection if have images
     if (imageList.length > 0) {
@@ -868,7 +887,11 @@ class _FormInvoice extends State<FormInvoice> {
       var connectionMobile = connectivityResult == ConnectivityResult.mobile;
       var connectionWifi = connectivityResult == ConnectivityResult.wifi;
       if (!connectionMobile && !connectionWifi) {
-        MessagesUtils.showAlert(context: context, title: 'No tiene conexión a internet! no se pueden guardar las imagenes').show();
+        MessagesUtils.showAlert(
+                context: context,
+                title:
+                    'No tiene conexión a internet! no se pueden guardar las imagenes')
+            .show();
         return;
       }
     }
@@ -880,7 +903,8 @@ class _FormInvoice extends State<FormInvoice> {
           .show();
 
       try {
-        DocumentReference _vehicleTypeRef;  //esta referencia debe traerse de la bd, en el momento se construye en la app
+        DocumentReference
+            _vehicleTypeRef; //esta referencia debe traerse de la bd, en el momento se construye en la app
         DocumentReference _customerReference;
         DocumentReference _operatorReference;
         DocumentReference _coordinatorReference;
@@ -912,7 +936,8 @@ class _FormInvoice extends State<FormInvoice> {
             model: '',
             placa: _textPlaca.text.trim(),
             color: _selectColor,
-            vehicleType: vehicleTypeSelected.text, //_vehicleTypeRef,
+            vehicleType: vehicleTypeSelected.text,
+            //_vehicleTypeRef,
             creationDate: Timestamp.now(),
             brandReference: _selectedBrandReference,
           );
@@ -988,7 +1013,8 @@ class _FormInvoice extends State<FormInvoice> {
         });
 
         //Save products list
-        List<Product> _selectedProducts = _listProduct.where((f) => f.isSelected).toList();
+        List<Product> _selectedProducts =
+            _listProduct.where((f) => f.isSelected).toList();
         List<Product> _productToSave = [];
         if (_selectedProducts.length > 0) {
           _selectedProducts.forEach((product) {
@@ -997,7 +1023,7 @@ class _FormInvoice extends State<FormInvoice> {
                 id: product.id,
                 productName: product.productName,
                 price: product.price,
-                ivaPercent : product.ivaPercent,
+                ivaPercent: product.ivaPercent,
                 isAdditional: false,
                 productType: product.productType,
               );
@@ -1011,7 +1037,7 @@ class _FormInvoice extends State<FormInvoice> {
               id: null,
               productName: addProduct.productName,
               price: double.parse(addProduct.productValue),
-              ivaPercent : addProduct.ivaPercent,
+              ivaPercent: addProduct.ivaPercent,
               isAdditional: true,
               productType: addProduct.productType,
             );
@@ -1020,7 +1046,8 @@ class _FormInvoice extends State<FormInvoice> {
         }
 
         //Get count products
-        _countProducts = _listProduct.where((f) => f.isSelected).toList().length;
+        _countProducts =
+            _listProduct.where((f) => f.isSelected).toList().length;
         _countAdditionalProducts = _listAdditionalProducts.length;
 
         //Get Consecutive
@@ -1080,9 +1107,11 @@ class _FormInvoice extends State<FormInvoice> {
           sendEmailInvoice: _sendEmail,
           invoiceProducts: _productToSave,
         );
-        DocumentReference invoiceReference = await _blocInvoice.saveInvoice(_invoice);
+        DocumentReference invoiceReference =
+            await _blocInvoice.saveInvoice(_invoice);
         String invoiceId = invoiceReference.documentID;
-        Invoice _currentInvoiceSaved = await _blocInvoice.getInvoiceById(invoiceId);
+        Invoice _currentInvoiceSaved =
+            await _blocInvoice.getInvoiceById(invoiceId);
 
         //Save products list
         /*List<Product> _selectedProducts = _listProduct.where((f) => f.isSelected).toList();
@@ -1100,7 +1129,8 @@ class _FormInvoice extends State<FormInvoice> {
         Navigator.pop(context); //Close form Create Invoice
 
         if (widget.editInvoice == null) {
-          _printInvoice(_currentInvoiceSaved, _selectedProducts, _listAdditionalProducts, _textEmail.text.trim());
+          _printInvoice(_currentInvoiceSaved, _selectedProducts,
+              _listAdditionalProducts, _textEmail.text.trim());
         }
 
         //MessagesUtils.showAlert(context: context, title: 'Factura Guardada').show();
@@ -1173,7 +1203,8 @@ class _FormInvoice extends State<FormInvoice> {
     _textIncidence.text = invoiceToEdit.incidence;
 
     //get vehicle reference
-    _vehicleReference = await _blocVehicle.getVehicleReferenceByPlaca(invoiceToEdit.placa);
+    _vehicleReference =
+        await _blocVehicle.getVehicleReferenceByPlaca(invoiceToEdit.placa);
 
     //get customer information
     _customer = await _customerBloc

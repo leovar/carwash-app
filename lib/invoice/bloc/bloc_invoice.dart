@@ -32,7 +32,9 @@ class BlocInvoice implements Bloc {
       for (String imageFilePath in invoice.invoiceImages) {
         if (!imageFilePath.contains('https://firebasestorage.')) {
           File imageFile = File(imageFilePath);
-          final pathImage = '$invoiceId/before/${basename(imageFilePath)}';
+          final pathImage = imageFilePath.contains('imageFirm')
+              ? '$invoiceId/before/firm'
+              : '$invoiceId/before/${basename(imageFilePath)}';
           StorageTaskSnapshot storageTaskSnapshot =
               await _invoiceRepository.uploadImageInvoice(pathImage, imageFile);
           String imageUrl = await storageTaskSnapshot.ref.getDownloadURL();
@@ -41,6 +43,8 @@ class BlocInvoice implements Bloc {
       }
     }
 
+    // Se comenta esta parte por que la firma ya se esta agregando dentro de la lista de las imagenes y no independiente
+    /*
     if (invoice.imageFirm != null) {
       if (!invoice.imageFirm.contains('https://firebasestorage.')) {
         final pathImage = '$invoiceId/before/firm';
@@ -50,6 +54,7 @@ class BlocInvoice implements Bloc {
         await _invoiceRepository.updateInvoiceImages(invoiceId, imageUrl);
       }
     }
+    */
 
     return ref;
   }
@@ -75,9 +80,11 @@ class BlocInvoice implements Bloc {
   }
 
   /// Operators
-  Stream<QuerySnapshot> operatorsStream() => _invoiceRepository.getListOperatorsStream();
+  Stream<QuerySnapshot> operatorsStream() =>
+      _invoiceRepository.getListOperatorsStream();
 
-  Stream<QuerySnapshot> operatorsByLocationStream(String idLocation) => _invoiceRepository.getListOperatorsByLocationStream(idLocation);
+  Stream<QuerySnapshot> operatorsByLocationStream(String idLocation) =>
+      _invoiceRepository.getListOperatorsByLocationStream(idLocation);
 
   List<User> buildOperators(List<DocumentSnapshot> operatorsListSnapshot) =>
       _invoiceRepository.buildOperators(operatorsListSnapshot);
@@ -87,9 +94,11 @@ class BlocInvoice implements Bloc {
   }*/
 
   /// Coordinators
-  Stream<QuerySnapshot> coordinatorsStream() => _invoiceRepository.getListCoordinatorStream();
+  Stream<QuerySnapshot> coordinatorsStream() =>
+      _invoiceRepository.getListCoordinatorStream();
 
-  Stream<QuerySnapshot> coordinatorsByLocationStream(String idLocation) => _invoiceRepository.getListCoordinatorByLocationStream(idLocation);
+  Stream<QuerySnapshot> coordinatorsByLocationStream(String idLocation) =>
+      _invoiceRepository.getListCoordinatorByLocationStream(idLocation);
 
   List<User> buildCoordinators(
           List<DocumentSnapshot> coordinatorListSnapshot) =>
@@ -173,7 +182,7 @@ class BlocInvoice implements Bloc {
     );
   }
 
-    List<Invoice> buildInvoicesListByMonth(
+  List<Invoice> buildInvoicesListByMonth(
       List<DocumentSnapshot> invoicesListSnapshot) {
     return _invoiceRepository.buildInvoicesListByMonth(invoicesListSnapshot);
   }
