@@ -61,6 +61,7 @@ class UserRepository {
     final querySnapshot = this
         ._db
         .collection(FirestoreCollections.users)
+        .orderBy(FirestoreCollections.usersFieldName)
         .snapshots();
     return querySnapshot;
   }

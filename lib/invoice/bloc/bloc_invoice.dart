@@ -75,9 +75,9 @@ class BlocInvoice implements Bloc {
   }
 
   /// Operators
-  Stream<QuerySnapshot> operatorsStream() {
-    return _invoiceRepository.getListOperatorsStream();
-  }
+  Stream<QuerySnapshot> operatorsStream() => _invoiceRepository.getListOperatorsStream();
+
+  Stream<QuerySnapshot> operatorsByLocationStream(String idLocation) => _invoiceRepository.getListOperatorsByLocationStream(idLocation);
 
   List<User> buildOperators(List<DocumentSnapshot> operatorsListSnapshot) =>
       _invoiceRepository.buildOperators(operatorsListSnapshot);
@@ -87,9 +87,9 @@ class BlocInvoice implements Bloc {
   }*/
 
   /// Coordinators
-  Stream<QuerySnapshot> coordinatorsStream() {
-    return _invoiceRepository.getListCoordinatorStream();
-  }
+  Stream<QuerySnapshot> coordinatorsStream() => _invoiceRepository.getListCoordinatorStream();
+
+  Stream<QuerySnapshot> coordinatorsByLocationStream(String idLocation) => _invoiceRepository.getListCoordinatorByLocationStream(idLocation);
 
   List<User> buildCoordinators(
           List<DocumentSnapshot> coordinatorListSnapshot) =>

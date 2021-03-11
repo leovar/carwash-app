@@ -18,7 +18,7 @@ class FieldsMenusInvoice extends StatefulWidget {
   final Function(String, int, int) cbHandlerTypeSex;
   final selectedOperator;
   final selectedCoordinator;
-  final locationReference;
+  final String idLocation;
   final String selectedVehicleBrand;
   final String selectVehicleBrandReference;
   final String selectedVehicleColor;
@@ -42,7 +42,7 @@ class FieldsMenusInvoice extends StatefulWidget {
     this.cbHandlerTypeSex,
     this.selectedOperator,
     this.selectedCoordinator,
-    this.locationReference,
+    this.idLocation,
     this.selectedVehicleBrand,
     this.selectVehicleBrandReference,
     this.selectedVehicleColor,
@@ -131,7 +131,7 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
     // cada vez que hace un set state.
     if (widget.listCountOperators == 0) {
       return StreamBuilder(
-        stream: _blocInvoice.operatorsStream(),
+        stream: _blocInvoice.operatorsByLocationStream(widget.idLocation),
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           switch (snapshot.connectionState) {
             case ConnectionState.waiting:
@@ -166,7 +166,7 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
   Widget _getCoordinators() {
     if (widget.listCountCoordinators == 0) {
       return StreamBuilder(
-        stream: _blocInvoice.coordinatorsStream(),
+        stream: _blocInvoice.coordinatorsByLocationStream(widget.idLocation),
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           switch (snapshot.connectionState) {
             case ConnectionState.waiting:

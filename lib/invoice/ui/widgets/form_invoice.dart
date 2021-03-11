@@ -307,7 +307,7 @@ class _FormInvoice extends State<FormInvoice> {
                 cbHandlerVehicleBrandReference: _setHandlerBrandReferences,
                 cbHandlerVehicleColor: _setHandlerVehicleColor,
                 cbHandlerTypeSex: _setHandlerTypeSex,
-                locationReference: _locationReference,
+                idLocation: _idLocation,
                 selectedOperator: _selectOperator,
                 selectedCoordinator: _selectCoordinator,
                 selectedVehicleBrand: _selectBrand,
