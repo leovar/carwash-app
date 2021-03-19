@@ -1124,6 +1124,9 @@ class _FormInvoice extends State<FormInvoice> {
           _blocInvoice.saveInvoiceAdditionalProducts(invoiceId, _listAdditionalProducts);
         }*/
 
+        final dir = await path_provider.getTemporaryDirectory();
+        dir.deleteSync(recursive: true);
+
         //Close screen
         Navigator.pop(context); //Close popUp Save
         Navigator.pop(context); //Close form Create Invoice
