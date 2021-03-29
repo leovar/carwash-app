@@ -841,40 +841,41 @@ class _FormInvoice extends State<FormInvoice> {
 
   // Get last invoices per vehicle
   void _getInvoicesForPlaca(String placa) async {
-    List<Invoice> listInvoicesByVehicle =
-        await _blocInvoice.getListInvoicesByVehicle(placa) ?? [];
-    if (listInvoicesByVehicle.length > 0) {
-      List<InvoiceHistoryList> invoiceHistoryList = [];
-      listInvoicesByVehicle.forEach((vehicleInvoice) async {
-        InvoiceHistoryList invoiceHistory = InvoiceHistoryList(
-            vehicleInvoice.creationDate,
-            vehicleInvoice.consecutive.toString(),
-            vehicleInvoice.invoiceProducts[0].productName,
-            vehicleInvoice.totalPrice);
-        invoiceHistoryList.add(invoiceHistory);
-        if (invoiceHistoryList.length == listInvoicesByVehicle.length) {
-          Alert(
-              context: context,
-              title: 'Historia',
-              style: MessagesUtils.alertStyle,
-              content: InfoLastServicesByVehicle(
-                listHistoryInvoices: invoiceHistoryList,
-              ),
-              buttons: [
-                DialogButton(
-                  color: Theme.of(context).accentColor,
-                  child: Text(
-                    'ACEPTAR',
-                    style: Theme.of(context).textTheme.button,
-                  ),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    setState(() {});
-                  },
-                )
-              ]).show();
-        }
-      });
+    try {
+      List<Invoice> listInvoicesByVehicle =
+          await _blocInvoice.getListInvoicesByVehicle(placa) ?? [];
+      if (listInvoicesByVehicle.length > 0) {
+        final dataList = listInvoicesByVehicle.map((vehicleInvoice) =>
+            InvoiceHistoryList(
+                vehicleInvoice.creationDate,
+                vehicleInvoice.consecutive.toString(),
+                vehicleInvoice.invoiceProducts.length > 0 ? vehicleInvoice.invoiceProducts[0].productName : '',
+                vehicleInvoice.totalPrice)
+        ).toList();
+
+        Alert(
+            context: context,
+            title: 'Historia',
+            style: MessagesUtils.alertStyle,
+            content: InfoLastServicesByVehicle(
+              listHistoryInvoices: dataList,
+            ),
+            buttons: [
+              DialogButton(
+                color: Theme.of(context).accentColor,
+                child: Text(
+                  'ACEPTAR',
+                  style: Theme.of(context).textTheme.button,
+                ),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  setState(() {});
+                },
+              )
+            ]).show();
+      }
+    } catch (e) {
+      print(e);
     }
   }
 

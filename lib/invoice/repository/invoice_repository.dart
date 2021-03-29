@@ -425,6 +425,27 @@ class InvoiceRepository {
     return productList;
   }
 
+  //TODO metodo temporal para pasar los productos de una lista aparte de la factura al interior de la factura
+  Future<List<Product>> getInvoiceProductsTemporal(String idInvoice) async {
+    List<Product> productList = <Product>[];
+    var querySnapshot = await this
+        ._db
+        .collection(FirestoreCollections.invoices)
+        .document(idInvoice)
+        .collection(FirestoreCollections.invoiceFieldProducts)
+        .getDocuments();
+
+    final documents = querySnapshot.documents;
+    if (documents.length > 0) {
+      documents.forEach((document) {
+        Product product =
+        Product.fromJsonTemporal(document.data);
+        productList.add(product);
+      });
+    }
+    return productList;
+  }
+
   ///Get last consecutive for location
   Future<int> getLastConsecutiveByLocation(
       DocumentReference locationReference) async {

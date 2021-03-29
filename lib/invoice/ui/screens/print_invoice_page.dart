@@ -257,20 +257,18 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
           Container(
             margin: EdgeInsets.only(right: 50, left: 50),
             child: Center(
-              child: Flexible(
-                child: Text(
-                  'El operador y la empresa no se hacen responsables por: 1.fallas eléctricas o mecánicas del vehiculo. /2. '
-                  'Robo total o parcial del mismo. /3. Bienes olvidados dentro o fuera del vehículo sin inventario. /4. '
-                  'No se responde por afectaciones que no se vean debido al polvo. *No se aceptan reclamaciones posteriores '
-                  'a la entrega del servicio. *El servicio es independiente al centro comercial.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontFamily: "Lato",
-                    decoration: TextDecoration.none,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black,
-                    fontSize: _spaceMarginButton,
-                  ),
+              child: Text(
+                'El operador y la empresa no se hacen responsables por: 1.fallas eléctricas o mecánicas del vehiculo. /2. '
+                    'Robo total o parcial del mismo. /3. Bienes olvidados dentro o fuera del vehículo sin inventario. /4. '
+                    'No se responde por afectaciones que no se vean debido al polvo. *No se aceptan reclamaciones posteriores '
+                    'a la entrega del servicio. *El servicio es independiente al centro comercial.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontFamily: "Lato",
+                  decoration: TextDecoration.none,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black,
+                  fontSize: _spaceMarginButton,
                 ),
               ),
             ),

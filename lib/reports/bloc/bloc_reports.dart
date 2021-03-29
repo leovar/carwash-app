@@ -7,7 +7,9 @@ import 'package:car_wash_app/invoice/repository/invoice_repository.dart';
 import 'package:car_wash_app/product/bloc/product_bloc.dart';
 import 'package:car_wash_app/product/model/product.dart';
 import 'package:car_wash_app/reports/repository/reports_repository.dart';
+import 'package:car_wash_app/widgets/messages_utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 
 class BlocReports implements Bloc {
@@ -38,35 +40,43 @@ class BlocReports implements Bloc {
 
   void updateInfoInvoices(List<Invoice> invoices) async {
     invoices.forEach((item) async {
-      List<Product> listProducts = await _invoiceRepository.getInvoiceProducts(item.id);
-      final _invoice = Invoice.copyWith(
-        origin: item,
-        countProducts: listProducts.where((f) => !f.isAdditional).length,
-        countAdditionalProducts: listProducts.where((f) => f.isAdditional).length,
-        listProducts: listProducts,
-      );
-      DocumentReference ref = await _invoiceRepository.updateInvoiceData(_invoice);
+      List<Product> listProducts = await _invoiceRepository.getInvoiceProductsTemporal(item.id);
+      if (listProducts.length > 0) {
+        var _invoice = Invoice.copyWith(
+          origin: item,
+          countProducts: listProducts.where((f) => !f.isAdditional).length,
+          countAdditionalProducts: listProducts.where((f) => f.isAdditional).length,
+          listProducts: listProducts,
+        );
+        if (item.invoiceProducts.length == 0) {
+          DocumentReference ref = await _invoiceRepository.updateInvoiceData(_invoice);
+        }
+      }
     });
   }
 
-  void updateInfoProductsInvoice(List<Invoice> invoices) async {
+  Future<int> updateInfoProductsInvoice(List<Invoice> invoices) async {
+    var countData = 0;
     invoices.forEach((item) async {
       final listInvoiceProducts = await _invoiceRepository.getProductsByIdInvoice(item.id);
       listInvoiceProducts.forEach((invProduct) async {
         if (invProduct.id != null) {
           final product = await _blocProduct.getProductById(invProduct.id);
           final newProd = Product.copyProductInvoiceWith(origin: invProduct, productType: product.productType, productInvoiceId: invProduct.productInvoiceId);
-          _blocInvoice.updateInvoiceProduct(item.id, newProd);
+          await _blocInvoice.updateInvoiceProduct(item.id, newProd);
+          countData ++;
         } else {
           String productTypeAdditional = 'Sencillo';
           if(item.uidVehicleType.toString().contains('1') || item.uidVehicleType.toString().contains('2')) {
             productTypeAdditional = 'Especial';
           }
           final newProd = Product.copyProductInvoiceWith(origin: invProduct, productType: productTypeAdditional, productInvoiceId: invProduct.productInvoiceId);
-          _blocInvoice.updateInvoiceProduct(item.id, newProd);
+          await _blocInvoice.updateInvoiceProduct(item.id, newProd);
+          countData ++;
         }
       });
     });
+    return countData;
   }
 
   @override

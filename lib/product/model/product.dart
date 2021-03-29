@@ -43,6 +43,28 @@ class Product extends Equatable {
     locationsList?.forEach((drLocation) {
       locationsListDb.add(drLocation);
     });
+
+    return Product(
+      id: id,
+      productName: json['productName'],
+      price: json['price'].toDouble(),
+      ivaPercent: json['ivaPercent'].toDouble(),
+      vehicleType: json['vehicleType'],
+      productActive : json['productActive'],
+      vehicleTypeUid : json['vehicleTypeUid'],
+      isAdditional: json['isAdditional'],
+      locations: locationsListDb,
+      isSelected: false,
+      productType: json['productType'],
+    );
+  }
+
+  factory Product.fromJsonTemporal(Map<String, dynamic> json) {
+    List<DocumentReference> locationsListDb = <DocumentReference>[];
+    List locationsList = json['locations'];
+    locationsList?.forEach((drLocation) {
+      locationsListDb.add(drLocation);
+    });
     bool additional = json['isAdditional'];
     String newId = json['productId'];
     if (additional??false) {

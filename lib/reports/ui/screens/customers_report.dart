@@ -28,7 +28,6 @@ class _CustomersReport extends State<CustomersReport> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
   }
 
