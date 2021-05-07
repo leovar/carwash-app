@@ -22,6 +22,11 @@ class ProductBloc implements Bloc {
   }
 
 
+  Future<List<Product>> getAllProducts() async {
+    return _productRepository.getAllProducts();
+  }
+
+
   @override
   void dispose() {
   }

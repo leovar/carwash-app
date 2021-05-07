@@ -376,5 +376,6 @@ class _ProductivityReport extends State<ProductivityReport> {
     ///TODO este metodo se llama para agregar los campos de countProducts a las facturas que no lo tienen aun
     //_blocReports.updateInfoInvoices(_invoice);
     //_blocReports.updateInfoProductsInvoice(_invoice);
+    //_blocReports.addIdToProductInvoice(_invoice);
   }
 }

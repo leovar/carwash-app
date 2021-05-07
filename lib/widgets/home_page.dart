@@ -34,7 +34,8 @@ class _HomePage extends State<HomePage> {
   String _photoUrl = '';
   DocumentReference _locationReference;
   String _locationName = '';
-  bool _showReportsButton = false;
+  bool _isAdministrator = false;
+  Location _selectedLocation = Location();
 
   @override
   void initState() {
@@ -87,7 +88,7 @@ class _HomePage extends State<HomePage> {
       this._currentUser = user;
       this._currentUser.photoUrl = _photoUrl;
       if (user.isAdministrator) {
-        _showReportsButton = true;
+        _isAdministrator = true;
       }
       return homePage();
     } else {
@@ -197,7 +198,7 @@ class _HomePage extends State<HomePage> {
           height: 10.0,
         ),
         Visibility(
-          visible: _showReportsButton,
+          visible: _isAdministrator,
           child: ButtonFunctions(
             onPressed: () {
               Navigator.push(
@@ -222,59 +223,89 @@ class _HomePage extends State<HomePage> {
       child: Container(
         width: MediaQuery.of(context).size.width,
         height: 40,
-        padding: EdgeInsets.symmetric(vertical: 6, horizontal: 12),
         decoration: BoxDecoration(color: Colors.white,
             //borderRadius: BorderRadius.all(Radius.circular(50))
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'Sede : $_locationName',
-              style: TextStyle(
-                fontFamily: "Lato",
-                decoration: TextDecoration.none,
-                fontWeight: FontWeight.normal,
-                color: Theme.of(context).primaryColor,
-                fontSize: 17,
+        child: Stack(
+          children: [
+            Container(
+              alignment: Alignment.center,
+              padding: EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+              child: Text(
+                'Sede : $_locationName',
+                style: TextStyle(
+                  fontFamily: "Lato",
+                  decoration: TextDecoration.none,
+                  fontWeight: FontWeight.normal,
+                  color: Theme.of(context).primaryColor,
+                  fontSize: 17,
+                ),
               ),
-            )
+            ),
+            Visibility(
+                visible: _isAdministrator,
+                child: Container(
+                alignment: Alignment.centerRight,
+                child: IconButton(
+                  icon: Icon(Icons.autorenew),
+                  color: Color(0XFF59B258),
+                  iconSize: 30,
+                  onPressed: () {
+                    _changeLocationPreferences();
+                  },
+                ),
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  /*
-  // este tramo de codigo mostraba la sede lateralmente con un fondo ovalado
-  Align(
-      alignment: Alignment(-0.93, -0.97),
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: 6, horizontal: 12),
-        decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.all(Radius.circular(50))),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Text(
-              'Sede : $_locationName',
-              style: TextStyle(
-                fontFamily: "Lato",
-                decoration: TextDecoration.none,
-                fontWeight: FontWeight.normal,
-                color: Theme.of(context).primaryColor,
-                fontSize: 17,
-              ),
-            )
-          ],
-        ),
-      ),
-    )
-  */
-
   ///Functions
+
+  void _changeLocationPreferences() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    String locationId = pref.getString(Keys.idLocation) ?? '';
+    Alert(
+      context: context,
+      title: 'Sede',
+      style: MessagesUtils.alertStyle,
+      content: SelectLocationWidget(
+        locationSelected: _selectedLocation,
+        selectLocation: _callBackSelectLocation,
+      ),
+      buttons: [
+        DialogButton(
+          color: Theme.of(context).accentColor,
+          child: Text(
+            'ACEPTAR',
+            style: Theme.of(context).textTheme.button,
+          ),
+          onPressed: () {
+            Navigator.of(context).pop();
+            setState(() {});
+          },
+        )
+      ],
+    ).show();
+  }
+  void _callBackSelectLocation(Location locationSelected) {
+    _selectedLocation = locationSelected;
+    _serLocationPreference(locationSelected);
+  }
+
+  void _serLocationPreference(Location locationSelected) async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    setState(() {
+      pref.setString(Keys.idLocation, locationSelected.id);
+      pref.setString(Keys.locationName, locationSelected.locationName);
+      pref.setString(
+          Keys.locationInitCount, locationSelected.initConcec.toString());
+      pref.setString(
+          Keys.locationFinalCount, locationSelected.finalConsec.toString());
+    });
+  }
 
   Future<void> _getPreferences() async {
     SharedPreferences pref = await SharedPreferences.getInstance();

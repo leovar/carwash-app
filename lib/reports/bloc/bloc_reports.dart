@@ -79,6 +79,54 @@ class BlocReports implements Bloc {
     return countData;
   }
 
+  //TODO metodo temporal para solucionar error con los id de los servicios dentro de las facturas
+  void addIdToProductInvoiceTemp(List<Invoice> invoices) async {
+    List<Invoice> invoicesList = invoices.where((item) => item.invoiceProducts.length > 0).toList();
+
+    List<Product> productos = await _blocProduct.getAllProducts();
+    List<Invoice> invoiceData = [];
+    invoicesList.forEach((f) {
+      List<Product> productsUpdated = [];
+      bool isupdate = false;
+      f.invoiceProducts.forEach((d) {
+        if (!d.isAdditional && d.id == null) {
+          List<Product> newProduct = productos.where((e) => e.productName == d.productName).toList();
+          Product selectProduct = newProduct.firstWhere((item) => item.vehicleTypeUid == f.uidVehicleType);
+          Product prodUpdate = Product.copyProductInvoiceWith(origin: d, id: selectProduct.id);
+          productsUpdated.add(prodUpdate);
+          isupdate = true;
+        } else {
+          productsUpdated.add(d);
+        }
+      });
+      var _invoice = Invoice.copyWith(
+        origin: f,
+        listProducts: productsUpdated,
+      );
+      if (isupdate) {
+        print('ACTUALIZO LA FACTURA # ${_invoice.consecutive.toString()}');
+        _invoiceRepository.updateInvoiceData(_invoice);
+      }
+    });
+
+
+    /*
+    List<Invoice> allInvoices = await _reportsRepository.getAllInvoices();
+    allInvoices.forEach((element) async {
+      List<Product> productsInvoice = await _invoiceRepository.getProductsByIdInvoice(element.id);
+      productsInvoice.forEach((item) {
+        if (item.id == 'bpdtndDhpviCzpfipQxi') {
+          print('bpdtndDhpviCzpfipQxi');
+        }
+        if (item.id == 'sDXNlRNGOBbIXody8LS7') {
+          print('sDXNlRNGOBbIXody8LS7');
+        }
+      });
+    });
+    */
+
+  }
+
   @override
   void dispose() {
   }

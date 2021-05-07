@@ -64,4 +64,21 @@ class ProductRepository {
 
     return Product.fromJson(querySnapshot.data, id: querySnapshot.documentID);
   }
+
+  Future<List<Product>> getAllProducts() async {
+    List<Product> productList = <Product>[];
+    final querySnapshot = await this
+        ._db
+        .collection(FirestoreCollections.products)
+        .getDocuments();
+
+    final documents = querySnapshot.documents;
+    if (documents.length > 0) {
+      documents.forEach((document) {
+        Product product = Product.fromJson(document.data, id: document.documentID);
+        productList.add(product);
+      });
+    }
+    return productList;
+  }
 }

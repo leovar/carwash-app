@@ -1136,9 +1136,6 @@ class _FormInvoice extends State<FormInvoice> {
           _printInvoice(_currentInvoiceSaved, _selectedProducts,
               _listAdditionalProducts, _textEmail.text.trim());
         }
-
-        //MessagesUtils.showAlert(context: context, title: 'Factura Guardada').show();
-
       } on PlatformException catch (e) {
         print('$e');
         MessagesUtils.showAlert(

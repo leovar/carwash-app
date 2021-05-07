@@ -39,4 +39,23 @@ class ReportsRepository {
     });
     return invoicesList;
   }
+
+
+  //TODO metodos hacia abajo solo se usan para corregir errores una sola vez, se deben eliminar
+  Future<List<Invoice>> getAllInvoices() async {
+    List<Invoice> invoiceList = <Invoice>[];
+    final querySnapshot = await this
+        ._db
+        .collection(FirestoreCollections.invoices)
+        .getDocuments();
+
+    final documents = querySnapshot.documents;
+    if (documents.length > 0) {
+      documents.forEach((document) {
+        Invoice product = Invoice.fromJson(document.data, id: document.documentID);
+        invoiceList.add(product);
+      });
+    }
+    return invoiceList;
+  }
 }

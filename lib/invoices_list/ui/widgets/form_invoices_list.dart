@@ -383,7 +383,7 @@ class _FormInvoicesList extends State<FormInvoicesList> {
       Alert(
         context: context,
         type: AlertType.info,
-        title: 'Esta seguro que desea cerrar la factura !',
+        title: 'Seleccione el operador',
         style: MessagesUtils.alertStyle,
         buttons: [
           DialogButton(

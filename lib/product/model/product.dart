@@ -154,6 +154,7 @@ class Product extends Equatable {
 
   factory Product.copyProductInvoiceWith({
     @required Product origin,
+    String id,
     bool isSelected,
     double price,
     double ivaPercent,
@@ -161,7 +162,7 @@ class Product extends Equatable {
     String productInvoiceId,
   }) {
     return Product(
-      id: origin.id,
+      id: id ?? origin.id,
       productName: origin.productName,
       price: price ?? origin.price,
       ivaPercent: ivaPercent ?? origin.ivaPercent,

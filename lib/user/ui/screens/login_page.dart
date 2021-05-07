@@ -487,7 +487,7 @@ class _LoginPage extends State<LoginPage> {
     }
 
     _setLocationInPreferences(user, _imageUserProfile, _userName);
-    // TODO este navigate se debe quitar si se coloca la app a validar primero si el usuario esta logueado
+    // TODO este navigate se debe quitar si se coloca la app a validar primero si el usuario actualmente ya se encuentra logueado
     /* Navigator.push(
       context,
       MaterialPageRoute(
