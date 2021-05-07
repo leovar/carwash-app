@@ -69,7 +69,7 @@ class _FieldsInvoice extends State<FieldsInvoice> {
           textController: widget.textPlaca,
           isUpperCase: true,
           textInputFormatter: [
-            WhitelistingTextInputFormatter(RegExp("^[a-zA-Z0-9]*"))
+            FilteringTextInputFormatter.allow(RegExp("^[a-zA-Z0-9]*"))
           ],
           onFinalEditText: widget.finalEditPlaca,
           validate: widget.validatePlaca,

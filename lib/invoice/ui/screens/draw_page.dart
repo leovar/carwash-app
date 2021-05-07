@@ -45,7 +45,7 @@ class _DrawPage extends State<DrawPage> {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         child: Icon(
-          Icons.add,
+          Icons.done,
           color: Colors.white,
         ),
         onPressed: _capturePng,
@@ -174,7 +174,7 @@ class _DrawPage extends State<DrawPage> {
 
   Future<Uint8List> _capturePng() async {
     try {
-      print('inside');
+      //print('inside');
       inside = true;
       RenderRepaintBoundary boundary =
           _globalKey.currentContext.findRenderObject();
@@ -185,11 +185,11 @@ class _DrawPage extends State<DrawPage> {
 //      String bs64 = base64Encode(pngBytes);
 //      print(pngBytes);
 //      print(bs64);
-      print('png done');
+      //print('png done');
+      await widget.callBackChargeImageFirm(pngBytes);
       setState(() {
         imageInMemory = pngBytes;
         inside = false;
-        widget.callBackChargeImageFirm(pngBytes);
         Navigator.pop(context);
       });
       return pngBytes;

@@ -1,4 +1,5 @@
 import 'package:car_wash_app/customer/model/customer.dart';
+import 'package:car_wash_app/invoice/model/invoice.dart';
 import 'package:car_wash_app/widgets/firestore_collections.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -10,8 +11,10 @@ class CustomerRepository {
     final querySnapshot = await this
         ._db
         .collection(FirestoreCollections.customers)
-        .where(FirestoreCollections.customerFieldVehicles, arrayContains: vehicleReference)
-        .orderBy(FirestoreCollections.customerFieldCreationDate, descending: true)
+        .where(FirestoreCollections.customerFieldVehicles,
+        arrayContains: vehicleReference)
+        .orderBy(
+        FirestoreCollections.customerFieldCreationDate, descending: true)
         .getDocuments();
 
     final documents = querySnapshot.documents;
@@ -25,8 +28,7 @@ class CustomerRepository {
     return null;
   }
 
-  Future<Customer> getCustomerByIdCustomer(
-      String idCustomer) async {
+  Future<Customer> getCustomerByIdCustomer(String idCustomer) async {
     final querySnapshot = await this
         ._db
         .collection(FirestoreCollections.customers)
@@ -39,20 +41,26 @@ class CustomerRepository {
     );
   }
 
-  Future<List<Customer>> getCustomerFilter(String telephoneNumber, String email) async {
+  Future<List<Customer>> getCustomerFilter(String telephoneNumber,
+      String email) async {
     List<Customer> customerList = [];
     QuerySnapshot querySnapshot;
     var queryFirestore = this
         ._db
         .collection(FirestoreCollections.customers)
-        .where(FirestoreCollections.customerFieldCreationDate, isLessThan: Timestamp.now());
+        .where(FirestoreCollections.customerFieldCreationDate,
+        isLessThan: Timestamp.now());
 
     if (telephoneNumber.isNotEmpty) {
-      queryFirestore = queryFirestore.where(FirestoreCollections.customerFieldPhoneNumber, isEqualTo: telephoneNumber);
+      queryFirestore = queryFirestore.where(
+          FirestoreCollections.customerFieldPhoneNumber,
+          isEqualTo: telephoneNumber);
     }
 
     if (email.isNotEmpty) {
-      queryFirestore = queryFirestore.where(FirestoreCollections.customerFieldEmail, isEqualTo: email.toLowerCase());
+      queryFirestore = queryFirestore.where(
+          FirestoreCollections.customerFieldEmail,
+          isEqualTo: email.toLowerCase());
     }
 
     querySnapshot = await queryFirestore.getDocuments();
@@ -68,12 +76,38 @@ class CustomerRepository {
 
   Future<DocumentReference> updateCustomer(Customer customer) async {
     DocumentReference ref =
-        _db.collection(FirestoreCollections.customers).document(customer.id);
+    _db.collection(FirestoreCollections.customers).document(customer.id);
     ref.setData(customer.toJson(), merge: true);
     return ref;
   }
 
   Future<DocumentReference> getCustomerReference(String customerId) async {
     return _db.collection(FirestoreCollections.customers).document(customerId);
+  }
+
+  Future<List<Customer>> getCustomersByLocation(
+      DocumentReference locationReference) async {
+    List<Customer> customerList = [];
+    QuerySnapshot querySnapshot;
+    var queryFirestore = this
+        ._db
+        .collection(FirestoreCollections.invoices)
+        .where(FirestoreCollections.invoiceFieldLocation,
+        isEqualTo: locationReference);
+
+    querySnapshot = await queryFirestore.getDocuments();
+    final responses = await Future.wait(
+        querySnapshot.documents.map((p) {
+            Invoice invoice = Invoice.fromJson(p.data, id: p.documentID);
+            return invoice.customer.get();
+        }),
+    );
+
+    customerList = responses.map((response) {
+      Customer customerModel = Customer.fromJson(response.data, id: response.documentID);
+      return customerModel;
+    }).toList();
+
+    return  customerList;
   }
 }

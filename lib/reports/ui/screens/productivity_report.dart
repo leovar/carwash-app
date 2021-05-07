@@ -133,10 +133,13 @@ class _ProductivityReport extends State<ProductivityReport> {
           child: CircularProgressIndicator(),
         );
       default:
-        _listInvoices = _blocReports.buildProductivityReportList(snapshot.data.documents);
-        _updateInvoices(_listInvoices); //TODO esta llamada se debe comentar o eliminar cuando se actualizce al app en los celulares que la usan
+        _listInvoices =
+            _blocReports.buildProductivityReportList(snapshot.data.documents);
+        _updateInvoices(
+            _listInvoices); //TODO esta llamada se debe comentar o eliminar cuando se actualizce al app en los celulares que la usan
         _listCardReport = _processInvoicesOperator(_listInvoices);
-        _listCardReport.sort((a, b) => b.countServices.compareTo(a.countServices));
+        _listCardReport
+            .sort((a, b) => b.countServices.compareTo(a.countServices));
     }
 
     if (_listInvoices.length > 0 && _selectedLocation != null) {
@@ -315,16 +318,25 @@ class _ProductivityReport extends State<ProductivityReport> {
           child: CircularProgressIndicator(),
         ),
         buttons: []).show();
-    final dataProducts = await _blocReports.getProductsByInvoicesReport(operatorInvoices);
+
+    List<Product> dataProducts = [];
+    operatorInvoices.forEach((element) {
+      dataProducts.addAll(element.invoiceProducts);
+    });
 
     dataProducts.forEach((e) {
       if (_productList.length == 0) {
-        final productDetail = ProductsCardDetail(e.productType ?? 'Adicional', 1, e.price);
+        final productDetail =
+            ProductsCardDetail(e.productType ?? 'Adicional', 1, e.price);
         _productList.add(productDetail);
       } else {
-        ProductsCardDetail _productInfo = _productList.firstWhere((x) => x.typeProductName == (e.productType ?? 'Adicional'), orElse: () => null,);
+        ProductsCardDetail _productInfo = _productList.firstWhere(
+          (x) => x.typeProductName == (e.productType ?? 'Adicional'),
+          orElse: () => null,
+        );
         if (_productInfo == null) {
-          final productDetail = ProductsCardDetail(e.productType ?? 'Adicional', 1, e.price);
+          final productDetail =
+              ProductsCardDetail(e.productType ?? 'Adicional', 1, e.price);
           _productList.add(productDetail);
         } else {
           _productInfo.countServices = _productInfo.countServices + 1;
@@ -364,5 +376,6 @@ class _ProductivityReport extends State<ProductivityReport> {
     ///TODO este metodo se llama para agregar los campos de countProducts a las facturas que no lo tienen aun
     //_blocReports.updateInfoInvoices(_invoice);
     //_blocReports.updateInfoProductsInvoice(_invoice);
+    //_blocReports.addIdToProductInvoice(_invoice);
   }
 }

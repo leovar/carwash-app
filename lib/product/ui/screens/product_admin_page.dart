@@ -4,7 +4,6 @@ import 'package:car_wash_app/location/model/location.dart';
 import 'package:car_wash_app/location/ui/screens/locations_select_list_page.dart';
 import 'package:car_wash_app/product/bloc/product_bloc.dart';
 import 'package:car_wash_app/product/model/product.dart';
-import 'package:car_wash_app/product/ui/widgets/item_products_admin_list.dart';
 import 'package:car_wash_app/vehicle_type/bloc/vehicle_type_bloc.dart';
 import 'package:car_wash_app/vehicle_type/model/vehicleType.dart';
 import 'package:car_wash_app/widgets/messages_utils.dart';
@@ -12,7 +11,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
-import 'package:intl/intl.dart';
 
 class ProductAdminPage extends StatefulWidget {
 
@@ -402,7 +400,9 @@ class _ProductAdminPage extends State<ProductAdminPage> {
 
   ///Functions Locations
   void _setLocationsDb(List<Location> locationsListSelected) {
-    _listLocation = locationsListSelected;
+    setState(() {
+      _listLocation = locationsListSelected;
+    });
   }
 
   ///Functions VehicleType

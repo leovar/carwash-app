@@ -21,12 +21,20 @@ class UserRepository {
   }
 
   Future<User> getCurrentUser() async {
-    FirebaseUser user = await FirebaseAuth.instance.currentUser();
-    final querySnapshot = await _db
-        .collection(FirestoreCollections.users)
-        .where(FirestoreCollections.usersFieldUid, isEqualTo: user.uid)
-        .getDocuments();
-    return User.fromJson(querySnapshot.documents.first.data, id: querySnapshot.documents.first.documentID);
+    try {
+      FirebaseUser user = await FirebaseAuth.instance.currentUser();
+      final querySnapshot = await _db
+          .collection(FirestoreCollections.users)
+          .where(FirestoreCollections.usersFieldUid, isEqualTo: user.uid)
+          .getDocuments();
+      if(querySnapshot.documents.length > 0) {
+        return User.fromJson(querySnapshot.documents.first.data, id: querySnapshot.documents.first.documentID);
+      } else {
+        return null;
+      }
+    } catch (e) {
+      print(e.message);
+    }
   }
 
   Future<DocumentReference> getUserReferenceById(String userId) async {
@@ -61,6 +69,7 @@ class UserRepository {
     final querySnapshot = this
         ._db
         .collection(FirestoreCollections.users)
+        .orderBy(FirestoreCollections.usersFieldName)
         .snapshots();
     return querySnapshot;
   }

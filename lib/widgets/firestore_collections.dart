@@ -52,6 +52,7 @@ class FirestoreCollections {
   static String invoiceFieldUserOperatorName = 'userOperatorName';
   static String invoiceFieldBrand = 'brand';
   static String invoiceFieldHaveSpecialService = 'haveSpecialService';
+  static String invoiceFieldCustomer = 'customer';
 
   /// Fields Brands
   static String brandFieldVehicleType = 'vehicleType';

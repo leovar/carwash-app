@@ -1,11 +1,13 @@
 
 import 'package:car_wash_app/invoice/model/invoice.dart';
+import 'package:car_wash_app/invoice/repository/invoice_repository.dart';
 import 'package:car_wash_app/product/model/product.dart';
 import 'package:car_wash_app/widgets/firestore_collections.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ReportsRepository {
   final Firestore _db = Firestore.instance;
+  final _invoiceRepository = InvoiceRepository();
 
   ///Get productivity report list
   Stream<QuerySnapshot> getListProductivityReportStream(
@@ -36,5 +38,24 @@ class ReportsRepository {
       invoicesList.add(invoice);
     });
     return invoicesList;
+  }
+
+
+  //TODO metodos hacia abajo solo se usan para corregir errores una sola vez, se deben eliminar
+  Future<List<Invoice>> getAllInvoices() async {
+    List<Invoice> invoiceList = <Invoice>[];
+    final querySnapshot = await this
+        ._db
+        .collection(FirestoreCollections.invoices)
+        .getDocuments();
+
+    final documents = querySnapshot.documents;
+    if (documents.length > 0) {
+      documents.forEach((document) {
+        Invoice product = Invoice.fromJson(document.data, id: document.documentID);
+        invoiceList.add(product);
+      });
+    }
+    return invoiceList;
   }
 }

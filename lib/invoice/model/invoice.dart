@@ -122,9 +122,15 @@ class Invoice extends Equatable {
 
   factory Invoice.fromJson(Map<String, dynamic> json, {String id}) {
     List<DocumentReference> locationsListDb = <DocumentReference>[];
+    List<Product> listProducts = <Product>[];
     List locationsList = json['locations'];
     locationsList?.forEach((drLocation) {
       locationsListDb.add(drLocation);
+    });
+    var products = json['invoiceProducts'];
+    products?.forEach((element) {
+      Product productResult = Product.fromJsonProductIntoInvoice(element);
+      listProducts.add(productResult);
     });
 
     return Invoice(
@@ -159,6 +165,7 @@ class Invoice extends Equatable {
       countProducts: json['countProducts'],
       countAdditionalProducts: json['countAdditionalProducts'],
       sendEmailInvoice: json['sendEmailInvoice'],
+      invoiceProducts: listProducts,
     );
   }
 

@@ -23,17 +23,31 @@ class InvoiceRepository {
 
   /// Save and Update Invoice
   Future<DocumentReference> updateInvoiceData(Invoice invoice) async {
+    var jsonInvoice = invoice.toJson();
+    var mapProducts = [];
+    invoice.invoiceProducts.forEach((element) {
+      var mapProduct = Product().toJsonInvoiceProduct(
+        element.productName,
+        element.price,
+        element.ivaPercent,
+        element.isAdditional,
+        element.id,
+        element.productType,
+      );
+      mapProducts.add(mapProduct);
+    });
+    jsonInvoice['invoiceProducts'] = mapProducts;
     DocumentReference ref =
         _db.collection(FirestoreCollections.invoices).document(invoice.id);
-    ref.setData(invoice.toJson(), merge: true);
+    ref.setData(jsonInvoice, merge: true);
     return ref;
   }
 
   /// Save invoice images in firebase storage
   Future<StorageTaskSnapshot> uploadImageInvoice(
       String path, File imageFile) async {
-    StorageUploadTask storageUploadTask = _storageReference.child(path).putData(
-          imageFile.readAsBytesSync(),
+    StorageUploadTask storageUploadTask = _storageReference.child(path).putFile(
+          imageFile, //imageFile.readAsBytesSync(),
           StorageMetadata(
             contentType: 'image/jpeg',
           ),
@@ -69,6 +83,19 @@ class InvoiceRepository {
     final querySnapshot = this
         ._db
         .collection(FirestoreCollections.users)
+        .where(FirestoreCollections.usersFieldIsOperator, isEqualTo: true)
+        .where(FirestoreCollections.usersFieldUserActive, isEqualTo: true)
+        .snapshots();
+    return querySnapshot;
+  }
+
+  Stream<QuerySnapshot> getListOperatorsByLocationStream(String idLocation) {
+    final querySnapshot = this
+        ._db
+        .collection(FirestoreCollections.users)
+        .where(FirestoreCollections.locations,
+            arrayContains:
+                _db.document('${FirestoreCollections.locations}/$idLocation'))
         .where(FirestoreCollections.usersFieldIsOperator, isEqualTo: true)
         .where(FirestoreCollections.usersFieldUserActive, isEqualTo: true)
         .snapshots();
@@ -112,6 +139,19 @@ class InvoiceRepository {
     return querySnapshot;
   }
 
+  Stream<QuerySnapshot> getListCoordinatorByLocationStream(String idLocation) {
+    final querySnapshot = this
+        ._db
+        .collection(FirestoreCollections.users)
+        .where(FirestoreCollections.locations,
+            arrayContains:
+                _db.document('${FirestoreCollections.locations}/$idLocation'))
+        .where(FirestoreCollections.usersFieldIsCoordinator, isEqualTo: true)
+        .where(FirestoreCollections.usersFieldUserActive, isEqualTo: true)
+        .snapshots();
+    return querySnapshot;
+  }
+
   List<User> buildCoordinator(List<DocumentSnapshot> coordinatorListSnapshot) {
     List<User> usersList = <User>[];
     coordinatorListSnapshot.forEach((p) {
@@ -123,29 +163,26 @@ class InvoiceRepository {
 
   /// Get Brands list by vehicleType
   Stream<QuerySnapshot> getListBrandsStream(int uidVehicleType) {
-    var querySnapshot = _db
-        .collection(FirestoreCollections.brands)
-        .where(FirestoreCollections.brandFieldVehicleType, isEqualTo: uidVehicleType);
+    var querySnapshot = _db.collection(FirestoreCollections.brands).where(
+        FirestoreCollections.brandFieldVehicleType,
+        isEqualTo: uidVehicleType);
 
     return querySnapshot.snapshots();
   }
 
   Stream<QuerySnapshot> getListAllBrandsStream() {
-    var querySnapshot = _db
-        .collection(FirestoreCollections.brands);
+    var querySnapshot = _db.collection(FirestoreCollections.brands);
 
     return querySnapshot.snapshots();
   }
 
   Future<List<String>> getListAllBrandsInvoiceRepo() async {
-    List<String> brandList = <String> [];
-    var querySnapshot = await this
-      ._db
-      .collection(FirestoreCollections.brands)
-      .getDocuments();
+    List<String> brandList = <String>[];
+    var querySnapshot =
+        await this._db.collection(FirestoreCollections.brands).getDocuments();
 
     if (querySnapshot.documents.length > 0) {
-      querySnapshot.documents.forEach((doc){
+      querySnapshot.documents.forEach((doc) {
         String brandData = doc.data['brand'];
         brandList.add(brandData);
       });
@@ -192,7 +229,7 @@ class InvoiceRepository {
         .getDocuments();
 
     if (querySnapshot.documents.length > 0) {
-      querySnapshot.documents.forEach((doc){
+      querySnapshot.documents.forEach((doc) {
         String brandReference = doc.data['reference'];
         referencesList.add(brandReference);
       });
@@ -251,6 +288,7 @@ class InvoiceRepository {
     return null;
   }
 
+  //TODO esta metodo caducaria cuando el producto se guarde en la misma factura
   /// Save Invoice Products
   Future<void> saveInvoiceProduct(String invoiceId, Product product) async {
     await this
@@ -268,6 +306,7 @@ class InvoiceRepository {
         ));
   }
 
+  //TODO esta metodo caducaria cuando el producto se guarde en la misma factura
   /// Save Invoice Additional Products
   Future<void> saveInvoiceAdditionalProducts(
       String invoiceId, AdditionalProduct additionalProduct) async {
@@ -286,22 +325,24 @@ class InvoiceRepository {
         ));
   }
 
+  //TODO actulizar el metodo para que actualice los productos en la tabla de invoice
   /// Update Invoice Products
   Future<void> updateInvoiceProduct(String invoiceId, Product product) async {
-    DocumentReference ref =
-    _db
+    DocumentReference ref = _db
         .collection(FirestoreCollections.invoices)
         .document(invoiceId)
         .collection(FirestoreCollections.products)
         .document(product.productInvoiceId);
-    ref.setData(Product().toJsonInvoiceProduct(
-      product.productName,
-      product.price,
-      product.ivaPercent,
-      product.isAdditional,
-      product.id,
-      product.productType,
-    ), merge: true);
+    ref.setData(
+        Product().toJsonInvoiceProduct(
+          product.productName,
+          product.price,
+          product.ivaPercent,
+          product.isAdditional,
+          product.id,
+          product.productType,
+        ),
+        merge: true);
   }
 
   ///Get invoices list from current Month
@@ -312,7 +353,7 @@ class InvoiceRepository {
     String placa,
     String operator,
     String consecutive,
-      String productTypeSelected,
+    String productTypeSelected,
   ) {
     DateTime dateFinalModify =
         DateTime(dateFinal.year, dateFinal.month, dateFinal.day, 23, 59);
@@ -341,13 +382,13 @@ class InvoiceRepository {
     if (consecutive.isNotEmpty) {
       querySnapshot = querySnapshot.where(
           FirestoreCollections.invoiceFieldConsecutive,
-          isEqualTo: int.parse(consecutive) );
+          isEqualTo: int.parse(consecutive));
     }
 
     if (productTypeSelected.isNotEmpty) {
       querySnapshot = querySnapshot.where(
           FirestoreCollections.invoiceFieldHaveSpecialService,
-          isEqualTo: productTypeSelected == 'Especial' ? true : false );
+          isEqualTo: productTypeSelected == 'Especial' ? true : false);
     }
 
     return querySnapshot.snapshots();
@@ -363,6 +404,7 @@ class InvoiceRepository {
     return invoicesList;
   }
 
+  //TODO esta metodo caducaria cuando el producto se guarde en la misma factura
   Future<List<Product>> getInvoiceProducts(String idInvoice) async {
     List<Product> productList = <Product>[];
     var querySnapshot = await this
@@ -375,7 +417,29 @@ class InvoiceRepository {
     final documents = querySnapshot.documents;
     if (documents.length > 0) {
       documents.forEach((document) {
-        Product product = Product.fromJson(document.data, id: document.documentID);
+        Product product =
+            Product.fromJson(document.data, id: document.documentID);
+        productList.add(product);
+      });
+    }
+    return productList;
+  }
+
+  //TODO metodo temporal para pasar los productos de una lista aparte de la factura al interior de la factura
+  Future<List<Product>> getInvoiceProductsTemporal(String idInvoice) async {
+    List<Product> productList = <Product>[];
+    var querySnapshot = await this
+        ._db
+        .collection(FirestoreCollections.invoices)
+        .document(idInvoice)
+        .collection(FirestoreCollections.invoiceFieldProducts)
+        .getDocuments();
+
+    final documents = querySnapshot.documents;
+    if (documents.length > 0) {
+      documents.forEach((document) {
+        Product product =
+        Product.fromJsonTemporal(document.data);
         productList.add(product);
       });
     }
@@ -407,6 +471,7 @@ class InvoiceRepository {
     return 0;
   }
 
+  //TODO esta metodo caducaria cuando el producto se guarde en la misma factura
   /// Get products per invoice
   Future<List<Product>> getProductsByIdInvoice(String invoiceId) async {
     List<Product> productList = <Product>[];
@@ -468,13 +533,15 @@ class InvoiceRepository {
         ._db
         .collection(FirestoreCollections.invoices)
         .where(FirestoreCollections.invoiceFieldPlaca, isEqualTo: vehicleId)
-        .where(FirestoreCollections.invoiceFieldCreationDate, isLessThanOrEqualTo: newDate)
+        .where(FirestoreCollections.invoiceFieldCreationDate,
+            isLessThanOrEqualTo: newDate)
         .getDocuments();
 
     final documents = querySnapshot.documents;
     if (documents.length > 0) {
       documents.forEach((invoice) {
-        listInvoices.add(Invoice.fromJson(invoice.data, id: invoice.documentID));
+        listInvoices
+            .add(Invoice.fromJson(invoice.data, id: invoice.documentID));
       });
     }
     return listInvoices;

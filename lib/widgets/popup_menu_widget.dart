@@ -31,9 +31,9 @@ class _PopUpMenuWidget extends State<PopUpMenuWidget> {
   @override
   Widget build(BuildContext context) {
     if (!widget.listString.contains(widget.popUpName)) {
-      widget.listString.add(widget.popUpName);
+      //TODO se comenta la siguiente linea para que no agrege el nombre del control a la lista, validar si es necesario agregarlo 11/03/21
+      //widget.listString.add(widget.popUpName);
     }
-    print(widget.valueSelect);
     if (widget.valueSelect.isEmpty) {
       widget.valueSelect = widget.popUpName;
     }

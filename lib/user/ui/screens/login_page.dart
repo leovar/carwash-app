@@ -487,7 +487,7 @@ class _LoginPage extends State<LoginPage> {
     }
 
     _setLocationInPreferences(user, _imageUserProfile, _userName);
-    // TODO este navigate se debe quitar si se coloca la app a validar primero si el usuario esta logueado
+    // TODO este navigate se debe quitar si se coloca la app a validar primero si el usuario actualmente ya se encuentra logueado
     /* Navigator.push(
       context,
       MaterialPageRoute(
@@ -498,16 +498,18 @@ class _LoginPage extends State<LoginPage> {
 
   Future<void> _setLocationInPreferences(FirebaseUser user, String imageUserProfile, String userName) async {
     User userDatabase = await _userBloc.getCurrentUser();
-    SharedPreferences pref = await SharedPreferences.getInstance();
-    pref.setString(Keys.idLocation, '');
-    pref.setString(Keys.locationName, '');
-    pref.setString(Keys.locationInitCount, '');
-    pref.setString(Keys.locationFinalCount, '');
-    pref.setString(Keys.photoUserUrl, imageUserProfile);
-    pref.setString(Keys.userId, user.uid??'');
-    pref.setString(Keys.userName, userName);
-    pref.setString(Keys.userEmail, user.email??'');
-    pref.setBool(Keys.isAdministrator, userDatabase.isAdministrator??false);
+    if (userDatabase != null) {
+      SharedPreferences pref = await SharedPreferences.getInstance();
+      pref.setString(Keys.idLocation, '');
+      pref.setString(Keys.locationName, '');
+      pref.setString(Keys.locationInitCount, '');
+      pref.setString(Keys.locationFinalCount, '');
+      pref.setString(Keys.photoUserUrl, imageUserProfile);
+      pref.setString(Keys.userId, user.uid??'');
+      pref.setString(Keys.userName, userName);
+      pref.setString(Keys.userEmail, user.email??'');
+      pref.setBool(Keys.isAdministrator, userDatabase.isAdministrator??false);
+    }
   }
 
   List<DropdownMenuItem<Location>> builDropdownMenuItems(List locations) {
@@ -589,6 +591,8 @@ class _LoginPage extends State<LoginPage> {
                 'Usuario o Contraseña incorrectos, recuerde que debe registrarte primero!',
             alertType: AlertType.warning,
           ).show();
+        } catch(error) {
+          print(error.message);
         }
       }
     }

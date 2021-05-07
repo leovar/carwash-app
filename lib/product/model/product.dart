@@ -59,6 +59,33 @@ class Product extends Equatable {
     );
   }
 
+  factory Product.fromJsonTemporal(Map<String, dynamic> json) {
+    List<DocumentReference> locationsListDb = <DocumentReference>[];
+    List locationsList = json['locations'];
+    locationsList?.forEach((drLocation) {
+      locationsListDb.add(drLocation);
+    });
+    bool additional = json['isAdditional'];
+    String newId = json['productId'];
+    if (additional??false) {
+      newId = '';
+    }
+
+    return Product(
+      id: newId,
+      productName: json['productName'],
+      price: json['price'].toDouble(),
+      ivaPercent: json['ivaPercent'].toDouble(),
+      vehicleType: json['vehicleType'],
+      productActive : json['productActive'],
+      vehicleTypeUid : json['vehicleTypeUid'],
+      isAdditional: json['isAdditional'],
+      locations: locationsListDb,
+      isSelected: false,
+      productType: json['productType'],
+    );
+  }
+
   factory Product.fromJsonProInvoice(Map<String, dynamic> json, {String id}) {
     List<DocumentReference> locationsListDb = <DocumentReference>[];
     List locationsList = json['locations'];
@@ -79,6 +106,18 @@ class Product extends Equatable {
       isSelected: true,
       productType: json['productType'],
       productInvoiceId : id,
+    );
+  }
+
+  factory Product.fromJsonProductIntoInvoice(Map<dynamic, dynamic> json) {
+    return Product(
+      id: json['Id'],
+      productName: json['productName'],
+      price: json['price'].toDouble(),
+      ivaPercent: json['ivaPercent'].toDouble(),
+      isAdditional: json['isAdditional'],
+      isSelected: true,
+      productType: json['productType'],
     );
   }
 
@@ -108,13 +147,14 @@ class Product extends Equatable {
       'price': price,
       'ivaPercent': ivaPercent,
       'isAdditional': isAdditional,
-      'productId': productId,
+      'Id': productId,
       'productType': productType,
     };
   }
 
   factory Product.copyProductInvoiceWith({
     @required Product origin,
+    String id,
     bool isSelected,
     double price,
     double ivaPercent,
@@ -122,7 +162,7 @@ class Product extends Equatable {
     String productInvoiceId,
   }) {
     return Product(
-      id: origin.id,
+      id: id ?? origin.id,
       productName: origin.productName,
       price: price ?? origin.price,
       ivaPercent: ivaPercent ?? origin.ivaPercent,
@@ -134,6 +174,25 @@ class Product extends Equatable {
       isAdditional: origin.isAdditional,
       productType: productType ?? origin.productType,
       productInvoiceId: productInvoiceId??'',
+    );
+  }
+
+  //Copy Product to add product in new invoice at save
+  factory Product.copyProductToSaveInvoice({
+    String id,
+    String productName,
+    double price,
+    double ivaPercent,
+    bool isAdditional,
+    String productType,
+  }) {
+    return Product(
+      id: id,
+      productName: productName,
+      price: price,
+      ivaPercent: ivaPercent,
+      isAdditional: isAdditional ?? true,
+      productType: productType,
     );
   }
 

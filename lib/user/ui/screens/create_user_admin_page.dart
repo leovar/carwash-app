@@ -1,6 +1,9 @@
 import 'dart:io';
 
 import 'package:car_wash_app/invoice/ui/widgets/text_field_input.dart';
+import 'package:car_wash_app/location/bloc/bloc_location.dart';
+import 'package:car_wash_app/location/model/location.dart';
+import 'package:car_wash_app/location/ui/screens/locations_select_list_page.dart';
 import 'package:car_wash_app/user/bloc/bloc_user.dart';
 import 'package:car_wash_app/user/model/user.dart';
 import 'package:car_wash_app/widgets/messages_utils.dart';
@@ -26,6 +29,7 @@ class CreateUserAdminPage extends StatefulWidget {
 
 class _CreateUserAdminPage extends State<CreateUserAdminPage> {
   UserBloc _userBloc;
+  BlocLocation _blocLocation = BlocLocation();
 
   GlobalKey btnChangeImageProfile = GlobalKey();
   bool _validateName = false;
@@ -44,6 +48,8 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
   final String _cameraTag = "Camera";
   final String _galleryTag = "Gallery";
   String _selectSourceImagePicker = "Camara";
+
+  List<Location> _listLocation = <Location>[];
 
   @override
   void initState() {
@@ -133,6 +139,8 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
                 isPassword: true,
               ),
             ),
+            SizedBox(height: 9),
+            _locationsToSelect(),
             SizedBox(height: 9),
             Flexible(
               child: Row(
@@ -242,6 +250,77 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
     );
   }
 
+  Widget _locationsToSelect() {
+    return StreamBuilder(
+      stream: _blocLocation.locationsListStream,
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        switch (snapshot.connectionState) {
+          case ConnectionState.waiting:
+            return CircularProgressIndicator();
+          default:
+            return _getLocationsToSelectWidget(snapshot);
+        }
+      },
+    );
+  }
+
+  Widget _getLocationsToSelectWidget(AsyncSnapshot snapshot) {
+    if (_blocLocation.buildLocations(snapshot.data.documents).length >
+        _listLocation.length) {
+      _listLocation = _blocLocation.buildLocations(snapshot.data.documents);
+      if (widget.currentUser != null) {
+        _selectUserList();
+      }
+    }
+    return InkWell(
+      child: Container(
+        height: 50,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            Container(
+              padding: EdgeInsets.only(left: 10),
+              child: Text(
+                '${_listLocation.where((f) => f.isSelected).toList().length} sedes agregadas',
+                style: TextStyle(
+                  fontFamily: "Lato",
+                  decoration: TextDecoration.none,
+                  color: Color(0xFF59B258),
+                  fontSize: 17,
+                ),
+              ),
+            ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: IconButton(
+                icon: Icon(
+                  Icons.keyboard_arrow_down,
+                  size: 30,
+                ),
+              ),
+            ),
+          ],
+        ),
+        decoration: BoxDecoration(
+          color: Color(0xFFF1F1F1),
+          borderRadius: BorderRadius.circular(5),
+        ),
+      ),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => LocationsSelectListPage(
+              callbackSetLocationsList: _setLocationsDb,
+              locationsList: _listLocation,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   Widget _imageProfile() {
     return Container(
       margin: EdgeInsets.only(left: 8, right: 18),
@@ -262,7 +341,7 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
     );
   }
 
-  Widget _buttonChangeImage(){
+  Widget _buttonChangeImage() {
     return Center(
       child: Container(
         height: 55,
@@ -318,6 +397,11 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
   }
 
   /// Functions
+  void _setLocationsDb(List<Location> locationsListSelected) {
+    setState(() {
+      _listLocation = locationsListSelected;
+    });
+  }
 
   ///Function Images
   ImageProvider _getProfileImageProvider() {
@@ -363,9 +447,9 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
 
   Future _addImageTour() async {
     var imageCapture = await ImagePicker.pickImage(
-        source: _selectSourceImagePicker == _cameraTag
-            ? ImageSource.camera
-            : ImageSource.gallery)
+            source: _selectSourceImagePicker == _cameraTag
+                ? ImageSource.camera
+                : ImageSource.gallery)
         .catchError((onError) => print(onError));
 
     if (imageCapture != null) {
@@ -381,22 +465,22 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
       sourcePath: imageCapture.path,
       aspectRatioPresets: Platform.isAndroid
           ? [
-        CropAspectRatioPreset.square,
-        CropAspectRatioPreset.ratio3x2,
-        CropAspectRatioPreset.original,
-        CropAspectRatioPreset.ratio4x3,
-        CropAspectRatioPreset.ratio16x9
-      ]
+              CropAspectRatioPreset.square,
+              CropAspectRatioPreset.ratio3x2,
+              CropAspectRatioPreset.original,
+              CropAspectRatioPreset.ratio4x3,
+              CropAspectRatioPreset.ratio16x9
+            ]
           : [
-        CropAspectRatioPreset.original,
-        CropAspectRatioPreset.square,
-        CropAspectRatioPreset.ratio3x2,
-        CropAspectRatioPreset.ratio4x3,
-        CropAspectRatioPreset.ratio5x3,
-        CropAspectRatioPreset.ratio5x4,
-        CropAspectRatioPreset.ratio7x5,
-        CropAspectRatioPreset.ratio16x9
-      ],
+              CropAspectRatioPreset.original,
+              CropAspectRatioPreset.square,
+              CropAspectRatioPreset.ratio3x2,
+              CropAspectRatioPreset.ratio4x3,
+              CropAspectRatioPreset.ratio5x3,
+              CropAspectRatioPreset.ratio5x4,
+              CropAspectRatioPreset.ratio7x5,
+              CropAspectRatioPreset.ratio16x9
+            ],
       androidUiSettings: AndroidUiSettings(
           toolbarTitle: 'Cropper',
           toolbarColor: Colors.white,
@@ -409,7 +493,8 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
     );
     if (croppedFile != null) {
       final dir = await path_provider.getTemporaryDirectory();
-      final targetPath = dir.absolute.path + "/${imageCapture.path.substring(imageCapture.path.length-10 ,imageCapture.path.length)}"; //dir.absolute.path + "/temp${imageList.length}.jpg";
+      final targetPath = dir.absolute.path +
+          "/${imageCapture.path.substring(imageCapture.path.length - 10, imageCapture.path.length)}"; //dir.absolute.path + "/temp${imageList.length}.jpg";
       File fileCompress = await FlutterImageCompress.compressAndGetFile(
         croppedFile.absolute.path,
         targetPath,
@@ -457,6 +542,15 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
     _userAdministrator = _userSelected.isAdministrator;
     _userCoordinator = _userSelected.isCoordinator;
     _userOperator = _userSelected.isOperator;
+    _listLocation.forEach((Location loc) {
+      List<DocumentReference> dr =
+          _userSelected.locations.where((e) => e.documentID == loc.id).toList();
+      if (dr.length > 0) {
+        _listLocation[_listLocation.indexOf(loc)].isSelected = true;
+      } else {
+        _listLocation[_listLocation.indexOf(loc)].isSelected = false;
+      }
+    });
   }
 
   bool _validateInputs() {
@@ -483,7 +577,9 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
 
     if (canSave == false) {
       setState(() {
-        MessagesUtils.showAlert(context: context, title: 'Faltan campos por llenar').show();
+        MessagesUtils.showAlert(
+                context: context, title: 'Faltan campos por llenar')
+            .show();
       });
     }
 
@@ -498,6 +594,11 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
     _userCoordinator = false;
     _userOperator = false;
     _userActive = true;
+    setState(() {
+      _listLocation.forEach((f) {
+        _listLocation[_listLocation.indexOf(f)].isSelected = false;
+      });
+    });
   }
 
   Future<void> _saveUser() async {
@@ -506,10 +607,52 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
         MessagesUtils.showAlertWithLoading(context: context, title: 'Guardando')
             .show();
 
+        //Add new locations at user exist
+        if (_userSelected != null) {
+          _listLocation.where((l) => l.isSelected).toList().forEach((f) {
+            List<DocumentReference> listFind = _userSelected.locations
+                .where((e) => e.documentID == f.id)
+                .toList();
+            if (listFind.length <= 0) {
+              _userSelected.locations
+                  .add(_blocLocation.getDocumentReferenceLocationById(f.id));
+            }
+          });
+        }
+
+        //Delete locations at user exist
+        if (_userSelected != null) {
+          List<DocumentReference> locListDeleted = <DocumentReference>[];
+          _userSelected.locations.forEach((item) {
+            locListDeleted.add(item);
+          });
+          _userSelected.locations.forEach((DocumentReference locRefDelete) {
+            List<Location> lotionsFind = _listLocation
+                .where((f) => f.id == locRefDelete.documentID && f.isSelected)
+                .toList();
+            if (lotionsFind.length == 0) {
+              locListDeleted
+                  .removeAt(_userSelected.locations.indexOf(locRefDelete));
+            }
+          });
+          _userSelected.locations.clear();
+          locListDeleted.forEach((d) {
+            _userSelected.locations.add(d);
+          });
+        }
+
+        List<DocumentReference> _newListLocationsReferences =
+            <DocumentReference>[];
+        _listLocation.where((d) => d.isSelected).toList().forEach((f) {
+          _newListLocationsReferences
+              .add(_blocLocation.getDocumentReferenceLocationById(f.id));
+        });
+
         //New User save in firestore
         String userNewRegister;
-        if(_userSelected == null) {
-          userNewRegister = await _userBloc.registerEmailUser(_textEmail.text.trim(), _textPassword.text.trim());
+        if (_userSelected == null) {
+          userNewRegister = await _userBloc.registerEmailUser(
+              _textEmail.text.trim(), _textPassword.text.trim());
         }
 
         final user = User(
@@ -520,7 +663,9 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
           photoUrl: _imageUrl,
           lastSignIn: Timestamp.now(),
           active: _userActive,
-          locations: [],
+          locations: _userSelected != null
+              ? _userSelected.locations
+              : _newListLocationsReferences,
           isAdministrator: _userAdministrator,
           isCoordinator: _userCoordinator,
           isOperator: _userOperator,
@@ -529,26 +674,27 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
         await _userBloc.updateUserData(user);
 
         Navigator.pop(context);
+        Navigator.pop(context);
+        /*
         MessagesUtils.showAlert(
           context: context,
-          title:
-          'Usuario guardado',
+          title: 'Usuario guardado',
           alertType: AlertType.success,
         ).show();
-
-      } on PlatformException catch(_) {
+        */
+      } on PlatformException catch (_) {
         Navigator.pop(context);
         print(_);
-        if (_.message == 'The email address is already in use by another account.') {
+        if (_.message ==
+            'The email address is already in use by another account.') {
           MessagesUtils.showAlert(
             context: context,
-            title:
-            'El usuario ya se encuentra registrado',
+            title: 'El usuario ya se encuentra registrado',
             alertType: AlertType.info,
           ).show();
         }
       }
-      //_clearData();
+      _clearData();
     }
   }
 }
