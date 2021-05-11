@@ -4,7 +4,7 @@ import 'package:car_wash_app/location/model/location.dart';
 import 'package:car_wash_app/reports/ui/screens/reports_page.dart';
 import 'package:car_wash_app/user/bloc/bloc_user.dart';
 import 'package:car_wash_app/user/model/user.dart';
-import 'package:car_wash_app/user/ui/widgets/select_location_widget.dart';
+import 'package:car_wash_app/widgets/select_location_widget.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';

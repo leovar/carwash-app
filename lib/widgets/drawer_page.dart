@@ -294,7 +294,7 @@ class _DrawerPage extends State<DrawerPage> {
                       child: Align(
                         alignment: Alignment.bottomCenter,
                         child: Container(
-                          child: Text('Version 1.0.0'),
+                          child: Text('Version 1.0.6'),
                         ),
                       ),
                     ),

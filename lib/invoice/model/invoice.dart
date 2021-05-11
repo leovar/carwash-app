@@ -176,6 +176,8 @@ class Invoice extends Equatable {
     List<Product> listProducts,
     int countProducts,
     int countAdditionalProducts,
+    DocumentReference userOperator,
+    String userOperatorName,
   }) {
     return Invoice(
       id: origin.id,
@@ -183,8 +185,8 @@ class Invoice extends Equatable {
       subtotal: origin.subtotal,
       iva: origin.iva,
       userOwner: origin.userOwner,
-      userOperator: origin.userOperator,
-      userOperatorName: origin.userOperatorName,
+      userOperator: userOperator ?? origin.userOperator,
+      userOperatorName: userOperatorName ?? origin.userOperatorName,
       userCoordinator: origin.userCoordinator,
       userCoordinatorName: origin.userCoordinatorName,
       customer: origin.customer,

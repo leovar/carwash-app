@@ -80,8 +80,9 @@ class _ProductsInvoicePage extends State<ProductsInvoicePage> {
         _productBloc.buildProductByLocation(snapshot.data.documents);
     List<Product> productGet = <Product>[];
     productsList.forEach((prod) {
-      Product proFindSelect = widget.productListCallback
-          .firstWhere((d) => d.id == prod.id && d.isSelected, orElse: () => null);
+      Product proFindSelect = widget.productListCallback.firstWhere(
+          (d) => d.id == prod.id && d.isSelected,
+          orElse: () => null);
       if (proFindSelect == null) {
         productGet.add(prod);
       } else {
@@ -152,38 +153,72 @@ class _ProductsInvoicePage extends State<ProductsInvoicePage> {
             },
           ),
         ),
-        Container(
-          height: 100,
-          child: Align(
-            alignment: Alignment.center,
-            child: RaisedButton(
-              padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
-              color: Color(0xFF59B258),
-              child: Text(
-                "Otros Servicios",
-                style: TextStyle(
-                  fontFamily: "Lato",
-                  decoration: TextDecoration.none,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  fontSize: 19,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Flexible(
+              child: Container(
+                height: 100,
+                child: Align(
+                  alignment: Alignment.center,
+                  child: RaisedButton(
+                    padding: EdgeInsets.symmetric(vertical: 15, horizontal: 25),
+                    color: Color(0xFF59B258),
+                    child: Text(
+                      "Otros Servicios",
+                      style: TextStyle(
+                        fontFamily: "Lato",
+                        decoration: TextDecoration.none,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        fontSize: 19,
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AdditionalProductPage(
+                            setCbAdditionalProducts:
+                                widget.cbAdditionalProducts,
+                            additionalProductsList:
+                                widget.additionalProductListCb,
+                            editForm: widget.editForm,
+                            vehicleTypeSelect: widget.vehicleTypeSelect,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => AdditionalProductPage(
-                      setCbAdditionalProducts: widget.cbAdditionalProducts,
-                      additionalProductsList: widget.additionalProductListCb,
-                      editForm: widget.editForm,
-                      vehicleTypeSelect: widget.vehicleTypeSelect,
-                    ),
-                  ),
-                );
-              },
             ),
-          ),
+            Flexible(
+              child: Container(
+                height: 100,
+                child: Align(
+                  alignment: Alignment.center,
+                  child: RaisedButton(
+                    padding: EdgeInsets.symmetric(vertical: 15, horizontal: 25),
+                    color: Color(0xFF59B258),
+                    child: Text(
+                      "Aceptar",
+                      style: TextStyle(
+                        fontFamily: "Lato",
+                        decoration: TextDecoration.none,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        fontSize: 19,
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ],
         )
       ],
     );

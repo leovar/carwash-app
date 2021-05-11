@@ -12,6 +12,7 @@ import 'package:car_wash_app/widgets/gradient_back.dart';
 import 'package:car_wash_app/widgets/info_header_container.dart';
 import 'package:car_wash_app/widgets/keys.dart';
 import 'package:car_wash_app/widgets/messages_utils.dart';
+import 'package:car_wash_app/widgets/select_operator_widget.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -43,6 +44,7 @@ class _FormInvoicesList extends State<FormInvoicesList> {
   double _totalMonth = 0.0;
   String _idLocation = '';
   Location _location;
+  User _selectedOperator = User();
 
   ///Filter Keys
   final _textPlaca = TextEditingController();
@@ -52,7 +54,6 @@ class _FormInvoicesList extends State<FormInvoicesList> {
   User _operatorFilter = User();
   double _totalPriceFilters = 0.0;
   String _productTypeSelected = '';
-
 
   @override
   void initState() {
@@ -109,7 +110,7 @@ class _FormInvoicesList extends State<FormInvoicesList> {
         _dateFilterInit,
         _dateFilterFinal,
         _textPlaca.text,
-        _operatorFilter.name??'',
+        _operatorFilter.name ?? '',
         _textConsecutive.text,
         _productTypeSelected,
       ),
@@ -125,7 +126,8 @@ class _FormInvoicesList extends State<FormInvoicesList> {
         _listInvoices = [];
         break;
       default:
-        _listInvoices = _blocInvoice.buildInvoicesListByMonth(snapshot.data.documents);
+        _listInvoices =
+            _blocInvoice.buildInvoicesListByMonth(snapshot.data.documents);
         _listInvoices.sort((a, b) => b.consecutive.compareTo(a.consecutive));
         _countAmountPerDayMonth();
     }
@@ -348,9 +350,7 @@ class _FormInvoicesList extends State<FormInvoicesList> {
           ),
           onPressed: () {
             Navigator.of(context).pop();
-            setState(() {
-
-            });
+            setState(() {});
           },
         )
       ],
@@ -370,7 +370,7 @@ class _FormInvoicesList extends State<FormInvoicesList> {
   }
 
   void _callBackSelectProductTYpe(String selectProductType) {
-    if(selectProductType == 'Typo de Servicio..')
+    if (selectProductType == 'Typo de Servicio..')
       _productTypeSelected = '';
     else
       _productTypeSelected = selectProductType;
@@ -378,12 +378,34 @@ class _FormInvoicesList extends State<FormInvoicesList> {
 
   void _closeInvoiceCallback(Invoice _invoiceClose) {
     if (_invoiceClose.userOperatorName.isEmpty) {
-      MessagesUtils.showAlert(context: context, title: 'Debe seleccionar el Operador de lavado para cerrar').show();
+      Alert(
+        context: context,
+        title: 'Seleccione el operador',
+        style: MessagesUtils.alertStyle,
+        content: SelectOperatorWidget(
+          operatorSelected: _selectedOperator,
+          idLocation: _idLocation,
+          selectOperator: _callBackSelectOperator,
+        ),
+        buttons: [
+          DialogButton(
+            color: Theme.of(context).accentColor,
+            child: Text(
+              'ACEPTAR',
+              style: Theme.of(context).textTheme.button,
+            ),
+            onPressed: () {
+              Navigator.of(context).pop();
+              _closeInvoiceWithOperator(_invoiceClose);
+            },
+          ),
+        ],
+      ).show();
     } else {
       Alert(
         context: context,
         type: AlertType.info,
-        title: 'Seleccione el operador',
+        title: 'Esta seguro que desea cerrar la factura !',
         style: MessagesUtils.alertStyle,
         buttons: [
           DialogButton(
@@ -405,9 +427,7 @@ class _FormInvoicesList extends State<FormInvoicesList> {
             ),
             onPressed: () {
               Navigator.of(context).pop();
-              setState(() {
-
-              });
+              setState(() {});
             },
           ),
         ],
@@ -415,46 +435,65 @@ class _FormInvoicesList extends State<FormInvoicesList> {
     }
   }
 
-  void _closeInvoice(Invoice invoiceToClose) async {
-    MessagesUtils.showAlertWithLoading(context: context, title: 'Guardando..').show();
+  void _callBackSelectOperator(User operatorSelected) {
+    _selectedOperator = operatorSelected;
+  }
+
+  void _closeInvoiceWithOperator(Invoice invoiceToClose) async {
+    DocumentReference _operatorReference =
+        await _blocUser.getUserReferenceById(_selectedOperator.id);
     Invoice invoice = Invoice.copyWith(
       origin: invoiceToClose,
       closedDate: Timestamp.now(),
       invoiceClosed: true,
-
+      userOperator: _operatorReference,
+      userOperatorName: _selectedOperator.name,
     );
     await _blocInvoice.saveInvoice(invoice);
+    _validateSendCustomerNotification(invoiceToClose);
+  }
+
+  void _closeInvoice(Invoice invoiceToClose) async {
+    MessagesUtils.showAlertWithLoading(context: context, title: 'Guardando..')
+        .show();
+    Invoice invoice = Invoice.copyWith(
+      origin: invoiceToClose,
+      closedDate: Timestamp.now(),
+      invoiceClosed: true,
+    );
+    await _blocInvoice.saveInvoice(invoice);
+    _validateSendCustomerNotification(invoiceToClose);
+    Navigator.pop(context);
+  }
+
+  void _validateSendCustomerNotification(Invoice invoiceToClose) {
     if (invoiceToClose.phoneNumber.isNotEmpty) {
-      String message = "Spa CarWash Movil -- Estimado cliente. Le informamos que el servicio de lavado de su vehículo ${invoiceToClose.placa}, ha terminado y está listo para ser entregado. Lo esperamos en nuestras instalaciones.";
+      String message =
+          "Spa CarWash Movil -- Estimado cliente. Le informamos que el servicio de lavado de su vehículo ${invoiceToClose.placa}, ha terminado y está listo para ser entregado. Lo esperamos en nuestras instalaciones.";
       List<String> recipents = [invoiceToClose.phoneNumber];
       if (_location != null) {
-        if (_location.sendMessageSms??false) {
+        if (_location.sendMessageSms ?? false) {
           _sendSMS(message, recipents);
         } else {
           _sendWhatsAppMessage(message, invoiceToClose.phoneNumber);
         }
       }
     }
-    Navigator.pop(context);
   }
 
   void _sendSMS(String message, List<String> recipents) async {
     try {
-      String _result = await FlutterSms
-          .sendSMS(message: message, recipients: recipents)
-          .catchError((onError) {
+      String _result =
+          await FlutterSms.sendSMS(message: message, recipients: recipents)
+              .catchError((onError) {
         print(onError);
       });
-    } catch(_){
-
-    }
+    } catch (_) {}
   }
 
   void _sendWhatsAppMessage(String message, String phoneNumber) {
     try {
-      FlutterOpenWhatsapp.sendSingleMessage('57'+phoneNumber, message);
-    } catch(_) {
-
-    }
+      FlutterOpenWhatsapp.sendSingleMessage('57' + phoneNumber, message);
+    } catch (_) {}
   }
 }

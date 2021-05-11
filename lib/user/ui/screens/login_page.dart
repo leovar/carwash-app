@@ -5,7 +5,7 @@ import 'package:car_wash_app/location/model/location.dart';
 import 'package:car_wash_app/user/bloc/bloc_user.dart';
 import 'package:car_wash_app/user/model/user.dart';
 import 'package:car_wash_app/user/ui/screens/register_user.dart';
-import 'package:car_wash_app/user/ui/widgets/select_location_widget.dart';
+import 'package:car_wash_app/widgets/select_location_widget.dart';
 import 'package:car_wash_app/widgets/home_page.dart';
 import 'package:car_wash_app/widgets/keys.dart';
 import 'package:car_wash_app/widgets/messages_utils.dart';
