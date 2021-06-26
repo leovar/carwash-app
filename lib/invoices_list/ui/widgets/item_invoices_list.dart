@@ -73,6 +73,7 @@ class _ItemInvoicesList extends State<ItemInvoicesList> {
 
   Widget _itemDecoration(Invoice invoiceList) {
     bool _visibleClosesText = invoiceList.invoiceClosed ?? false;
+    bool _cancelInvoice = invoiceList.cancelledInvoice ?? false;
     return ConstrainedBox(
       constraints: BoxConstraints(
         minHeight: 83,
@@ -127,8 +128,9 @@ class _ItemInvoicesList extends State<ItemInvoicesList> {
                           ),
                           Flexible(
                             child: Visibility(
-                              visible:
-                              (invoiceList.userOperatorName != null) ? true : false,
+                              visible: (invoiceList.userOperatorName != null)
+                                  ? true
+                                  : false,
                               child: Text(
                                 invoiceList.userOperatorName ?? '',
                                 style: TextStyle(
@@ -142,7 +144,8 @@ class _ItemInvoicesList extends State<ItemInvoicesList> {
                           ),
                           Flexible(
                             child: Text(
-                              formatter.format(invoiceList.creationDate.toDate()),
+                              formatter
+                                  .format(invoiceList.creationDate.toDate()),
                               style: TextStyle(
                                 color: Color(0xFF787A71),
                                 fontFamily: "Lato",
@@ -163,42 +166,58 @@ class _ItemInvoicesList extends State<ItemInvoicesList> {
               flex: 2,
               child: Container(
                 alignment: Alignment.centerRight,
-                child: _visibleClosesText
+                child: _cancelInvoice
                     ? Container(
-                  margin: EdgeInsets.only(
-                    right: 12,
-                  ),
-                  child: Text(
-                    'CERRADA',
-                    style: TextStyle(
-                      color: Theme.of(context).primaryColor,
-                      fontFamily: "Lato",
-                      fontWeight: FontWeight.normal,
-                      fontSize: 15,
-                    ),
-                  ),
-                )
-                    : Container(
-                  margin: EdgeInsets.only(right: 2),
-                  child: ButtonTheme(
-                    minWidth: 84,
-                    child: RaisedButton(
-                      shape: RoundedRectangleBorder(
-                          borderRadius: new BorderRadius.circular(18.0),
-                          side: BorderSide(
-                              color: Theme.of(context).accentColor)),
-                      color: Theme.of(context).accentColor,
-                      onPressed: () {
-                        widget.closeInvoice(invoiceList);
-                      },
-                      textColor: Colors.white,
-                      child: Text(
-                        'Terminar'.toUpperCase(),
-                        style: TextStyle(fontSize: 12),
-                      ),
-                    ),
-                  ),
-                ),
+                        margin: EdgeInsets.only(
+                          right: 12,
+                        ),
+                        child: Text(
+                          'ANULADA',
+                          style: TextStyle(
+                            color: Colors.red,
+                            fontFamily: "Lato",
+                            fontWeight: FontWeight.normal,
+                            fontSize: 15,
+                          ),
+                        ),
+                      )
+                    : _visibleClosesText
+                        ? Container(
+                            margin: EdgeInsets.only(
+                              right: 12,
+                            ),
+                            child: Text(
+                              'CERRADA',
+                              style: TextStyle(
+                                color: Theme.of(context).primaryColor,
+                                fontFamily: "Lato",
+                                fontWeight: FontWeight.normal,
+                                fontSize: 15,
+                              ),
+                            ),
+                          )
+                        : Container(
+                            margin: EdgeInsets.only(right: 2),
+                            child: ButtonTheme(
+                              minWidth: 84,
+                              child: RaisedButton(
+                                shape: RoundedRectangleBorder(
+                                    borderRadius:
+                                        new BorderRadius.circular(18.0),
+                                    side: BorderSide(
+                                        color: Theme.of(context).accentColor)),
+                                color: Theme.of(context).accentColor,
+                                onPressed: () {
+                                  widget.closeInvoice(invoiceList);
+                                },
+                                textColor: Colors.white,
+                                child: Text(
+                                  'Terminar'.toUpperCase(),
+                                  style: TextStyle(fontSize: 12),
+                                ),
+                              ),
+                            ),
+                          ),
               ),
             ),
           ],

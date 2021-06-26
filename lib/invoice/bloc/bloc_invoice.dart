@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:car_wash_app/invoice/model/additional_product.dart';
+import 'package:car_wash_app/invoice/model/configuration.dart';
 import 'package:car_wash_app/invoice/model/invoice.dart';
 import 'package:car_wash_app/invoice/repository/invoice_repository.dart';
 import 'package:car_wash_app/product/model/product.dart';
@@ -213,6 +214,10 @@ class BlocInvoice implements Bloc {
 
   Future<void> updateInvoiceProduct(String invoiceId, Product product) {
     return _invoiceRepository.updateInvoiceProduct(invoiceId, product);
+  }
+
+  Future<Configuration> getConfigurationObject() {
+    return _invoiceRepository.getConfiguration();
   }
 
   @override

@@ -44,14 +44,14 @@ class _FormInvoicesList extends State<FormInvoicesList> {
   double _totalMonth = 0.0;
   String _idLocation = '';
   Location _location;
-  User _selectedOperator = User();
+  User _selectedOperator = User(name:'', uid: '', email: '');
 
   ///Filter Keys
   final _textPlaca = TextEditingController();
   final _textConsecutive = TextEditingController();
   var _dateFilterInit = DateTime(DateTime.now().year, DateTime.now().month, 1);
   var _dateFilterFinal = DateTime.now();
-  User _operatorFilter = User();
+  User _operatorFilter = User(name:'', uid: '', email: '');
   double _totalPriceFilters = 0.0;
   String _productTypeSelected = '';
 
@@ -312,14 +312,14 @@ class _FormInvoicesList extends State<FormInvoicesList> {
             invoice.creationDate.toDate().day);
 
         if (dateDayInvoice.compareTo(nowDay) == 0) {
-          _totalDay = _totalDay + invoice.totalPrice;
+          _totalDay = _totalDay + (invoice.cancelledInvoice ? 0 : invoice.totalPrice);
         }
 
         if (nowMonth.compareTo(dateMonthInvoice) == 0) {
-          _totalMonth = _totalMonth + invoice.totalPrice;
+          _totalMonth = _totalMonth + (invoice.cancelledInvoice ? 0 : invoice.totalPrice);
         }
 
-        _totalPriceFilters = _totalPriceFilters + invoice.totalPrice;
+        _totalPriceFilters = _totalPriceFilters + (invoice.cancelledInvoice ? 0 : invoice.totalPrice);
       });
     }
   }

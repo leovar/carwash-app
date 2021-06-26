@@ -218,7 +218,7 @@ class _FilterFieldsWidget extends State<FilterFieldsWidget> {
   onChangeDropDawn(User selectedOperator) {
     setState(() {
       if (selectedOperator.uid == '0') {
-        widget.selectOperator(User());
+        widget.selectOperator(User(name:'', uid: '', email: ''));
       } else {
         widget.selectOperator(selectedOperator);
       }
