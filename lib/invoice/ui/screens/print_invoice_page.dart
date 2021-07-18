@@ -167,7 +167,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                   SizedBox(height: 4),
                   Center(
                     child: Text(
-                      'Régimen Simplificado',
+                      'Soluciones de Mantenimiento Automotriz SAS',
                       style: TextStyle(
                         fontFamily: "Lato",
                         decoration: TextDecoration.none,
@@ -175,6 +175,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                         color: Colors.black,
                         fontSize: _textInfoLocationSize,
                       ),
+                      textAlign: TextAlign.center,
                     ),
                   ),
                   SizedBox(height: 4),
