@@ -27,8 +27,12 @@ class _CreateLocationAdminPage extends State<CreateLocationAdminPage> {
   bool _validateInitConsec = false;
   bool _validateNit = false;
   bool _validatePrefix = false;
+  bool _validatePhone = false;
+  bool _validateRegimen = false;
   final _textLocationName = TextEditingController();
   final _textAddress = TextEditingController();
+  final _textRegimen = TextEditingController();
+  final _textPhone = TextEditingController();
   final _textDianResolution = TextEditingController();
   final _textFinalConsec = TextEditingController();
   final _textInitConsec = TextEditingController();
@@ -117,10 +121,35 @@ class _CreateLocationAdminPage extends State<CreateLocationAdminPage> {
             Container(
               height: _heightTextField,
               child: TextFieldInput(
+                labelText: 'Teléfono',
+                textController: _textPhone,
+                validate: _validatePhone,
+                textValidate: 'Escriba un valor',
+                inputType: TextInputType.number,
+                textInputFormatter: [
+                  WhitelistingTextInputFormatter(RegExp("^[0-9.]*")),
+                  LengthLimitingTextInputFormatter(11),
+                ],
+              ),
+            ),
+            SizedBox(height: 9),
+            Container(
+              height: _heightTextField,
+              child: TextFieldInput(
                 labelText: 'Nit',
                 textController: _textNit,
                 validate: _validateNit,
                 textValidate: 'Escriba un nit',
+              ),
+            ),
+            SizedBox(height: 9),
+            Container(
+              height: _heightTextField,
+              child: TextFieldInput(
+                labelText: 'Régimen',
+                textController: _textRegimen,
+                validate: _validateRegimen,
+                textValidate: 'Escriba un valor',
               ),
             ),
             SizedBox(height: 9),
@@ -318,6 +347,8 @@ class _CreateLocationAdminPage extends State<CreateLocationAdminPage> {
     _validateInitConsec = false;
     _validateFinalConsec = false;
     _validatePrefix = false;
+    _validatePhone = false;
+    _validateRegimen = false;
     _textLocationName.text = _locationSelected.locationName;
     _textAddress.text = _locationSelected.address;
     _textDianResolution.text = _locationSelected.dianResolution;
@@ -327,8 +358,10 @@ class _CreateLocationAdminPage extends State<CreateLocationAdminPage> {
     _textPrefix.text = _locationSelected.prefix;
     _locationActive = _locationSelected.active;
     _sendSms = _locationSelected.sendMessageSms?? false;
-    _sendWp = _locationSelected.sendMessageSms??true ? false : true;
+    _sendWp = _locationSelected.sendMessageWp?? false;
     _printIva = _locationSelected.printIva;
+    _textRegimen.text = _locationSelected.regimen;
+    _textPhone.text = _locationSelected.phoneNumber;
   }
 
   bool _validateInputs() {
@@ -411,7 +444,10 @@ class _CreateLocationAdminPage extends State<CreateLocationAdminPage> {
         active: _locationActive,
         creationDate: Timestamp.now(),
         sendMessageSms: _sendSms,
+        sendMessageWp: _sendWp,
         printIva: _printIva,
+        phoneNumber: _textPhone.text.trim(),
+        regimen: _textRegimen.text.trim(),
       );
 
       _blocLocation.updateLocationData(location);

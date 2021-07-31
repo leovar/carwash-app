@@ -474,7 +474,7 @@ class _FormInvoicesList extends State<FormInvoicesList> {
       if (_location != null) {
         if (_location.sendMessageSms ?? false) {
           _sendSMS(message, recipents);
-        } else {
+        } else if (_location.sendMessageWp ?? false) {
           _sendWhatsAppMessage(message, invoiceToClose.phoneNumber);
         }
       }
