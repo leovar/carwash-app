@@ -46,15 +46,20 @@ class _HomePage extends State<HomePage> {
   Widget build(BuildContext context) {
     _userBloc = BlocProvider.of(context);
     this._getPreferences();
-    return StreamBuilder(
-      stream: _userBloc.streamFirebase,
-      builder: (BuildContext context, AsyncSnapshot snapshot) {
-        switch (snapshot.connectionState) {
+    return WillPopScope(
+      child: StreamBuilder(
+        stream: _userBloc.streamFirebase,
+        builder: (BuildContext context, AsyncSnapshot snapshot) {
+          switch (snapshot.connectionState) {
           /*case ConnectionState.waiting:
             return indicadorDeProgreso();*/
-          default:
-            return showSnapShot(snapshot);
-        }
+            default:
+              return showSnapShot(snapshot);
+          }
+        },
+      ),
+      onWillPop: (){
+        return Future(() => false);
       },
     );
   }
