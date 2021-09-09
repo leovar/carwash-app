@@ -1,4 +1,3 @@
-
 import 'dart:typed_data';
 
 import 'package:car_wash_app/customer/model/customer.dart';
@@ -9,7 +8,6 @@ import 'package:car_wash_app/vehicle/model/vehicle.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
-
 
 @immutable
 class Invoice extends Equatable {
@@ -47,6 +45,7 @@ class Invoice extends Equatable {
   final int countProducts;
   final int countAdditionalProducts;
   final bool sendEmailInvoice;
+  final bool cancelledInvoice;
 
   Invoice({
     this.id,
@@ -83,6 +82,7 @@ class Invoice extends Equatable {
     this.countProducts,
     this.countAdditionalProducts,
     this.sendEmailInvoice,
+    this.cancelledInvoice,
   });
 
   Map<String, dynamic> toJson() {
@@ -117,6 +117,7 @@ class Invoice extends Equatable {
       'countProducts': this.countProducts,
       'countAdditionalProducts': this.countAdditionalProducts,
       'sendEmailInvoice': this.sendEmailInvoice,
+      'cancelledInvoice': this.cancelledInvoice,
     };
   }
 
@@ -166,6 +167,7 @@ class Invoice extends Equatable {
       countAdditionalProducts: json['countAdditionalProducts'],
       sendEmailInvoice: json['sendEmailInvoice'],
       invoiceProducts: listProducts,
+      cancelledInvoice: json['cancelledInvoice']??false,
     );
   }
 
@@ -210,44 +212,47 @@ class Invoice extends Equatable {
       incidence: origin.incidence,
       haveSpecialService: origin.haveSpecialService,
       countProducts: countProducts ?? origin.countProducts,
-      countAdditionalProducts: countAdditionalProducts ?? origin.countAdditionalProducts,
+      countAdditionalProducts:
+          countAdditionalProducts ?? origin.countAdditionalProducts,
       sendEmailInvoice: origin.sendEmailInvoice,
+      cancelledInvoice: origin.cancelledInvoice,
     );
   }
 
   @override
   List<Object> get props => [
-    id,
-    totalPrice,
-    subtotal,
-    iva,
-    userOwner,
-    userOperator,
-    userOperatorName,
-    userCoordinator,
-    customer,
-    phoneNumber,
-    vehicle,
-    placa,
-    uidVehicleType,
-    location,
-    locationName,
-    consecutive,
-    creationDate,
-    invoiceImages,
-    invoiceProducts,
-    approveDataProcessing,
-    vehicleBrand,
-    brandReference,
-    vehicleColor,
-    timeDelivery,
-    closedDate,
-    invoiceClosed,
-    observation,
-    incidence,
-    haveSpecialService,
-    countProducts,
-    countAdditionalProducts,
-    sendEmailInvoice,
-  ];
+        id,
+        totalPrice,
+        subtotal,
+        iva,
+        userOwner,
+        userOperator,
+        userOperatorName,
+        userCoordinator,
+        customer,
+        phoneNumber,
+        vehicle,
+        placa,
+        uidVehicleType,
+        location,
+        locationName,
+        consecutive,
+        creationDate,
+        invoiceImages,
+        invoiceProducts,
+        approveDataProcessing,
+        vehicleBrand,
+        brandReference,
+        vehicleColor,
+        timeDelivery,
+        closedDate,
+        invoiceClosed,
+        observation,
+        incidence,
+        haveSpecialService,
+        countProducts,
+        countAdditionalProducts,
+        sendEmailInvoice,
+        cancelledInvoice,
+      ];
 }

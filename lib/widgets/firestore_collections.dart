@@ -10,6 +10,7 @@ class FirestoreCollections {
   static String brands = 'brands';
   static String colors = 'colors';
   static String brandReferences = 'brandReferences';
+  static String configuration = 'configuration';
 
   /// Fields User Collection
   static String usersFieldUid = 'uid';
@@ -53,6 +54,7 @@ class FirestoreCollections {
   static String invoiceFieldBrand = 'brand';
   static String invoiceFieldHaveSpecialService = 'haveSpecialService';
   static String invoiceFieldCustomer = 'customer';
+  static String invoiceCancelled = 'cancelledInvoice';
 
   /// Fields Brands
   static String brandFieldVehicleType = 'vehicleType';

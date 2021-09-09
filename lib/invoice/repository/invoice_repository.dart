@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:car_wash_app/invoice/model/additional_product.dart';
+import 'package:car_wash_app/invoice/model/configuration.dart';
 import 'package:car_wash_app/invoice/model/invoice.dart';
 import 'package:car_wash_app/product/model/product.dart';
 import 'package:car_wash_app/user/model/user.dart';
@@ -545,5 +546,20 @@ class InvoiceRepository {
       });
     }
     return listInvoices;
+  }
+
+  Future<Configuration> getConfiguration() async {
+    List<Configuration> configList = <Configuration>[];
+    final querySnapshot = await this
+        ._db
+        .collection(FirestoreCollections.configuration)
+        .getDocuments();
+
+    final snapShot = querySnapshot.documents;
+    snapShot.forEach((document) {
+      Configuration config = Configuration.fromJson(document.data, id: document.documentID);
+      configList.add(config);
+    });
+    return configList[0];
   }
 }

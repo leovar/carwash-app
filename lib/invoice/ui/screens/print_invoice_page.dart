@@ -7,6 +7,7 @@ import 'dart:ui' as ui;
 import 'package:car_wash_app/customer/bloc/bloc_customer.dart';
 import 'package:car_wash_app/customer/model/customer.dart';
 import 'package:car_wash_app/invoice/model/additional_product.dart';
+import 'package:car_wash_app/invoice/model/configuration.dart';
 import 'package:car_wash_app/invoice/model/invoice.dart';
 import 'package:car_wash_app/location/bloc/bloc_location.dart';
 import 'package:car_wash_app/location/model/location.dart';
@@ -37,13 +38,15 @@ class PrintInvoicePage extends StatefulWidget {
   final List<Product> selectedProducts;
   final List<AdditionalProduct> additionalProducts;
   final String customerEmail;
+  final Configuration configuration;
 
   PrintInvoicePage(
       {Key key,
       this.currentInvoice,
       this.selectedProducts,
       this.additionalProducts,
-      this.customerEmail});
+      this.customerEmail,
+      this.configuration});
 
   @override
   State<StatefulWidget> createState() => _PrintInvoicePage();
@@ -164,7 +167,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                   SizedBox(height: 4),
                   Center(
                     child: Text(
-                      'Régimen Simplificado',
+                      _location.regimen ?? '',
                       style: TextStyle(
                         fontFamily: "Lato",
                         decoration: TextDecoration.none,
@@ -172,6 +175,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                         color: Colors.black,
                         fontSize: _textInfoLocationSize,
                       ),
+                      textAlign: TextAlign.center,
                     ),
                   ),
                   SizedBox(height: 4),
@@ -798,9 +802,9 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
       (attachments ?? []).map((a) => ml.FileAttachment(File(a)));
 
   void _sendMail(String imagePath) async {
-    String username = 'spacarwashmobilapp@gmail.com';
-    String password = 'Spadeautos2019';
-    String domainSmtp = 'smtp.gmail.com';
+    String username = widget.configuration.emailFrom;
+    String password = widget.configuration.passFrom;
+    String domainSmtp = widget.configuration.smtpFrom;
 
     if (widget.customerEmail.isNotEmpty) {
       final emailSplit = widget.customerEmail.split(',');

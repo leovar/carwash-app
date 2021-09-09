@@ -137,7 +137,7 @@ class _ProductivityReport extends State<ProductivityReport> {
             _blocReports.buildProductivityReportList(snapshot.data.documents);
         _updateInvoices(
             _listInvoices); //TODO esta llamada se debe comentar o eliminar cuando se actualizce al app en los celulares que la usan
-        _listCardReport = _processInvoicesOperator(_listInvoices);
+        _listCardReport = _processInvoicesOperator(_listInvoices.where((f) => !f.cancelledInvoice).toList());
         _listCardReport
             .sort((a, b) => b.countServices.compareTo(a.countServices));
     }

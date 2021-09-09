@@ -5,6 +5,7 @@ import 'package:car_wash_app/customer/bloc/bloc_customer.dart';
 import 'package:car_wash_app/customer/model/customer.dart';
 import 'package:car_wash_app/invoice/bloc/bloc_invoice.dart';
 import 'package:car_wash_app/invoice/model/additional_product.dart';
+import 'package:car_wash_app/invoice/model/configuration.dart';
 import 'package:car_wash_app/invoice/model/invoice.dart';
 import 'package:car_wash_app/invoice/model/invoice_history_list.dart';
 import 'package:car_wash_app/invoice/ui/screens/draw_page.dart';
@@ -18,6 +19,7 @@ import 'package:car_wash_app/location/bloc/bloc_location.dart';
 import 'package:car_wash_app/product/bloc/product_bloc.dart';
 import 'package:car_wash_app/product/model/product.dart';
 import 'package:car_wash_app/user/bloc/bloc_user.dart';
+import 'package:car_wash_app/user/model/user.dart';
 import 'package:car_wash_app/vehicle/bloc/bloc_vehicle.dart';
 import 'package:car_wash_app/vehicle/model/vehicle.dart';
 import 'package:car_wash_app/widgets/gradient_back.dart';
@@ -113,6 +115,10 @@ class _FormInvoice extends State<FormInvoice> {
   int _countBrands = 0;
   int _countBrandReferences = 0;
   int _countColors = 0;
+  User _currentUser;
+  bool _isUserAdmin = false;
+  bool _canceledInvoice = false;
+  Configuration _config = Configuration();
 
   @override
   void initState() {
@@ -153,6 +159,15 @@ class _FormInvoice extends State<FormInvoice> {
       _editInvoice(widget.editInvoice);
       _editForm = false;
     }
+    _userBloc.getCurrentUser().then((User user) {
+      _currentUser = user;
+      if (user.isAdministrator) {
+        setState(() {
+          _isUserAdmin = true;
+        });
+      }
+    });
+
   }
 
   @override
@@ -171,8 +186,11 @@ class _FormInvoice extends State<FormInvoice> {
     if (_imageSelect != null) {
       if (_imageSelect.path.contains('imageFirm')) {
         var _imagePath = _imageSelect.path;
-        var _oldImageFirmPath = imageList.where((e) => e.contains('imageFirm')).toList();
-        _deleteImageList(_oldImageFirmPath.length > 0 ? _oldImageFirmPath[0].toString(): '');
+        var _oldImageFirmPath =
+            imageList.where((e) => e.contains('imageFirm')).toList();
+        _deleteImageList(_oldImageFirmPath.length > 0
+            ? _oldImageFirmPath[0].toString()
+            : '');
         imageList.add(_imagePath);
       } else {
         if (!imageList.contains(_imageSelect.path)) {
@@ -374,6 +392,10 @@ class _FormInvoice extends State<FormInvoice> {
                 visible: !_editForm,
                 child: _rePrintInvoice(),
               ),
+              Visibility(
+                visible: (!_editForm && _isUserAdmin),
+                child: _cancelInvoice(),
+              ),
               SizedBox(height: 9),
               //_printInvoiceTest(),
               //SizedBox(height: 9),
@@ -501,6 +523,67 @@ class _FormInvoice extends State<FormInvoice> {
                     _listProduct.where((f) => f.isSelected).toList(),
                     _listAdditionalProducts,
                     _textEmail.text.trim());
+              }
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _cancelInvoice() {
+    return Container(
+      height: 80,
+      child: Align(
+        alignment: Alignment.center,
+        child: ButtonTheme(
+          minWidth: 230.0,
+          height: 45,
+          child: RaisedButton(
+            padding: EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+            color: Theme.of(context).accentColor,
+            child: Text(
+              "CANCELAR FACTURA",
+              style: TextStyle(
+                fontFamily: "Lato",
+                decoration: TextDecoration.none,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                fontSize: 19,
+              ),
+            ),
+            onPressed: () {
+              if (widget.editInvoice != null) {
+                Alert(
+                    context: context,
+                    type: AlertType.warning,
+                    title: 'Esta seguro de anular la factura?',
+                    style: MessagesUtils.alertStyle,
+                    buttons: [
+                      DialogButton(
+                        color: Theme.of(context).accentColor,
+                        child: Text(
+                          'CANCELAR',
+                          style: Theme.of(context).textTheme.button,
+                        ),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          setState(() {});
+                        },
+                      ),
+                      DialogButton(
+                        color: Theme.of(context).accentColor,
+                        child: Text(
+                          'ACEPTAR',
+                          style: Theme.of(context).textTheme.button,
+                        ),
+                        onPressed: () {
+                          _canceledInvoice = true;
+                          Navigator.of(context).pop();
+                          _saveInvoice();
+                        },
+                      )
+                    ]).show();
               }
             },
           ),
@@ -714,7 +797,9 @@ class _FormInvoice extends State<FormInvoice> {
     _imageFirmInMemory = imageFirm;
     String formattedDate = DateFormat('kk_mm_ss').format(DateTime.now());
     final dir = await path_provider.getTemporaryDirectory();
-    final file = await new File('${dir.absolute.path}/imageFirm$formattedDate.jpg').create();
+    final file =
+        await new File('${dir.absolute.path}/imageFirm$formattedDate.jpg')
+            .create();
     file.writeAsBytesSync(imageFirm);
     print(file.path);
     setState(() {
@@ -837,6 +922,7 @@ class _FormInvoice extends State<FormInvoice> {
     _finalConsecLocation = pref.getString(Keys.locationFinalCount);
     _idLocation = pref.getString(Keys.idLocation);
     _locationReference = await _locationBloc.getLocationReference(_idLocation);
+    _blocInvoice.getConfigurationObject().then((value) => _config = value);
   }
 
   // Get last invoices per vehicle
@@ -845,13 +931,15 @@ class _FormInvoice extends State<FormInvoice> {
       List<Invoice> listInvoicesByVehicle =
           await _blocInvoice.getListInvoicesByVehicle(placa) ?? [];
       if (listInvoicesByVehicle.length > 0) {
-        final dataList = listInvoicesByVehicle.map((vehicleInvoice) =>
-            InvoiceHistoryList(
+        final dataList = listInvoicesByVehicle
+            .map((vehicleInvoice) => InvoiceHistoryList(
                 vehicleInvoice.creationDate,
                 vehicleInvoice.consecutive.toString(),
-                vehicleInvoice.invoiceProducts.length > 0 ? vehicleInvoice.invoiceProducts[0].productName : '',
-                vehicleInvoice.totalPrice)
-        ).toList();
+                vehicleInvoice.invoiceProducts.length > 0
+                    ? vehicleInvoice.invoiceProducts[0].productName
+                    : '',
+                vehicleInvoice.totalPrice))
+            .toList();
 
         Alert(
             context: context,
@@ -1102,11 +1190,14 @@ class _FormInvoice extends State<FormInvoice> {
           timeDelivery: _textTimeDelivery.text,
           observation: _textObservation.text.trim(),
           incidence: _textIncidence.text.trim(),
-          haveSpecialService: _haveServiceSpecial,
+          haveSpecialService: widget.editInvoice != null ? widget.editInvoice.haveSpecialService : _haveServiceSpecial,
           countProducts: _countProducts,
           countAdditionalProducts: _countAdditionalProducts,
           sendEmailInvoice: _sendEmail,
-          invoiceProducts: _productToSave,
+          invoiceProducts: widget.editInvoice != null
+              ? widget.editInvoice.invoiceProducts
+              : _productToSave,
+          cancelledInvoice: _canceledInvoice,
         );
         DocumentReference invoiceReference =
             await _blocInvoice.saveInvoice(_invoice);
@@ -1260,6 +1351,7 @@ class _FormInvoice extends State<FormInvoice> {
           selectedProducts: listProducts,
           additionalProducts: listAddProducts,
           customerEmail: customerEmail,
+          configuration: _config,
         ),
       ),
     );

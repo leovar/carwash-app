@@ -10,6 +10,7 @@ class Location extends Equatable {
   final String phoneNumber;
   final String director;
   final String nit;
+  final String regimen;
   final String prefix;
   final String dianResolution;
   final int initConcec;
@@ -17,6 +18,7 @@ class Location extends Equatable {
   final Timestamp creationDate;
   final bool active;
   final bool sendMessageSms;
+  final bool sendMessageWp;
   final bool printIva;
   bool isSelected;
 
@@ -27,6 +29,7 @@ class Location extends Equatable {
     this.phoneNumber,
     this.director,
     this.nit,
+    this.regimen,
     this.prefix,
     this.dianResolution,
     this.initConcec,
@@ -35,6 +38,7 @@ class Location extends Equatable {
     this.isSelected,
     this.active,
     this.sendMessageSms,
+    this.sendMessageWp,
     this.printIva,
   });
 
@@ -46,6 +50,7 @@ class Location extends Equatable {
         phoneNumber: json['phoneNumber'],
         director: json['director'],
         nit: json['nit'],
+        regimen: json['regimen'],
         prefix: json['prefix'],
         dianResolution: json['dianResolution'],
         initConcec: json['initConcec'],
@@ -53,6 +58,7 @@ class Location extends Equatable {
         creationDate: json['creationDate'],
         active: json['active'],
         sendMessageSms: json['sendMessageSms'],
+        sendMessageWp: json['sendMessageWp'],
         printIva: json['printIva'],
         isSelected: false);
   }
@@ -64,6 +70,7 @@ class Location extends Equatable {
       'phoneNumber': this.phoneNumber,
       'director': this.director,
       'nit': this.nit,
+      'regimen': this.regimen,
       'prefix': this.prefix,
       'dianResolution': this.dianResolution,
       'initConcec': this.initConcec,
@@ -71,6 +78,7 @@ class Location extends Equatable {
       'creationDate': Timestamp.now(),
       'active': this.active,
       'sendMessageSms': this.sendMessageSms,
+      'sendMessageWp': this.sendMessageWp,
       'printIva': this.printIva,
     };
   }
@@ -83,6 +91,7 @@ class Location extends Equatable {
         phoneNumber,
         director,
         nit,
+        regimen,
         prefix,
         dianResolution,
         initConcec,
@@ -90,6 +99,7 @@ class Location extends Equatable {
         creationDate,
         active,
         sendMessageSms,
+        sendMessageWp,
         printIva,
       ];
 }

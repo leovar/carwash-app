@@ -27,7 +27,7 @@ class _SelectOperatorWidget extends State<SelectOperatorWidget> {
   @override
   void initState() {
     super.initState();
-    if (widget.operatorSelected.name != null) {
+    if (widget.operatorSelected.name != null && widget.operatorSelected.name != '') {
       _selectedUser = widget.operatorSelected;
     }
   }
