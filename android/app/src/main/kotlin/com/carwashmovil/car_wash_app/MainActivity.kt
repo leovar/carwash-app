@@ -104,8 +104,8 @@ class MainActivity : FlutterActivity() {
                         // Handle successful print
                         } else { // Handle unsuccessful print
                             // Error message (null on successful print)
-                            val errorMessage = resultData.getString("com.zebra.printconnect.PrintService.ERROR_MESSAGE")
-                            Log.e("error al imprimir", errorMessage)
+                            //var errorMessage: String = resultData.getString("com.zebra.printconnect.PrintService.ERROR_MESSAGE")
+                            //Log.e("error al imprimir", errorMessage)
                         }
                     }
                 }

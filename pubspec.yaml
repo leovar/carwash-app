@@ -11,7 +11,8 @@ description: Car Wash Flutter application.
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.0.10+10
+version: 1.0.10+11
+
 
 environment:
   sdk: ">=2.2.0 <3.0.0"
@@ -58,7 +59,7 @@ dependencies:
   image: ^2.1.4
   image_picker_saver: ^0.3.0
   screenshot: ^0.1.1
-  path_provider: ^1.6.0
+  path_provider: ^1.6.28
   photo_view: ^0.9.2
   image_gallery_saver: ^1.6.7
 
