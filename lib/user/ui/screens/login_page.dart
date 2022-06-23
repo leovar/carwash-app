@@ -14,6 +14,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -65,6 +66,9 @@ class _LoginPage extends State<LoginPage> {
         } else {
           _selectedLocation = Location();
           _validateLocationPreferences();
+
+          _deleteCacheDir();
+          _deleteAppDir();
           return BlocProvider(
             bloc: UserBloc(),
             child: HomePage(),
@@ -72,6 +76,22 @@ class _LoginPage extends State<LoginPage> {
         }
       },
     );
+  }
+
+  Future<void> _deleteCacheDir() async {
+    final cacheDir = await getTemporaryDirectory();
+
+    if (cacheDir.existsSync()) {
+      cacheDir.deleteSync(recursive: true);
+    }
+  }
+
+  Future<void> _deleteAppDir() async {
+    final appDir = await getApplicationSupportDirectory();
+
+    if(appDir.existsSync()){
+      appDir.deleteSync(recursive: true);
+    }
   }
 
   Widget loginScreen() {

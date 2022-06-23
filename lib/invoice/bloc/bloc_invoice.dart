@@ -9,10 +9,13 @@ import 'package:car_wash_app/product/model/product.dart';
 import 'package:car_wash_app/user/model/user.dart';
 import 'package:car_wash_app/vehicle/repository/vehicle_repository.dart';
 import 'package:car_wash_app/vehicle_type/model/brand.dart';
+import 'package:car_wash_app/widgets/messages_utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart' as path_provider;
 
 class BlocInvoice implements Bloc {
   final _invoiceRepository = InvoiceRepository();
@@ -28,21 +31,7 @@ class BlocInvoice implements Bloc {
   Future<DocumentReference> saveInvoice(Invoice invoice) async {
     DocumentReference ref = await _invoiceRepository.updateInvoiceData(invoice);
     String invoiceId = ref.documentID;
-
-    if (invoice.invoiceImages != null && invoice.invoiceImages.length > 0) {
-      for (String imageFilePath in invoice.invoiceImages) {
-        if (!imageFilePath.contains('https://firebasestorage.')) {
-          File imageFile = File(imageFilePath);
-          final pathImage = imageFilePath.contains('imageFirm')
-              ? '$invoiceId/before/firm'
-              : '$invoiceId/before/${basename(imageFilePath)}';
-          StorageTaskSnapshot storageTaskSnapshot =
-              await _invoiceRepository.uploadImageInvoice(pathImage, imageFile);
-          String imageUrl = await storageTaskSnapshot.ref.getDownloadURL();
-          await _invoiceRepository.updateInvoiceImages(invoiceId, imageUrl);
-        }
-      }
-    }
+    _saveImages(invoice, invoiceId);
 
     // Se comenta esta parte por que la firma ya se esta agregando dentro de la lista de las imagenes y no independiente
     /*
@@ -58,6 +47,31 @@ class BlocInvoice implements Bloc {
     */
 
     return ref;
+  }
+
+  void _saveImages(Invoice invoice, String invoiceId) async {
+    try{
+      if (invoice.invoiceImages != null && invoice.invoiceImages.length > 0) {
+        for (String imageFilePath in invoice.invoiceImages) {
+          if (!imageFilePath.contains('https://firebasestorage.')) {
+            File imageFile = File(imageFilePath);
+            final pathImage = imageFilePath.contains('imageFirm')
+                ? '$invoiceId/before/firm'
+                : '$invoiceId/before/${basename(imageFilePath)}';
+            StorageTaskSnapshot storageTaskSnapshot =
+            await _invoiceRepository.uploadImageInvoice(pathImage, imageFile);
+            String imageUrl = await storageTaskSnapshot.ref.getDownloadURL();
+            String imagePath = await storageTaskSnapshot.ref.getPath();
+            await _invoiceRepository.updateInvoiceImages(invoiceId, imageUrl, imagePath);
+          }
+        }
+        final dir = await path_provider.getTemporaryDirectory();
+        dir.deleteSync(recursive: true);
+        Fluttertoast.showToast(msg: "Imagenes guardadas de la factura # ${invoice.consecutive}", toastLength: Toast.LENGTH_LONG);
+      }
+    } catch(err) {
+      throw(err);
+    }
   }
 
   Future<void> saveInvoiceProduct(

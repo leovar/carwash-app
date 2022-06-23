@@ -70,13 +70,13 @@ class InvoiceRepository {
 
   /// Save images URL in subcollection invoice
   Future<void> updateInvoiceImages(
-      String invoiceId, String invoiceImage) async {
+      String invoiceId, String invoiceImage, String imagePath) async {
     return await this
         ._db
         .collection(FirestoreCollections.invoices)
         .document(invoiceId)
         .collection('images')
-        .add({'imageUrl': invoiceImage});
+        .add({'imageUrl': invoiceImage, 'imagePath': imagePath});
   }
 
   ///Get Operators list by Location
