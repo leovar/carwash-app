@@ -74,6 +74,7 @@ class _ItemInvoicesList extends State<ItemInvoicesList> {
   Widget _itemDecoration(Invoice invoiceList) {
     bool _visibleClosesText = invoiceList.invoiceClosed ?? false;
     bool _cancelInvoice = invoiceList.cancelledInvoice ?? false;
+    final formatterNumber = NumberFormat("#,###");
     return ConstrainedBox(
       constraints: BoxConstraints(
         minHeight: 83,
@@ -104,14 +105,34 @@ class _ItemInvoicesList extends State<ItemInvoicesList> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Flexible(
-                            child: Text(
-                              invoiceList.consecutive.toString(),
-                              style: TextStyle(
-                                color: Color(0xFF59B258),
-                                fontFamily: "Lato",
-                                fontWeight: FontWeight.bold,
-                                fontSize: 17.0,
-                              ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    invoiceList.consecutive.toString(),
+                                    style: TextStyle(
+                                      color: Color(0xFF59B258),
+                                      fontFamily: "Lato",
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 17.0,
+                                    ),
+                                  ),
+                                ),
+                                Visibility(
+                                  visible: widget.isAdmon,
+                                  child: Expanded(
+                                    child: Text(
+                                      '\$${formatterNumber.format(invoiceList.totalPrice)}',
+                                      style: TextStyle(
+                                        color: Color(0xFF59B258),
+                                        fontFamily: "Lato",
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 17.0,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                           SizedBox(height: 5),
