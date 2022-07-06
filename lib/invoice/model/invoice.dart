@@ -130,7 +130,7 @@ class Invoice extends Equatable {
     });
     var products = json['invoiceProducts'];
     products?.forEach((element) {
-      Product productResult = Product.fromJsonProductIntoInvoice(element);
+      Product productResult = Product.fromJsonProductIntoInvoice(element, json['uidVehicleType'], json['creationDate']);
       listProducts.add(productResult);
     });
 

@@ -1,4 +1,3 @@
-
 import 'package:car_wash_app/location/model/location.dart';
 import 'package:car_wash_app/vehicle_type/model/vehicleType.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -20,6 +19,7 @@ class Product extends Equatable {
   bool newProduct;
   final String productType;
   final String productInvoiceId;
+  final Timestamp dateAdded;
 
   Product({
     this.id,
@@ -35,6 +35,7 @@ class Product extends Equatable {
     this.newProduct,
     this.productType,
     this.productInvoiceId,
+    this.dateAdded,
   });
 
   factory Product.fromJson(Map<String, dynamic> json, {String id}) {
@@ -50,8 +51,8 @@ class Product extends Equatable {
       price: json['price'].toDouble(),
       ivaPercent: json['ivaPercent'].toDouble(),
       vehicleType: json['vehicleType'],
-      productActive : json['productActive'],
-      vehicleTypeUid : json['vehicleTypeUid'],
+      productActive: json['productActive'],
+      vehicleTypeUid: json['vehicleTypeUid'],
       isAdditional: json['isAdditional'],
       locations: locationsListDb,
       isSelected: false,
@@ -67,7 +68,7 @@ class Product extends Equatable {
     });
     bool additional = json['isAdditional'];
     String newId = json['productId'];
-    if (additional??false) {
+    if (additional ?? false) {
       newId = '';
     }
 
@@ -77,8 +78,8 @@ class Product extends Equatable {
       price: json['price'].toDouble(),
       ivaPercent: json['ivaPercent'].toDouble(),
       vehicleType: json['vehicleType'],
-      productActive : json['productActive'],
-      vehicleTypeUid : json['vehicleTypeUid'],
+      productActive: json['productActive'],
+      vehicleTypeUid: json['vehicleTypeUid'],
       isAdditional: json['isAdditional'],
       locations: locationsListDb,
       isSelected: false,
@@ -99,17 +100,18 @@ class Product extends Equatable {
       price: json['price'].toDouble(),
       ivaPercent: json['ivaPercent'].toDouble(),
       vehicleType: json['vehicleType'],
-      productActive : json['productActive'],
-      vehicleTypeUid : json['vehicleTypeUid'],
+      productActive: json['productActive'],
+      vehicleTypeUid: json['vehicleTypeUid'],
       isAdditional: json['isAdditional'],
       locations: locationsListDb,
       isSelected: true,
       productType: json['productType'],
-      productInvoiceId : id,
+      productInvoiceId: id,
     );
   }
 
-  factory Product.fromJsonProductIntoInvoice(Map<dynamic, dynamic> json) {
+  factory Product.fromJsonProductIntoInvoice(
+      Map<dynamic, dynamic> json, int uidVehicleType, Timestamp addDate) {
     return Product(
       id: json['Id'],
       productName: json['productName'],
@@ -118,6 +120,8 @@ class Product extends Equatable {
       isAdditional: json['isAdditional'],
       isSelected: true,
       productType: json['productType'],
+      vehicleTypeUid: uidVehicleType,
+      dateAdded: addDate,
     );
   }
 
@@ -125,23 +129,23 @@ class Product extends Equatable {
     return {
       'productName': this.productName,
       'price': this.price,
-      'ivaPercent' : this.ivaPercent,
-      'vehicleType' : this.vehicleType,
-      'locations' : this.locations,
-      'productActive' : this.productActive,
-      'vehicleTypeUid' : this.vehicleTypeUid,
-      'productType' : this.productType,
+      'ivaPercent': this.ivaPercent,
+      'vehicleType': this.vehicleType,
+      'locations': this.locations,
+      'productActive': this.productActive,
+      'vehicleTypeUid': this.vehicleTypeUid,
+      'productType': this.productType,
     };
   }
 
   Map<String, dynamic> toJsonInvoiceProduct(
-      String productName,
-      double price,
-      double ivaPercent,
-      bool isAdditional,
-      String productId,
-      String productType,
-      ) {
+    String productName,
+    double price,
+    double ivaPercent,
+    bool isAdditional,
+    String productId,
+    String productType,
+  ) {
     return {
       'productName': productName,
       'price': price,
@@ -173,7 +177,7 @@ class Product extends Equatable {
       isSelected: isSelected ?? origin.isSelected,
       isAdditional: origin.isAdditional,
       productType: productType ?? origin.productType,
-      productInvoiceId: productInvoiceId??'',
+      productInvoiceId: productInvoiceId ?? '',
     );
   }
 
@@ -198,16 +202,16 @@ class Product extends Equatable {
 
   @override
   List<Object> get props => [
-    id,
-    productName,
-    price,
-    ivaPercent,
-    vehicleType,
-    locations,
-    productActive,
-    vehicleTypeUid,
-    isSelected,
-    productType,
-    productInvoiceId,
-  ];
+        id,
+        productName,
+        price,
+        ivaPercent,
+        vehicleType,
+        locations,
+        productActive,
+        vehicleTypeUid,
+        isSelected,
+        productType,
+        productInvoiceId,
+      ];
 }
