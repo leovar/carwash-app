@@ -11,6 +11,9 @@ class Commission extends Equatable {
   final bool isPercentage;
   final bool isValue;
   final double value;
+  final bool calculatePerCount;
+  final double commissionThreshold;
+  final double valueBeforeThreshold;
 
   Commission({
     this.id,
@@ -19,6 +22,9 @@ class Commission extends Equatable {
     this.isPercentage,
     this.isValue,
     this.value,
+    this.calculatePerCount,
+    this.commissionThreshold,
+    this.valueBeforeThreshold,
   });
 
   factory Commission.fromJson(Map<String, dynamic> json, {String id}) {
@@ -29,6 +35,9 @@ class Commission extends Equatable {
       isPercentage: json['isPercentage'],
       isValue: json['isValue'],
       value: json['value'].toDouble(),
+      calculatePerCount : json['calculatePerCount'],
+      commissionThreshold : json['commissionThreshold'].toDouble(),
+      valueBeforeThreshold : json['valueBeforeThreshold'].toDouble(),
     );
   }
 
@@ -39,6 +48,9 @@ class Commission extends Equatable {
       'isPercentage': this.isPercentage,
       'isValue': this.isValue,
       'value': this.value,
+      'calculatePerCount': this.calculatePerCount,
+      'commissionThreshold': this.commissionThreshold,
+      'valueBeforeThreshold': this.valueBeforeThreshold,
     };
   }
 
@@ -50,5 +62,8 @@ class Commission extends Equatable {
         isPercentage,
         isValue,
         value,
+        calculatePerCount,
+        commissionThreshold,
+        valueBeforeThreshold,
       ];
 }

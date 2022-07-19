@@ -344,72 +344,23 @@ class _ProductivityReport extends State<ProductivityReport> {
       final DateFormat formatter = DateFormat('dd-MM-yyyy');
       final String dateFormatted = formatter.format(createdDate);
       if (_productList.length == 0) {
-        ProductsCardDetail productDetail = _getProductCardToAdd(e, commissionsList);
-        _productList.add(productDetail);
+        ProductsCardDetail _productDetail = _startCardDetail(e); //_getProductCardToAdd(e, commissionsList);
+        _productDetail = _commissionProcess(commissionsList, e, _productDetail);
+        _productList.add(_productDetail);
       } else {
         ProductsCardDetail _productInfo = _productList.firstWhere(
           (x) => x.dateServices == dateFormatted,
           orElse: () => null,
         );
         if (_productInfo == null) {
-          ProductsCardDetail productDetail = _getProductCardToAdd(e, commissionsList);
-          _productList.add(productDetail);
+          ProductsCardDetail _productDetail = _startCardDetail(e); //_getProductCardToAdd(e, commissionsList);
+          _productDetail = _commissionProcess(commissionsList, e, _productDetail);
+          _productList.add(_productDetail);
         } else {
-          final commissionProd = commissionsList.firstWhere((c) => c.productType == e.productType && c.uidVehicleType == e.vehicleTypeUid, orElse: () => null);
-          if (e.productType == 'Sencillo') {
-            final countSimpleVehicle = _productInfo.countSimpleVehicle + (e.vehicleTypeUid == 1 ? 1 : 0);
-            final countSimpleVan = _productInfo.countSimpleVan + (e.vehicleTypeUid == 2 ? 1 : 0);
-            _productInfo.countSimpleServices = _productInfo.countSimpleServices + 1;
-            _productInfo.totalSimpleValue = _productInfo.totalSimpleValue + e.price;
-            _productInfo.countSimpleVehicle = countSimpleVehicle;
-            _productInfo.countSimpleVan = countSimpleVan;
-            _productInfo.totalSimpleVehicle = _productInfo.totalSimpleVehicle + (e.vehicleTypeUid == 1 ? e.price : 0);
-            _productInfo.totalSimpleVan = _productInfo.totalSimpleVan + (e.vehicleTypeUid == 2 ? e.price : 0);
-            _productInfo.totalPrice = _productInfo.totalPrice + e.price;
-            if (commissionProd != null) {
-              final commissionSimple = (e.vehicleTypeUid == 1 ? (countSimpleVehicle * commissionProd.value) : _productInfo.commissionSimpleVehicle);
-              final commissionVan = (e.vehicleTypeUid == 2 ? (countSimpleVan * commissionProd.value) : _productInfo.commissionSimpleVan);
-              _productInfo.commissionSimpleVehicle = commissionSimple;
-              _productInfo.commissionSimpleVan = commissionVan;
-              _productInfo.totalCommission = _productInfo.totalCommission + (e.vehicleTypeUid == 1 ? commissionSimple : commissionVan);
-            }
-          } else {
-            _productInfo.countSpecialServices = _productInfo.countSpecialServices + 1;
-            _productInfo.totalSpecialValue = _productInfo.totalSpecialValue + e.price;
-            _productInfo.totalPrice = _productInfo.totalPrice + e.price;
-            if (commissionProd != null) {
-              final commissionSpecial = ((_productInfo.totalSpecialValue + e.price) * commissionProd.value) / 100;
-              _productInfo.commissionSpecial = commissionSpecial;
-              _productInfo.totalCommission = _productInfo.totalCommission + commissionSpecial;
-            }
-          }
+          _productInfo = _commissionProcess(commissionsList, e, _productInfo);
         }
       }
     });
-
-    /*
-    dataProducts.forEach((e) {
-      if (_productList.length == 0) {
-        final productDetail = ProductsCardDetail(
-            e.productType ?? 'Adicional', 1, e.price, e.dateAdded);
-        _productList.add(productDetail);
-      } else {
-        ProductsCardDetail _productInfo = _productList.firstWhere(
-          (x) => x.typeProductName == (e.productType ?? 'Adicional'),
-          orElse: () => null,
-        );
-        if (_productInfo == null) {
-          final productDetail = ProductsCardDetail(
-              e.productType ?? 'Adicional', 1, e.price, e.dateAdded);
-          _productList.add(productDetail);
-        } else {
-          _productInfo.countServices = _productInfo.countServices + 1;
-          _productInfo.totalPrice = _productInfo.totalPrice + e.price;
-          int indexData = _productList.indexOf(_productInfo);
-          _productList[indexData] = _productInfo;
-        }
-      }
-    });*/
 
     if (dataProducts.length > 0) {
       Navigator.pop(context);
@@ -420,60 +371,167 @@ class _ProductivityReport extends State<ProductivityReport> {
               productsList: _productList,
             ));
       }));
-      /*
-      Alert(
-          context: context,
-          title: 'Detalle de productos',
-          style: MessagesUtils.alertStyle,
-          content: InfoDetailCardProductivity(
-            productivityProducts: _productList,
-          ),
-          buttons: [
-            DialogButton(
-              color: Theme.of(context).accentColor,
-              child: Text(
-                'ACEPTAR',
-                style: Theme.of(context).textTheme.button,
-              ),
-              onPressed: () {
-                Navigator.of(context).pop();
-                setState(() {});
-              },
-            )
-          ]).show();*/
     }
   }
 
-  ProductsCardDetail _getProductCardToAdd(Product product, List<Commission> commissionsList) {
-    var createdDate = product.dateAdded.toDate();
+  ProductsCardDetail _commissionProcess(List<Commission> commissionsList, Product prod, ProductsCardDetail _currentProd) {
+    final commissionProd = commissionsList.firstWhere((c) => c.productType == prod.productType && c.uidVehicleType == prod.vehicleTypeUid, orElse: () => null);
+    int countService = 0;
+    double totalService = 0;
+    double calculateComm = 0;
+    double totalCalculateComm = 0;
+    bool isNormal = false;
+    _currentProd.totalPrice = _currentProd.totalPrice + prod.price;
+    switch(prod.vehicleTypeUid) {
+      case 1: {
+        if (prod.productType == 'Sencillo') {
+          countService = _currentProd.countSimpleAuto + 1;
+          totalService = _currentProd.totalSimpleAuto + prod.price;
+          _currentProd.countSimpleAuto = countService;
+          _currentProd.totalSimpleAuto = totalService;
+        } else {
+          countService = _currentProd.countSpecialAuto + 1;
+          totalService = _currentProd.totalSpecialAuto + prod.price;
+          _currentProd.countSpecialAuto = countService;
+          _currentProd.totalSpecialAuto = totalService;
+        }
+      }
+      break;
+      case 2: {
+        if (prod.productType == 'Sencillo') {
+          countService = _currentProd.countSimpleVan + 1;
+          totalService = _currentProd.totalSimpleVan + prod.price;
+          _currentProd.countSimpleVan = countService;
+          _currentProd.totalSimpleVan = totalService;
+        } else {
+          countService = _currentProd.countSpecialVan + 1;
+          totalService = _currentProd.totalSpecialVal + prod.price;
+          _currentProd.countSpecialVan = countService;
+          _currentProd.totalSpecialVal = totalService;
+        }
+      }
+      break;
+      case 3: {
+        if (prod.productType == 'Sencillo') {
+          countService = _currentProd.countSimpleMoto + 1;
+          totalService = _currentProd.totalSimpleMoto + prod.price;
+          _currentProd.countSimpleMoto = countService;
+          _currentProd.totalSimpleMoto = totalService;
+        } else {
+          countService = _currentProd.countSpecialMoto + 1;
+          totalService = _currentProd.totalSpecialMoto + prod.price;
+          _currentProd.countSpecialMoto = countService;
+          _currentProd.totalSpecialMoto = totalService;
+        }
+      }
+      break;
+      case 4: {
+        if (prod.productType == 'Sencillo') {
+          countService = _currentProd.countSimpleBicycle + 1;
+          totalService = _currentProd.totalSimpleBicycle + prod.price;
+          _currentProd.countSimpleBicycle = countService;
+          _currentProd.totalSimpleBicycle = totalService;
+        } else {
+          countService = _currentProd.countSpecialBicycle + 1;
+          totalService = _currentProd.totalSpecialBicycle + prod.price;
+          _currentProd.countSpecialBicycle = countService;
+          _currentProd.totalSpecialBicycle = totalService;
+        }
+      }
+      break;
+    }
+
+    if (commissionProd != null) {
+      if (commissionProd.commissionThreshold > 0) {
+        if (prod.price <= commissionProd.commissionThreshold) {
+          if (commissionProd.calculatePerCount) {
+            calculateComm = commissionProd.isValue ? countService * commissionProd.valueBeforeThreshold : (countService * commissionProd.valueBeforeThreshold) / 100;
+          } else {
+            calculateComm = commissionProd.isValue ? prod.price * commissionProd.valueBeforeThreshold : (prod.price * commissionProd.valueBeforeThreshold) / 100;
+          }
+        } else {
+          isNormal = true;
+        }
+      } else {
+        isNormal = true;
+      }
+      if (isNormal) {
+        if (commissionProd.calculatePerCount) {
+          calculateComm = commissionProd.isValue ? countService * commissionProd.value : (countService * commissionProd.value) / 100;
+        } else {
+          calculateComm = commissionProd.isValue ? prod.price * commissionProd.value : (prod.price * commissionProd.value) / 100;
+        }
+      }
+    }
+
+    switch(prod.vehicleTypeUid) {
+      case 1: {
+        if (prod.productType == 'Sencillo') {
+          totalCalculateComm = commissionProd.calculatePerCount ? calculateComm : _currentProd.commissionSimpleAuto + calculateComm;
+          _currentProd.commissionSimpleAuto = totalCalculateComm;
+        } else {
+          totalCalculateComm = commissionProd.calculatePerCount ? calculateComm : _currentProd.commissionSpecialAuto + calculateComm;
+          _currentProd.commissionSpecialAuto = totalCalculateComm;
+        }
+      }
+      break;
+      case 2: {
+        if (prod.productType == 'Sencillo') {
+          totalCalculateComm = commissionProd.calculatePerCount ? calculateComm : _currentProd.commissionSimpleVan + calculateComm;
+          _currentProd.commissionSimpleVan = totalCalculateComm;
+        } else {
+          totalCalculateComm = commissionProd.calculatePerCount ? calculateComm : _currentProd.commissionSpecialVan + calculateComm;
+          _currentProd.commissionSpecialVan = totalCalculateComm;
+        }
+      }
+      break;
+      case 3: {
+        if (prod.productType == 'Sencillo') {
+          totalCalculateComm = commissionProd.calculatePerCount ? calculateComm : _currentProd.commissionSimpleMoto + calculateComm;
+          _currentProd.commissionSimpleMoto = totalCalculateComm;
+        } else {
+          totalCalculateComm = commissionProd.calculatePerCount ? calculateComm : _currentProd.commissionSpecialMoto + calculateComm;
+          _currentProd.commissionSpecialMoto = totalCalculateComm;
+        }
+      }
+      break;
+      case 4: {
+        if (prod.productType == 'Sencillo') {
+          totalCalculateComm = commissionProd.calculatePerCount ? calculateComm : _currentProd.commissionSimpleBicycle + calculateComm;
+          _currentProd.commissionSimpleBicycle = totalCalculateComm;
+        } else {
+          totalCalculateComm = commissionProd.calculatePerCount ? calculateComm : _currentProd.commissionSpecialBicycle + calculateComm;
+          _currentProd.commissionSpecialBicycle = totalCalculateComm;
+        }
+      }
+      break;
+    }
+    _currentProd.totalCommission = _currentProd.commissionSimpleAuto
+        + _currentProd.commissionSpecialAuto
+        + _currentProd.commissionSimpleVan
+        + _currentProd.commissionSpecialVan
+        + _currentProd.commissionSimpleMoto
+        + _currentProd.commissionSpecialMoto
+        + _currentProd.commissionSimpleBicycle
+        + _currentProd.commissionSpecialBicycle;
+
+
+    if (prod.productType == 'Sencillo') {
+      _currentProd.countSimpleServices = _currentProd.countSimpleServices + 1;
+      _currentProd.totalSimpleValue = _currentProd.totalSimpleValue + prod.price;
+    } else {
+      _currentProd.countSpecialServices = _currentProd.countSpecialServices + 1;
+      _currentProd.totalSpecialValue = _currentProd.totalSpecialValue + prod.price;
+    }
+
+    return _currentProd;
+  }
+
+  ProductsCardDetail _startCardDetail(Product prod) {
+    var createdDate = prod.dateAdded.toDate();
     final DateFormat formatter = DateFormat('dd-MM-yyyy');
     final String dateFormatted = formatter.format(createdDate);
-    ProductsCardDetail productDetail;
-    Commission commissionProd = commissionsList.firstWhere((c) => c.productType == product.productType && c.uidVehicleType == product.vehicleTypeUid, orElse: () => null);
-    double commissionVehicle = 0;
-    if (commissionProd != null) {
-      commissionVehicle = commissionProd.value;
-    }
-    if (product.productType == 'Sencillo') {
-      productDetail = ProductsCardDetail(
-          1,
-          0,
-          product.price,
-          0,
-          product.vehicleTypeUid == 1 ? 1 : 0,
-          product.vehicleTypeUid == 2 ? 1 : 0,
-          product.vehicleTypeUid == 1 ? product.price : 0,
-          product.vehicleTypeUid == 2 ? product.price : 0,
-          product.vehicleTypeUid == 1 ? commissionVehicle : 0,
-          product.vehicleTypeUid == 2 ? commissionVehicle : 0,
-          0,
-          commissionVehicle,
-          product.price,
-          dateFormatted);
-    } else {
-      productDetail = ProductsCardDetail(
-          0, 1, 0, product.price, 0, 0, 0, 0, 0, 0, commissionVehicle, commissionVehicle, product.price, dateFormatted);
-    }
+    ProductsCardDetail productDetail =ProductsCardDetail(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,dateFormatted);
     return productDetail;
   }
 

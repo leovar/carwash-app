@@ -1,17 +1,37 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 class ProductsCardDetail {
+  //-------- counts -----
   int countSimpleServices;
   int countSpecialServices;
+  int countSimpleAuto;
+  int countSpecialAuto;
+  int countSimpleVan;
+  int countSpecialVan;
+  int countSimpleMoto;
+  int countSpecialMoto;
+  int countSimpleBicycle;
+  int countSpecialBicycle;
+
+  //-------- totals -----
   double totalSimpleValue;
   double totalSpecialValue;
-  int countSimpleVehicle;
-  int countSimpleVan;
-  double totalSimpleVehicle;
+  double totalSimpleAuto;
+  double totalSpecialAuto;
   double totalSimpleVan;
-  double commissionSimpleVehicle;
+  double totalSpecialVal;
+  double totalSimpleMoto;
+  double totalSpecialMoto;
+  double totalSimpleBicycle;
+  double totalSpecialBicycle;
+
+  //-------- commissions -----
+  double commissionSimpleAuto;
+  double commissionSpecialAuto;
   double commissionSimpleVan;
-  double commissionSpecial;
+  double commissionSpecialVan;
+  double commissionSimpleMoto;
+  double commissionSpecialMoto;
+  double commissionSimpleBicycle;
+  double commissionSpecialBicycle;
   double totalCommission;
   double totalPrice;
   String dateServices;
@@ -19,17 +39,33 @@ class ProductsCardDetail {
   ProductsCardDetail(
       this.countSimpleServices,
       this.countSpecialServices,
+      this.countSimpleAuto,
+      this.countSpecialAuto,
+      this.countSimpleVan,
+      this.countSpecialVan,
+      this.countSimpleMoto,
+      this.countSpecialMoto,
+      this.countSimpleBicycle,
+      this.countSpecialBicycle,
       this.totalSimpleValue,
       this.totalSpecialValue,
-      this.countSimpleVehicle,
-      this.countSimpleVan,
-      this.totalSimpleVehicle,
+      this.totalSimpleAuto,
+      this.totalSpecialAuto,
       this.totalSimpleVan,
-      this.commissionSimpleVehicle,
+      this.totalSpecialVal,
+      this.totalSimpleMoto,
+      this.totalSpecialMoto,
+      this.totalSimpleBicycle,
+      this.totalSpecialBicycle,
+      this.commissionSimpleAuto,
+      this.commissionSpecialAuto,
       this.commissionSimpleVan,
-      this.commissionSpecial,
+      this.commissionSpecialVan,
+      this.commissionSimpleMoto,
+      this.commissionSpecialMoto,
+      this.commissionSimpleBicycle,
+      this.commissionSpecialBicycle,
       this.totalCommission,
       this.totalPrice,
-      this.dateServices,
-      );
+      this.dateServices);
 }
