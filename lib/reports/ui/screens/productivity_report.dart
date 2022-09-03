@@ -1,3 +1,5 @@
+import 'package:car_wash_app/commission/bloc/bloc_commission.dart';
+import 'package:car_wash_app/commission/model/commission.dart';
 import 'package:car_wash_app/invoice/bloc/bloc_invoice.dart';
 import 'package:car_wash_app/invoice/model/invoice.dart';
 import 'package:car_wash_app/location/bloc/bloc_location.dart';
@@ -6,12 +8,14 @@ import 'package:car_wash_app/product/model/product.dart';
 import 'package:car_wash_app/reports/bloc/bloc_reports.dart';
 import 'package:car_wash_app/reports/model/card_report.dart';
 import 'package:car_wash_app/reports/model/products_card_detail.dart';
+import 'package:car_wash_app/reports/ui/screens/productivity_user_detail_page.dart';
 import 'package:car_wash_app/reports/ui/widgets/info_detail_card_productivity.dart';
 import 'package:car_wash_app/reports/ui/widgets/item_productivity_report_list.dart';
 import 'package:car_wash_app/widgets/messages_utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
@@ -25,6 +29,7 @@ class _ProductivityReport extends State<ProductivityReport> {
   BlocReports _blocReports = BlocReports();
   BlocLocation _blocLocation = BlocLocation();
   BlocInvoice _blocInvoice = BlocInvoice();
+  BlocCommission _blocCommission = BlocCommission();
   List<DropdownMenuItem<Location>> _dropdownMenuItems;
   Location _selectedLocation;
   List<CardReport> _listCardReport = [];
@@ -135,9 +140,9 @@ class _ProductivityReport extends State<ProductivityReport> {
       default:
         _listInvoices =
             _blocReports.buildProductivityReportList(snapshot.data.documents);
-        _updateInvoices(
-            _listInvoices); //TODO esta llamada se debe comentar o eliminar cuando se actualizce al app en los celulares que la usan
-        _listCardReport = _processInvoicesOperator(_listInvoices.where((f) => !f.cancelledInvoice).toList());
+        //_updateInvoices(_listInvoices); //TODO esta llamada se debe comentar o eliminar cuando se actualizce al app en los celulares que la usan
+        _listCardReport = _processInvoicesOperator(
+            _listInvoices.where((f) => !f.cancelledInvoice).toList());
         _listCardReport
             .sort((a, b) => b.countServices.compareTo(a.countServices));
     }
@@ -265,6 +270,7 @@ class _ProductivityReport extends State<ProductivityReport> {
     List<CardReport> _cardList = [];
     try {
       _listInvoices.forEach((item) {
+        List<Invoice> invoicesPerUser = [];
         if (_cardList.length > 0) {
           CardReport cardInfo = _cardList.firstWhere(
             (x) =>
@@ -273,28 +279,35 @@ class _ProductivityReport extends State<ProductivityReport> {
             orElse: () => null,
           );
           if (cardInfo == null) {
+            invoicesPerUser.add(item);
             final newOperatorCard = CardReport(
                 item.userOperatorName,
                 item.userOperator,
                 item.locationName,
                 item.countProducts + item.countAdditionalProducts,
-                item.totalPrice);
+                item.totalPrice,
+                invoicesPerUser);
             _cardList.add(newOperatorCard);
           } else {
             cardInfo.countServices = cardInfo.countServices +
                 item.countProducts +
                 item.countAdditionalProducts;
             cardInfo.totalPrice = cardInfo.totalPrice + item.totalPrice;
+            List<Invoice> listGet = cardInfo.invoicesList;
+            listGet.add(item);
             int indexData = _cardList.indexOf(cardInfo);
             _cardList[indexData] = cardInfo;
           }
         } else {
+          invoicesPerUser.add(item);
           final newOperatorCard = CardReport(
-              item.userOperatorName,
-              item.userOperator,
-              item.locationName,
-              item.countProducts + item.countAdditionalProducts,
-              item.totalPrice);
+            item.userOperatorName,
+            item.userOperator,
+            item.locationName,
+            item.countProducts + item.countAdditionalProducts,
+            item.totalPrice,
+            invoicesPerUser,
+          );
           _cardList.add(newOperatorCard);
         }
       });
@@ -307,8 +320,10 @@ class _ProductivityReport extends State<ProductivityReport> {
 
   Future<void> _openServicesDetail(DocumentReference operatorReference) async {
     List<ProductsCardDetail> _productList = [];
+    List<Commission> commissionsList = await _blocCommission.getAllCommissions();
     final operatorInvoices = _listInvoices
-        .where((f) => f.userOperator == operatorReference)
+        .where(
+            (f) => f.userOperator == operatorReference && !f.cancelledInvoice)
         .toList();
     Alert(
         context: context,
@@ -325,51 +340,199 @@ class _ProductivityReport extends State<ProductivityReport> {
     });
 
     dataProducts.forEach((e) {
+      var createdDate = e.dateAdded.toDate();
+      final DateFormat formatter = DateFormat('dd-MM-yyyy');
+      final String dateFormatted = formatter.format(createdDate);
       if (_productList.length == 0) {
-        final productDetail =
-            ProductsCardDetail(e.productType ?? 'Adicional', 1, e.price);
-        _productList.add(productDetail);
+        ProductsCardDetail _productDetail = _startCardDetail(e); //_getProductCardToAdd(e, commissionsList);
+        _productDetail = _commissionProcess(commissionsList, e, _productDetail);
+        _productList.add(_productDetail);
       } else {
         ProductsCardDetail _productInfo = _productList.firstWhere(
-          (x) => x.typeProductName == (e.productType ?? 'Adicional'),
+          (x) => x.dateServices == dateFormatted,
           orElse: () => null,
         );
         if (_productInfo == null) {
-          final productDetail =
-              ProductsCardDetail(e.productType ?? 'Adicional', 1, e.price);
-          _productList.add(productDetail);
+          ProductsCardDetail _productDetail = _startCardDetail(e); //_getProductCardToAdd(e, commissionsList);
+          _productDetail = _commissionProcess(commissionsList, e, _productDetail);
+          _productList.add(_productDetail);
         } else {
-          _productInfo.countServices = _productInfo.countServices + 1;
-          _productInfo.totalPrice = _productInfo.totalPrice + e.price;
-          int indexData = _productList.indexOf(_productInfo);
-          _productList[indexData] = _productInfo;
+          _productInfo = _commissionProcess(commissionsList, e, _productInfo);
         }
       }
     });
 
     if (dataProducts.length > 0) {
       Navigator.pop(context);
-      Alert(
-          context: context,
-          title: 'Detalle de productos',
-          style: MessagesUtils.alertStyle,
-          content: InfoDetailCardProductivity(
-            productivityProducts: _productList,
-          ),
-          buttons: [
-            DialogButton(
-              color: Theme.of(context).accentColor,
-              child: Text(
-                'ACEPTAR',
-                style: Theme.of(context).textTheme.button,
-              ),
-              onPressed: () {
-                Navigator.of(context).pop();
-                setState(() {});
-              },
-            )
-          ]).show();
+      Navigator.push(context, MaterialPageRoute(builder: (context) {
+        return BlocProvider(
+            bloc: BlocReports(),
+            child: ProductivityUserDetailPage(
+              productsList: _productList,
+            ));
+      }));
     }
+  }
+
+  ProductsCardDetail _commissionProcess(List<Commission> commissionsList, Product prod, ProductsCardDetail _currentProd) {
+    final commissionProd = commissionsList.firstWhere((c) => c.productType == prod.productType && c.uidVehicleType == prod.vehicleTypeUid, orElse: () => null);
+    int countService = 0;
+    double totalService = 0;
+    double calculateComm = 0;
+    double totalCalculateComm = 0;
+    bool isNormal = false;
+    _currentProd.totalPrice = _currentProd.totalPrice + prod.price;
+    switch(prod.vehicleTypeUid) {
+      case 1: {
+        if (prod.productType == 'Sencillo') {
+          countService = _currentProd.countSimpleAuto + 1;
+          totalService = _currentProd.totalSimpleAuto + prod.price;
+          _currentProd.countSimpleAuto = countService;
+          _currentProd.totalSimpleAuto = totalService;
+        } else {
+          countService = _currentProd.countSpecialAuto + 1;
+          totalService = _currentProd.totalSpecialAuto + prod.price;
+          _currentProd.countSpecialAuto = countService;
+          _currentProd.totalSpecialAuto = totalService;
+        }
+      }
+      break;
+      case 2: {
+        if (prod.productType == 'Sencillo') {
+          countService = _currentProd.countSimpleVan + 1;
+          totalService = _currentProd.totalSimpleVan + prod.price;
+          _currentProd.countSimpleVan = countService;
+          _currentProd.totalSimpleVan = totalService;
+        } else {
+          countService = _currentProd.countSpecialVan + 1;
+          totalService = _currentProd.totalSpecialVal + prod.price;
+          _currentProd.countSpecialVan = countService;
+          _currentProd.totalSpecialVal = totalService;
+        }
+      }
+      break;
+      case 3: {
+        if (prod.productType == 'Sencillo') {
+          countService = _currentProd.countSimpleMoto + 1;
+          totalService = _currentProd.totalSimpleMoto + prod.price;
+          _currentProd.countSimpleMoto = countService;
+          _currentProd.totalSimpleMoto = totalService;
+        } else {
+          countService = _currentProd.countSpecialMoto + 1;
+          totalService = _currentProd.totalSpecialMoto + prod.price;
+          _currentProd.countSpecialMoto = countService;
+          _currentProd.totalSpecialMoto = totalService;
+        }
+      }
+      break;
+      case 4: {
+        if (prod.productType == 'Sencillo') {
+          countService = _currentProd.countSimpleBicycle + 1;
+          totalService = _currentProd.totalSimpleBicycle + prod.price;
+          _currentProd.countSimpleBicycle = countService;
+          _currentProd.totalSimpleBicycle = totalService;
+        } else {
+          countService = _currentProd.countSpecialBicycle + 1;
+          totalService = _currentProd.totalSpecialBicycle + prod.price;
+          _currentProd.countSpecialBicycle = countService;
+          _currentProd.totalSpecialBicycle = totalService;
+        }
+      }
+      break;
+    }
+
+    if (commissionProd != null) {
+      if (commissionProd.commissionThreshold > 0) {
+        if (prod.price <= commissionProd.commissionThreshold) {
+          if (commissionProd.calculatePerCount) {
+            calculateComm = commissionProd.isValue ? countService * commissionProd.valueBeforeThreshold : (countService * commissionProd.valueBeforeThreshold) / 100;
+          } else {
+            calculateComm = commissionProd.isValue ? prod.price * commissionProd.valueBeforeThreshold : (prod.price * commissionProd.valueBeforeThreshold) / 100;
+          }
+        } else {
+          isNormal = true;
+        }
+      } else {
+        isNormal = true;
+      }
+      if (isNormal) {
+        if (commissionProd.calculatePerCount) {
+          calculateComm = commissionProd.isValue ? countService * commissionProd.value : (countService * commissionProd.value) / 100;
+        } else {
+          calculateComm = commissionProd.isValue ? prod.price * commissionProd.value : (prod.price * commissionProd.value) / 100;
+        }
+      }
+    }
+
+    switch(prod.vehicleTypeUid) {
+      case 1: {
+        if (prod.productType == 'Sencillo') {
+          totalCalculateComm = commissionProd.calculatePerCount ? calculateComm : _currentProd.commissionSimpleAuto + calculateComm;
+          _currentProd.commissionSimpleAuto = totalCalculateComm;
+        } else {
+          totalCalculateComm = commissionProd.calculatePerCount ? calculateComm : _currentProd.commissionSpecialAuto + calculateComm;
+          _currentProd.commissionSpecialAuto = totalCalculateComm;
+        }
+      }
+      break;
+      case 2: {
+        if (prod.productType == 'Sencillo') {
+          totalCalculateComm = commissionProd.calculatePerCount ? calculateComm : _currentProd.commissionSimpleVan + calculateComm;
+          _currentProd.commissionSimpleVan = totalCalculateComm;
+        } else {
+          totalCalculateComm = commissionProd.calculatePerCount ? calculateComm : _currentProd.commissionSpecialVan + calculateComm;
+          _currentProd.commissionSpecialVan = totalCalculateComm;
+        }
+      }
+      break;
+      case 3: {
+        if (prod.productType == 'Sencillo') {
+          totalCalculateComm = commissionProd.calculatePerCount ? calculateComm : _currentProd.commissionSimpleMoto + calculateComm;
+          _currentProd.commissionSimpleMoto = totalCalculateComm;
+        } else {
+          totalCalculateComm = commissionProd.calculatePerCount ? calculateComm : _currentProd.commissionSpecialMoto + calculateComm;
+          _currentProd.commissionSpecialMoto = totalCalculateComm;
+        }
+      }
+      break;
+      case 4: {
+        if (prod.productType == 'Sencillo') {
+          totalCalculateComm = commissionProd.calculatePerCount ? calculateComm : _currentProd.commissionSimpleBicycle + calculateComm;
+          _currentProd.commissionSimpleBicycle = totalCalculateComm;
+        } else {
+          totalCalculateComm = commissionProd.calculatePerCount ? calculateComm : _currentProd.commissionSpecialBicycle + calculateComm;
+          _currentProd.commissionSpecialBicycle = totalCalculateComm;
+        }
+      }
+      break;
+    }
+    _currentProd.totalCommission = _currentProd.commissionSimpleAuto
+        + _currentProd.commissionSpecialAuto
+        + _currentProd.commissionSimpleVan
+        + _currentProd.commissionSpecialVan
+        + _currentProd.commissionSimpleMoto
+        + _currentProd.commissionSpecialMoto
+        + _currentProd.commissionSimpleBicycle
+        + _currentProd.commissionSpecialBicycle;
+
+
+    if (prod.productType == 'Sencillo') {
+      _currentProd.countSimpleServices = _currentProd.countSimpleServices + 1;
+      _currentProd.totalSimpleValue = _currentProd.totalSimpleValue + prod.price;
+    } else {
+      _currentProd.countSpecialServices = _currentProd.countSpecialServices + 1;
+      _currentProd.totalSpecialValue = _currentProd.totalSpecialValue + prod.price;
+    }
+
+    return _currentProd;
+  }
+
+  ProductsCardDetail _startCardDetail(Product prod) {
+    var createdDate = prod.dateAdded.toDate();
+    final DateFormat formatter = DateFormat('dd-MM-yyyy');
+    final String dateFormatted = formatter.format(createdDate);
+    ProductsCardDetail productDetail =ProductsCardDetail(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,dateFormatted);
+    return productDetail;
   }
 
   void _updateInvoices(List<Invoice> _invoice) async {

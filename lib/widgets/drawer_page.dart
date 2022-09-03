@@ -1,3 +1,5 @@
+import 'package:car_wash_app/commission/bloc/bloc_commission.dart';
+import 'package:car_wash_app/commission/ui/screens/commission_list_admin_page.dart';
 import 'package:car_wash_app/location/bloc/bloc_location.dart';
 import 'package:car_wash_app/location/ui/screens/locations_admin_page.dart';
 import 'package:car_wash_app/product/bloc/product_bloc.dart';
@@ -8,7 +10,6 @@ import 'package:car_wash_app/user/ui/screens/user_profile_page.dart';
 import 'package:car_wash_app/user/ui/screens/users_admin_page.dart';
 import 'package:car_wash_app/vehicle_type/bloc/vehicle_type_bloc.dart';
 import 'package:car_wash_app/vehicle_type/ui/screens/admin_brand_reference.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
@@ -43,7 +44,7 @@ class _DrawerPage extends State<DrawerPage> {
 
   drawerPage() => Drawer(
         child: Column(
-          mainAxisSize: MainAxisSize.max,
+          mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             Flexible(
               flex: 5,
@@ -89,7 +90,7 @@ class _DrawerPage extends State<DrawerPage> {
                           fit: BoxFit.cover,
                           image: (_photoUser == null || _photoUser.isEmpty)
                               ? AssetImage(
-                                  'assets/images/profile_placeholder.png')
+                              'assets/images/profile_placeholder.png')
                               : NetworkImage(_photoUser),
                         ),
                       ),
@@ -210,7 +211,7 @@ class _DrawerPage extends State<DrawerPage> {
                         ),
                         Container(
                           padding:
-                              EdgeInsets.only(left: 90, top: 17, bottom: 10),
+                          EdgeInsets.only(left: 90, top: 17, bottom: 10),
                           alignment: Alignment(-1.0, 0.0),
                           child: InkWell(
                             child: Text(
@@ -235,6 +236,34 @@ class _DrawerPage extends State<DrawerPage> {
                               );
                             },
                           ),
+                        ),
+                        Container(
+                          padding:
+                          EdgeInsets.only(left: 90, top: 17, bottom: 10),
+                          alignment: Alignment(-1.0, 0.0),
+                          child: InkWell(
+                            child: Text(
+                              "Comisiones",
+                              style: TextStyle(
+                                fontFamily: "Lato",
+                                fontWeight: FontWeight.normal,
+                                fontSize: 17,
+                                color: Color(0xFFAEAEAE),
+                              ),
+                            ),
+                            onTap: () {
+                              Navigator.pop(context);
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) {
+                                  return BlocProvider<BlocCommission>(
+                                    bloc: BlocCommission(),
+                                    child: CommissionListAdminPage(),
+                                  );
+                                }),
+                              );
+                            },
+                          ),
                         )
                       ],
                     ),
@@ -254,29 +283,31 @@ class _DrawerPage extends State<DrawerPage> {
                       width: 25,
                     ),
                   ),
-                  InkWell(
-                    child: ListTile(
-                      title: Text(
-                        "Perfil",
-                        style: TextStyle(
-                          fontFamily: "Lato",
-                          fontWeight: FontWeight.normal,
-                          fontSize: 17,
-                          color: Color(0xFF27AEBB),
+                  Flexible(
+                    child: InkWell(
+                      child: ListTile(
+                        title: Text(
+                          "Perfil",
+                          style: TextStyle(
+                            fontFamily: "Lato",
+                            fontWeight: FontWeight.normal,
+                            fontSize: 17,
+                            color: Color(0xFF27AEBB),
+                          ),
+                        ),
+                        leading: Icon(
+                          Icons.perm_identity,
+                          color: Color(0xFF59B258),
                         ),
                       ),
-                      leading: Icon(
-                        Icons.perm_identity,
-                        color: Color(0xFF59B258),
-                      ),
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => UserProfilePage()),
+                        );
+                      },
                     ),
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => UserProfilePage()),
-                      );
-                    },
                   ),
                 ],
               ),
@@ -285,6 +316,7 @@ class _DrawerPage extends State<DrawerPage> {
               flex: 1,
               child: Container(
                 alignment: Alignment.bottomCenter,
+                height: 35,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,

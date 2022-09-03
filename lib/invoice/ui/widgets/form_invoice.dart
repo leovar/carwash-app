@@ -93,6 +93,7 @@ class _FormInvoice extends State<FormInvoice> {
   String _selectedBrandReference = '';
   String _selectColor = '';
   String _selectTypeSex = '';
+  String _selectedPaymentMethod = '';
 
   final _textPlaca = TextEditingController();
   final _textClient = TextEditingController();
@@ -333,6 +334,7 @@ class _FormInvoice extends State<FormInvoice> {
                 cbHandlerVehicleBrandReference: _setHandlerBrandReferences,
                 cbHandlerVehicleColor: _setHandlerVehicleColor,
                 cbHandlerTypeSex: _setHandlerTypeSex,
+                cbHandlerPaymentMethod: _setHandlerPaymentMethod,
                 idLocation: _idLocation,
                 selectedOperator: _selectOperator,
                 selectedCoordinator: _selectCoordinator,
@@ -340,6 +342,7 @@ class _FormInvoice extends State<FormInvoice> {
                 selectVehicleBrandReference: _selectedBrandReference,
                 selectedVehicleColor: _selectColor,
                 selectedTypeSex: _selectTypeSex,
+                selectedPaymentMethod: _selectedPaymentMethod,
                 uidVehicleType: vehicleTypeSelected.uid,
                 enableForm: _enableForm,
                 editOperator: _editOperator,
@@ -783,6 +786,11 @@ class _FormInvoice extends State<FormInvoice> {
     _selectTypeSex = typeSex;
   }
 
+  //Payment Methods
+  void _setHandlerPaymentMethod(String paymentMethod, int countPayment, int operationType) {
+    _selectedPaymentMethod = paymentMethod;
+  }
+
   void _setHandlerSendEmailInvoice(bool value) {
     _sendEmail = value;
   }
@@ -1198,6 +1206,7 @@ class _FormInvoice extends State<FormInvoice> {
               ? widget.editInvoice.invoiceProducts
               : _productToSave,
           cancelledInvoice: _canceledInvoice,
+          paymentMethod:  _selectedPaymentMethod,
         );
         DocumentReference invoiceReference =
             await _blocInvoice.saveInvoice(_invoice);
@@ -1291,6 +1300,7 @@ class _FormInvoice extends State<FormInvoice> {
     _textTimeDelivery.text = invoiceToEdit.timeDelivery;
     _textObservation.text = invoiceToEdit.observation;
     _textIncidence.text = invoiceToEdit.incidence;
+    _selectedPaymentMethod = invoiceToEdit.paymentMethod;
 
     //get vehicle reference
     _vehicleReference =

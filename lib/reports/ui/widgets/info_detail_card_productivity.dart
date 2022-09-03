@@ -13,7 +13,9 @@ class InfoDetailCardProductivity extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     List<ProductsCardDetail> _listProducts = productivityProducts;
-    _listProducts.sort((a, b) => b.countServices.compareTo(a.countServices));
+    //_listProducts.sort((a, b) => b.countServices.compareTo(a.countServices));
+    return Container();
+    /*
     return SingleChildScrollView(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -34,9 +36,10 @@ class InfoDetailCardProductivity extends StatelessWidget {
           ),
         ],
       ),
-    );
+    );*/
   }
 
+  /*
   Widget _itemServices(BuildContext context, ProductsCardDetail product) {
     final formatterPrice = NumberFormat("#,###");
     return ConstrainedBox(
@@ -102,5 +105,5 @@ class InfoDetailCardProductivity extends StatelessWidget {
         ),
       ),
     );
-  }
+  }*/
 }

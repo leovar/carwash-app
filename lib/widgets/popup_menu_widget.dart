@@ -56,44 +56,61 @@ class _PopUpMenuWidget extends State<PopUpMenuWidget> {
           _selectValue(valText);
         }
       },
-      child: Container(
-        height: 50,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            Container(
-              padding: EdgeInsets.only(left: 10),
-              child: Text(
-                widget.valueSelect,
-                style: TextStyle(
-                  fontFamily: "Lato",
-                  decoration: TextDecoration.none,
-                  color: Color(0xFFAEAEAE),
-                  fontSize: 15,
+      child: Stack(
+        children: [
+          Container(
+            margin: EdgeInsets.only(top: 5) ,
+            height: 50,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Container(
+                  padding: EdgeInsets.only(left: 10),
+                  child: Text(
+                    widget.valueSelect,
+                    style: TextStyle(
+                      fontFamily: "Lato",
+                      decoration: TextDecoration.none,
+                      color: Color(0xFFAEAEAE),
+                      fontSize: 15,
+                    ),
+                  ),
                 ),
-              ),
-            ),
-            Align(
-              alignment: Alignment.centerRight,
-              child: IconButton(
-                icon: Icon(
-                  Icons.keyboard_arrow_down,
-                  size: 30,
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: IconButton(
+                    icon: Icon(
+                      Icons.keyboard_arrow_down,
+                      size: 30,
+                    ),
+                    onPressed: (){},
+                  ),
                 ),
-                onPressed: (){},
-              ),
+              ],
             ),
-          ],
-        ),
-        decoration: BoxDecoration(
-          border: Border.all(
-            width: 1.2,
-            color: Color(0xFFAEAEAE),
+            decoration: BoxDecoration(
+              border: Border.all(
+                width: 1.2,
+                color: Color(0xFFAEAEAE),
+              ),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(5),
+            ),
           ),
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(5),
-        ),
+          Positioned(
+              left: 10,
+              top: 0,
+              child: Container(
+                padding: EdgeInsets.only(bottom: 2, left: 10, right: 10),
+                color: Colors.white,
+                child: Text(
+                  widget.popUpName,
+                  style: TextStyle(color: Color(0xFFAEAEAE), fontSize: 12),
+                ),
+              ),
+          ),
+        ],
       ),
     );
   }

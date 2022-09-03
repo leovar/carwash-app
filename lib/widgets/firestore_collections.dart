@@ -11,6 +11,7 @@ class FirestoreCollections {
   static String colors = 'colors';
   static String brandReferences = 'brandReferences';
   static String configuration = 'configuration';
+  static String commissions = 'commissions';
 
   /// Fields User Collection
   static String usersFieldUid = 'uid';
@@ -60,5 +61,10 @@ class FirestoreCollections {
   static String brandFieldVehicleType = 'vehicleType';
   static String brandFieldBrand = 'brand';
 
-
+  /// Fields Commissions
+  static String commissionUidVehicleType = 'uidVehicleType';
+  static String commissionProductType = 'productType';
+  static String commissionIsPercentage = 'isPercentage';
+  static String commissionIsValue = 'isValue';
+  static String commissionValue = 'value';
 }

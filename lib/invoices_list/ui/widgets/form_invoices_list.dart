@@ -22,6 +22,7 @@ import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class FormInvoicesList extends StatefulWidget {
   final locationReference;
@@ -45,6 +46,7 @@ class _FormInvoicesList extends State<FormInvoicesList> {
   String _idLocation = '';
   Location _location;
   User _selectedOperator = User(name:'', uid: '', email: '');
+  String _selectedPaymentMethod = '';
 
   ///Filter Keys
   final _textPlaca = TextEditingController();
@@ -376,16 +378,20 @@ class _FormInvoicesList extends State<FormInvoicesList> {
       _productTypeSelected = selectProductType;
   }
 
-  void _closeInvoiceCallback(Invoice _invoiceClose) {
-    if (_invoiceClose.userOperatorName.isEmpty) {
+  void _closeInvoiceCallback(Invoice _invoiceClose) async {
+    if (_invoiceClose.userOperatorName.isEmpty || _invoiceClose.paymentMethod.isEmpty) {
+      _selectedOperator = _invoiceClose.userOperatorName.isEmpty ? new User(name:'', uid: '', email: '') : await _blocUser.getUserById(_invoiceClose.userOperator.documentID);
+      _selectedPaymentMethod = _invoiceClose.paymentMethod;
       Alert(
         context: context,
-        title: 'Seleccione el operador',
+        title: 'Seleccione el operador y el Método de pago',
         style: MessagesUtils.alertStyle,
         content: SelectOperatorWidget(
           operatorSelected: _selectedOperator,
+          paymentMethodSelected: _selectedPaymentMethod,
           idLocation: _idLocation,
           selectOperator: _callBackSelectOperator,
+          selectPaymentMethod: _callBackSelectPaymentMethod,
         ),
         buttons: [
           DialogButton(
@@ -439,18 +445,49 @@ class _FormInvoicesList extends State<FormInvoicesList> {
     _selectedOperator = operatorSelected;
   }
 
+  void _callBackSelectPaymentMethod(String payment) {
+    _selectedPaymentMethod = payment;
+  }
+
+  void _selectPaymentMethodMessage() {
+    Alert(
+      context: context,
+
+    ).show();
+  }
+
   void _closeInvoiceWithOperator(Invoice invoiceToClose) async {
-    DocumentReference _operatorReference =
+    if (_selectedOperator.name.isNotEmpty && _selectedPaymentMethod.isNotEmpty) {
+      DocumentReference _operatorReference =
+      await _blocUser.getUserReferenceById(_selectedOperator.id);
+      Invoice invoice = Invoice.copyWith(
+        origin: invoiceToClose,
+        closedDate: Timestamp.now(),
+        invoiceClosed: true,
+        userOperator: _operatorReference,
+        userOperatorName: _selectedOperator.name,
+        paymentMethod: _selectedPaymentMethod,
+      );
+      await _blocInvoice.saveInvoice(invoice);
+      _validateSendCustomerNotification(invoiceToClose);
+    } else {
+      if (_selectedOperator.name.isNotEmpty) {
+        DocumentReference _operatorReference =
         await _blocUser.getUserReferenceById(_selectedOperator.id);
-    Invoice invoice = Invoice.copyWith(
-      origin: invoiceToClose,
-      closedDate: Timestamp.now(),
-      invoiceClosed: true,
-      userOperator: _operatorReference,
-      userOperatorName: _selectedOperator.name,
-    );
-    await _blocInvoice.saveInvoice(invoice);
-    _validateSendCustomerNotification(invoiceToClose);
+        Invoice invoice = Invoice.copyWith(
+          origin: invoiceToClose,
+          userOperator: _operatorReference,
+          userOperatorName: _selectedOperator.name,
+        );
+        await _blocInvoice.saveInvoice(invoice);
+      } else {
+        Invoice invoice = Invoice.copyWith(
+          origin: invoiceToClose,
+          paymentMethod: _selectedPaymentMethod,
+        );
+        await _blocInvoice.saveInvoice(invoice);
+      }
+    }
   }
 
   void _closeInvoice(Invoice invoiceToClose) async {
@@ -469,7 +506,9 @@ class _FormInvoicesList extends State<FormInvoicesList> {
   void _validateSendCustomerNotification(Invoice invoiceToClose) {
     if (invoiceToClose.phoneNumber.isNotEmpty) {
       String message =
-          "Spa CarWash Movil -- Estimado cliente. Le informamos que el servicio de lavado de su vehículo ${invoiceToClose.placa}, ha terminado y está listo para ser entregado. Lo esperamos en nuestras instalaciones.";
+          "Spa CarWash Movil -- Estimado cliente. Le informamos que el servicio de lavado de su vehículo de placas ${invoiceToClose.placa}, ha terminado y está listo para ser entregado ☑️. "
+          "Una vez recibido, ¡Nos encantaría conocer tu opinión 💭! Aunque sabemos que las encuestas son aburridas 😐, solo 3️⃣ respuestas tuyas nos permitirán estar más cerca de hacerte más feliz con tu servicio 😃. Responde en este link ➡️"
+          "https://docs.google.com/forms/d/1gjEMveRLkrbQF_2x5OxE1uXQLzWKtS0n_NFMw2NJTtE/edit?ts=62f6801d";
       List<String> recipents = [invoiceToClose.phoneNumber];
       if (_location != null) {
         if (_location.sendMessageSms ?? false) {
@@ -488,12 +527,21 @@ class _FormInvoicesList extends State<FormInvoicesList> {
               .catchError((onError) {
         print(onError);
       });
-    } catch (_) {}
+    } catch (_) {
+      print(_);
+    }
   }
 
-  void _sendWhatsAppMessage(String message, String phoneNumber) {
+  void _sendWhatsAppMessage(String message, String phoneNumber) async {
     try {
-      FlutterOpenWhatsapp.sendSingleMessage('57' + phoneNumber, message);
-    } catch (_) {}
+      if (phoneNumber.isNotEmpty) {
+        //FlutterOpenWhatsapp.sendSingleMessage('57' + phoneNumber, message);
+        //String url = 'https://api.whatsapp.com/send/?phone=57'+ phoneNumber + '&text=' + message + '&app_absent=1' ;
+        String url = 'https://wa.me/57' + phoneNumber + '?text=' + message;
+        launch(url);
+      }
+    } catch (_) {
+      print(_);
+    }
   }
 }
