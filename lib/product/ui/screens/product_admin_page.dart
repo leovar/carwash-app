@@ -114,6 +114,7 @@ class _ProductAdminPage extends State<ProductAdminPage> {
                 labelText: 'Valor',
                 textController: _textPrice,
                 validate: _validatePrice,
+                autofocus: false,
                 textValidate: 'Escriba el valor del producto',
                 inputType: TextInputType.number,
                 textInputFormatter: [
@@ -321,6 +322,7 @@ class _ProductAdminPage extends State<ProductAdminPage> {
       items: _dropdownVehicleTypes,
       value: _selectedVehicleType,
       onChanged: onChangeDropDawn,
+      onTap: unfocusTextFields,
       hint: Text(
         "Seleccione el Typo de Vehiculo...",
         style: TextStyle(
@@ -427,6 +429,10 @@ class _ProductAdminPage extends State<ProductAdminPage> {
     setState(() {
       _selectedVehicleType = selectedVehicleType;
     });
+  }
+
+  unfocusTextFields() {
+    FocusScope.of(context).unfocus();
   }
 
   bool _validateInputs() {

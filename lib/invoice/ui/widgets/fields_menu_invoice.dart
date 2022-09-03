@@ -3,6 +3,7 @@ import 'package:car_wash_app/user/model/user.dart';
 import 'package:car_wash_app/widgets/popup_menu_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
+import 'package:car_wash_app/invoice/model/payment_methods.dart';
 
 class FieldsMenusInvoice extends StatefulWidget {
   final int listCountOperators;
@@ -16,6 +17,7 @@ class FieldsMenusInvoice extends StatefulWidget {
   final Function(String, int, int) cbHandlerVehicleBrandReference;
   final Function(String, int, int) cbHandlerVehicleColor;
   final Function(String, int, int) cbHandlerTypeSex;
+  final Function(String, int, int) cbHandlerPaymentMethod;
   final selectedOperator;
   final selectedCoordinator;
   final String idLocation;
@@ -23,6 +25,7 @@ class FieldsMenusInvoice extends StatefulWidget {
   final String selectVehicleBrandReference;
   final String selectedVehicleColor;
   final String selectedTypeSex;
+  final String selectedPaymentMethod;
   final int uidVehicleType;
   final bool enableForm;
   final bool editOperator;
@@ -40,6 +43,7 @@ class FieldsMenusInvoice extends StatefulWidget {
     this.cbHandlerVehicleBrandReference,
     this.cbHandlerVehicleColor,
     this.cbHandlerTypeSex,
+    this.cbHandlerPaymentMethod,
     this.selectedOperator,
     this.selectedCoordinator,
     this.idLocation,
@@ -47,6 +51,7 @@ class FieldsMenusInvoice extends StatefulWidget {
     this.selectVehicleBrandReference,
     this.selectedVehicleColor,
     this.selectedTypeSex,
+    this.selectedPaymentMethod,
     this.uidVehicleType,
     this.enableForm,
     this.editOperator,
@@ -68,6 +73,7 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
   List<String> _listBrandReferences = <String>[];
   List<String> _listColors = <String>[];
   List<String> _listTypeSex = <String>[];
+  List<String> _listPaymentMethods = <String>[];
   int _vehicleType = 0;
   String _selectTypeSex = '';
   String _selectOperator = '';
@@ -75,6 +81,7 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
   String _selectedBrand = '';
   String _selectBrandReference = '';
   String _selectedColor = '';
+  String _selectPaymentMethod = '';
 
   @override
   void initState() {
@@ -83,12 +90,18 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
       _listTypeSex.add('Masculino');
       _listTypeSex.add('Femenino');
     }
+    if (_listPaymentMethods.length >= 0) {
+      _listPaymentMethods.add(paymentMethodClass.datafono);
+      _listPaymentMethods.add(paymentMethodClass.transferencia);
+      _listPaymentMethods.add(paymentMethodClass.efectivo);
+    }
     setState(() {
       _selectedBrand = widget.selectedVehicleBrand;
       _selectedColor = widget.selectedVehicleColor;
       _selectOperator = widget.selectedOperator;
       _selectCoordinator = widget.selectedCoordinator;
       _selectTypeSex = widget.selectedTypeSex;
+      _selectPaymentMethod = widget.selectedPaymentMethod;
       _selectBrandReference = widget.selectVehicleBrandReference;
     });
   }
@@ -100,6 +113,7 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
     _selectBrandReference = widget.selectVehicleBrandReference;
     _selectedColor = widget.selectedVehicleColor;
     _selectTypeSex = widget.selectedTypeSex;
+    _selectPaymentMethod = widget.selectedPaymentMethod;
     _getListBrandReferences(_selectedBrand, updateRef: _selectBrandReference);
     _getAllListBrands(_selectedBrand);
   }
@@ -111,16 +125,18 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
     return Column(
       children: <Widget>[
         _chargeListTypeSex(),
-        SizedBox(height: 9),
+        SizedBox(height: 12),
         _chargeListBrands(), //_getBrandsStream(),  //se comenta por que se carga todas las referencias
-        SizedBox(height: 9),
+        SizedBox(height: 12),
         _chargeListBrandReferences(),
-        SizedBox(height: 9),
+        SizedBox(height: 12),
         _getColorsStream(),
-        SizedBox(height: 9),
+        SizedBox(height: 12),
         _getOperators(),
-        SizedBox(height: 9),
+        SizedBox(height: 12),
         _getCoordinators(),
+        SizedBox(height: 12),
+        _chargeListPaymentMethods(),
       ],
     );
   }
@@ -309,6 +325,16 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
     );
   }
 
+  Widget _chargeListPaymentMethods() {
+    return PopUpMenuWidget(
+      popUpName: 'Método de pago',
+      selectValue: _cbSelectPaymentMethod,
+      listString: _listPaymentMethods,
+      valueSelect: _selectPaymentMethod,
+      enableForm: widget.enableForm,
+    );
+  }
+
   /// Functions
 
   void _cbSelectValueOperator(String valueSelect) {
@@ -340,6 +366,11 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
   void _cbSelectTypeSex(String valueSelected) {
     _selectTypeSex = valueSelected;
     widget.cbHandlerTypeSex(valueSelected, 0, 1);
+  }
+
+  void _cbSelectPaymentMethod(String valueSelected) {
+    _selectPaymentMethod = valueSelected;
+    widget.cbHandlerPaymentMethod(valueSelected, 0, 1);
   }
 
   void _getListBrandReferences(String brandSelected, {String updateRef = ''}) {

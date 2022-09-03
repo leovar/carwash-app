@@ -46,6 +46,7 @@ class Invoice extends Equatable {
   final int countAdditionalProducts;
   final bool sendEmailInvoice;
   final bool cancelledInvoice;
+  final String paymentMethod;
 
   Invoice({
     this.id,
@@ -83,6 +84,7 @@ class Invoice extends Equatable {
     this.countAdditionalProducts,
     this.sendEmailInvoice,
     this.cancelledInvoice,
+    this.paymentMethod,
   });
 
   Map<String, dynamic> toJson() {
@@ -118,6 +120,7 @@ class Invoice extends Equatable {
       'countAdditionalProducts': this.countAdditionalProducts,
       'sendEmailInvoice': this.sendEmailInvoice,
       'cancelledInvoice': this.cancelledInvoice,
+      'paymentMethod' : this.paymentMethod,
     };
   }
 
@@ -168,6 +171,7 @@ class Invoice extends Equatable {
       sendEmailInvoice: json['sendEmailInvoice'],
       invoiceProducts: listProducts,
       cancelledInvoice: json['cancelledInvoice']??false,
+      paymentMethod: json['paymentMethod'],
     );
   }
 
@@ -180,6 +184,7 @@ class Invoice extends Equatable {
     int countAdditionalProducts,
     DocumentReference userOperator,
     String userOperatorName,
+    String paymentMethod,
   }) {
     return Invoice(
       id: origin.id,
@@ -216,6 +221,7 @@ class Invoice extends Equatable {
           countAdditionalProducts ?? origin.countAdditionalProducts,
       sendEmailInvoice: origin.sendEmailInvoice,
       cancelledInvoice: origin.cancelledInvoice,
+      paymentMethod: paymentMethod ?? origin.paymentMethod,
     );
   }
 
@@ -254,5 +260,6 @@ class Invoice extends Equatable {
         countAdditionalProducts,
         sendEmailInvoice,
         cancelledInvoice,
+        paymentMethod,
       ];
 }
