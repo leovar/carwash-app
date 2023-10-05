@@ -5,11 +5,10 @@ import 'dart:typed_data';
 import 'package:car_wash_app/invoice/model/additional_product.dart';
 import 'package:car_wash_app/invoice/model/configuration.dart';
 import 'package:car_wash_app/invoice/model/invoice.dart';
+import 'package:car_wash_app/invoice/model/payment_methods.dart';
 import 'package:car_wash_app/product/model/product.dart';
 import 'package:car_wash_app/user/model/user.dart';
-import 'package:car_wash_app/vehicle/model/vehicle.dart';
 import 'package:car_wash_app/vehicle_type/model/brand.dart';
-import 'package:car_wash_app/vehicle_type/model/vehicleType.dart';
 import 'package:car_wash_app/widgets/firestore_collections.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -34,6 +33,7 @@ class InvoiceRepository {
         element.isAdditional,
         element.id,
         element.productType,
+        element.serviceTime,
       );
       mapProducts.add(mapProduct);
     });
@@ -160,6 +160,41 @@ class InvoiceRepository {
       usersList.add(loc);
     });
     return usersList;
+  }
+
+  ///Get Payment Methods
+  Stream<QuerySnapshot> getListPaymentMethodsStream() {
+    final querySnapshot = this
+        ._db
+        .collection(FirestoreCollections.paymentMethods)
+        .where(FirestoreCollections.paymentActive, isEqualTo: true)
+        .snapshots();
+    return querySnapshot;
+  }
+
+  List<PaymentMethod> buildPaymentMethods(
+      List<DocumentSnapshot> paymentListSnapshot) {
+    List<PaymentMethod> paymentsList = <PaymentMethod>[];
+    paymentListSnapshot.forEach((p) {
+      PaymentMethod loc = PaymentMethod.fromJson(p.data, id: p.documentID);
+      paymentsList.add(loc);
+    });
+    return paymentsList;
+  }
+
+  Future<PaymentMethod> getPaymentMethodByName(String name) async {
+    final querySnapshot = await this
+        ._db
+        .collection(FirestoreCollections.paymentMethods)
+        .where(FirestoreCollections.paymentName, isEqualTo: name)
+        .getDocuments();
+
+    PaymentMethod pm = new PaymentMethod();
+    if (querySnapshot.documents.length > 0) {
+      pm = PaymentMethod.fromJson(querySnapshot.documents[0].data,
+          id: querySnapshot.documents[0].documentID);
+    }
+    return pm;
   }
 
   /// Get Brands list by vehicleType
@@ -304,6 +339,7 @@ class InvoiceRepository {
           false,
           product.id,
           product.productType,
+          product.serviceTime,
         ));
   }
 
@@ -323,6 +359,7 @@ class InvoiceRepository {
           true,
           null,
           additionalProduct.productType,
+          additionalProduct.serviceTime,
         ));
   }
 
@@ -342,6 +379,7 @@ class InvoiceRepository {
           product.isAdditional,
           product.id,
           product.productType,
+          product.serviceTime,
         ),
         merge: true);
   }
@@ -355,6 +393,7 @@ class InvoiceRepository {
     String operator,
     String consecutive,
     String productTypeSelected,
+    String paymentMethod,
   ) {
     DateTime dateFinalModify =
         DateTime(dateFinal.year, dateFinal.month, dateFinal.day, 23, 59);
@@ -392,17 +431,83 @@ class InvoiceRepository {
           isEqualTo: productTypeSelected == 'Especial' ? true : false);
     }
 
+    if (paymentMethod.isNotEmpty) {
+      querySnapshot = querySnapshot.where(
+          FirestoreCollections.invoicePaymentMethod,
+          isEqualTo: paymentMethod);
+    }
+
     return querySnapshot.snapshots();
   }
 
-  List<Invoice> buildInvoicesListByMonth(
-      List<DocumentSnapshot> invoicesListSnapshot) {
+  List<Invoice> buildInvoicesListFromSnapshot(List<DocumentSnapshot> invoicesListSnapshot) {
     List<Invoice> invoicesList = <Invoice>[];
     invoicesListSnapshot.forEach((p) {
       Invoice invoice = Invoice.fromJson(p.data, id: p.documentID);
       invoicesList.add(invoice);
     });
     return invoicesList;
+  }
+
+  /// Get invoices pending for Washing Stream
+  Stream<QuerySnapshot> getInvoicesListPendingWashingStream(DocumentReference locationReference) {
+    var querySnapshot = this
+        ._db
+        .collection(FirestoreCollections.invoices)
+        .where(FirestoreCollections.invoiceFieldLocation, isEqualTo: locationReference)
+        .where(FirestoreCollections.invoiceClosed, isEqualTo: false)
+        .where(FirestoreCollections.invoiceStartWashing, isEqualTo: false);
+    return querySnapshot.snapshots();
+  }
+
+  /// Get invoices pending for Washing Documents
+  Future<List<Invoice>> getInvoicesListPendingWashing(DocumentReference locationReference) async {
+    List<Invoice> invoiceList = <Invoice>[];
+    var querySnapshot = await this
+        ._db
+        .collection(FirestoreCollections.invoices)
+        .where(FirestoreCollections.invoiceFieldLocation, isEqualTo: locationReference)
+        .where(FirestoreCollections.invoiceClosed, isEqualTo: false)
+        .where(FirestoreCollections.invoiceStartWashing, isEqualTo: false).getDocuments();
+    final documents = querySnapshot.documents;
+    if (documents.length > 0) {
+      documents.forEach((invoice) {
+        Invoice invoiceGet = Invoice.fromJson(invoice.data, id: invoice.documentID);
+        invoiceList.add(invoiceGet);
+      });
+    }
+    return invoiceList;
+  }
+
+  /// Get invoices in washing process Stream
+  Stream<QuerySnapshot> getInvoicesListWashingStream(DocumentReference locationReference) {
+    var querySnapshot = this
+        ._db
+        .collection(FirestoreCollections.invoices)
+        .where(FirestoreCollections.invoiceFieldLocation, isEqualTo: locationReference)
+        .where(FirestoreCollections.invoiceClosed, isEqualTo: false)
+        .where(FirestoreCollections.invoiceEndWash, isEqualTo: false)
+        .where(FirestoreCollections.invoiceStartWashing, isEqualTo: true);
+    return querySnapshot.snapshots();
+  }
+
+  Future<List<Invoice>> getInvoicesWashingList(DocumentReference locationReference) async {
+    List<Invoice> invoiceList = <Invoice>[];
+    var querySnapshot = await this
+        ._db
+        .collection(FirestoreCollections.invoices)
+        .where(FirestoreCollections.invoiceFieldLocation, isEqualTo: locationReference)
+        .where(FirestoreCollections.invoiceClosed, isEqualTo: false)
+        .where(FirestoreCollections.invoiceEndWash, isEqualTo: false)
+        .where(FirestoreCollections.invoiceStartWashing, isEqualTo: true).getDocuments();
+    final documents = querySnapshot.documents;
+    if (documents.length > 0) {
+      documents.forEach((element) {
+        Invoice invoiceGet = Invoice.fromJson(element.data, id: element.documentID);
+        invoiceList.add(invoiceGet);
+      });
+    }
+    return invoiceList;
   }
 
   //TODO esta metodo caducaria cuando el producto se guarde en la misma factura
@@ -439,8 +544,7 @@ class InvoiceRepository {
     final documents = querySnapshot.documents;
     if (documents.length > 0) {
       documents.forEach((document) {
-        Product product =
-        Product.fromJsonTemporal(document.data);
+        Product product = Product.fromJsonTemporal(document.data);
         productList.add(product);
       });
     }
@@ -557,7 +661,8 @@ class InvoiceRepository {
 
     final snapShot = querySnapshot.documents;
     snapShot.forEach((document) {
-      Configuration config = Configuration.fromJson(document.data, id: document.documentID);
+      Configuration config =
+          Configuration.fromJson(document.data, id: document.documentID);
       configList.add(config);
     });
     return configList[0];

@@ -1,4 +1,5 @@
 import 'package:car_wash_app/invoice/bloc/bloc_invoice.dart';
+import 'package:car_wash_app/invoice/model/payment_methods.dart';
 import 'package:car_wash_app/user/model/user.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -13,10 +14,12 @@ class FilterFieldsWidget extends StatefulWidget {
   final DateTime dateFinal;
   final User operatorSelected;
   final String productTypeSelected;
+  final PaymentMethod paymentMethodSelected;
   final Function(User) selectOperator;
   final Function(DateTime) selectDateInit;
   final Function(DateTime) selectDateFinal;
   final Function(String) selectProductType;
+  final Function(PaymentMethod) selectPaymentMethod;
 
   FilterFieldsWidget({Key key,
     this.placaController,
@@ -25,10 +28,12 @@ class FilterFieldsWidget extends StatefulWidget {
     this.dateFinal,
     this.operatorSelected,
     this.productTypeSelected,
+    this.paymentMethodSelected,
     this.selectOperator,
     this.selectDateInit,
     this.selectDateFinal,
     this.selectProductType,
+    this.selectPaymentMethod,
   });
 
   @override
@@ -40,12 +45,14 @@ class _FilterFieldsWidget extends State<FilterFieldsWidget> {
   final _textDateInit = TextEditingController();
   final _textDateFinal = TextEditingController();
   List<DropdownMenuItem<User>> _dropdownMenuItems;
+  List<DropdownMenuItem<PaymentMethod>> _dropdownMenuItemsPayments;
   List<DropdownMenuItem<String>> _dropdownMenuItemsProductTypes;
   List<String> _productsTypeList = [];
   User _selectedOperator;
   DateTime _dateTimeInit;
   DateTime _dateTimeFinal;
   String _selectProductType;
+  PaymentMethod _selectedPaymentMethod;
   var formatter = new DateFormat('dd-MM-yyyy');
   var _emptySelectionProductType = 'Typo de Servicio..';
 
@@ -63,6 +70,9 @@ class _FilterFieldsWidget extends State<FilterFieldsWidget> {
     _textDateInit.text = formatter.format(_dateTimeInit);
     _textDateFinal.text = formatter.format(_dateTimeFinal);
     _selectProductType = widget.productTypeSelected;
+    if(widget.paymentMethodSelected.name != null) {
+      _selectedPaymentMethod = widget.paymentMethodSelected;
+    }
   }
 
   @override
@@ -101,6 +111,8 @@ class _FilterFieldsWidget extends State<FilterFieldsWidget> {
         ),
         SizedBox(height: 10),
         _selectProductTypeControl(),
+        SizedBox(height: 10),
+        _getPaymentMethods(),
       ],
     );
   }
@@ -181,6 +193,54 @@ class _FilterFieldsWidget extends State<FilterFieldsWidget> {
     );
   }
 
+  Widget _getPaymentMethods() {
+    return StreamBuilder(
+      stream: _blocInvoice.paymentMethodsStream(),
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        switch (snapshot.connectionState) {
+          case ConnectionState.waiting:
+            return CircularProgressIndicator();
+          default:
+            return _showPaymentMethods(snapshot);
+        }
+      },
+    );
+  }
+
+  Widget _showPaymentMethods(AsyncSnapshot snapshot) {
+    var paymentMethodSelectionEmpty = PaymentMethod(id: '0', name: 'Seleccione el método de pago...', active: true);
+    List<PaymentMethod> paymentMethods = _blocInvoice.buildPaymentMethods(snapshot.data.documents);
+    paymentMethods.add(paymentMethodSelectionEmpty);
+    if (_selectedPaymentMethod != null && _selectedPaymentMethod.name.isEmpty) {
+      _selectedPaymentMethod = paymentMethodSelectionEmpty;
+    }
+    _dropdownMenuItemsPayments = _builtDropdownMenuItemsPaymentMethods(paymentMethods);
+    return DropdownButton(
+      isExpanded: true,
+      items: _dropdownMenuItemsPayments,
+      value: _selectedPaymentMethod,
+      onChanged: onChangeDropDawnPaymentMethods,
+      hint: Text(
+        "Seleccione el método de pago...",
+      ),
+      icon: Icon(
+        Icons.keyboard_arrow_down,
+        color: Theme.of(context).cardColor,
+      ),
+      iconSize: 24,
+      elevation: 16,
+      style: TextStyle(
+        fontFamily: "AvenirNext",
+        fontWeight: FontWeight.normal,
+        color: Theme.of(context).cardColor,
+      ),
+      underline: Container(
+        height: 1,
+        color: Theme.of(context).cursorColor,
+      ),
+    );
+  }
+
   Widget _selectProductTypeControl() {
     if (_selectProductType.isEmpty) {
       _selectProductType = _emptySelectionProductType;
@@ -229,6 +289,32 @@ class _FilterFieldsWidget extends State<FilterFieldsWidget> {
   List<DropdownMenuItem<User>> _builtDropdownMenuItems(List users) {
     List<DropdownMenuItem<User>> listItems = List();
     for (User documentLoc in users) {
+      listItems.add(
+        DropdownMenuItem(
+          value: documentLoc,
+          child: Text(
+            documentLoc.name,
+          ),
+        ),
+      );
+    }
+    return listItems;
+  }
+
+  onChangeDropDawnPaymentMethods(PaymentMethod selectedPaymentMethod) {
+    setState(() {
+      if (selectedPaymentMethod.id == '0') {
+        widget.selectPaymentMethod(PaymentMethod(name:'', id: ''));
+      } else {
+        widget.selectPaymentMethod(selectedPaymentMethod);
+      }
+      _selectedPaymentMethod = selectedPaymentMethod;
+    });
+  }
+
+  List<DropdownMenuItem<PaymentMethod>> _builtDropdownMenuItemsPaymentMethods(List paymentMethods) {
+    List<DropdownMenuItem<PaymentMethod>> listItems = List();
+    for (PaymentMethod documentLoc in paymentMethods) {
       listItems.add(
         DropdownMenuItem(
           value: documentLoc,

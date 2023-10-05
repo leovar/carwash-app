@@ -115,6 +115,7 @@ class _FormInvoice extends State<FormInvoice> {
   int _listCoordinatorsCount = 0;
   int _countBrands = 0;
   int _countBrandReferences = 0;
+  int _countPaymentMethods = 0;
   int _countColors = 0;
   User _currentUser;
   bool _isUserAdmin = false;
@@ -328,6 +329,7 @@ class _FormInvoice extends State<FormInvoice> {
                 listCountBrands: _countBrands,
                 listCountColors: _countColors,
                 listCountBrandReference: _countBrandReferences,
+                listCountPaymentMethods: _countPaymentMethods,
                 cbHandlerOperator: _setHandlerUsersOperator,
                 cbHandlerCoordinator: _setHandlerUserCoordinator,
                 cbHandlerVehicleBrand: _setHandlerVehicleBrand,
@@ -788,7 +790,11 @@ class _FormInvoice extends State<FormInvoice> {
 
   //Payment Methods
   void _setHandlerPaymentMethod(String paymentMethod, int countPayment, int operationType) {
-    _selectedPaymentMethod = paymentMethod;
+    if (operationType == 1) {
+      _selectedPaymentMethod = paymentMethod;
+    } else {
+      _countPaymentMethods = countPayment;
+    }
   }
 
   void _setHandlerSendEmailInvoice(bool value) {
@@ -1010,6 +1016,7 @@ class _FormInvoice extends State<FormInvoice> {
         double _subTotal = 0;
         int _countProducts = 0;
         int _countAdditionalProducts = 0;
+        int _servicesWashingTime = 0;
 
         //Get Current user reference
         DocumentReference _userRef = await _userBloc.getCurrentUserReference();
@@ -1095,6 +1102,7 @@ class _FormInvoice extends State<FormInvoice> {
             _subTotal = _subTotal + (product.price - _ivaProd); //_subT
             _iva = _iva + _ivaProd;
             _total = _total + product.price;
+            _servicesWashingTime = _servicesWashingTime + product.serviceTime;
           }
         });
         _listAdditionalProducts.forEach((addProduct) {
@@ -1107,6 +1115,7 @@ class _FormInvoice extends State<FormInvoice> {
                   _ivaProd); //_subT;
           _iva = _iva + _ivaProd;
           _total = _total + double.parse(addProduct.productValue ?? '0');
+          _servicesWashingTime = _servicesWashingTime + addProduct.serviceTime;
         });
 
         //Save products list
@@ -1123,6 +1132,7 @@ class _FormInvoice extends State<FormInvoice> {
                 ivaPercent: product.ivaPercent,
                 isAdditional: false,
                 productType: product.productType,
+                serviceTime: product.serviceTime,
               );
               _productToSave.add(prodSave);
             }
@@ -1207,6 +1217,10 @@ class _FormInvoice extends State<FormInvoice> {
               : _productToSave,
           cancelledInvoice: _canceledInvoice,
           paymentMethod:  _selectedPaymentMethod,
+          invoiceClosed: false,
+          endWash: false,
+          startWashing: false,
+          washingServicesTime: _servicesWashingTime,
         );
         DocumentReference invoiceReference =
             await _blocInvoice.saveInvoice(_invoice);
@@ -1335,6 +1349,7 @@ class _FormInvoice extends State<FormInvoice> {
           prodSelected.ivaPercent,
           false,
           prodSelected.productType,
+          prodSelected.serviceTime,
         );
         _listAdditionalProducts.add(addProd);
       }

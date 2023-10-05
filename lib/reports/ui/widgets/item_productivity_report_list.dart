@@ -9,7 +9,7 @@ import 'package:intl/intl.dart';
 
 class ItemProductivityReportList extends StatefulWidget {
   final CardReport cardReport;
-  final Function(DocumentReference) servicesDetail;
+  final Function(String) servicesDetail;
 
   ItemProductivityReportList(
       {Key key,
@@ -42,7 +42,7 @@ class _ItemProductivityReportList extends State<ItemProductivityReportList> {
           child: InkWell(
             splashColor: Colors.blue.withAlpha(30),
             onTap: () {
-              widget.servicesDetail(widget.cardReport.operatorReference);
+              widget.servicesDetail(widget.cardReport.operatorName);
             },
             child: Row(
               mainAxisSize: MainAxisSize.max,

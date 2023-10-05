@@ -12,6 +12,7 @@ class FirestoreCollections {
   static String brandReferences = 'brandReferences';
   static String configuration = 'configuration';
   static String commissions = 'commissions';
+  static String paymentMethods = 'paymentMethods';
 
   /// Fields User Collection
   static String usersFieldUid = 'uid';
@@ -56,6 +57,10 @@ class FirestoreCollections {
   static String invoiceFieldHaveSpecialService = 'haveSpecialService';
   static String invoiceFieldCustomer = 'customer';
   static String invoiceCancelled = 'cancelledInvoice';
+  static String invoicePaymentMethod = 'paymentMethod';
+  static String invoiceClosed = 'invoiceClosed';
+  static String invoiceEndWash = 'endWash';
+  static String invoiceStartWashing = 'startWashing';
 
   /// Fields Brands
   static String brandFieldVehicleType = 'vehicleType';
@@ -67,4 +72,8 @@ class FirestoreCollections {
   static String commissionIsPercentage = 'isPercentage';
   static String commissionIsValue = 'isValue';
   static String commissionValue = 'value';
+
+  /// Fields Payment Methods
+  static String paymentName = 'name';
+  static String paymentActive = 'active';
 }

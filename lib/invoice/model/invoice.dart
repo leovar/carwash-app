@@ -21,6 +21,7 @@ class Invoice extends Equatable {
   final DocumentReference userCoordinator;
   final String userCoordinatorName;
   final DocumentReference customer;
+  final String customerName;
   final String phoneNumber;
   final DocumentReference vehicle;
   final String placa;
@@ -31,6 +32,7 @@ class Invoice extends Equatable {
   final Timestamp creationDate;
   final List<String> invoiceImages;
   final List<Product> invoiceProducts;
+  final String productsSplit;
   final String vehicleBrand;
   final String brandReference;
   final String vehicleColor;
@@ -47,6 +49,14 @@ class Invoice extends Equatable {
   final bool sendEmailInvoice;
   final bool cancelledInvoice;
   final String paymentMethod;
+  final int washingServicesTime;
+  final bool startWashing;
+  final String washingCell;
+  final Timestamp dateStartWashing;
+  final int countWashingWorkers;
+  final bool endWash;
+  final Timestamp dateEndWash;
+  final int washingTime;
 
   Invoice({
     this.id,
@@ -59,6 +69,7 @@ class Invoice extends Equatable {
     this.userCoordinator,
     this.userCoordinatorName,
     this.customer,
+    this.customerName,
     this.phoneNumber,
     this.vehicle,
     this.placa,
@@ -69,6 +80,7 @@ class Invoice extends Equatable {
     this.creationDate,
     this.invoiceImages,
     this.invoiceProducts,
+    this.productsSplit,
     this.vehicleBrand,
     this.brandReference,
     this.vehicleColor,
@@ -85,6 +97,14 @@ class Invoice extends Equatable {
     this.sendEmailInvoice,
     this.cancelledInvoice,
     this.paymentMethod,
+    this.startWashing,
+    this.washingCell,
+    this.dateStartWashing,
+    this.dateEndWash,
+    this.countWashingWorkers,
+    this.endWash,
+    this.washingServicesTime,
+    this.washingTime,
   });
 
   Map<String, dynamic> toJson() {
@@ -121,12 +141,21 @@ class Invoice extends Equatable {
       'sendEmailInvoice': this.sendEmailInvoice,
       'cancelledInvoice': this.cancelledInvoice,
       'paymentMethod' : this.paymentMethod,
+      'startWashing' : this.startWashing,
+      'washingCell' : this.washingCell,
+      'dateStartWashing' : this.dateStartWashing,
+      'dateEndWash' : this.dateEndWash,
+      'countWashingWorkers' : this.countWashingWorkers,
+      'endWash' : this.endWash,
+      'washingServicesTime' : this.washingServicesTime,
+      'washingTime' : this.washingTime,
     };
   }
 
   factory Invoice.fromJson(Map<String, dynamic> json, {String id}) {
     List<DocumentReference> locationsListDb = <DocumentReference>[];
     List<Product> listProducts = <Product>[];
+    var pSplit = '';
     List locationsList = json['locations'];
     locationsList?.forEach((drLocation) {
       locationsListDb.add(drLocation);
@@ -135,6 +164,7 @@ class Invoice extends Equatable {
     products?.forEach((element) {
       Product productResult = Product.fromJsonProductIntoInvoice(element, json['uidVehicleType'], json['creationDate']);
       listProducts.add(productResult);
+      pSplit = pSplit + productResult.productName + ', ';
     });
 
     return Invoice(
@@ -170,8 +200,17 @@ class Invoice extends Equatable {
       countAdditionalProducts: json['countAdditionalProducts'],
       sendEmailInvoice: json['sendEmailInvoice'],
       invoiceProducts: listProducts,
+      productsSplit: pSplit,
       cancelledInvoice: json['cancelledInvoice']??false,
       paymentMethod: json['paymentMethod'],
+      startWashing : json['startWashing']??false,
+      washingCell : json['washingCell'],
+      dateStartWashing : json['dateStartWashing'],
+      dateEndWash : json['dateEndWash'],
+      countWashingWorkers : json['countWashingWorkers'],
+      endWash : json['endWash']??false,
+      washingServicesTime : json['washingServicesTime'],
+      washingTime : json['washingTime'],
     );
   }
 
@@ -185,6 +224,15 @@ class Invoice extends Equatable {
     DocumentReference userOperator,
     String userOperatorName,
     String paymentMethod,
+    String customerName,
+    String customerPhone,
+    bool startWashing,
+    bool endWash,
+    String washingCell,
+    Timestamp dateStartWashing,
+    Timestamp dateEndWash,
+    int countWashingWorkers,
+    int washingTime,
   }) {
     return Invoice(
       id: origin.id,
@@ -197,7 +245,8 @@ class Invoice extends Equatable {
       userCoordinator: origin.userCoordinator,
       userCoordinatorName: origin.userCoordinatorName,
       customer: origin.customer,
-      phoneNumber: origin.phoneNumber,
+      customerName: customerName ?? origin.customerName,
+      phoneNumber: customerPhone ?? origin.phoneNumber,
       vehicle: origin.vehicle,
       placa: origin.placa,
       uidVehicleType: origin.uidVehicleType,
@@ -209,6 +258,7 @@ class Invoice extends Equatable {
       vehicleColor: origin.vehicleColor,
       creationDate: origin.creationDate,
       invoiceProducts: listProducts ?? origin.invoiceProducts,
+      productsSplit: origin.productsSplit,
       approveDataProcessing: origin.approveDataProcessing,
       timeDelivery: origin.timeDelivery,
       closedDate: closedDate ?? origin.closedDate,
@@ -222,6 +272,14 @@ class Invoice extends Equatable {
       sendEmailInvoice: origin.sendEmailInvoice,
       cancelledInvoice: origin.cancelledInvoice,
       paymentMethod: paymentMethod ?? origin.paymentMethod,
+      startWashing : startWashing ?? origin.startWashing,
+      washingCell : washingCell ?? origin.washingCell,
+      dateStartWashing : dateStartWashing ?? origin.dateStartWashing,
+      dateEndWash : dateEndWash ?? origin.dateEndWash,
+      countWashingWorkers : countWashingWorkers ?? origin.countWashingWorkers,
+      endWash : endWash ?? origin.endWash,
+      washingServicesTime : origin.washingServicesTime,
+      washingTime : washingTime ?? origin.washingTime,
     );
   }
 
@@ -236,6 +294,7 @@ class Invoice extends Equatable {
         userOperatorName,
         userCoordinator,
         customer,
+        customerName,
         phoneNumber,
         vehicle,
         placa,
@@ -261,5 +320,13 @@ class Invoice extends Equatable {
         sendEmailInvoice,
         cancelledInvoice,
         paymentMethod,
+        startWashing,
+        washingCell,
+        dateStartWashing,
+        dateEndWash,
+        countWashingWorkers,
+        endWash,
+        washingServicesTime,
+        washingTime,
       ];
 }

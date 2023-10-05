@@ -21,6 +21,25 @@ class MessagesUtils {
     ),
   );
 
+  static var alertWarningStyle = AlertStyle(
+    animationType: AnimationType.fromTop,
+    isCloseButton: false,
+    isOverlayTapDismiss: false,
+    animationDuration: Duration(milliseconds: 400),
+    alertBorder: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(13.0),
+      side: BorderSide(
+        color: Colors.grey,
+      ),
+    ),
+    titleStyle: TextStyle(
+      color: Colors.black,
+      fontWeight: FontWeight.w700,
+      fontFamily: "Lato",
+      fontSize: 22,
+    ),
+  );
+
   static Alert showAlert({
     @required BuildContext context,
     @required String title,

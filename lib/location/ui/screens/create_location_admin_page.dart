@@ -38,6 +38,7 @@ class _CreateLocationAdminPage extends State<CreateLocationAdminPage> {
   final _textInitConsec = TextEditingController();
   final _textNit = TextEditingController();
   final _textPrefix = TextEditingController();
+  final _textActiveCells = TextEditingController();
   final double _heightTextField = 60;
   bool _locationActive = true;
   bool _sendSms = true;
@@ -198,6 +199,20 @@ class _CreateLocationAdminPage extends State<CreateLocationAdminPage> {
                 textController: _textPrefix,
                 validate: _validatePrefix,
                 textValidate: 'Escriba un valor',
+              ),
+            ),
+            SizedBox(height: 9),
+            Container(
+              height: _heightTextField,
+              child: TextFieldInput(
+                labelText: 'Celdas Activas',
+                textController: _textActiveCells,
+                validate: _validatePrefix,
+                textValidate: 'Escriba un valor',
+                inputType: TextInputType.number,
+                textInputFormatter: [
+                  FilteringTextInputFormatter.allow(RegExp('[0-9]')),
+                ],
               ),
             ),
             SizedBox(height: 9),
@@ -362,6 +377,7 @@ class _CreateLocationAdminPage extends State<CreateLocationAdminPage> {
     _printIva = _locationSelected.printIva;
     _textRegimen.text = _locationSelected.regimen;
     _textPhone.text = _locationSelected.phoneNumber;
+    _textActiveCells.text = _locationSelected.activeCells == null ? '0' : _locationSelected.activeCells.toString();
   }
 
   bool _validateInputs() {
@@ -448,6 +464,7 @@ class _CreateLocationAdminPage extends State<CreateLocationAdminPage> {
         printIva: _printIva,
         phoneNumber: _textPhone.text.trim(),
         regimen: _textRegimen.text.trim(),
+        activeCells: int.tryParse(_textActiveCells.text.trim()) ?? 0,
       );
 
       _blocLocation.updateLocationData(location);

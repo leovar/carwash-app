@@ -1,4 +1,5 @@
 
+import 'package:car_wash_app/customer/model/customer.dart';
 import 'package:car_wash_app/invoice/model/invoice.dart';
 import 'package:car_wash_app/invoice/repository/invoice_repository.dart';
 import 'package:car_wash_app/product/model/product.dart';
@@ -57,5 +58,34 @@ class ReportsRepository {
       });
     }
     return invoiceList;
+  }
+
+  Future<List<Invoice>> getCustomerInvoicesByLocation (DocumentReference locationReference, DateTime dateInit, DateTime dateFinal) async {
+    List<Invoice> invoicesList = [];
+    QuerySnapshot querySnapshot;
+
+    DateTime dateFinalModify = DateTime(dateFinal.year, dateFinal.month, dateFinal.day, 23, 59);
+
+    var queryFirestore = this
+        ._db
+        .collection(FirestoreCollections.invoices)
+        .where(FirestoreCollections.invoiceFieldCreationDate,
+          isGreaterThanOrEqualTo: Timestamp.fromDate(dateInit))
+        .where(FirestoreCollections.invoiceFieldCreationDate,
+          isLessThanOrEqualTo: Timestamp.fromDate(dateFinalModify))
+        .where(FirestoreCollections.invoiceFieldLocation,
+        isEqualTo: locationReference);
+
+    querySnapshot = await queryFirestore.getDocuments();
+    final responses = await Future.wait(
+      querySnapshot.documents.map((p) async {
+        Invoice invoice = Invoice.fromJson(p.data, id: p.documentID);
+        final customerResponse = await invoice.customer.get();
+        Customer cus = Customer.fromJson(customerResponse.data, id: customerResponse.documentID);
+        Invoice newInvoice = Invoice.copyWith(origin: invoice, customerName: cus.name, customerPhone: cus.phoneNumber);
+        invoicesList.add(newInvoice);
+      }),
+    );
+    return invoicesList;
   }
 }

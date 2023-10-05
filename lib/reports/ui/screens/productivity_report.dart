@@ -100,7 +100,7 @@ class _ProductivityReport extends State<ProductivityReport> {
                 _datePickerFinal();
               },
             ),
-          )
+          ),
         ],
       ),
     );
@@ -274,7 +274,7 @@ class _ProductivityReport extends State<ProductivityReport> {
         if (_cardList.length > 0) {
           CardReport cardInfo = _cardList.firstWhere(
             (x) =>
-                x.operatorReference == item.userOperator &&
+                x.operatorName == item.userOperatorName &&    //x.operatorReference == item.userOperator &&  // esta linea se comenta por que se encuentra que si cambian el nombre solo va mostrar los registros del primer nombre encontrado en la lista
                 x.locationName == item.locationName,
             orElse: () => null,
           );
@@ -318,12 +318,12 @@ class _ProductivityReport extends State<ProductivityReport> {
     }
   }
 
-  Future<void> _openServicesDetail(DocumentReference operatorReference) async {
+  Future<void> _openServicesDetail(String operatorName) async {
     List<ProductsCardDetail> _productList = [];
     List<Commission> commissionsList = await _blocCommission.getAllCommissions();
     final operatorInvoices = _listInvoices
         .where(
-            (f) => f.userOperator == operatorReference && !f.cancelledInvoice)
+            (f) => f.userOperatorName == operatorName && !f.cancelledInvoice)
         .toList();
     Alert(
         context: context,

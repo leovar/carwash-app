@@ -72,7 +72,7 @@ class _ItemInvoicesList extends State<ItemInvoicesList> {
   }
 
   Widget _itemDecoration(Invoice invoiceList) {
-    bool _visibleClosesText = invoiceList.invoiceClosed ?? false;
+    bool _visibleClosesText = ((invoiceList.invoiceClosed??false) && (invoiceList.paymentMethod??'') != '') ?? false;
     bool _cancelInvoice = invoiceList.cancelledInvoice ?? false;
     final formatterNumber = NumberFormat("#,###");
     return ConstrainedBox(
@@ -190,7 +190,7 @@ class _ItemInvoicesList extends State<ItemInvoicesList> {
                 child: _cancelInvoice
                     ? Container(
                         margin: EdgeInsets.only(
-                          right: 12,
+                          right: 15,
                         ),
                         child: Text(
                           'ANULADA',
@@ -205,7 +205,7 @@ class _ItemInvoicesList extends State<ItemInvoicesList> {
                     : _visibleClosesText
                         ? Container(
                             margin: EdgeInsets.only(
-                              right: 12,
+                              right: 15,
                             ),
                             child: Text(
                               'CERRADA',
@@ -233,7 +233,7 @@ class _ItemInvoicesList extends State<ItemInvoicesList> {
                                 },
                                 textColor: Colors.white,
                                 child: Text(
-                                  'Terminar'.toUpperCase(),
+                                  'Completar'.toUpperCase(),
                                   style: TextStyle(fontSize: 12),
                                 ),
                               ),

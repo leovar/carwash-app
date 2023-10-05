@@ -1,15 +1,18 @@
 import 'package:car_wash_app/invoice/bloc/bloc_invoice.dart';
+import 'package:car_wash_app/invoice/model/payment_methods.dart';
 import 'package:car_wash_app/user/model/user.dart';
+import 'package:car_wash_app/invoice/model/invoice.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:car_wash_app/invoice/model/payment_methods.dart';
 
 class SelectOperatorWidget extends StatefulWidget {
   final Function(User) selectOperator;
   final User operatorSelected;
   final String idLocation;
-  final String paymentMethodSelected;
-  final Function(String) selectPaymentMethod;
+  final PaymentMethod paymentMethodSelected;
+  final Function(PaymentMethod) selectPaymentMethod;
+  final Invoice currentInvoice;
+  final Function(Invoice) finishInvoice;
 
   SelectOperatorWidget({
     Key key,
@@ -18,6 +21,8 @@ class SelectOperatorWidget extends StatefulWidget {
     this.idLocation,
     this.paymentMethodSelected,
     this.selectPaymentMethod,
+    this.currentInvoice,
+    this.finishInvoice,
   });
 
   @override
@@ -27,8 +32,8 @@ class SelectOperatorWidget extends StatefulWidget {
 class _SelectOperatorWidget extends State<SelectOperatorWidget> {
   BlocInvoice _blocInvoice = BlocInvoice();
   List<DropdownMenuItem<User>> _dropdownMenuItems;
-  List<DropdownMenuItem<String>> _listPaymentMethods = List();
-  String _selectedPaymentMethod;
+  List<DropdownMenuItem<PaymentMethod>> _listPaymentMethods;
+  PaymentMethod _selectedPaymentMethod;
   User _selectedUser;
 
   @override
@@ -38,31 +43,8 @@ class _SelectOperatorWidget extends State<SelectOperatorWidget> {
         widget.operatorSelected.name != '') {
       _selectedUser = widget.operatorSelected;
     }
-    _listPaymentMethods.add(
-      DropdownMenuItem(
-        value: paymentMethodClass.datafono,
-        child: Text(
-          paymentMethodClass.datafono,
-        ),
-      ),
-    );
-    _listPaymentMethods.add(
-      DropdownMenuItem(
-        value: paymentMethodClass.transferencia,
-        child: Text(
-          paymentMethodClass.transferencia,
-        ),
-      ),
-    );
-    _listPaymentMethods.add(
-      DropdownMenuItem(
-        value: paymentMethodClass.efectivo,
-        child: Text(
-          paymentMethodClass.efectivo,
-        ),
-      ),
-    );
-    if (widget.paymentMethodSelected.isNotEmpty) {
+    if (widget.paymentMethodSelected.name != null &&
+        widget.paymentMethodSelected.name != '') {
       _selectedPaymentMethod = widget.paymentMethodSelected;
     }
   }
@@ -72,6 +54,10 @@ class _SelectOperatorWidget extends State<SelectOperatorWidget> {
     return Column(
       children: <Widget>[
         _getOperatorsList(),
+        SizedBox(height: 12),
+        _buttonFinishInvoice(),
+        SizedBox(height: 12),
+        _getPaymentMethodsList(),
       ],
     );
   }
@@ -121,7 +107,57 @@ class _SelectOperatorWidget extends State<SelectOperatorWidget> {
             color: Theme.of(context).cursorColor,
           ),
         ),
-        SizedBox(height: 12),
+      ],
+    );
+  }
+
+  Widget _buttonFinishInvoice() {
+    return Container(
+      alignment: Alignment.center,
+      child: ButtonTheme(
+        minWidth: 84,
+        child: RaisedButton(
+          shape: RoundedRectangleBorder(
+              borderRadius:
+              new BorderRadius.circular(6.0),
+              side: BorderSide(
+                  color: Theme.of(context).accentColor)),
+          color: Theme.of(context).accentColor,
+          onPressed: widget.currentInvoice.invoiceClosed??false ? null : () {
+            setState(() {
+              widget.finishInvoice(widget.currentInvoice);
+              Navigator.pop(context);
+            });
+          },
+          textColor: Colors.white,
+          child: Text(
+            'Terminar'.toUpperCase(),
+            style: TextStyle(fontSize: 12),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _getPaymentMethodsList() {
+    return StreamBuilder(
+      stream: _blocInvoice.paymentMethodsStream(),
+      builder: (context, snapshot) {
+        switch (snapshot.connectionState) {
+          case ConnectionState.waiting:
+            return CircularProgressIndicator();
+          default:
+            return _chargeDropPaymentMethods(snapshot);
+        }
+      },
+    );
+  }
+
+  Widget _chargeDropPaymentMethods(AsyncSnapshot snapshot) {
+    List<PaymentMethod> paymentsList = _blocInvoice.buildPaymentMethods(snapshot.data.documents);
+    _listPaymentMethods = builtDropdownPaymentMethod(paymentsList);
+    return Column(
+      children: [
         DropdownButton(
           isExpanded: true,
           items: _listPaymentMethods,
@@ -165,6 +201,25 @@ class _SelectOperatorWidget extends State<SelectOperatorWidget> {
     return listItems;
   }
 
+  List<DropdownMenuItem<PaymentMethod>> builtDropdownPaymentMethod(List payments) {
+    List<DropdownMenuItem<PaymentMethod>> listItems = List();
+    for (PaymentMethod documentPm in payments) {
+      listItems.add(
+        DropdownMenuItem(
+          value: documentPm,
+          child: Text(
+            documentPm.name,
+          ),
+        ),
+      );
+    }
+    return listItems;
+  }
+
+  onFinishInvoicePressed() {
+    widget.finishInvoice(widget.currentInvoice);
+  }
+
   onChangeDropDawnOperator(User selectedUser) {
     setState(() {
       widget.selectOperator(selectedUser);
@@ -172,7 +227,7 @@ class _SelectOperatorWidget extends State<SelectOperatorWidget> {
     });
   }
 
-  onChangeDropDawPayment(String payment) {
+  onChangeDropDawPayment(PaymentMethod payment) {
     setState(() {
       widget.selectPaymentMethod(payment);
       _selectedPaymentMethod = payment;

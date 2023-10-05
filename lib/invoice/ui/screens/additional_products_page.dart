@@ -244,6 +244,7 @@ class _AdditionalProductPage extends State<AdditionalProductPage> {
 
   void _addAdditionalProduct() {
     String productType = 'Sencillo';
+    int serviceTime = 0;
     double _iva = 0;
     if(_checkIva) {
       _iva = 19;
@@ -258,7 +259,8 @@ class _AdditionalProductPage extends State<AdditionalProductPage> {
       _valueAdditionalService.text,
       _iva,
       true,
-      productType
+      productType,
+      serviceTime
     );
 
     _checkIva = false;

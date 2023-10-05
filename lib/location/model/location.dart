@@ -21,6 +21,7 @@ class Location extends Equatable {
   final bool sendMessageWp;
   final bool printIva;
   bool isSelected;
+  final int activeCells;
 
   Location({
     this.id,
@@ -40,6 +41,7 @@ class Location extends Equatable {
     this.sendMessageSms,
     this.sendMessageWp,
     this.printIva,
+    this.activeCells,
   });
 
   factory Location.fromJson(Map<String, dynamic> json, {String id}) {
@@ -60,7 +62,9 @@ class Location extends Equatable {
         sendMessageSms: json['sendMessageSms'],
         sendMessageWp: json['sendMessageWp'],
         printIva: json['printIva'],
-        isSelected: false);
+        isSelected: false,
+        activeCells: json['activeCells'],
+    );
   }
 
   Map<String, dynamic> toJson() {
@@ -80,6 +84,7 @@ class Location extends Equatable {
       'sendMessageSms': this.sendMessageSms,
       'sendMessageWp': this.sendMessageWp,
       'printIva': this.printIva,
+      'activeCells': this.activeCells,
     };
   }
 
@@ -101,5 +106,6 @@ class Location extends Equatable {
         sendMessageSms,
         sendMessageWp,
         printIva,
+        activeCells,
       ];
 }

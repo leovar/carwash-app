@@ -44,6 +44,7 @@ class MyApp extends StatelessWidget {
           accentColor: Color(0xFF59B258),
           cardColor: Color(0xFF787A71),
           cursorColor: Color(0xFFAEAEAE),
+          dividerColor: Color(0xFFF1F1F1),
           textTheme: TextTheme(
             button: TextStyle(
               fontFamily: "Lato",

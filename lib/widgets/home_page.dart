@@ -2,6 +2,7 @@ import 'package:car_wash_app/invoices_list/ui/screens/invoices_list_page.dart';
 import 'package:car_wash_app/location/bloc/bloc_location.dart';
 import 'package:car_wash_app/location/model/location.dart';
 import 'package:car_wash_app/reports/ui/screens/reports_page.dart';
+import 'package:car_wash_app/turns/ui/screens/turns_page.dart';
 import 'package:car_wash_app/user/bloc/bloc_user.dart';
 import 'package:car_wash_app/user/model/user.dart';
 import 'package:car_wash_app/widgets/select_location_widget.dart';
@@ -51,14 +52,14 @@ class _HomePage extends State<HomePage> {
         stream: _userBloc.streamFirebase,
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           switch (snapshot.connectionState) {
-          /*case ConnectionState.waiting:
+            /*case ConnectionState.waiting:
             return indicadorDeProgreso();*/
             default:
               return showSnapShot(snapshot);
           }
         },
       ),
-      onWillPop: (){
+      onWillPop: () {
         return Future(() => false);
       },
     );
@@ -134,7 +135,7 @@ class _HomePage extends State<HomePage> {
       );
 
   bodyContainer() => Column(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         mainAxisSize: MainAxisSize.max,
         children: <Widget>[
           Flexible(
@@ -170,34 +171,53 @@ class _HomePage extends State<HomePage> {
       scrollDirection: Axis.vertical,
       children: <Widget>[
         ButtonFunctions(
-            onPressed: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => InvoicePage(showDrawer: false)));
-            },
-            buttonName: "NUEVA FACTURA",
-            imageAsset: "assets/images/icon_nueva_factura.png",
-            buttonEnabled: _locationName.isNotEmpty ? true : false,
+          onPressed: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => InvoicePage(showDrawer: false)));
+          },
+          buttonName: "NUEVA FACTURA",
+          imageAsset: "assets/images/icon_nueva_factura.png",
+          buttonEnabled: _locationName.isNotEmpty ? true : false,
         ),
         SizedBox(
           height: 10.0,
         ),
         ButtonFunctions(
-            onPressed: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => InvoicesListPage(
-                        user: _currentUser,
-                        locationReference: _locationReference,
-                      ),
-                  ),
-              );
-            },
-            buttonName: "FACTURAS",
-            imageAsset: "assets/images/icon_facturas.png",
-            buttonEnabled: _locationName.isNotEmpty ? true : false,
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => InvoicesListPage(
+                  user: _currentUser,
+                  locationReference: _locationReference,
+                ),
+              ),
+            );
+          },
+          buttonName: "FACTURAS",
+          imageAsset: "assets/images/icon_facturas.png",
+          buttonEnabled: _locationName.isNotEmpty ? true : false,
+        ),
+        SizedBox(
+          height: 10.0,
+        ),
+        ButtonFunctions(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => TurnsPage(
+                  user: _currentUser,
+                  locationReference: _locationReference,
+                ),
+              ),
+            );
+          },
+          buttonName: "TURNOS",
+          imageAsset: "assets/images/icon_queue.png",
+          buttonEnabled: _locationName.isNotEmpty ? true : false,
         ),
         SizedBox(
           height: 10.0,
@@ -208,9 +228,7 @@ class _HomePage extends State<HomePage> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                    builder: (context) => ReportsPage()
-                ),
+                MaterialPageRoute(builder: (context) => ReportsPage()),
               );
             },
             buttonName: "INFORMES",
@@ -228,8 +246,9 @@ class _HomePage extends State<HomePage> {
       child: Container(
         width: MediaQuery.of(context).size.width,
         height: 40,
-        decoration: BoxDecoration(color: Colors.white,
-            //borderRadius: BorderRadius.all(Radius.circular(50))
+        decoration: BoxDecoration(
+          color: Colors.white,
+          //borderRadius: BorderRadius.all(Radius.circular(50))
         ),
         child: Stack(
           children: [
@@ -248,8 +267,8 @@ class _HomePage extends State<HomePage> {
               ),
             ),
             Visibility(
-                visible: _isAdministrator,
-                child: Container(
+              visible: _isAdministrator,
+              child: Container(
                 alignment: Alignment.centerRight,
                 child: IconButton(
                   icon: Icon(Icons.autorenew),
@@ -295,6 +314,7 @@ class _HomePage extends State<HomePage> {
       ],
     ).show();
   }
+
   void _callBackSelectLocation(Location locationSelected) {
     _selectedLocation = locationSelected;
     _serLocationPreference(locationSelected);
@@ -331,4 +351,4 @@ class _HomePage extends State<HomePage> {
   Future<void> _logOut() async {
     await _userBloc.singOut();
   }
- }
+}

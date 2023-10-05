@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:car_wash_app/invoice/model/additional_product.dart';
 import 'package:car_wash_app/invoice/model/configuration.dart';
 import 'package:car_wash_app/invoice/model/invoice.dart';
+import 'package:car_wash_app/invoice/model/payment_methods.dart';
 import 'package:car_wash_app/invoice/repository/invoice_repository.dart';
 import 'package:car_wash_app/product/model/product.dart';
 import 'package:car_wash_app/user/model/user.dart';
@@ -12,6 +13,7 @@ import 'package:car_wash_app/vehicle_type/model/brand.dart';
 import 'package:car_wash_app/widgets/messages_utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 import 'package:path/path.dart';
@@ -123,6 +125,15 @@ class BlocInvoice implements Bloc {
     return _invoiceRepository.getCoordinatorUsers();
   }*/
 
+  /// Payment Methods
+  Stream<QuerySnapshot> paymentMethodsStream() =>
+      _invoiceRepository.getListPaymentMethodsStream();
+
+  List<PaymentMethod> buildPaymentMethods(List<DocumentSnapshot> paymentMethodsListSnapshot) =>
+      _invoiceRepository.buildPaymentMethods(paymentMethodsListSnapshot);
+
+  Future<PaymentMethod> getPaymentMethodByName(String name) async => await _invoiceRepository.getPaymentMethodByName(name);
+
   /// Brands
   Stream<QuerySnapshot> brandsStream(int uidVehicleType) {
     return _invoiceRepository.getListBrandsStream(uidVehicleType);
@@ -185,6 +196,7 @@ class BlocInvoice implements Bloc {
     String operator,
     String consecutive,
     String productTypeSelected,
+    String paymentMethod,
   ) {
     return _invoiceRepository.getListInvoicesByMonthStream(
       locationReference,
@@ -194,12 +206,39 @@ class BlocInvoice implements Bloc {
       operator,
       consecutive,
       productTypeSelected,
+      paymentMethod
     );
   }
 
   List<Invoice> buildInvoicesListByMonth(
       List<DocumentSnapshot> invoicesListSnapshot) {
-    return _invoiceRepository.buildInvoicesListByMonth(invoicesListSnapshot);
+    return _invoiceRepository.buildInvoicesListFromSnapshot(invoicesListSnapshot);
+  }
+
+  /// Get invoices pending for Washing
+  Stream<QuerySnapshot> invoicesListPendingWashingStream(DocumentReference locationReference) {
+    return _invoiceRepository.getInvoicesListPendingWashingStream(locationReference);
+  }
+
+  List<Invoice> buildInvoicesListPendingWashing(List<DocumentSnapshot> invoicesListSnapshot) {
+    return _invoiceRepository.buildInvoicesListFromSnapshot(invoicesListSnapshot);
+  }
+
+  Future<List<Invoice>> getListPendingWashList(DocumentReference locationReference) async {
+    return await _invoiceRepository.getInvoicesListPendingWashing(locationReference);
+  }
+
+  /// Get invoices current Wash
+  Stream<QuerySnapshot> invoicesListWashingStream(DocumentReference locationReference) {
+    return _invoiceRepository.getInvoicesListWashingStream(locationReference);
+  }
+
+  List<Invoice> buildInvoicesListWashing(List<DocumentSnapshot> invoicesListSnapshot) {
+    return _invoiceRepository.buildInvoicesListFromSnapshot(invoicesListSnapshot);
+  }
+
+  Future<List<Invoice>> invoicesWashingList(DocumentReference locationReference) async {
+    return await _invoiceRepository.getInvoicesWashingList(locationReference);
   }
 
   /// Get invoices list for placa

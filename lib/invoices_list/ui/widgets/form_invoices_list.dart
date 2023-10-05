@@ -1,5 +1,6 @@
 import 'package:car_wash_app/invoice/bloc/bloc_invoice.dart';
 import 'package:car_wash_app/invoice/model/invoice.dart';
+import 'package:car_wash_app/invoice/model/payment_methods.dart';
 import 'package:car_wash_app/invoices_list/model/invoice_list_model.dart';
 import 'package:car_wash_app/invoices_list/ui/widgets/filter_fields_widget.dart';
 import 'package:car_wash_app/invoices_list/ui/widgets/item_invoices_list.dart';
@@ -46,7 +47,7 @@ class _FormInvoicesList extends State<FormInvoicesList> {
   String _idLocation = '';
   Location _location;
   User _selectedOperator = User(name:'', uid: '', email: '');
-  String _selectedPaymentMethod = '';
+  PaymentMethod _selectedPaymentMethod = PaymentMethod(name:'');
 
   ///Filter Keys
   final _textPlaca = TextEditingController();
@@ -56,6 +57,7 @@ class _FormInvoicesList extends State<FormInvoicesList> {
   User _operatorFilter = User(name:'', uid: '', email: '');
   double _totalPriceFilters = 0.0;
   String _productTypeSelected = '';
+  PaymentMethod _paymentMethodFilter = PaymentMethod(id: '', name:'');
 
   @override
   void initState() {
@@ -115,6 +117,7 @@ class _FormInvoicesList extends State<FormInvoicesList> {
         _operatorFilter.name ?? '',
         _textConsecutive.text,
         _productTypeSelected,
+        _paymentMethodFilter.name ?? '',
       ),
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         return _containerList(snapshot);
@@ -338,10 +341,12 @@ class _FormInvoicesList extends State<FormInvoicesList> {
         dateFinal: _dateFilterFinal,
         operatorSelected: _operatorFilter,
         productTypeSelected: _productTypeSelected,
+        paymentMethodSelected: _paymentMethodFilter,
         selectOperator: _callBackSelectOperatorFilter,
         selectDateInit: _setDateInitFilter,
         selectDateFinal: _setDateFinalFilter,
         selectProductType: _callBackSelectProductTYpe,
+        selectPaymentMethod: _callBackSelectPaymentMethodFilter,
       ),
       buttons: [
         DialogButton(
@@ -378,10 +383,15 @@ class _FormInvoicesList extends State<FormInvoicesList> {
       _productTypeSelected = selectProductType;
   }
 
+  void _callBackSelectPaymentMethodFilter(PaymentMethod paymentMethodSelected) {
+    _paymentMethodFilter = paymentMethodSelected;
+  }
+
   void _closeInvoiceCallback(Invoice _invoiceClose) async {
-    if (_invoiceClose.userOperatorName.isEmpty || _invoiceClose.paymentMethod.isEmpty) {
+    if (_invoiceClose.userOperatorName.isEmpty || (_invoiceClose.paymentMethod??'') == '') {
+
       _selectedOperator = _invoiceClose.userOperatorName.isEmpty ? new User(name:'', uid: '', email: '') : await _blocUser.getUserById(_invoiceClose.userOperator.documentID);
-      _selectedPaymentMethod = _invoiceClose.paymentMethod;
+      _selectedPaymentMethod = ((_invoiceClose.paymentMethod??'') == '' || _invoiceClose.paymentMethod == null) ? new PaymentMethod(name:'') : await _blocInvoice.getPaymentMethodByName(_invoiceClose.paymentMethod);
       Alert(
         context: context,
         title: 'Seleccione el operador y el Método de pago',
@@ -392,17 +402,19 @@ class _FormInvoicesList extends State<FormInvoicesList> {
           idLocation: _idLocation,
           selectOperator: _callBackSelectOperator,
           selectPaymentMethod: _callBackSelectPaymentMethod,
+          currentInvoice: _invoiceClose,
+          finishInvoice: _closeInvoiceWithOperator,
         ),
         buttons: [
           DialogButton(
             color: Theme.of(context).accentColor,
             child: Text(
-              'ACEPTAR',
+              'GUARDAR',
               style: Theme.of(context).textTheme.button,
             ),
             onPressed: () {
               Navigator.of(context).pop();
-              _closeInvoiceWithOperator(_invoiceClose);
+              _completeOrderToClose(_invoiceClose);
             },
           ),
         ],
@@ -445,48 +457,57 @@ class _FormInvoicesList extends State<FormInvoicesList> {
     _selectedOperator = operatorSelected;
   }
 
-  void _callBackSelectPaymentMethod(String payment) {
+  void _callBackSelectPaymentMethod(PaymentMethod payment) {
     _selectedPaymentMethod = payment;
   }
 
-  void _selectPaymentMethodMessage() {
-    Alert(
-      context: context,
-
-    ).show();
+  void _completeOrderToClose(Invoice invoiceToSave) async {
+    if (_selectedPaymentMethod.name.isNotEmpty) {
+      Invoice invoice = Invoice.copyWith(
+        origin: invoiceToSave,
+        paymentMethod: _selectedPaymentMethod.name,
+      );
+      await _blocInvoice.saveInvoice(invoice);
+    }
   }
 
   void _closeInvoiceWithOperator(Invoice invoiceToClose) async {
-    if (_selectedOperator.name.isNotEmpty && _selectedPaymentMethod.isNotEmpty) {
-      DocumentReference _operatorReference =
-      await _blocUser.getUserReferenceById(_selectedOperator.id);
-      Invoice invoice = Invoice.copyWith(
-        origin: invoiceToClose,
-        closedDate: Timestamp.now(),
-        invoiceClosed: true,
-        userOperator: _operatorReference,
-        userOperatorName: _selectedOperator.name,
-        paymentMethod: _selectedPaymentMethod,
-      );
-      await _blocInvoice.saveInvoice(invoice);
-      _validateSendCustomerNotification(invoiceToClose);
-    } else {
-      if (_selectedOperator.name.isNotEmpty) {
-        DocumentReference _operatorReference =
-        await _blocUser.getUserReferenceById(_selectedOperator.id);
+    if (_selectedOperator.name.isNotEmpty) {
+      bool endWashValue = false;
+      Timestamp endWashData;
+      int washingTimeValue;
+      DocumentReference _operatorReference = await _blocUser.getUserReferenceById(_selectedOperator.id);
+      if (invoiceToClose.startWashing && !invoiceToClose?.endWash?? false) { //Finaliza la factura con final de lavado
+        DateTime dateStart = invoiceToClose.dateStartWashing.toDate();
+        DateTime dateCurrent = DateTime.now();
+        Duration diff = dateCurrent.difference(dateStart);
+        int washCurrentDuration = diff.inMinutes;
+        washingTimeValue = washCurrentDuration;
+        endWashValue = true;
+        endWashData = Timestamp.now();
+
         Invoice invoice = Invoice.copyWith(
           origin: invoiceToClose,
+          closedDate: Timestamp.now(),
+          invoiceClosed: true,
+          userOperator: _operatorReference,
+          userOperatorName: _selectedOperator.name,
+          endWash: endWashValue,
+          dateEndWash: endWashData,
+          washingTime: washingTimeValue,
+        );
+        await _blocInvoice.saveInvoice(invoice);
+      } else {  //Finaliza la factura sin final de lavado
+        Invoice invoice = Invoice.copyWith(
+          origin: invoiceToClose,
+          closedDate: Timestamp.now(),
+          invoiceClosed: true,
           userOperator: _operatorReference,
           userOperatorName: _selectedOperator.name,
         );
         await _blocInvoice.saveInvoice(invoice);
-      } else {
-        Invoice invoice = Invoice.copyWith(
-          origin: invoiceToClose,
-          paymentMethod: _selectedPaymentMethod,
-        );
-        await _blocInvoice.saveInvoice(invoice);
       }
+      _validateSendCustomerNotification(invoiceToClose);
     }
   }
 
@@ -506,9 +527,9 @@ class _FormInvoicesList extends State<FormInvoicesList> {
   void _validateSendCustomerNotification(Invoice invoiceToClose) {
     if (invoiceToClose.phoneNumber.isNotEmpty) {
       String message =
-          "Spa CarWash Movil -- Estimado cliente. Le informamos que el servicio de lavado de su vehículo de placas ${invoiceToClose.placa}, ha terminado y está listo para ser entregado ☑️. "
-          "Una vez recibido, ¡Nos encantaría conocer tu opinión 💭! Aunque sabemos que las encuestas son aburridas 😐, solo 3️⃣ respuestas tuyas nos permitirán estar más cerca de hacerte más feliz con tu servicio 😃. Responde en este link ➡️"
-          "https://docs.google.com/forms/d/1gjEMveRLkrbQF_2x5OxE1uXQLzWKtS0n_NFMw2NJTtE/edit?ts=62f6801d";
+          "Spa CarWash Movil -- Estimado cliente. Le informamos que el servicio de lavado de su vehículo de placa ${invoiceToClose.placa}, ha finalizado y está listo para ser entregado ☑️. "
+          "Cómo estamos comprometidos con tu satisfacción 😃, por favor ayúdanos con tu opinion en cortas respuestas en el siguinte link ➡️"
+          "https://docs.google.com/forms/d/1gdq9rSR8pMqlukEalGLxF_m5954m7_Hpm5k5HYX89yU/edit";
       List<String> recipents = [invoiceToClose.phoneNumber];
       if (_location != null) {
         if (_location.sendMessageSms ?? false) {

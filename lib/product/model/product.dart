@@ -20,6 +20,7 @@ class Product extends Equatable {
   final String productType;
   final String productInvoiceId;
   final Timestamp dateAdded;
+  final int serviceTime;
 
   Product({
     this.id,
@@ -36,6 +37,7 @@ class Product extends Equatable {
     this.productType,
     this.productInvoiceId,
     this.dateAdded,
+    this.serviceTime,
   });
 
   factory Product.fromJson(Map<String, dynamic> json, {String id}) {
@@ -57,6 +59,7 @@ class Product extends Equatable {
       locations: locationsListDb,
       isSelected: false,
       productType: json['productType'],
+      serviceTime: json['serviceTime'],
     );
   }
 
@@ -84,6 +87,7 @@ class Product extends Equatable {
       locations: locationsListDb,
       isSelected: false,
       productType: json['productType'],
+      serviceTime: json['serviceTime'],
     );
   }
 
@@ -107,6 +111,7 @@ class Product extends Equatable {
       isSelected: true,
       productType: json['productType'],
       productInvoiceId: id,
+      serviceTime: json['serviceTime'],
     );
   }
 
@@ -122,6 +127,7 @@ class Product extends Equatable {
       productType: json['productType'],
       vehicleTypeUid: uidVehicleType,
       dateAdded: addDate,
+      serviceTime: json['serviceTime'],
     );
   }
 
@@ -135,6 +141,7 @@ class Product extends Equatable {
       'productActive': this.productActive,
       'vehicleTypeUid': this.vehicleTypeUid,
       'productType': this.productType,
+      'serviceTime': this.serviceTime,
     };
   }
 
@@ -145,6 +152,7 @@ class Product extends Equatable {
     bool isAdditional,
     String productId,
     String productType,
+    int serviceTime,
   ) {
     return {
       'productName': productName,
@@ -153,6 +161,7 @@ class Product extends Equatable {
       'isAdditional': isAdditional,
       'Id': productId,
       'productType': productType,
+      'serviceTime': serviceTime,
     };
   }
 
@@ -178,6 +187,7 @@ class Product extends Equatable {
       isAdditional: origin.isAdditional,
       productType: productType ?? origin.productType,
       productInvoiceId: productInvoiceId ?? '',
+      serviceTime: origin.serviceTime,
     );
   }
 
@@ -189,6 +199,7 @@ class Product extends Equatable {
     double ivaPercent,
     bool isAdditional,
     String productType,
+    int serviceTime,
   }) {
     return Product(
       id: id,
@@ -197,6 +208,7 @@ class Product extends Equatable {
       ivaPercent: ivaPercent,
       isAdditional: isAdditional ?? true,
       productType: productType,
+      serviceTime: serviceTime,
     );
   }
 
@@ -213,5 +225,6 @@ class Product extends Equatable {
         isSelected,
         productType,
         productInvoiceId,
+        serviceTime,
       ];
 }

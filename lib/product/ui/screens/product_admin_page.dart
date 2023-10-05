@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:car_wash_app/invoice/ui/widgets/text_field_input.dart';
 import 'package:car_wash_app/location/bloc/bloc_location.dart';
 import 'package:car_wash_app/location/model/location.dart';
@@ -32,6 +34,7 @@ class _ProductAdminPage extends State<ProductAdminPage> {
   final _textProductName = TextEditingController();
   final _textPrice = TextEditingController();
   final _textIvaPercent = TextEditingController();
+  final _textServiceTime = TextEditingController();
   final double _heightTextField = 60;
   final String _initialIvaPercent = '19';
   List<Product> _productList = <Product>[];
@@ -129,6 +132,19 @@ class _ProductAdminPage extends State<ProductAdminPage> {
                 labelText: '% De Iva',
                 textController: _textIvaPercent,
                 textValidate: 'Escriba el % de iva del producto',
+                inputType: TextInputType.number,
+                textInputFormatter: [
+                  WhitelistingTextInputFormatter(RegExp("^[0-9.]*"))
+                ],
+              ),
+            ),
+            SizedBox(height: 9),
+            Container(
+              height: _heightTextField,
+              child: TextFieldInput(
+                labelText: 'Duración del servicio (minutos)',
+                textController: _textServiceTime,
+                textValidate: 'Escriba la duración del servicio en minutos',
                 inputType: TextInputType.number,
                 textInputFormatter: [
                   WhitelistingTextInputFormatter(RegExp("^[0-9.]*"))
@@ -383,6 +399,7 @@ class _ProductAdminPage extends State<ProductAdminPage> {
     _textProductName.text = _productSelected.productName;
     _textIvaPercent.text = _productSelected.ivaPercent.toStringAsFixed(0);
     _textPrice.text = _productSelected.price.toStringAsFixed(2);
+    _textServiceTime.text = _productSelected.serviceTime == null ? '0' : _productSelected.serviceTime.toStringAsFixed(0);
     _productActive = _productSelected.productActive ?? true;
     _productTypeSimple = _productSelected.productType == 'Sencillo' ? true : false;
     _productTypeSpecial = _productSelected.productType == 'Especial' ? true : false;
@@ -451,6 +468,12 @@ class _ProductAdminPage extends State<ProductAdminPage> {
     } else
       _validatePrice = false;
 
+    if (_textServiceTime.text.isEmpty) {
+      _validatePrice = true;
+      canSave = false;
+    } else
+      _validatePrice = false;
+
     if (_listLocation.where((f) => f.isSelected).toList().length == 0) {
       listSedesEmpty = true;
       canSave = false;
@@ -481,6 +504,7 @@ class _ProductAdminPage extends State<ProductAdminPage> {
     _textProductName.text = '';
     _textIvaPercent.text = _initialIvaPercent;
     _textPrice.text = '';
+    _textServiceTime.text = '';
     _selectedVehicleType = null;
     _productSelected = null;
     _productActive = true;
@@ -548,6 +572,7 @@ class _ProductAdminPage extends State<ProductAdminPage> {
           productActive: _productActive,
           vehicleTypeUid: _selectedVehicleType.uid,
           productType: _productTypeSimple ? 'Sencillo' : 'Especial',
+          serviceTime: int.tryParse(_textServiceTime.text.trim()) ?? 0,
       );
 
       _productBloc.updateProduct(product);

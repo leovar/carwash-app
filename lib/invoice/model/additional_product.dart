@@ -4,6 +4,7 @@ class AdditionalProduct {
   double ivaPercent;
   bool newProduct;
   String productType;
+  int serviceTime;
 
   AdditionalProduct(
     this.productName,
@@ -11,5 +12,6 @@ class AdditionalProduct {
     this.ivaPercent,
     this.newProduct,
     this.productType,
+    this.serviceTime,
   );
 }

@@ -1,5 +1,7 @@
 import 'dart:io';
+import 'package:car_wash_app/invoice/model/invoice.dart';
 import 'package:car_wash_app/widgets/messages_utils.dart';
+import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path_prov;
 import 'package:car_wash_app/customer/bloc/bloc_customer.dart';
 import 'package:car_wash_app/customer/model/customer.dart';
@@ -24,11 +26,18 @@ class _CustomersReport extends State<CustomersReport> {
   List<DropdownMenuItem<Location>> _dropdownMenuItems;
   Location _selectedLocation;
 
+  final _textDateInit = TextEditingController();
+  final _textDateFinal = TextEditingController();
   DocumentReference _locationReference;
+  var formatter = new DateFormat('dd-MM-yyyy');
+  var _dateTimeInit = DateTime(DateTime.now().year, DateTime.now().month, 1);
+  var _dateTimeFinal = DateTime.now();
 
   @override
   void initState() {
     super.initState();
+    _textDateInit.text = formatter.format(_dateTimeInit);
+    _textDateFinal.text = formatter.format(_dateTimeFinal);
   }
 
   @override
@@ -51,7 +60,7 @@ class _CustomersReport extends State<CustomersReport> {
               fontSize: 19,
             ),
           ),
-          onPressed: _generateCustomerReport,
+          onPressed: _generateInvoiceCustomerReport,
         ),
       ],
     );
@@ -65,6 +74,32 @@ class _CustomersReport extends State<CustomersReport> {
         children: <Widget>[
           Flexible(
             child: _locationsList(),
+          ),
+          Flexible(
+            child: TextField(
+              controller: _textDateInit,
+              decoration: InputDecoration(
+                labelText: 'Fecha Desde',
+              ),
+              keyboardType: TextInputType.datetime,
+              readOnly: true,
+              onTap: () {
+                _datePickerFrom();
+              },
+            ),
+          ),
+          Flexible(
+            child: TextField(
+              controller: _textDateFinal,
+              decoration: InputDecoration(
+                labelText: 'Fecha Hasta',
+              ),
+              keyboardType: TextInputType.datetime,
+              readOnly: true,
+              onTap: () {
+                _datePickerFinal();
+              },
+            ),
           ),
         ],
       ),
@@ -143,14 +178,107 @@ class _CustomersReport extends State<CustomersReport> {
     });
   }
 
+  Future<Null> _datePickerFrom() async {
+    final DateTime picked = await showDatePicker(
+      context: context,
+      initialDate: _dateTimeInit,
+      firstDate: DateTime(1970),
+      lastDate: DateTime(2100),
+    );
+
+    if (picked != null && picked != _dateTimeInit) {
+      setState(() {
+        _dateTimeInit = picked;
+        _textDateInit.text = formatter.format(_dateTimeInit);
+      });
+    }
+  }
+
+  Future<Null> _datePickerFinal() async {
+    final DateTime picked = await showDatePicker(
+      context: context,
+      initialDate: _dateTimeFinal,
+      firstDate: DateTime(1970),
+      lastDate: DateTime(2100),
+    );
+
+    if (picked != null && picked != _dateTimeFinal) {
+      setState(() {
+        _dateTimeFinal = picked;
+        _textDateFinal.text = formatter.format(_dateTimeFinal);
+      });
+    }
+  }
+
+  void _generateInvoiceCustomerReport() async {
+    if (_selectedLocation != null) {
+      //Open message Saving
+      MessagesUtils.showAlertWithLoading(
+          context: context, title: 'Generando reporte')
+          .show();
+      List<Invoice> _listInvoices = await _blocReports.getListCustomerInvoicesByLocation(_locationReference, _dateTimeInit, _dateTimeFinal); //await _blocCustomer.getListCustomerReportByLocation(_locationReference);
+      List<Invoice> _newListInvoices = [];
+      _newListInvoices = _listInvoices.toSet().toList();
+      _newListInvoices.sort((a, b) => a.customerName.compareTo(b.customerName));
+
+      var excel = Excel.createExcel();
+      var sheetObject = excel["Sheet1"];
+
+      if (_newListInvoices.length > 0) {
+        List<String> header = [
+          "Nombre",
+          "Teléfono",
+          "Fecha del servicio",
+          "Valor",
+          "Placa",
+          "Sede",
+          "Servicios",
+          "Método de pago",
+          "Sede",
+        ];
+        sheetObject.appendRow(header);
+        _newListInvoices.forEach((item) {
+          List<String> row = [
+            "${item.customerName}",
+            "${item.phoneNumber}",
+            "${formatter.format(item.creationDate.toDate())}",
+            "${item.totalPrice}",
+            "${item.placa}",
+            "${item.locationName}",
+            "${item.productsSplit}",
+            "${item.paymentMethod}",
+            "${item.locationName}",
+          ];
+          sheetObject.appendRow(row);
+        });
+      }
+
+      excel.rename("Sheet1", "Hoja1");
+
+      String outputFile =
+          "/storage/emulated/0/Download/ReporteClientes_${_selectedLocation.locationName}.xlsx";
+      excel.encode().then((onValue) {
+        File(path_prov.join(outputFile))
+          ..createSync(recursive: true)
+          ..writeAsBytesSync(onValue);
+      });
+      Navigator.pop(context); //Close popUp Save
+      Fluttertoast.showToast(
+          msg: "Su reporte ha sido descargado en: ${outputFile}",
+          toastLength: Toast.LENGTH_LONG);
+    } else {
+      Fluttertoast.showToast(
+          msg: "Primero seleccione una sede", toastLength: Toast.LENGTH_LONG);
+    }
+  }
+
   void _generateCustomerReport() async {
     if (_selectedLocation != null) {
       //Open message Saving
       MessagesUtils.showAlertWithLoading(
               context: context, title: 'Generando reporte')
           .show();
-      List<Customer> _listCustomers = await _blocCustomer
-          .getListCustomerReportByLocation(_locationReference);
+      List<Customer> _listCustomers = await _blocCustomer.getListCustomerReportByLocation(_locationReference);
       List<Customer> _newListCustomer = [];
       _newListCustomer = _listCustomers.toSet().toList();
       _newListCustomer.sort((a, b) => a.name.compareTo(b.name));

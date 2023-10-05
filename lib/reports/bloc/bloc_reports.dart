@@ -55,6 +55,10 @@ class BlocReports implements Bloc {
     });
   }
 
+  Future<List<Invoice>> getListCustomerInvoicesByLocation(DocumentReference locationReference, DateTime dateInit, DateTime dateFinal) async {
+    return await _reportsRepository.getCustomerInvoicesByLocation(locationReference, dateInit, dateFinal);
+  }
+
   Future<int> updateInfoProductsInvoice(List<Invoice> invoices) async {
     var countData = 0;
     invoices.forEach((item) async {

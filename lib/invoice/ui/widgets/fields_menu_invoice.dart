@@ -1,9 +1,9 @@
 import 'package:car_wash_app/invoice/bloc/bloc_invoice.dart';
+import 'package:car_wash_app/invoice/model/payment_methods.dart';
 import 'package:car_wash_app/user/model/user.dart';
 import 'package:car_wash_app/widgets/popup_menu_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
-import 'package:car_wash_app/invoice/model/payment_methods.dart';
 
 class FieldsMenusInvoice extends StatefulWidget {
   final int listCountOperators;
@@ -11,6 +11,7 @@ class FieldsMenusInvoice extends StatefulWidget {
   final int listCountBrands;
   final int listCountBrandReference;
   final int listCountColors;
+  final int listCountPaymentMethods;
   final Function(String, int, int) cbHandlerOperator;
   final Function(String, int, int) cbHandlerCoordinator;
   final Function(String, int, int) cbHandlerVehicleBrand;
@@ -37,6 +38,7 @@ class FieldsMenusInvoice extends StatefulWidget {
     this.listCountBrands,
     this.listCountBrandReference,
     this.listCountColors,
+    this.listCountPaymentMethods,
     this.cbHandlerOperator,
     this.cbHandlerCoordinator,
     this.cbHandlerVehicleBrand,
@@ -67,6 +69,7 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
   BlocInvoice _blocInvoice;
   List<User> _listUsersOperators;
   List<User> _listUsersCoordinators;
+  List<PaymentMethod> _listMasterPaymentsMethods;
   List<String> _listOperators = <String>[];
   List<String> _listCoordinators = <String>[];
   List<String> _listBrands = <String>[];
@@ -89,11 +92,6 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
     if (_listTypeSex.length <= 0) {
       _listTypeSex.add('Masculino');
       _listTypeSex.add('Femenino');
-    }
-    if (_listPaymentMethods.length >= 0) {
-      _listPaymentMethods.add(paymentMethodClass.datafono);
-      _listPaymentMethods.add(paymentMethodClass.transferencia);
-      _listPaymentMethods.add(paymentMethodClass.efectivo);
     }
     setState(() {
       _selectedBrand = widget.selectedVehicleBrand;
@@ -136,7 +134,7 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
         SizedBox(height: 12),
         _getCoordinators(),
         SizedBox(height: 12),
-        _chargeListPaymentMethods(),
+        _getPaymentMethods(),
       ],
     );
   }
@@ -325,12 +323,37 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
     );
   }
 
-  Widget _chargeListPaymentMethods() {
+  Widget _getPaymentMethods() {
+    if (widget.listCountPaymentMethods == 0) {
+      return StreamBuilder(
+        stream: _blocInvoice.paymentMethodsStream(),
+        builder: (context, snapshot) {
+          switch (snapshot.connectionState) {
+            case ConnectionState.waiting:
+              return CircularProgressIndicator();
+            default:
+              return showPopUpPaymentMethods(snapshot);
+          }
+        },
+      );
+    } else {
+      return chargePaymentMethodsControl();
+    }
+  }
+
+  Widget showPopUpPaymentMethods(AsyncSnapshot snapshot) {
+    _listMasterPaymentsMethods = _blocInvoice.buildPaymentMethods(snapshot.data.documents);
+    _listPaymentMethods = _listMasterPaymentsMethods.map((pm) => pm.name).toList();
+    widget.cbHandlerPaymentMethod('', _listMasterPaymentsMethods.length, 2);
+    return chargePaymentMethodsControl();
+  }
+
+  Widget chargePaymentMethodsControl() {
     return PopUpMenuWidget(
       popUpName: 'Método de pago',
       selectValue: _cbSelectPaymentMethod,
       listString: _listPaymentMethods,
-      valueSelect: _selectPaymentMethod,
+      valueSelect: _selectPaymentMethod??'',
       enableForm: widget.enableForm,
     );
   }
