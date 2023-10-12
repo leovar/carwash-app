@@ -585,7 +585,7 @@ class _FormInvoice extends State<FormInvoice> {
                         onPressed: () {
                           _canceledInvoice = true;
                           Navigator.of(context).pop();
-                          _saveInvoice();
+                          _cancelInvoiceFunction();
                         },
                       )
                     ]).show();
@@ -931,6 +931,7 @@ class _FormInvoice extends State<FormInvoice> {
   void getPreferences() async {
     //Get preferences with location and get location reference
     SharedPreferences pref = await SharedPreferences.getInstance();
+    _locationName = pref.getString(Keys.locationName);
     _locationName = pref.getString(Keys.locationName);
     _initConsecLocation = pref.getString(Keys.locationInitCount);
     _finalConsecLocation = pref.getString(Keys.locationFinalCount);
@@ -1362,6 +1363,23 @@ class _FormInvoice extends State<FormInvoice> {
     setState(() {
       imageList = imagesList;
     });
+  }
+
+  void _cancelInvoiceFunction() async {
+    if (widget.editInvoice != null) {
+      MessagesUtils.showAlertWithLoading(context: context, title: 'Guardando')
+          .show();
+      Invoice invoiceCopy = Invoice.copyWith(
+        origin: widget.editInvoice,
+        cancelledInvoice: _canceledInvoice,
+      );
+      _blocInvoice.saveInvoice(invoiceCopy);
+      Navigator.pop(context);
+      Navigator.pop(context);
+    } else {
+      MessagesUtils.showAlert(
+          context: context, title: 'No se puede cancelar la factura');
+    }
   }
 
   void _printInvoice(Invoice invoicePrint, List<Product> listProducts,

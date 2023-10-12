@@ -3,6 +3,7 @@ import 'package:car_wash_app/invoice/model/header_services.dart';
 import 'package:car_wash_app/invoice/ui/widgets/text_field_input.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:meta/dart2js.dart';
 
 class AdditionalProductPage extends StatefulWidget {
   final Function(List<AdditionalProduct>) setCbAdditionalProducts;
@@ -22,6 +23,7 @@ class AdditionalProductPage extends StatefulWidget {
 class _AdditionalProductPage extends State<AdditionalProductPage> {
   final _textAdditionalService = TextEditingController();
   final _valueAdditionalService = TextEditingController();
+  final _valueServiceTime = TextEditingController();
   bool _checkIva = false;
   FocusNode nameFocusNode;
 
@@ -70,11 +72,10 @@ class _AdditionalProductPage extends State<AdditionalProductPage> {
           Card(
             margin: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(20),
             ),
             elevation: 16,
             child: Container(
-              height: 270,
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.all(Radius.circular(20)),
@@ -82,6 +83,7 @@ class _AdditionalProductPage extends State<AdditionalProductPage> {
               child: Container(
                 margin: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                 child: Column(
+                  mainAxisSize: MainAxisSize.max,
                   children: <Widget>[
                     TextFieldInput(
                       labelText: "Servicio Adicional",
@@ -96,7 +98,18 @@ class _AdditionalProductPage extends State<AdditionalProductPage> {
                       textController: _valueAdditionalService,
                       inputType: TextInputType.numberWithOptions(decimal: true, signed: true),
                       textInputFormatter: [
-                        WhitelistingTextInputFormatter(RegExp('[0-9\.]'))
+                        FilteringTextInputFormatter.allow(RegExp('[0-9\.]')),
+                      ],
+                    ),
+                    SizedBox(
+                      height: 9,
+                    ),
+                    TextFieldInput(
+                      labelText: "Tiempo del servicio en minutos",
+                      textController: _valueServiceTime,
+                      inputType: TextInputType.numberWithOptions(decimal: true, signed: true),
+                      textInputFormatter: [
+                        FilteringTextInputFormatter.allow(RegExp('[0-9]')),
                       ],
                     ),
                     SizedBox(
@@ -128,12 +141,11 @@ class _AdditionalProductPage extends State<AdditionalProductPage> {
                       ],
                     ),
                     Container(
-                      height: 70,
                       child: Align(
                         alignment: Alignment.center,
                         child: RaisedButton(
                           padding:
-                              EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+                          EdgeInsets.symmetric(vertical: 8, horizontal: 10),
                           color: Color(0xFF59B258),
                           child: Text(
                             "Agregar Servicio",
@@ -150,7 +162,7 @@ class _AdditionalProductPage extends State<AdditionalProductPage> {
                           } : null,
                         ),
                       ),
-                    )
+                    ),
                   ],
                 ),
               ),
@@ -244,7 +256,7 @@ class _AdditionalProductPage extends State<AdditionalProductPage> {
 
   void _addAdditionalProduct() {
     String productType = 'Sencillo';
-    int serviceTime = 0;
+    int serviceTime = int.tryParse(_valueServiceTime.text) == null ? 0 : int.parse(_valueServiceTime.text);
     double _iva = 0;
     if(_checkIva) {
       _iva = 19;
@@ -260,12 +272,13 @@ class _AdditionalProductPage extends State<AdditionalProductPage> {
       _iva,
       true,
       productType,
-      serviceTime
+      serviceTime,
     );
 
     _checkIva = false;
     _valueAdditionalService.text = '';
     _textAdditionalService.text = '';
+    _valueServiceTime.text = '';
 
     if (mounted) {
       setState(() {

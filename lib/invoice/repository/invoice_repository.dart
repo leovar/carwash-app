@@ -456,7 +456,8 @@ class InvoiceRepository {
         .collection(FirestoreCollections.invoices)
         .where(FirestoreCollections.invoiceFieldLocation, isEqualTo: locationReference)
         .where(FirestoreCollections.invoiceClosed, isEqualTo: false)
-        .where(FirestoreCollections.invoiceStartWashing, isEqualTo: false);
+        .where(FirestoreCollections.invoiceStartWashing, isEqualTo: false)
+        .where(FirestoreCollections.invoiceCancelled, isEqualTo: false);
     return querySnapshot.snapshots();
   }
 
@@ -468,7 +469,8 @@ class InvoiceRepository {
         .collection(FirestoreCollections.invoices)
         .where(FirestoreCollections.invoiceFieldLocation, isEqualTo: locationReference)
         .where(FirestoreCollections.invoiceClosed, isEqualTo: false)
-        .where(FirestoreCollections.invoiceStartWashing, isEqualTo: false).getDocuments();
+        .where(FirestoreCollections.invoiceStartWashing, isEqualTo: false)
+        .where(FirestoreCollections.invoiceCancelled, isEqualTo: false).getDocuments();
     final documents = querySnapshot.documents;
     if (documents.length > 0) {
       documents.forEach((invoice) {

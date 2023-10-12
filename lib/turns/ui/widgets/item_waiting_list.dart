@@ -54,7 +54,7 @@ class _ItemWaitingList extends State<ItemWaitingList> {
     var durationTime = Duration(minutes: invoiceDuration);
     return ConstrainedBox(
       constraints: BoxConstraints(
-        minHeight: 83,
+        minHeight: 95,
       ),
       child: Container(
         padding: EdgeInsets.only(

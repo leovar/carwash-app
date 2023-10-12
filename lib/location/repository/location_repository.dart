@@ -5,9 +5,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class LocationRepository {
   final Firestore _db = Firestore.instance;
 
-  void updateLocationDataRepository(Location location) async {
+  Future<DocumentReference> updateLocationDataRepository(Location location) async {
     DocumentReference ref = _db.collection(FirestoreCollections.locations).document(location.id);
-    return await ref.setData(location.toJson(), merge: true);
+    ref.setData(location.toJson(), merge: true);
+    return ref;
   }
 
   DocumentReference getDocumentReferenceLocationById(String idLocation) {

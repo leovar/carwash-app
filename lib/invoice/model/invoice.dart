@@ -226,6 +226,7 @@ class Invoice extends Equatable {
     String paymentMethod,
     String customerName,
     String customerPhone,
+    bool cancelledInvoice,
     bool startWashing,
     bool endWash,
     String washingCell,
@@ -270,7 +271,7 @@ class Invoice extends Equatable {
       countAdditionalProducts:
           countAdditionalProducts ?? origin.countAdditionalProducts,
       sendEmailInvoice: origin.sendEmailInvoice,
-      cancelledInvoice: origin.cancelledInvoice,
+      cancelledInvoice: cancelledInvoice ?? origin.cancelledInvoice,
       paymentMethod: paymentMethod ?? origin.paymentMethod,
       startWashing : startWashing ?? origin.startWashing,
       washingCell : washingCell ?? origin.washingCell,

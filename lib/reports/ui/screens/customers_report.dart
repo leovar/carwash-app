@@ -156,6 +156,14 @@ class _CustomersReport extends State<CustomersReport> {
 
   List<DropdownMenuItem<Location>> builtDropdownMenuItems(List locations) {
     List<DropdownMenuItem<Location>> listItems = List();
+    listItems.add(
+      DropdownMenuItem(
+        value: new Location(id: '', locationName: 'Todas las sedes'),
+        child: Text(
+          'Todas las sedes',
+        ),
+      ),
+    );
     for (Location documentLoc in locations) {
       listItems.add(
         DropdownMenuItem(
@@ -171,11 +179,18 @@ class _CustomersReport extends State<CustomersReport> {
 
   /// Functions
   onChangeDropDawn(Location selectedLocation) async {
-    _locationReference =
-        await _blocLocation.getLocationReference(selectedLocation.id);
-    setState(() {
-      _selectedLocation = selectedLocation;
-    });
+    if (selectedLocation.id.isNotEmpty) {
+      _locationReference =
+          await _blocLocation.getLocationReference(selectedLocation.id);
+      setState(() {
+        _selectedLocation = selectedLocation;
+      });
+    } else {
+      _locationReference = null;
+      setState(() {
+        _selectedLocation = selectedLocation;
+      });
+    }
   }
 
   Future<Null> _datePickerFrom() async {
@@ -211,12 +226,15 @@ class _CustomersReport extends State<CustomersReport> {
   }
 
   void _generateInvoiceCustomerReport() async {
-    if (_selectedLocation != null) {
-      //Open message Saving
+    try {
       MessagesUtils.showAlertWithLoading(
-          context: context, title: 'Generando reporte')
+              context: context, title: 'Generando reporte')
           .show();
-      List<Invoice> _listInvoices = await _blocReports.getListCustomerInvoicesByLocation(_locationReference, _dateTimeInit, _dateTimeFinal); //await _blocCustomer.getListCustomerReportByLocation(_locationReference);
+      List<Invoice> _listInvoices =
+          await _blocReports.getListCustomerInvoicesByLocation(
+              _locationReference,
+              _dateTimeInit,
+              _dateTimeFinal); //await _blocCustomer.getListCustomerReportByLocation(_locationReference);
       List<Invoice> _newListInvoices = [];
       _newListInvoices = _listInvoices.toSet().toList();
       _newListInvoices.sort((a, b) => a.customerName.compareTo(b.customerName));
@@ -266,9 +284,11 @@ class _CustomersReport extends State<CustomersReport> {
       Fluttertoast.showToast(
           msg: "Su reporte ha sido descargado en: ${outputFile}",
           toastLength: Toast.LENGTH_LONG);
-    } else {
-      Fluttertoast.showToast(
-          msg: "Primero seleccione una sede", toastLength: Toast.LENGTH_LONG);
+    } catch (error) {
+      print('$error');
+      Navigator.pop(context);
+      MessagesUtils.showAlert(
+          context: context, title: 'Error al generar el reporte');
     }
   }
 
@@ -278,7 +298,8 @@ class _CustomersReport extends State<CustomersReport> {
       MessagesUtils.showAlertWithLoading(
               context: context, title: 'Generando reporte')
           .show();
-      List<Customer> _listCustomers = await _blocCustomer.getListCustomerReportByLocation(_locationReference);
+      List<Customer> _listCustomers = await _blocCustomer
+          .getListCustomerReportByLocation(_locationReference);
       List<Customer> _newListCustomer = [];
       _newListCustomer = _listCustomers.toSet().toList();
       _newListCustomer.sort((a, b) => a.name.compareTo(b.name));

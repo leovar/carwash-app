@@ -21,7 +21,8 @@ class Location extends Equatable {
   final bool sendMessageWp;
   final bool printIva;
   bool isSelected;
-  final int activeCells;
+  int activeCells;
+  final int totalCells;
 
   Location({
     this.id,
@@ -42,6 +43,7 @@ class Location extends Equatable {
     this.sendMessageWp,
     this.printIva,
     this.activeCells,
+    this.totalCells,
   });
 
   factory Location.fromJson(Map<String, dynamic> json, {String id}) {
@@ -64,6 +66,7 @@ class Location extends Equatable {
         printIva: json['printIva'],
         isSelected: false,
         activeCells: json['activeCells'],
+        totalCells: json['totalCells'],
     );
   }
 
@@ -79,14 +82,43 @@ class Location extends Equatable {
       'dianResolution': this.dianResolution,
       'initConcec': this.initConcec,
       'finalConsec': this.finalConsec,
-      'creationDate': Timestamp.now(),
+      'creationDate': this.creationDate,
       'active': this.active,
       'sendMessageSms': this.sendMessageSms,
       'sendMessageWp': this.sendMessageWp,
       'printIva': this.printIva,
       'activeCells': this.activeCells,
+      'totalCells': this.totalCells,
     };
   }
+
+  factory Location.copyWith({
+    @required Location origin,
+    int activeCells
+  }) {
+    return Location(
+      id: origin.id,
+      locationName: origin.locationName,
+      address: origin.address,
+      phoneNumber: origin.phoneNumber,
+      director: origin.director,
+      nit: origin.nit,
+      regimen: origin.regimen,
+      prefix: origin.prefix,
+      dianResolution: origin.dianResolution,
+      initConcec: origin.initConcec,
+      finalConsec: origin.finalConsec,
+      creationDate: origin.creationDate,
+      active: origin.active,
+      sendMessageSms: origin.sendMessageSms,
+      sendMessageWp: origin.sendMessageWp,
+      printIva: origin.printIva,
+      isSelected: origin.isSelected,
+      activeCells: activeCells ?? origin.activeCells,
+      totalCells: origin.totalCells,
+    );
+  }
+
 
   @override
   List<Object> get props => [
@@ -107,5 +139,6 @@ class Location extends Equatable {
         sendMessageWp,
         printIva,
         activeCells,
+        totalCells,
       ];
 }

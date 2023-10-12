@@ -5,6 +5,7 @@ import 'package:car_wash_app/invoice/model/invoice.dart';
 import 'package:car_wash_app/invoice/model/queue_model.dart';
 import 'package:car_wash_app/location/bloc/bloc_location.dart';
 import 'package:car_wash_app/location/model/location.dart';
+import 'package:car_wash_app/turns/ui/widgets/change_active_cells_widget.dart';
 import 'package:car_wash_app/turns/ui/widgets/item_waiting_list.dart';
 import 'package:car_wash_app/turns/ui/widgets/item_washing_list.dart';
 import 'package:car_wash_app/turns/ui/widgets/select_turn_cell_widget.dart';
@@ -39,6 +40,7 @@ class _FormTurns extends State<FormTurns> with SingleTickerProviderStateMixin {
   DocumentReference _locationReference;
   Location _locationData = new Location();
   CellsModel _cellSelected = CellsModel('', '');
+  int _activeCellsSelected = 0;
   User _currentUser;
   TabController _tabController;
   final _textWorkers = TextEditingController();
@@ -76,8 +78,9 @@ class _FormTurns extends State<FormTurns> with SingleTickerProviderStateMixin {
     return Column(
       children: <Widget>[
         _headerTurns(),
-        Flexible(
+        Expanded(
           child: Column(
+            mainAxisSize: MainAxisSize.max,
             children: _bodyContainer(),
           ),
         ),
@@ -87,7 +90,7 @@ class _FormTurns extends State<FormTurns> with SingleTickerProviderStateMixin {
 
   Widget _headerTurns() {
     return Container(
-      height: MediaQuery.of(context).size.height / 7,
+      height: 125,
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(
@@ -96,120 +99,153 @@ class _FormTurns extends State<FormTurns> with SingleTickerProviderStateMixin {
           ),
         ),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.max,
+      child: Column(
         children: [
           Flexible(
-            flex: 2,
-            child: Container(
-              padding: EdgeInsets.all(5),
-              alignment: Alignment.center,
-              color: Colors.transparent,
-              child: Column(
-                children: [
-                  Flexible(
-                    child: Text(
-                      'Tiempo de espera estimado',
-                      style: TextStyle(
-                        color: Theme.of(context).accentColor,
-                        fontFamily: "Lato",
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  SizedBox(height: 10),
-                  Flexible(
-                      child: Text(
-                        _printDuration(_estimatedWaitingTime),
-                        style: TextStyle(
-                          fontFamily: "Lato",
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
+            child: Row(
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                Flexible(
+                  flex: 2,
+                  child: Container(
+                    padding: EdgeInsets.all(5),
+                    alignment: Alignment.center,
+                    color: Colors.transparent,
+                    child: Column(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            'Tiempo de espera estimado',
+                            style: TextStyle(
+                              color: Theme.of(context).accentColor,
+                              fontFamily: "Lato",
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
                         ),
-                      ),
+                        SizedBox(height: 10),
+                        Flexible(
+                          child: Text(
+                            _printDuration(_estimatedWaitingTime),
+                            style: TextStyle(
+                              fontFamily: "Lato",
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ],
-              ),
+                ),
+                VerticalDivider(
+                  thickness: 1,
+                  indent: 20,
+                  endIndent: 20,
+                  color: Colors.grey,
+                ),
+                Flexible(
+                  flex: 2,
+                  child: Container(
+                    padding: EdgeInsets.all(5),
+                    alignment: Alignment.center,
+                    color: Colors.transparent,
+                    child: Column(
+                      children: [
+                        Text(
+                          'Vehículos en lavado',
+                          style: TextStyle(
+                            color: Theme.of(context).accentColor,
+                            fontFamily: "Lato",
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        SizedBox(height: 10),
+                        Text(
+                          _listInvoicesWashing.length.toString(),
+                          style: TextStyle(
+                            fontFamily: "Lato",
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                VerticalDivider(
+                  thickness: 1,
+                  indent: 20,
+                  endIndent: 20,
+                  color: Colors.grey,
+                ),
+                Flexible(
+                  flex: 2,
+                  child: Container(
+                    padding: EdgeInsets.all(5),
+                    alignment: Alignment.center,
+                    color: Colors.transparent,
+                    child: Column(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            'Vehículos en espera',
+                            style: TextStyle(
+                              color: Theme.of(context).accentColor,
+                              fontFamily: "Lato",
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        SizedBox(height: 10),
+                        Flexible(
+                          child: Text(
+                            _listInvoicesWaiting.length.toString(),
+                            style: TextStyle(
+                              fontFamily: "Lato",
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-          VerticalDivider(
-            thickness: 1,
-            indent: 20,
-            endIndent: 20,
-            color: Colors.grey,
-          ),
-          Flexible(
-            flex: 2,
-            child: Container(
-              padding: EdgeInsets.all(5),
-              alignment: Alignment.center,
-              color: Colors.transparent,
-              child: Column(
-                children: [
-                  Text(
-                    'Vehículos en lavado',
-                    style: TextStyle(
-                      color: Theme.of(context).accentColor,
-                      fontFamily: "Lato",
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
+          Container(
+            height: 30,
+            padding: EdgeInsets.only(left: 10, right: 20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              //mainAxisSize: MainAxisSize.max,
+              children: [
+                Text(
+                  'Celdas activas:   ' + _locationData.activeCells.toString(),
+                  style: TextStyle(
+                    color: Theme.of(context).accentColor,
+                    fontFamily: "Lato",
+                    fontWeight: FontWeight.bold,
+                    fontSize: 17,
                   ),
-                  SizedBox(height: 10),
-                  Text(
-                    _listInvoicesWashing.length.toString(),
-                    style: TextStyle(
-                      fontFamily: "Lato",
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
+                ),
+                InkWell(
+                  onTap: _changeActiveCellsValue,
+                  child: Image.asset(
+                    'assets/images/icon_filter1.png',
+                    width: 23.0,
+                    height: 23.0,
                   ),
-                ],
-              ),
-            ),
-          ),
-          VerticalDivider(
-            thickness: 1,
-            indent: 20,
-            endIndent: 20,
-            color: Colors.grey,
-          ),
-          Flexible(
-            flex: 2,
-            child: Container(
-              padding: EdgeInsets.all(5),
-              alignment: Alignment.center,
-              color: Colors.transparent,
-              child: Column(
-                children: [
-                  Flexible(
-                    child: Text(
-                      'Vehículos en espera',
-                      style: TextStyle(
-                        color: Theme.of(context).accentColor,
-                        fontFamily: "Lato",
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  SizedBox(height: 10),
-                  Flexible(
-                    child: Text(
-                      _listInvoicesWaiting.length.toString(),
-                      style: TextStyle(
-                        fontFamily: "Lato",
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ],
@@ -344,7 +380,7 @@ class _FormTurns extends State<FormTurns> with SingleTickerProviderStateMixin {
           .getLocationById(_idLocation)
           .then((loc) => _locationData = loc);
     }
-    _blocInvoice.getConfigurationObject().then((value) => _config = value);
+    //_blocInvoice.getConfigurationObject().then((value) => _config = value);
   }
 
   void _assignTurnCallback(Invoice _invoiceClose) {
@@ -453,11 +489,9 @@ class _FormTurns extends State<FormTurns> with SingleTickerProviderStateMixin {
   }
 
   void _countEstimateWashTime () {
-    List<QueueModel> _queueList = List<QueueModel>();
-    if (_locationData.activeCells != null) {
-      for (int i= 0; i < _locationData.activeCells; i++) {
-        _queueList.add(QueueModel((i+1).toString(), 0));
-      }
+    List<QueueModel> _queueActiveCellsList = List<QueueModel>();
+    List<QueueModel> _queueWashingCellsList = List<QueueModel>();
+    if (_locationData.activeCells != null && _locationData.activeCells > 0) {
       if (_listInvoicesWashing.length > 0) {
         _listInvoicesWashing.forEach((item) {
           DateTime dateStartWash = item.dateStartWashing.toDate();
@@ -471,29 +505,52 @@ class _FormTurns extends State<FormTurns> with SingleTickerProviderStateMixin {
             invoiceDuration = (invoiceDuration / item.countWashingWorkers).round();
           }
           int remainingDuration = invoiceDuration - washCurrentDuration;
-          QueueModel queueTime = _queueList.firstWhere((e) => e.cell == item.washingCell);
-          queueTime.time = queueTime.time + (remainingDuration < 0 ? 0 : remainingDuration);
+          if (_queueWashingCellsList.where((e) => e.cell == item.washingCell).length == 0) {
+            QueueModel newItem = new QueueModel(item.washingCell, remainingDuration);
+            _queueWashingCellsList.add(newItem);
+          } else {
+            QueueModel queueTime = _queueWashingCellsList.firstWhere((e) => e.cell == item.washingCell);
+            queueTime.time = queueTime.time + (remainingDuration < 0 ? 0 : remainingDuration);
+          }
+        });
+      }
+
+      for (int i= 0; i < _locationData.activeCells; i++) {
+        _queueActiveCellsList.add(QueueModel((i+1).toString(), 0));
+      }
+
+      if (_queueWashingCellsList.length > _queueActiveCellsList.length) {
+        _queueWashingCellsList.sort((a, b) => a.time.compareTo(b.time));
+        for(var i=0; i<_queueActiveCellsList.length; i++) {
+          _queueActiveCellsList[i].time = _queueWashingCellsList[i].time;
+        }
+      } else {
+        _queueActiveCellsList.forEach((element) {
+          if (_queueWashingCellsList.where((e) => e.cell == element.cell).length > 0) {
+            QueueModel queueWashingTime = _queueWashingCellsList.firstWhere((e) => e.cell == element.cell);
+            QueueModel queueActiveTime = _queueActiveCellsList.firstWhere((e) => e.cell == element.cell);
+            queueActiveTime.time = queueWashingTime.time;
+          }
         });
       }
 
       if (_listInvoicesWaiting.length > 0) {
+        _listInvoicesWaiting.sort((a, b) => a.washingServicesTime.compareTo(b.washingServicesTime));
         _listInvoicesWaiting.forEach((item) {
-          var min = _queueList.first;
-          _queueList.forEach((e) {
+          var min = _queueActiveCellsList.first;
+          _queueActiveCellsList.forEach((e) {
             if(e.time < min.time) min = e;
           });
 
-          QueueModel queueTime = _queueList.firstWhere((e) => e.cell == min.cell);
+          QueueModel queueTime = _queueActiveCellsList.firstWhere((e) => e.cell == min.cell);
           queueTime.time = queueTime.time + (item.washingServicesTime == null ? 0 : item.washingServicesTime);
         });
       }
-
-      var minTime = _queueList.first;
-      _queueList.forEach((e) {
+      var minTime = _queueActiveCellsList.first;
+      _queueActiveCellsList.forEach((e) {
         if(e.time < minTime.time) minTime = e;
       });
-
-      _estimatedWaitingTime = Duration(minutes: minTime.time);
+      _estimatedWaitingTime = Duration(minutes: minTime.time < 0 ? 0 : minTime.time);
     } else {
       _estimatedWaitingTime = Duration(minutes: 0);
     }
@@ -511,6 +568,53 @@ class _FormTurns extends State<FormTurns> with SingleTickerProviderStateMixin {
           });
         });
       });
+    }
+  }
+
+  void _changeActiveCellsValue() {
+    Alert(
+      context: context,
+      title: 'Seleccione las celdas activas',
+      style: MessagesUtils.alertStyle,
+      content: ChangeActiveCellsWidget(
+        selectActiveCells: _callBackSelectActiveCells,
+        locationData: _locationData,
+      ),
+      buttons: [
+        DialogButton(
+          color: Theme.of(context).accentColor,
+          child: Text(
+            'ASIGNAR',
+            style: Theme.of(context).textTheme.button,
+          ),
+          onPressed: () {
+            Navigator.of(context).pop();
+            _completeAssignActiveCells();
+          },
+        )
+      ],
+    ).show();
+  }
+
+  void _callBackSelectActiveCells(int cellsSelected) {
+    _activeCellsSelected = cellsSelected;
+  }
+
+  void _completeAssignActiveCells() async {
+    if (_activeCellsSelected != null) {
+      Location location = Location.copyWith(
+          origin: _locationData,
+          activeCells: _activeCellsSelected,
+      );
+      await _locationBloc.updateLocationData(location);
+      _locationBloc
+          .getLocationById(_idLocation)
+          .then((loc) {
+          setState(() {
+            _locationData = loc;
+          });
+      });
+      _activeCellsSelected = 0;
     }
   }
 

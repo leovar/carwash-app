@@ -38,7 +38,7 @@ class _CreateLocationAdminPage extends State<CreateLocationAdminPage> {
   final _textInitConsec = TextEditingController();
   final _textNit = TextEditingController();
   final _textPrefix = TextEditingController();
-  final _textActiveCells = TextEditingController();
+  final _textTotalCells = TextEditingController();
   final double _heightTextField = 60;
   bool _locationActive = true;
   bool _sendSms = true;
@@ -205,8 +205,8 @@ class _CreateLocationAdminPage extends State<CreateLocationAdminPage> {
             Container(
               height: _heightTextField,
               child: TextFieldInput(
-                labelText: 'Celdas Activas',
-                textController: _textActiveCells,
+                labelText: 'Celdas Disponibles',
+                textController: _textTotalCells,
                 validate: _validatePrefix,
                 textValidate: 'Escriba un valor',
                 inputType: TextInputType.number,
@@ -377,7 +377,7 @@ class _CreateLocationAdminPage extends State<CreateLocationAdminPage> {
     _printIva = _locationSelected.printIva;
     _textRegimen.text = _locationSelected.regimen;
     _textPhone.text = _locationSelected.phoneNumber;
-    _textActiveCells.text = _locationSelected.activeCells == null ? '0' : _locationSelected.activeCells.toString();
+    _textTotalCells.text = _locationSelected.totalCells == null ? '0' : _locationSelected.totalCells.toString();
   }
 
   bool _validateInputs() {
@@ -448,7 +448,16 @@ class _CreateLocationAdminPage extends State<CreateLocationAdminPage> {
       MessagesUtils.showAlertWithLoading(context: context, title: 'Guardando')
           .show();
 
-      final location = Location(
+      var minActiveCells = 0;
+      if (_locationSelected != null) {
+        var totalCells = int.tryParse(_textTotalCells.text.trim()) ?? 0;
+        if ((_locationSelected?.activeCells ?? 0) > totalCells)
+          minActiveCells = 0;
+        else
+          minActiveCells = _locationSelected?.activeCells ?? 0;
+      }
+
+      var location = Location(
         id: _locationSelected != null ? _locationSelected.id : null,
         locationName: _textLocationName.text.trim(),
         address: _textAddress.text.trim(),
@@ -458,13 +467,14 @@ class _CreateLocationAdminPage extends State<CreateLocationAdminPage> {
         finalConsec: int.tryParse(_textFinalConsec.text.trim()) ?? 0.0,
         prefix: _textPrefix.text.trim(),
         active: _locationActive,
-        creationDate: Timestamp.now(),
+        creationDate: _locationSelected != null ? _locationSelected.creationDate : Timestamp.now(),
         sendMessageSms: _sendSms,
         sendMessageWp: _sendWp,
         printIva: _printIva,
         phoneNumber: _textPhone.text.trim(),
         regimen: _textRegimen.text.trim(),
-        activeCells: int.tryParse(_textActiveCells.text.trim()) ?? 0,
+        activeCells: _locationSelected != null ? minActiveCells : 0,
+        totalCells: int.tryParse(_textTotalCells.text.trim()) ?? 0,
       );
 
       _blocLocation.updateLocationData(location);

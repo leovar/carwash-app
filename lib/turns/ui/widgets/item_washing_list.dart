@@ -50,6 +50,7 @@ class _ItemWashingList extends State<ItemWashingList> {
 
   @override
   Widget build(BuildContext context) {
+    final formatter = NumberFormat("#,###");
     Invoice _invoiceList = widget.listInvoices[widget.index];
     DateTime dateStart = _invoiceList.dateStartWashing.toDate();
     DateTime dateCurrent = DateTime.now();
@@ -70,7 +71,7 @@ class _ItemWashingList extends State<ItemWashingList> {
     var washCurrentDurationTime = Duration(minutes: washCurrentDuration);
     return ConstrainedBox(
       constraints: BoxConstraints(
-        minHeight: 115,
+        minHeight: 128,
       ),
       child: Container(
         padding: EdgeInsets.only(
@@ -164,6 +165,17 @@ class _ItemWashingList extends State<ItemWashingList> {
                                 fontFamily: "Lato",
                                 fontWeight: FontWeight.normal,
                                 fontSize: 15,
+                              ),
+                            ),
+                          ),
+                          Flexible(
+                            child: Text(
+                              'Valor:  ' + '\$${formatter.format(_invoiceList.totalPrice)}',
+                              style: TextStyle(
+                                color: Theme.of(context).cardColor,
+                                fontFamily: "Lato",
+                                fontWeight: FontWeight.normal,
+                                fontSize: 14,
                               ),
                             ),
                           ),

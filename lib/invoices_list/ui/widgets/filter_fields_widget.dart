@@ -105,7 +105,7 @@ class _FilterFieldsWidget extends State<FilterFieldsWidget> {
             labelText: 'Consecutivo',
           ),
           inputFormatters: [
-            WhitelistingTextInputFormatter(RegExp("^[0-9]*"))
+            FilteringTextInputFormatter.allow(RegExp('[0-9]')),
           ],
           keyboardType: TextInputType.number,
         ),

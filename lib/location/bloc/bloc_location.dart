@@ -13,8 +13,9 @@ class BlocLocation implements Bloc {
   //1. Obtener locaciones desde la bd
   //2. Crear o Editar locaciones
 
-  void updateLocationData(Location location) async {
-    _locationRepository.updateLocationDataRepository(location);
+  Future<DocumentReference> updateLocationData(Location location) async {
+    DocumentReference ref = await _locationRepository.updateLocationDataRepository(location);
+    return ref;
   }
 
   Future<DocumentReference> getLocationReference(String locationId) async {
