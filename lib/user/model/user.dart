@@ -16,6 +16,7 @@ class User extends Equatable {
   final bool isAdministrator;
   final bool isCoordinator;
   final bool isOperator;
+  bool isSelected;
 
   User({
     @required this.uid,
@@ -29,6 +30,7 @@ class User extends Equatable {
     this.isAdministrator,
     this.isCoordinator,
     this.isOperator,
+    this.isSelected,
   });
 
   factory User.fromJson(Map<String, dynamic> json, {String id}) {
@@ -50,6 +52,7 @@ class User extends Equatable {
       isAdministrator: json['isAdministrator'],
       isCoordinator: json['isCoordinator'],
       isOperator: json['isOperator'],
+      isSelected: false,
     );
   }
 
@@ -57,14 +60,14 @@ class User extends Equatable {
     return {
       'uid': this.uid,
       'name': this.name,
-      'email' : this.email,
-      'photoUrl' : this.photoUrl,
-      'lastSignIn' : DateTime.now(),
-      'active' : this.active,
-      'locations' : this.locations,
-      'isAdministrator' : this.isAdministrator,
-      'isCoordinator' : this.isCoordinator,
-      'isOperator' : this.isOperator,
+      'email': this.email,
+      'photoUrl': this.photoUrl,
+      'lastSignIn': DateTime.now(),
+      'active': this.active,
+      'locations': this.locations,
+      'isAdministrator': this.isAdministrator,
+      'isCoordinator': this.isCoordinator,
+      'isOperator': this.isOperator,
     };
   }
 
@@ -75,9 +78,10 @@ class User extends Equatable {
     String email,
     String photoUrl,
     Timestamp lastSignIn,
+    bool isSelected,
   }) {
     return User(
-      id : origin.id,
+      id: origin.id,
       uid: uid ?? origin.uid,
       active: origin.active,
       name: name ?? origin.name,
@@ -87,21 +91,48 @@ class User extends Equatable {
       isAdministrator: origin.isAdministrator,
       isCoordinator: origin.isCoordinator,
       isOperator: origin.isOperator,
+      isSelected: isSelected ?? origin.isSelected,
     );
+  }
+
+  factory User.copyUserOperatorToSaveInvoice({String id, String name}) {
+    return User(
+      id: id,
+      name: name,
+    );
+  }
+
+  factory User.fromJsonOperatorIntoInvoice(Map<dynamic, dynamic> json) {
+    return User(
+      id: json['id'],
+      name: json['name'],
+      isSelected: true,
+    );
+  }
+
+  Map<String, dynamic> toJsonInvoiceOperator(
+      String userId,
+      String name,
+      ) {
+    return {
+      'id': userId,
+      'name': name,
+    };
   }
 
   @override
   List<Object> get props => [
-    id,
-    uid,
-    name,
-    email,
-    photoUrl,
-    lastSignIn,
-    active,
-    locations,
-    isAdministrator,
-    isCoordinator,
-    isOperator,
-  ];
+        id,
+        uid,
+        name,
+        email,
+        photoUrl,
+        lastSignIn,
+        active,
+        locations,
+        isAdministrator,
+        isCoordinator,
+        isOperator,
+        isSelected,
+      ];
 }

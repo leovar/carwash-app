@@ -44,6 +44,7 @@ import '../../model/header_services.dart';
 import 'carousel_cars_widget.dart';
 import 'fields_invoice.dart';
 import 'fields_menu_invoice.dart';
+import 'fields_operators.dart';
 
 class FormInvoice extends StatefulWidget {
   final Invoice editInvoice;
@@ -64,6 +65,7 @@ class _FormInvoice extends State<FormInvoice> {
   bool _editForm = true;
   bool _editOperator = false;
   bool _enablePerIncidence = false;
+  bool _closedInvoice = false;
 
   ///global variables
   //Esta variable _scaffoldKey se usa para poder abrir el drawer desde un boton diferente al que se coloca por defecto en el AppBar
@@ -121,6 +123,7 @@ class _FormInvoice extends State<FormInvoice> {
   bool _isUserAdmin = false;
   bool _canceledInvoice = false;
   Configuration _config = Configuration();
+  List<User> _listOperators = <User>[];
 
   @override
   void initState() {
@@ -268,6 +271,7 @@ class _FormInvoice extends State<FormInvoice> {
                       vehicleTypeSelected = vehicleTypeList[index];
                       _listAdditionalProducts = <AdditionalProduct>[];
                       _listProduct = <Product>[];
+                      _listOperators = <User>[];
                     });
                   }
                 : null,
@@ -369,6 +373,16 @@ class _FormInvoice extends State<FormInvoice> {
                     enable: _enablePerIncidence,
                   ),
                 ),
+              ),
+              SizedBox(height: 9),
+              FieldsOperators(
+                  callbackOperatorsList: _setOperatorsDb,
+                  operatorsListCallback: _listOperators,
+                  enableForm: _enableForm,
+                  selectedOperatorsCount: _listOperators.where((f) => f.isSelected).toList().length,
+                  editForm: _editForm,
+                  closedInvoice: _closedInvoice,
+                  idLocation: _idLocation,
               ),
               SizedBox(height: 9),
               FieldsProducts(
@@ -624,7 +638,7 @@ class _FormInvoice extends State<FormInvoice> {
     );
   }
 
-  ///Functions
+  ///  Functions  ////////////////////////////////////////////////
 
   ///Image Functions
   void _menuSourceAddImage() {
@@ -834,6 +848,13 @@ class _FormInvoice extends State<FormInvoice> {
     });
   }
 
+  ///Functions Operator Users List
+  void _setOperatorsDb(List<User> operatorsListSelected) {
+    setState(() {
+      _listOperators = operatorsListSelected;
+    });
+  }
+
   ///Function validate exist customer
   /// After digit placa validate Vehicle and Customer
   void _onFinalEditPlaca() {
@@ -1018,6 +1039,7 @@ class _FormInvoice extends State<FormInvoice> {
         int _countProducts = 0;
         int _countAdditionalProducts = 0;
         int _servicesWashingTime = 0;
+        int _countOperators = 0;
 
         //Get Current user reference
         DocumentReference _userRef = await _userBloc.getCurrentUserReference();
@@ -1153,9 +1175,24 @@ class _FormInvoice extends State<FormInvoice> {
           });
         }
 
+        //Save user operators
+        List<User> _operatorsToSave = [];
+        List<User> _selectedOperators = _listOperators.where((u) => u.isSelected).toList();
+        if (_selectedOperators.length > 0) {
+          _selectedOperators.forEach((user) {
+            var operatorSave = User.copyUserOperatorToSaveInvoice(
+              id: user.id,
+              name: user.name,
+            );
+            _operatorsToSave.add(operatorSave);
+          });
+        }
+
+        //Get count operators
+        _countOperators = _listOperators.where((u) => u.isSelected).toList().length;
+
         //Get count products
-        _countProducts =
-            _listProduct.where((f) => f.isSelected).toList().length;
+        _countProducts = _listProduct.where((f) => f.isSelected).toList().length;
         _countAdditionalProducts = _listAdditionalProducts.length;
 
         //Get Consecutive
@@ -1222,6 +1259,8 @@ class _FormInvoice extends State<FormInvoice> {
           endWash: false,
           startWashing: false,
           washingServicesTime: _servicesWashingTime,
+          operatorUsers: _operatorsToSave,
+          countOperators: _countOperators,
         );
         DocumentReference invoiceReference =
             await _blocInvoice.saveInvoice(_invoice);
@@ -1316,6 +1355,7 @@ class _FormInvoice extends State<FormInvoice> {
     _textObservation.text = invoiceToEdit.observation;
     _textIncidence.text = invoiceToEdit.incidence;
     _selectedPaymentMethod = invoiceToEdit.paymentMethod;
+    _closedInvoice = invoiceToEdit.invoiceClosed;
 
     //get vehicle reference
     _vehicleReference =
@@ -1357,6 +1397,7 @@ class _FormInvoice extends State<FormInvoice> {
     });
     setState(() {
       _listProduct = productEditList;
+      _listOperators = invoiceToEdit.operatorUsers;
     });
     List<String> imagesList =
         await _blocInvoice.getInvoiceImages(invoiceToEdit.id);

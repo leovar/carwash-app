@@ -57,6 +57,9 @@ class Invoice extends Equatable {
   final bool endWash;
   final Timestamp dateEndWash;
   final int washingTime;
+  final List<User> operatorUsers;
+  final String operatorsSplit;
+  final int countOperators;
 
   Invoice({
     this.id,
@@ -105,6 +108,9 @@ class Invoice extends Equatable {
     this.endWash,
     this.washingServicesTime,
     this.washingTime,
+    this.operatorUsers,
+    this.operatorsSplit,
+    this.countOperators,
   });
 
   Map<String, dynamic> toJson() {
@@ -149,13 +155,16 @@ class Invoice extends Equatable {
       'endWash' : this.endWash,
       'washingServicesTime' : this.washingServicesTime,
       'washingTime' : this.washingTime,
+      'countOperators' : this.countOperators,
     };
   }
 
   factory Invoice.fromJson(Map<String, dynamic> json, {String id}) {
     List<DocumentReference> locationsListDb = <DocumentReference>[];
     List<Product> listProducts = <Product>[];
+    List<User> listOperators = <User>[];
     var pSplit = '';
+    var oSplit = '';
     List locationsList = json['locations'];
     locationsList?.forEach((drLocation) {
       locationsListDb.add(drLocation);
@@ -165,6 +174,12 @@ class Invoice extends Equatable {
       Product productResult = Product.fromJsonProductIntoInvoice(element, json['uidVehicleType'], json['creationDate']);
       listProducts.add(productResult);
       pSplit = pSplit + productResult.productName + ', ';
+    });
+    var operators = json['operatorUsers'];
+    operators?.forEach((item) {
+      User userResult = User.fromJsonOperatorIntoInvoice(item);
+      listOperators.add(userResult);
+      oSplit = oSplit + userResult.name + ', ';
     });
 
     return Invoice(
@@ -211,6 +226,9 @@ class Invoice extends Equatable {
       endWash : json['endWash']??false,
       washingServicesTime : json['washingServicesTime'],
       washingTime : json['washingTime'],
+      operatorUsers : listOperators,
+      operatorsSplit : oSplit,
+      countOperators : json['countOperators'],
     );
   }
 
@@ -234,6 +252,8 @@ class Invoice extends Equatable {
     Timestamp dateEndWash,
     int countWashingWorkers,
     int washingTime,
+    List<User> listOperators,
+    int countOperators,
   }) {
     return Invoice(
       id: origin.id,
@@ -281,6 +301,9 @@ class Invoice extends Equatable {
       endWash : endWash ?? origin.endWash,
       washingServicesTime : origin.washingServicesTime,
       washingTime : washingTime ?? origin.washingTime,
+      operatorUsers: listOperators ?? origin.operatorUsers,
+      operatorsSplit : origin.operatorsSplit,
+      countOperators : countOperators ?? origin.countOperators,
     );
   }
 
@@ -329,5 +352,8 @@ class Invoice extends Equatable {
         endWash,
         washingServicesTime,
         washingTime,
+        operatorUsers,
+        operatorsSplit,
+        countOperators,
       ];
 }

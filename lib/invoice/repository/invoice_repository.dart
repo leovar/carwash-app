@@ -38,6 +38,15 @@ class InvoiceRepository {
       mapProducts.add(mapProduct);
     });
     jsonInvoice['invoiceProducts'] = mapProducts;
+    var mapOperators = [];
+    invoice.operatorUsers.forEach((item) {
+      var mapOperator = User().toJsonInvoiceOperator(
+        item.id,
+        item.name,
+      );
+      mapOperators.add(mapOperator);
+    });
+    jsonInvoice['operatorUsers'] = mapOperators;
     DocumentReference ref =
         _db.collection(FirestoreCollections.invoices).document(invoice.id);
     ref.setData(jsonInvoice, merge: true);
