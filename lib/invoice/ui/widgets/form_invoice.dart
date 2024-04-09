@@ -63,7 +63,6 @@ class _FormInvoice extends State<FormInvoice> {
   final _locationBloc = BlocLocation();
   bool _enableForm;
   bool _editForm = true;
-  bool _editOperator = false;
   bool _enablePerIncidence = false;
   bool _closedInvoice = false;
 
@@ -106,14 +105,13 @@ class _FormInvoice extends State<FormInvoice> {
   final _textTimeDelivery = TextEditingController();
   final _textObservation = TextEditingController();
   final _textIncidence = TextEditingController();
-  String _selectOperator = "";
   String _selectCoordinator = "";
   List<Product> _listProduct = <Product>[];
   List<AdditionalProduct> _listAdditionalProducts = <AdditionalProduct>[];
   bool _validatePlaca = false;
   Customer _customer;
   DocumentReference _vehicleReference;
-  int _listOperatorsCount = 0;
+  int _countOperators = 0;
   int _listCoordinatorsCount = 0;
   int _countBrands = 0;
   int _countBrandReferences = 0;
@@ -130,7 +128,7 @@ class _FormInvoice extends State<FormInvoice> {
     super.initState();
     _enableForm = false;
     _clientFocusNode = FocusNode();
-    _listOperatorsCount = 0;
+    _countOperators = 0;
     _listCoordinatorsCount = 0;
     _countBrands = 0;
     _countColors = 0;
@@ -328,13 +326,11 @@ class _FormInvoice extends State<FormInvoice> {
               ),
               SizedBox(height: 9),
               FieldsMenusInvoice(
-                listCountOperators: _listOperatorsCount,
                 listCountCoordinators: _listCoordinatorsCount,
                 listCountBrands: _countBrands,
                 listCountColors: _countColors,
                 listCountBrandReference: _countBrandReferences,
                 listCountPaymentMethods: _countPaymentMethods,
-                cbHandlerOperator: _setHandlerUsersOperator,
                 cbHandlerCoordinator: _setHandlerUserCoordinator,
                 cbHandlerVehicleBrand: _setHandlerVehicleBrand,
                 cbHandlerVehicleBrandReference: _setHandlerBrandReferences,
@@ -342,7 +338,6 @@ class _FormInvoice extends State<FormInvoice> {
                 cbHandlerTypeSex: _setHandlerTypeSex,
                 cbHandlerPaymentMethod: _setHandlerPaymentMethod,
                 idLocation: _idLocation,
-                selectedOperator: _selectOperator,
                 selectedCoordinator: _selectCoordinator,
                 selectedVehicleBrand: _selectBrand,
                 selectVehicleBrandReference: _selectedBrandReference,
@@ -351,7 +346,6 @@ class _FormInvoice extends State<FormInvoice> {
                 selectedPaymentMethod: _selectedPaymentMethod,
                 uidVehicleType: vehicleTypeSelected.uid,
                 enableForm: _enableForm,
-                editOperator: _editOperator,
               ),
               SizedBox(height: 9),
               TextFieldInput(
@@ -749,15 +743,6 @@ class _FormInvoice extends State<FormInvoice> {
   }
 
   ///Functions Select Menu
-  void _setHandlerUsersOperator(
-      String operatorSelect, int operatorsCount, int operationType) {
-    if (operationType == 1) {
-      _selectOperator = operatorSelect;
-    } else {
-      _listOperatorsCount = operatorsCount;
-    }
-  }
-
   void _setHandlerUserCoordinator(
       String selectCoordinator, int countList, int operationType) {
     if (operationType == 1) {
@@ -1031,7 +1016,6 @@ class _FormInvoice extends State<FormInvoice> {
         DocumentReference
             _vehicleTypeRef; //esta referencia debe traerse de la bd, en el momento se construye en la app
         DocumentReference _customerReference;
-        DocumentReference _operatorReference;
         DocumentReference _coordinatorReference;
         double _total = 0;
         double _iva = 0;
@@ -1043,12 +1027,6 @@ class _FormInvoice extends State<FormInvoice> {
 
         //Get Current user reference
         DocumentReference _userRef = await _userBloc.getCurrentUserReference();
-
-        //Get Operator reference
-        if (_selectOperator.isNotEmpty) {
-          _operatorReference =
-              await _userBloc.getUserReferenceByUserName(_selectOperator);
-        }
 
         //Get Coordinator reference
         if (_selectCoordinator.isNotEmpty) {
@@ -1230,8 +1208,6 @@ class _FormInvoice extends State<FormInvoice> {
           userOwner: widget.editInvoice != null
               ? widget.editInvoice.userOwner
               : _userRef,
-          userOperator: _operatorReference,
-          userOperatorName: _selectOperator,
           userCoordinator: _coordinatorReference,
           userCoordinatorName: _selectCoordinator,
           creationDate: widget.editInvoice != null
@@ -1342,14 +1318,10 @@ class _FormInvoice extends State<FormInvoice> {
   ///Set Fields Invoice to Edit
   void _editInvoice(Invoice invoiceToEdit) async {
     _textPlaca.text = invoiceToEdit.placa;
-    _selectOperator = invoiceToEdit.userOperatorName;
     _selectCoordinator = invoiceToEdit.userCoordinatorName;
     _selectBrand = invoiceToEdit.vehicleBrand ?? '';
     _selectedBrandReference = invoiceToEdit.brandReference ?? '';
     _selectColor = invoiceToEdit.vehicleColor ?? '';
-    if (_selectOperator.isEmpty) {
-      _editOperator = true;
-    }
     _approveDataProcessing = invoiceToEdit.approveDataProcessing;
     _textTimeDelivery.text = invoiceToEdit.timeDelivery;
     _textObservation.text = invoiceToEdit.observation;
@@ -1451,7 +1423,7 @@ class _FormInvoice extends State<FormInvoice> {
       }
     }
 
-    return (_editOperator || _editForm || _enablePerIncidence) ? true : false;
+    return (_editForm || _enablePerIncidence) ? true : false;
   }
 
   Future<bool> _alertBackButton() {

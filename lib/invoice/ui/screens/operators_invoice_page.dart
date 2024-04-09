@@ -10,18 +10,22 @@ import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 
 class OperatorsInvoicePage extends StatefulWidget {
   final Function(List<User>) callbackSetOperatorsList;
+  final Function() callbackFinishInvoice;
   List<User> usersListCallback;
   final bool editForm;
   final String idLocation;
   final bool closedInvoice;
+  final bool fromCompleteInvoice;
 
   OperatorsInvoicePage({
     Key key,
     this.callbackSetOperatorsList,
+    this.callbackFinishInvoice,
     this.usersListCallback,
     this.editForm,
     this.idLocation,
     this.closedInvoice,
+    this.fromCompleteInvoice,
   });
 
   @override
@@ -33,7 +37,6 @@ class _OperatorsInvoicePage extends State<OperatorsInvoicePage> {
 
   @override
   Widget build(BuildContext context) {
-    //_blocInvoice = BlocProvider.of(context);
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -90,9 +93,7 @@ class _OperatorsInvoicePage extends State<OperatorsInvoicePage> {
         _userGet.add(userSelected);
       }
     });
-
     widget.usersListCallback = _userGet;
-    //_userGet = _userGet.map((user) => user.name).cast<User>().toList();
 
     return Column(
       children: [
@@ -102,11 +103,12 @@ class _OperatorsInvoicePage extends State<OperatorsInvoicePage> {
             scrollDirection: Axis.vertical,
             itemBuilder: (BuildContext context, int index) {
               return ItemOperator(
-                _validateSaveOperators,
+                widget.callbackSetOperatorsList,
                 widget.usersListCallback,
                 index,
                 widget.editForm,
                 widget.closedInvoice,
+                widget.fromCompleteInvoice,
               );
             },
           ),
@@ -119,7 +121,7 @@ class _OperatorsInvoicePage extends State<OperatorsInvoicePage> {
               padding: EdgeInsets.symmetric(vertical: 15, horizontal: 25),
               color: Color(0xFF59B258),
               child: Text(
-                "Aceptar",
+                widget.fromCompleteInvoice ?? false ? "Terminar" : "Aceptar",
                 style: TextStyle(
                   fontFamily: "Lato",
                   decoration: TextDecoration.none,
@@ -130,19 +132,14 @@ class _OperatorsInvoicePage extends State<OperatorsInvoicePage> {
               ),
               onPressed: () {
                 Navigator.pop(context);
+                if (widget.fromCompleteInvoice ?? false) {
+                  widget.callbackFinishInvoice();
+                }
               },
             ),
           ),
         ),
       ],
     );
-  }
-
-  void _validateSaveOperators(List<User> users) {
-    if (widget.editForm) {
-
-    } else {
-      widget.callbackSetOperatorsList(users);
-    }
   }
 }

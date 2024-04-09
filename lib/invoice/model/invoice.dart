@@ -175,12 +175,19 @@ class Invoice extends Equatable {
       listProducts.add(productResult);
       pSplit = pSplit + productResult.productName + ', ';
     });
+    if (pSplit != null && pSplit.length > 0) {
+      pSplit = pSplit.substring(0, pSplit.length - 2);
+    }
+
     var operators = json['operatorUsers'];
     operators?.forEach((item) {
       User userResult = User.fromJsonOperatorIntoInvoice(item);
       listOperators.add(userResult);
       oSplit = oSplit + userResult.name + ', ';
     });
+    if (oSplit != null && oSplit.length > 0) {
+      oSplit = oSplit.substring(0, oSplit.length - 2);
+    }
 
     return Invoice(
       id: id ?? '',

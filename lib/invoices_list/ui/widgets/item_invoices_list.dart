@@ -149,11 +149,11 @@ class _ItemInvoicesList extends State<ItemInvoicesList> {
                           ),
                           Flexible(
                             child: Visibility(
-                              visible: (invoiceList.userOperatorName != null)
+                              visible: (invoiceList.operatorsSplit != null)
                                   ? true
                                   : false,
                               child: Text(
-                                invoiceList.userOperatorName ?? '',
+                                invoiceList.operatorsSplit ?? '',
                                 style: TextStyle(
                                   color: Color(0xFF787A71),
                                   fontFamily: "Lato",

@@ -37,8 +37,6 @@ class _FieldsOperators extends State<FieldsOperators> {
         Container(
           height: 50,
           child: Row(
-            //mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            //crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisSize: MainAxisSize.max,
             children: [
               Flexible(
@@ -85,6 +83,7 @@ class _FieldsOperators extends State<FieldsOperators> {
                                   editForm: widget.editForm,
                                   idLocation: widget.idLocation,
                                   closedInvoice: widget.closedInvoice,
+                                  fromCompleteInvoice: false,
                               ),
                             ),
                         );

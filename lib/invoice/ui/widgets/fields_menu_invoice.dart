@@ -6,20 +6,17 @@ import 'package:flutter/material.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 
 class FieldsMenusInvoice extends StatefulWidget {
-  final int listCountOperators;
   final int listCountCoordinators;
   final int listCountBrands;
   final int listCountBrandReference;
   final int listCountColors;
   final int listCountPaymentMethods;
-  final Function(String, int, int) cbHandlerOperator;
   final Function(String, int, int) cbHandlerCoordinator;
   final Function(String, int, int) cbHandlerVehicleBrand;
   final Function(String, int, int) cbHandlerVehicleBrandReference;
   final Function(String, int, int) cbHandlerVehicleColor;
   final Function(String, int, int) cbHandlerTypeSex;
   final Function(String, int, int) cbHandlerPaymentMethod;
-  final selectedOperator;
   final selectedCoordinator;
   final String idLocation;
   final String selectedVehicleBrand;
@@ -29,24 +26,20 @@ class FieldsMenusInvoice extends StatefulWidget {
   final String selectedPaymentMethod;
   final int uidVehicleType;
   final bool enableForm;
-  final bool editOperator;
 
   FieldsMenusInvoice({
     Key key,
-    this.listCountOperators,
     this.listCountCoordinators,
     this.listCountBrands,
     this.listCountBrandReference,
     this.listCountColors,
     this.listCountPaymentMethods,
-    this.cbHandlerOperator,
     this.cbHandlerCoordinator,
     this.cbHandlerVehicleBrand,
     this.cbHandlerVehicleBrandReference,
     this.cbHandlerVehicleColor,
     this.cbHandlerTypeSex,
     this.cbHandlerPaymentMethod,
-    this.selectedOperator,
     this.selectedCoordinator,
     this.idLocation,
     this.selectedVehicleBrand,
@@ -56,7 +49,6 @@ class FieldsMenusInvoice extends StatefulWidget {
     this.selectedPaymentMethod,
     this.uidVehicleType,
     this.enableForm,
-    this.editOperator,
   });
 
   @override
@@ -67,10 +59,8 @@ class FieldsMenusInvoice extends StatefulWidget {
 
 class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
   BlocInvoice _blocInvoice;
-  List<User> _listUsersOperators;
   List<User> _listUsersCoordinators;
   List<PaymentMethod> _listMasterPaymentsMethods;
-  List<String> _listOperators = <String>[];
   List<String> _listCoordinators = <String>[];
   List<String> _listBrands = <String>[];
   List<String> _listBrandReferences = <String>[];
@@ -79,7 +69,6 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
   List<String> _listPaymentMethods = <String>[];
   int _vehicleType = 0;
   String _selectTypeSex = '';
-  String _selectOperator = '';
   String _selectCoordinator = '';
   String _selectedBrand = '';
   String _selectBrandReference = '';
@@ -96,7 +85,6 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
     setState(() {
       _selectedBrand = widget.selectedVehicleBrand;
       _selectedColor = widget.selectedVehicleColor;
-      _selectOperator = widget.selectedOperator;
       _selectCoordinator = widget.selectedCoordinator;
       _selectTypeSex = widget.selectedTypeSex;
       _selectPaymentMethod = widget.selectedPaymentMethod;
@@ -130,50 +118,10 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
         SizedBox(height: 12),
         _getColorsStream(),
         SizedBox(height: 12),
-        _getOperators(),
-        SizedBox(height: 12),
         _getCoordinators(),
         SizedBox(height: 12),
         _getPaymentMethods(),
       ],
-    );
-  }
-
-  Widget _getOperators() {
-    //El contador inicial arranca en 0, al consultra los usuarios operadores por primera vez
-    // ya queda cargado con la cantidad de usuarios encontrados y no tiene que volver a hacer la consulta
-    // cada vez que hace un set state.
-    if (widget.listCountOperators == 0) {
-      return StreamBuilder(
-        stream: _blocInvoice.operatorsByLocationStream(widget.idLocation),
-        builder: (BuildContext context, AsyncSnapshot snapshot) {
-          switch (snapshot.connectionState) {
-            case ConnectionState.waiting:
-              return CircularProgressIndicator();
-            default:
-              return showPopUpOperators(snapshot);
-          }
-        },
-      );
-    } else {
-      return chargeOperatorsControl();
-    }
-  }
-
-  Widget showPopUpOperators(AsyncSnapshot snapshot) {
-    _listUsersOperators = _blocInvoice.buildOperators(snapshot.data.documents);
-    _listOperators = _listUsersOperators.map((user) => user.name).toList();
-    widget.cbHandlerOperator('', _listUsersOperators.length, 2);
-    return chargeOperatorsControl();
-  }
-
-  Widget chargeOperatorsControl() {
-    return PopUpMenuWidget(
-      popUpName: 'Operador',
-      selectValue: _cbSelectValueOperator,
-      listString: _listOperators,
-      valueSelect: _selectOperator,
-      enableForm: (widget.editOperator || widget.enableForm) ? true : false,
     );
   }
 
@@ -359,11 +307,6 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
   }
 
   /// Functions
-
-  void _cbSelectValueOperator(String valueSelect) {
-    _selectOperator = valueSelect;
-    widget.cbHandlerOperator(valueSelect, 0, 1);
-  }
 
   void _cbSelectValueCoordinator(String valueSelect) {
     _selectCoordinator = valueSelect;
