@@ -465,6 +465,7 @@ class InvoiceRepository {
         .collection(FirestoreCollections.invoices)
         .where(FirestoreCollections.invoiceFieldLocation, isEqualTo: locationReference)
         .where(FirestoreCollections.invoiceClosed, isEqualTo: false)
+        .where(FirestoreCollections.invoiceClosedDate, isNull: true)
         .where(FirestoreCollections.invoiceStartWashing, isEqualTo: false)
         .where(FirestoreCollections.invoiceCancelled, isEqualTo: false);
     return querySnapshot.snapshots();

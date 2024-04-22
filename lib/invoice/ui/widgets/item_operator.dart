@@ -1,4 +1,5 @@
 import 'package:car_wash_app/user/model/user.dart';
+import 'package:car_wash_app/widgets/messages_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -30,7 +31,11 @@ class _ItemOperator extends State<ItemOperator> {
           ? () {
               setState(() {
                 if (widget.operatorList[widget.index].isSelected) {
-                  widget.operatorList[widget.index].isSelected = false;
+                  List<User> selected = widget.operatorList.where((u) => u.isSelected).toList();
+                  if (!widget.editForm && selected.length == 1)
+                    MessagesUtils.showAlert(context: context, title: 'No se pueden eliminar todos los operadores').show();
+                  else
+                    widget.operatorList[widget.index].isSelected = false;
                 } else {
                   widget.operatorList[widget.index].isSelected = true;
                 }

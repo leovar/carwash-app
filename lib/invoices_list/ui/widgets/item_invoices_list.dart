@@ -9,6 +9,7 @@ class ItemInvoicesList extends StatefulWidget {
   final int index;
   final bool updateDate;
   final bool isAdmon;
+  final Function(Invoice) finishInvoice;
   final Function(Invoice) closeInvoice;
 
   ItemInvoicesList(
@@ -17,6 +18,7 @@ class ItemInvoicesList extends StatefulWidget {
       this.index,
       this.updateDate,
       this.isAdmon,
+      this.finishInvoice,
       this.closeInvoice});
 
   @override
@@ -72,8 +74,12 @@ class _ItemInvoicesList extends State<ItemInvoicesList> {
   }
 
   Widget _itemDecoration(Invoice invoiceList) {
-    bool _visibleClosesText = ((invoiceList.invoiceClosed??false) && (invoiceList.paymentMethod??'') != '') ?? false;
+    bool _visibleClosesText = ((invoiceList.invoiceClosed ?? false) &&
+            (invoiceList.paymentMethod ?? '') != '') ??
+        false;
     bool _cancelInvoice = invoiceList.cancelledInvoice ?? false;
+    bool _finishedInvoice =
+    ((invoiceList.countOperators ?? 0) > 0 && invoiceList.closedDate != null) ? true : false;
     final formatterNumber = NumberFormat("#,###");
     return ConstrainedBox(
       constraints: BoxConstraints(
@@ -217,28 +223,53 @@ class _ItemInvoicesList extends State<ItemInvoicesList> {
                               ),
                             ),
                           )
-                        : Container(
-                            margin: EdgeInsets.only(right: 2),
-                            child: ButtonTheme(
-                              minWidth: 84,
-                              child: RaisedButton(
-                                shape: RoundedRectangleBorder(
-                                    borderRadius:
-                                        new BorderRadius.circular(18.0),
-                                    side: BorderSide(
-                                        color: Theme.of(context).accentColor)),
-                                color: Theme.of(context).accentColor,
-                                onPressed: () {
-                                  widget.closeInvoice(invoiceList);
-                                },
-                                textColor: Colors.white,
-                                child: Text(
-                                  'Completar'.toUpperCase(),
-                                  style: TextStyle(fontSize: 12),
+                        : _finishedInvoice
+                            ? Container(
+                                margin: EdgeInsets.only(right: 2),
+                                child: ButtonTheme(
+                                  minWidth: 84,
+                                  child: RaisedButton(
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            new BorderRadius.circular(18.0),
+                                        side: BorderSide(
+                                            color:
+                                                Theme.of(context).accentColor)),
+                                    color: Theme.of(context).accentColor,
+                                    onPressed: () {
+                                      widget.closeInvoice(invoiceList);
+                                    },
+                                    textColor: Colors.white,
+                                    child: Text(
+                                      'Completar'.toUpperCase(),
+                                      style: TextStyle(fontSize: 12),
+                                    ),
+                                  ),
+                                ),
+                              )
+                            : Container(
+                                margin: EdgeInsets.only(right: 2),
+                                child: ButtonTheme(
+                                  minWidth: 84,
+                                  child: RaisedButton(
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            new BorderRadius.circular(18.0),
+                                        side: BorderSide(
+                                            color:
+                                                Theme.of(context).errorColor)),
+                                    color: Theme.of(context).errorColor,
+                                    onPressed: () {
+                                      widget.finishInvoice(invoiceList);
+                                    },
+                                    textColor: Colors.white,
+                                    child: Text(
+                                      'Terminar'.toUpperCase(),
+                                      style: TextStyle(fontSize: 12),
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
-                          ),
               ),
             ),
           ],

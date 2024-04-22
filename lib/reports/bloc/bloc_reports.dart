@@ -1,5 +1,6 @@
 
 import 'dart:ffi';
+import 'dart:io';
 
 import 'package:car_wash_app/invoice/bloc/bloc_invoice.dart';
 import 'package:car_wash_app/invoice/model/invoice.dart';
@@ -7,6 +8,7 @@ import 'package:car_wash_app/invoice/repository/invoice_repository.dart';
 import 'package:car_wash_app/product/bloc/product_bloc.dart';
 import 'package:car_wash_app/product/model/product.dart';
 import 'package:car_wash_app/reports/repository/reports_repository.dart';
+import 'package:car_wash_app/user/model/user.dart';
 import 'package:car_wash_app/widgets/messages_utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -38,9 +40,53 @@ class BlocReports implements Bloc {
     return invoices;
   }
 
-  void updateInfoInvoices(List<Invoice> invoices) async {
+  //TODO metodo temporal para solucionar error con los id de los servicios dentro de las facturas
+  void updateInfoOperatorsInvoices(List<Invoice> invoices) async {
     invoices.forEach((item) async {
-      List<Product> listProducts = await _invoiceRepository.getInvoiceProductsTemporal(item.id);
+      if (item.userOperatorName != null) {
+        if (item.operatorUsers != null) {
+          //valido que el operador unico no este creado en la lista
+          bool exist = false;
+          for (var elm in item.operatorUsers) {
+            if (elm.name == item.userOperatorName) {
+              exist = true;
+              break;
+            }
+          }
+          if (!exist) {
+            List<User> _operatorsExist = item.operatorUsers;
+            var oppInsert = User.copyUserOperatorToSaveInvoice(
+              id: item.userOperator.documentID,
+              name: item.userOperatorName,
+            );
+            _operatorsExist.add(oppInsert);
+            int _countOperators = _operatorsExist.length;
+            Invoice invoice = Invoice.copyWith(
+              origin: item,
+              listOperators: _operatorsExist,
+              countOperators: _countOperators,
+            );
+            await _blocInvoice.saveInvoice(invoice);
+          }
+        } else {
+          //creo la lista de operadores con el operador y el contador y actualizo la factura
+          List<User> _operatorsExist = [];
+          var oppInsert = User.copyUserOperatorToSaveInvoice(
+            id: item.userOperator.documentID,
+            name: item.userOperatorName,
+          );
+          _operatorsExist.add(oppInsert);
+          int _countOperators = _operatorsExist.length;
+          Invoice invoice = Invoice.copyWith(
+            origin: item,
+            listOperators: _operatorsExist,
+            countOperators: _countOperators,
+          );
+          await _blocInvoice.saveInvoice(invoice);
+        }
+      }
+
+      /*List<Product> listProducts = await _invoiceRepository.getInvoiceProductsTemporal(item.id);
       if (listProducts.length > 0) {
         var _invoice = Invoice.copyWith(
           origin: item,
@@ -51,7 +97,7 @@ class BlocReports implements Bloc {
         if (item.invoiceProducts.length == 0) {
           DocumentReference ref = await _invoiceRepository.updateInvoiceData(_invoice);
         }
-      }
+      }*/
     });
   }
 
@@ -59,6 +105,7 @@ class BlocReports implements Bloc {
     return await _reportsRepository.getCustomerInvoicesByLocation(locationReference, dateInit, dateFinal);
   }
 
+  //TODO metodo temporal para solucionar error con los id de los servicios dentro de las facturas
   Future<int> updateInfoProductsInvoice(List<Invoice> invoices) async {
     var countData = 0;
     invoices.forEach((item) async {

@@ -75,7 +75,6 @@ class _OperatorsInvoicePage extends State<OperatorsInvoicePage> {
   }
 
   Widget showOperatorsWidget(AsyncSnapshot snapshot) {
-    //widget.cbHandlerOperator('', _listUsersOperators.length, 2);   //Evaluarlo luego, esta función se usa para el select de un solo operador
     List<User> _listUsersOperators =
         _blocInvoice.buildOperators(snapshot.data.documents);
     List<User> _userGet = <User>[];
@@ -93,6 +92,7 @@ class _OperatorsInvoicePage extends State<OperatorsInvoicePage> {
         _userGet.add(userSelected);
       }
     });
+    _userGet.sort((a, b) => a.name.compareTo(b.name));
     widget.usersListCallback = _userGet;
 
     return Column(

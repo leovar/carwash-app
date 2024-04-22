@@ -3,17 +3,19 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CardReport {
   final String operatorName;
-  final DocumentReference operatorReference;
+  final String operatorId;
   final String locationName;
   int countServices;
+  int countSharedServices;
   double totalPrice;
   List<Invoice> invoicesList;
 
   CardReport(
       this.operatorName,
-      this.operatorReference,
+      this.operatorId,
       this.locationName,
       this.countServices,
+      this.countSharedServices,
       this.totalPrice,
       this.invoicesList,
       );

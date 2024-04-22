@@ -259,6 +259,7 @@ class Invoice extends Equatable {
     Timestamp dateEndWash,
     int countWashingWorkers,
     int washingTime,
+    String incidence,
     List<User> listOperators,
     int countOperators,
   }) {
@@ -292,7 +293,7 @@ class Invoice extends Equatable {
       closedDate: closedDate ?? origin.closedDate,
       invoiceClosed: invoiceClosed ?? origin.invoiceClosed,
       observation: origin.observation,
-      incidence: origin.incidence,
+      incidence: incidence ?? origin.incidence,
       haveSpecialService: origin.haveSpecialService,
       countProducts: countProducts ?? origin.countProducts,
       countAdditionalProducts:

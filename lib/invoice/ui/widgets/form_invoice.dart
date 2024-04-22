@@ -39,6 +39,7 @@ import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:popup_menu/popup_menu.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import '../../model/header_services.dart';
 import 'carousel_cars_widget.dart';
@@ -402,11 +403,11 @@ class _FormInvoice extends State<FormInvoice> {
                 child: _saveInvoiceButton(),
               ),
               Visibility(
-                visible: !_editForm,
+                visible: (!_editForm && !_canceledInvoice),
                 child: _rePrintInvoice(),
               ),
               Visibility(
-                visible: (!_editForm && _isUserAdmin),
+                visible: (!_editForm && _isUserAdmin && !_canceledInvoice),
                 child: _cancelInvoice(),
               ),
               SizedBox(height: 9),
@@ -834,10 +835,33 @@ class _FormInvoice extends State<FormInvoice> {
   }
 
   ///Functions Operator Users List
-  void _setOperatorsDb(List<User> operatorsListSelected) {
-    setState(() {
-      _listOperators = operatorsListSelected;
-    });
+  void _setOperatorsDb(List<User> operatorsListSelected) async {
+    if (widget.editInvoice != null) {
+      int _countOperators = 0;
+      List<User> _operatorsToSave = [];
+      List<User> _selectedOperators = operatorsListSelected.where((u) => u.isSelected).toList();
+      _selectedOperators.forEach((user) {
+        var operatorSave = User.copyUserOperatorToSaveInvoice(
+          id: user.id,
+          name: user.name,
+        );
+        _operatorsToSave.add(operatorSave);
+      });
+      _countOperators = _selectedOperators.length;
+      Invoice invoice = Invoice.copyWith(
+        origin: widget.editInvoice,
+        listOperators: _operatorsToSave,
+        countOperators: _countOperators,
+      );
+      await _blocInvoice.saveInvoice(invoice);
+      setState(() {
+        _listOperators = operatorsListSelected;
+      });
+    } else {
+      setState(() {
+        _listOperators = operatorsListSelected;
+      });
+    }
   }
 
   ///Function validate exist customer
@@ -1229,11 +1253,17 @@ class _FormInvoice extends State<FormInvoice> {
           invoiceProducts: widget.editInvoice != null
               ? widget.editInvoice.invoiceProducts
               : _productToSave,
-          cancelledInvoice: _canceledInvoice,
-          paymentMethod:  _selectedPaymentMethod,
-          invoiceClosed: false,
-          endWash: false,
-          startWashing: false,
+          cancelledInvoice: widget.editInvoice != null ? widget.editInvoice.cancelledInvoice : _canceledInvoice,
+          paymentMethod: _selectedPaymentMethod,
+          closedDate: widget.editInvoice != null ? widget.editInvoice.closedDate : null,
+          invoiceClosed: widget.editInvoice != null ? widget.editInvoice.invoiceClosed : false,
+          endWash: widget.editInvoice != null ? widget.editInvoice.endWash : false,
+          dateEndWash: widget.editInvoice != null ? widget.editInvoice.dateEndWash : null,
+          startWashing: widget.editInvoice != null ? widget.editInvoice.startWashing : false,
+          dateStartWashing: widget.editInvoice != null ? widget.editInvoice.dateStartWashing : null,
+          washingTime: widget.editInvoice != null ? widget.editInvoice.washingTime : null,
+          washingCell: widget.editInvoice != null ? widget.editInvoice.washingCell : null,
+          countWashingWorkers: widget.editInvoice != null ? widget.editInvoice.countWashingWorkers : null,
           washingServicesTime: _servicesWashingTime,
           operatorUsers: _operatorsToSave,
           countOperators: _countOperators,
@@ -1243,18 +1273,6 @@ class _FormInvoice extends State<FormInvoice> {
         String invoiceId = invoiceReference.documentID;
         Invoice _currentInvoiceSaved =
             await _blocInvoice.getInvoiceById(invoiceId);
-
-        //Save products list
-        /*List<Product> _selectedProducts = _listProduct.where((f) => f.isSelected).toList();
-        if (_selectedProducts.length > 0) {
-          _blocInvoice.saveInvoiceProduct(invoiceId, _selectedProducts);
-        }*/
-
-        //Save additional products list
-        /*if (_listAdditionalProducts.length > 0) {
-          _blocInvoice.saveInvoiceAdditionalProducts(invoiceId, _listAdditionalProducts);
-        }*/
-
 
         //Close screen
         Navigator.pop(context); //Close popUp Save
@@ -1266,12 +1284,12 @@ class _FormInvoice extends State<FormInvoice> {
         }
       } on PlatformException catch (e) {
         print('$e');
-        MessagesUtils.showAlert(
-            context: context, title: 'Error al guardar la factura');
+        Navigator.pop(context);
+        Fluttertoast.showToast(msg: "Error guardando la factura: $e", toastLength: Toast.LENGTH_LONG);
       } catch (error) {
         print('$error');
-        MessagesUtils.showAlert(
-            context: context, title: 'Error al guardar la factura');
+        Navigator.pop(context);
+        Fluttertoast.showToast(msg: "Error guardando la factura: $error", toastLength: Toast.LENGTH_LONG);
       }
     } else {
       MessagesUtils.showAlert(context: context, title: validateMessage).show();
@@ -1328,6 +1346,8 @@ class _FormInvoice extends State<FormInvoice> {
     _textIncidence.text = invoiceToEdit.incidence;
     _selectedPaymentMethod = invoiceToEdit.paymentMethod;
     _closedInvoice = invoiceToEdit.invoiceClosed;
+    _sendEmail = invoiceToEdit.sendEmailInvoice;
+    _canceledInvoice = invoiceToEdit.cancelledInvoice;
 
     //get vehicle reference
     _vehicleReference =

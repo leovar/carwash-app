@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:car_wash_app/commission/bloc/bloc_commission.dart';
 import 'package:car_wash_app/commission/model/commission.dart';
 import 'package:car_wash_app/invoice/bloc/bloc_invoice.dart';
@@ -15,6 +17,7 @@ import 'package:car_wash_app/widgets/messages_utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
@@ -269,62 +272,47 @@ class _ProductivityReport extends State<ProductivityReport> {
   List<CardReport> _processInvoicesOperator(List<Invoice> _listInvoices) {
     List<CardReport> _cardList = [];
     try {
-      _listInvoices.forEach((item) {
-        List<Invoice> invoicesPerUser = [];
-        if (_cardList.length > 0) {
-          CardReport cardInfo = _cardList.firstWhere(
-            (x) =>
-                x.operatorName == item.userOperatorName &&    //x.operatorReference == item.userOperator &&  // esta linea se comenta por que se encuentra que si cambian el nombre solo va mostrar los registros del primer nombre encontrado en la lista
-                x.locationName == item.locationName,
-            orElse: () => null,
-          );
-          if (cardInfo == null) {
-            invoicesPerUser.add(item);
-            final newOperatorCard = CardReport(
-                item.userOperatorName,
-                item.userOperator,
-                item.locationName,
-                item.countProducts + item.countAdditionalProducts,
-                item.totalPrice,
-                invoicesPerUser);
-            _cardList.add(newOperatorCard);
-          } else {
-            cardInfo.countServices = cardInfo.countServices +
-                item.countProducts +
-                item.countAdditionalProducts;
-            cardInfo.totalPrice = cardInfo.totalPrice + item.totalPrice;
-            List<Invoice> listGet = cardInfo.invoicesList;
-            listGet.add(item);
-            int indexData = _cardList.indexOf(cardInfo);
-            _cardList[indexData] = cardInfo;
-          }
-        } else {
-          invoicesPerUser.add(item);
-          final newOperatorCard = CardReport(
-            item.userOperatorName,
-            item.userOperator,
-            item.locationName,
-            item.countProducts + item.countAdditionalProducts,
-            item.totalPrice,
-            invoicesPerUser,
-          );
-          _cardList.add(newOperatorCard);
+      _listInvoices.forEach((itemInvoice) {
+        if (itemInvoice.operatorUsers != null) {
+          itemInvoice.operatorUsers.forEach((item) {
+            List<Invoice> invoicesPerUser = [];
+            double _totalPrice = itemInvoice.totalPrice / itemInvoice.countOperators;
+            CardReport cardInfo = _cardList.length > 0 ? _cardList.firstWhere(
+                  (x) => x.operatorName == item.name && x.locationName == itemInvoice.locationName, orElse: () => null,) : null;
+            if (cardInfo == null) {
+              invoicesPerUser.add(itemInvoice);
+              final newOperatorCard = CardReport(
+                  item.name,
+                  item.id,
+                  itemInvoice.locationName,
+                  itemInvoice.countOperators == 1 ? itemInvoice.countProducts + itemInvoice.countAdditionalProducts : 0,
+                  itemInvoice.countOperators > 1 ? itemInvoice.countProducts + itemInvoice.countAdditionalProducts : 0,
+                  _totalPrice,
+                  invoicesPerUser);
+              _cardList.add(newOperatorCard);
+            } else {
+              cardInfo.countServices = cardInfo.countServices + (itemInvoice.countOperators == 1 ? (itemInvoice.countProducts + itemInvoice.countAdditionalProducts) : 0);
+              cardInfo.countSharedServices = cardInfo.countSharedServices + (itemInvoice.countOperators > 1 ? (itemInvoice.countProducts + itemInvoice.countAdditionalProducts) : 0);
+              cardInfo.totalPrice = cardInfo.totalPrice + _totalPrice;
+              List<Invoice> listGet = cardInfo.invoicesList;
+              listGet.add(itemInvoice);
+              int indexData = _cardList.indexOf(cardInfo);
+              _cardList[indexData] = cardInfo;
+            }
+          });
         }
       });
       return _cardList;
     } catch (_error) {
       print(_error);
+      Fluttertoast.showToast(msg: "Error generando el informe: $_error", toastLength: Toast.LENGTH_LONG);
       return _cardList;
     }
   }
 
-  Future<void> _openServicesDetail(String operatorName) async {
+  Future<void> _openServicesDetail(String operatorName, List<Invoice> _invoiceOperatorList) async {
     List<ProductsCardDetail> _productList = [];
     List<Commission> commissionsList = await _blocCommission.getAllCommissions();
-    final operatorInvoices = _listInvoices
-        .where(
-            (f) => f.userOperatorName == operatorName && !f.cancelledInvoice)
-        .toList();
     Alert(
         context: context,
         title: '',
@@ -335,7 +323,7 @@ class _ProductivityReport extends State<ProductivityReport> {
         buttons: []).show();
 
     List<Product> dataProducts = [];
-    operatorInvoices.forEach((element) {
+    _invoiceOperatorList.forEach((element) {
       dataProducts.addAll(element.invoiceProducts);
     });
 
@@ -537,7 +525,7 @@ class _ProductivityReport extends State<ProductivityReport> {
 
   void _updateInvoices(List<Invoice> _invoice) async {
     ///TODO este metodo se llama para agregar los campos de countProducts a las facturas que no lo tienen aun
-    //_blocReports.updateInfoInvoices(_invoice);
+    _blocReports.updateInfoOperatorsInvoices(_invoice);
     //_blocReports.updateInfoProductsInvoice(_invoice);
     //_blocReports.addIdToProductInvoice(_invoice);
   }

@@ -186,6 +186,7 @@ class _FormInvoicesList extends State<FormInvoicesList> {
           index: index,
           updateDate: true,
           isAdmon: _showInfoAmounts,
+          finishInvoice: _finishInvoiceCallback,
           closeInvoice: _closeInvoiceCallback,
         );
       },
@@ -392,21 +393,6 @@ class _FormInvoicesList extends State<FormInvoicesList> {
     _invoiceSelected = _invoiceClose;
     if (_invoiceSelected.countOperators > 0) {
       _closeInvoiceMessage();
-    } else {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => OperatorsInvoicePage(
-            callbackSetOperatorsList: _saveOperators,
-            usersListCallback: _invoiceClose.operatorUsers,
-            editForm: false,
-            idLocation: _idLocation,
-            closedInvoice: _invoiceClose.invoiceClosed,
-            fromCompleteInvoice: true,
-            callbackFinishInvoice : _finishInvoice,
-          ),
-        ),
-      );
     }
   }
 
@@ -470,31 +456,22 @@ class _FormInvoicesList extends State<FormInvoicesList> {
     }
   }
 
-  void _callBackSelectPaymentMethod(PaymentMethod payment) {
-    _selectedPaymentMethod = payment;
-  }
-
-  void _saveOperators(List<User> userList) async {
-    int _countOperators = 0;
-    List<User> _operatorsToSave = [];
-    List<User> _selectedOperators = userList.where((u) => u.isSelected).toList();
-    if (_selectedOperators.length > 0) {
-      _selectedOperators.forEach((user) {
-        var operatorSave = User.copyUserOperatorToSaveInvoice(
-          id: user.id,
-          name: user.name,
-        );
-        _operatorsToSave.add(operatorSave);
-      });
-      _countOperators = _selectedOperators.length;
-      Invoice invoice = Invoice.copyWith(
-        origin: _invoiceSelected,
-        listOperators: _operatorsToSave,
-        countOperators: _countOperators,
-      );
-      _invoiceSelected = invoice;
-      await _blocInvoice.saveInvoice(invoice);
-    }
+  void _finishInvoiceCallback(Invoice _invoiceToFinish) {
+    _invoiceSelected = _invoiceToFinish;
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => OperatorsInvoicePage(
+          callbackSetOperatorsList: _saveOperators,
+          usersListCallback: _invoiceToFinish.operatorUsers,
+          editForm: false,
+          idLocation: _idLocation,
+          closedInvoice: _invoiceToFinish.invoiceClosed,
+          fromCompleteInvoice: true,
+          callbackFinishInvoice : _finishInvoice,
+        ),
+      ),
+    );
   }
 
   void _finishInvoice() async {
@@ -527,7 +504,36 @@ class _FormInvoicesList extends State<FormInvoicesList> {
         await _blocInvoice.saveInvoice(invoice);
       }
       _validateSendCustomerNotification(_invoiceSelected);
-      _closeInvoiceMessage();
+      setState(() {});
+      //_closeInvoiceMessage();
+    }
+  }
+
+  void _callBackSelectPaymentMethod(PaymentMethod payment) {
+    _selectedPaymentMethod = payment;
+  }
+
+  void _saveOperators(List<User> userList) async {
+    int _countOperators = 0;
+    List<User> _operatorsToSave = [];
+    List<User> _selectedOperators = userList.where((u) => u.isSelected).toList();
+    if (_selectedOperators.length > 0) {
+      _selectedOperators.forEach((user) {
+        var operatorSave = User.copyUserOperatorToSaveInvoice(
+          id: user.id,
+          name: user.name,
+        );
+        _operatorsToSave.add(operatorSave);
+      });
+      _countOperators = _selectedOperators.length;
+      Invoice invoice = Invoice.copyWith(
+        origin: _invoiceSelected,
+        listOperators: _operatorsToSave,
+        countOperators: _countOperators,
+      );
+      _invoiceSelected = invoice;
+      await _blocInvoice.saveInvoice(invoice);
+      setState(() {});
     }
   }
 
