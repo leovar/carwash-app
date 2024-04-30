@@ -34,20 +34,6 @@ class BlocInvoice implements Bloc {
     DocumentReference ref = await _invoiceRepository.updateInvoiceData(invoice);
     String invoiceId = ref.documentID;
     _saveImages(invoice, invoiceId);
-
-    // Se comenta esta parte por que la firma ya se esta agregando dentro de la lista de las imagenes y no independiente
-    /*
-    if (invoice.imageFirm != null) {
-      if (!invoice.imageFirm.contains('https://firebasestorage.')) {
-        final pathImage = '$invoiceId/before/firm';
-        StorageTaskSnapshot storageTaskSnapshot = await _invoiceRepository
-            .uploadImageFirmInvoice(pathImage, invoice.imageFirm);
-        String imageUrl = await storageTaskSnapshot.ref.getDownloadURL();
-        await _invoiceRepository.updateInvoiceImages(invoiceId, imageUrl);
-      }
-    }
-    */
-
     return ref;
   }
 
@@ -74,22 +60,6 @@ class BlocInvoice implements Bloc {
     } catch(err) {
       throw(err);
     }
-  }
-
-  Future<void> saveInvoiceProduct(
-      String invoiceId, List<Product> listProducts) async {
-    listProducts.forEach((product) {
-      if (product.newProduct ?? true) {
-        _invoiceRepository.saveInvoiceProduct(invoiceId, product);
-      }
-    });
-  }
-
-  Future<void> saveInvoiceAdditionalProducts(
-      String invoiceId, List<AdditionalProduct> additionalProducts) async {
-    additionalProducts.forEach((addProduct) {
-      _invoiceRepository.saveInvoiceAdditionalProducts(invoiceId, addProduct);
-    });
   }
 
   Future<DocumentReference> getVehicleTypeReference(String vehicleType) {
@@ -263,10 +233,6 @@ class BlocInvoice implements Bloc {
 
   Future<Invoice> getInvoiceById(String invoiceId) {
     return _invoiceRepository.getInvoiceByIdInvoice(invoiceId);
-  }
-
-  Future<void> updateInvoiceProduct(String invoiceId, Product product) {
-    return _invoiceRepository.updateInvoiceProduct(invoiceId, product);
   }
 
   Future<Configuration> getConfigurationObject() {

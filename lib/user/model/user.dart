@@ -16,6 +16,7 @@ class User extends Equatable {
   final bool isAdministrator;
   final bool isCoordinator;
   final bool isOperator;
+  final double operatorCommission;
   bool isSelected;
 
   User({
@@ -31,6 +32,7 @@ class User extends Equatable {
     this.isCoordinator,
     this.isOperator,
     this.isSelected,
+    this.operatorCommission,
   });
 
   factory User.fromJson(Map<String, dynamic> json, {String id}) {
@@ -95,10 +97,11 @@ class User extends Equatable {
     );
   }
 
-  factory User.copyUserOperatorToSaveInvoice({String id, String name}) {
+  factory User.copyUserOperatorToSaveInvoice({String id, String name, double operatorCommission}) {
     return User(
       id: id,
       name: name,
+      operatorCommission: operatorCommission,
     );
   }
 
@@ -106,6 +109,7 @@ class User extends Equatable {
     return User(
       id: json['id'],
       name: json['name'],
+      operatorCommission: json['operatorCommission'],
       isSelected: true,
     );
   }
@@ -113,10 +117,12 @@ class User extends Equatable {
   Map<String, dynamic> toJsonInvoiceOperator(
       String userId,
       String name,
+      double operatorCommission,
       ) {
     return {
       'id': userId,
       'name': name,
+      'operatorCommission': operatorCommission,
     };
   }
 
@@ -134,5 +140,6 @@ class User extends Equatable {
         isCoordinator,
         isOperator,
         isSelected,
+        operatorCommission,
       ];
 }

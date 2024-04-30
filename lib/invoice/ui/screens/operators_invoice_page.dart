@@ -1,6 +1,7 @@
 import 'dart:core';
 
 import 'package:car_wash_app/invoice/bloc/bloc_invoice.dart';
+import 'package:car_wash_app/invoice/model/invoice.dart';
 import 'package:car_wash_app/invoice/ui/widgets/item_operator.dart';
 import 'package:car_wash_app/invoice/ui/widgets/item_product.dart';
 import 'package:car_wash_app/user/model/user.dart';
@@ -16,6 +17,7 @@ class OperatorsInvoicePage extends StatefulWidget {
   final String idLocation;
   final bool closedInvoice;
   final bool fromCompleteInvoice;
+  final Invoice invoice;
 
   OperatorsInvoicePage({
     Key key,
@@ -26,6 +28,7 @@ class OperatorsInvoicePage extends StatefulWidget {
     this.idLocation,
     this.closedInvoice,
     this.fromCompleteInvoice,
+    this.invoice,
   });
 
   @override
@@ -61,17 +64,30 @@ class _OperatorsInvoicePage extends State<OperatorsInvoicePage> {
   }
 
   Widget listUsers() {
-    return StreamBuilder(
-      stream: _blocInvoice.operatorsByLocationStream(widget.idLocation),
-      builder: (BuildContext context, AsyncSnapshot snapshot) {
-        switch (snapshot.connectionState) {
-          case ConnectionState.waiting:
-            return CircularProgressIndicator();
-          default:
-            return showOperatorsWidget(snapshot);
-        }
-      },
-    );
+    if (widget.invoice != null && widget.invoice.invoiceClosed) {
+      List<User> operatorsList = [];
+      widget.usersListCallback.forEach((item) {
+        User userSelected = User.copyWith(
+          origin: item,
+          isSelected: true,
+        );
+        operatorsList.add(userSelected);
+      });
+      widget.usersListCallback = operatorsList;
+      return _showOperators();
+    } else {
+      return StreamBuilder(
+        stream: _blocInvoice.operatorsByLocationStream(widget.idLocation),
+        builder: (BuildContext context, AsyncSnapshot snapshot) {
+          switch (snapshot.connectionState) {
+            case ConnectionState.waiting:
+              return CircularProgressIndicator();
+            default:
+              return showOperatorsWidget(snapshot);
+          }
+        },
+      );
+    }
   }
 
   Widget showOperatorsWidget(AsyncSnapshot snapshot) {
@@ -95,6 +111,10 @@ class _OperatorsInvoicePage extends State<OperatorsInvoicePage> {
     _userGet.sort((a, b) => a.name.compareTo(b.name));
     widget.usersListCallback = _userGet;
 
+    return _showOperators();
+  }
+
+  Widget _showOperators() {
     return Column(
       children: [
         Flexible(

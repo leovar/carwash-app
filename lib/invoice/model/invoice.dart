@@ -60,6 +60,7 @@ class Invoice extends Equatable {
   final List<User> operatorUsers;
   final String operatorsSplit;
   final int countOperators;
+  final double totalCommission;
 
   Invoice({
     this.id,
@@ -111,6 +112,7 @@ class Invoice extends Equatable {
     this.operatorUsers,
     this.operatorsSplit,
     this.countOperators,
+    this.totalCommission,
   });
 
   Map<String, dynamic> toJson() {
@@ -156,6 +158,7 @@ class Invoice extends Equatable {
       'washingServicesTime' : this.washingServicesTime,
       'washingTime' : this.washingTime,
       'countOperators' : this.countOperators,
+      'totalCommission' : this.totalCommission,
     };
   }
 
@@ -171,7 +174,7 @@ class Invoice extends Equatable {
     });
     var products = json['invoiceProducts'];
     products?.forEach((element) {
-      Product productResult = Product.fromJsonProductIntoInvoice(element, json['uidVehicleType'], json['creationDate']);
+      Product productResult = Product.fromJsonProductIntoInvoice(element, json['uidVehicleType'], json['creationDate'], json['countOperators'], json['consecutive']);
       listProducts.add(productResult);
       pSplit = pSplit + productResult.productName + ', ';
     });
@@ -236,6 +239,7 @@ class Invoice extends Equatable {
       operatorUsers : listOperators,
       operatorsSplit : oSplit,
       countOperators : json['countOperators'],
+      totalCommission : json['totalCommission'],
     );
   }
 
@@ -262,6 +266,8 @@ class Invoice extends Equatable {
     String incidence,
     List<User> listOperators,
     int countOperators,
+    double oppCommission,
+    double totalCommission,
   }) {
     return Invoice(
       id: origin.id,
@@ -312,6 +318,7 @@ class Invoice extends Equatable {
       operatorUsers: listOperators ?? origin.operatorUsers,
       operatorsSplit : origin.operatorsSplit,
       countOperators : countOperators ?? origin.countOperators,
+      totalCommission : totalCommission ?? origin.totalCommission,
     );
   }
 
@@ -363,5 +370,6 @@ class Invoice extends Equatable {
         operatorUsers,
         operatorsSplit,
         countOperators,
+        totalCommission,
       ];
 }

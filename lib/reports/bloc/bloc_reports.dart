@@ -12,6 +12,7 @@ import 'package:car_wash_app/user/model/user.dart';
 import 'package:car_wash_app/widgets/messages_utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 
 class BlocReports implements Bloc {
@@ -40,21 +41,38 @@ class BlocReports implements Bloc {
     return invoices;
   }
 
-  //TODO metodo temporal para solucionar error con los id de los servicios dentro de las facturas
+  //TODO metodo temporal para pasar el operador de la factura a una lista de operadores dentro de la factura
   void updateInfoOperatorsInvoices(List<Invoice> invoices) async {
-    invoices.forEach((item) async {
-      if (item.userOperatorName != null) {
-        if (item.operatorUsers != null) {
-          //valido que el operador unico no este creado en la lista
-          bool exist = false;
-          for (var elm in item.operatorUsers) {
-            if (elm.name == item.userOperatorName) {
-              exist = true;
-              break;
+    try {
+      invoices.forEach((item) async {
+        if (item.userOperatorName != null && item.userOperatorName.isNotEmpty) {
+          if (item.operatorUsers != null) {
+            //valido que el operador unico no este creado en la lista
+            bool exist = false;
+            for (var elm in item.operatorUsers) {
+              if (elm.name == item.userOperatorName) {
+                exist = true;
+                break;
+              }
             }
-          }
-          if (!exist) {
-            List<User> _operatorsExist = item.operatorUsers;
+            if (!exist && item.userOperator != null) {
+              List<User> _operatorsExist = item.operatorUsers;
+              var oppInsert = User.copyUserOperatorToSaveInvoice(
+                id: item.userOperator.documentID,
+                name: item.userOperatorName,
+              );
+              _operatorsExist.add(oppInsert);
+              int _countOperators = _operatorsExist.length;
+              Invoice invoice = Invoice.copyWith(
+                origin: item,
+                listOperators: _operatorsExist,
+                countOperators: _countOperators,
+              );
+              await _blocInvoice.saveInvoice(invoice);
+            }
+          } else {
+            //creo la lista de operadores con el operador y el contador y actualizo la factura
+            List<User> _operatorsExist = [];
             var oppInsert = User.copyUserOperatorToSaveInvoice(
               id: item.userOperator.documentID,
               name: item.userOperatorName,
@@ -68,37 +86,12 @@ class BlocReports implements Bloc {
             );
             await _blocInvoice.saveInvoice(invoice);
           }
-        } else {
-          //creo la lista de operadores con el operador y el contador y actualizo la factura
-          List<User> _operatorsExist = [];
-          var oppInsert = User.copyUserOperatorToSaveInvoice(
-            id: item.userOperator.documentID,
-            name: item.userOperatorName,
-          );
-          _operatorsExist.add(oppInsert);
-          int _countOperators = _operatorsExist.length;
-          Invoice invoice = Invoice.copyWith(
-            origin: item,
-            listOperators: _operatorsExist,
-            countOperators: _countOperators,
-          );
-          await _blocInvoice.saveInvoice(invoice);
         }
-      }
-
-      /*List<Product> listProducts = await _invoiceRepository.getInvoiceProductsTemporal(item.id);
-      if (listProducts.length > 0) {
-        var _invoice = Invoice.copyWith(
-          origin: item,
-          countProducts: listProducts.where((f) => !f.isAdditional).length,
-          countAdditionalProducts: listProducts.where((f) => f.isAdditional).length,
-          listProducts: listProducts,
-        );
-        if (item.invoiceProducts.length == 0) {
-          DocumentReference ref = await _invoiceRepository.updateInvoiceData(_invoice);
-        }
-      }*/
-    });
+      });
+    } catch(_error) {
+      print(_error);
+      Fluttertoast.showToast(msg: "Error generando el informe: $_error", toastLength: Toast.LENGTH_LONG);
+    }
   }
 
   Future<List<Invoice>> getListCustomerInvoicesByLocation(DocumentReference locationReference, DateTime dateInit, DateTime dateFinal) async {
@@ -107,7 +100,7 @@ class BlocReports implements Bloc {
 
   //TODO metodo temporal para solucionar error con los id de los servicios dentro de las facturas
   Future<int> updateInfoProductsInvoice(List<Invoice> invoices) async {
-    var countData = 0;
+    /*var countData = 0;
     invoices.forEach((item) async {
       final listInvoiceProducts = await _invoiceRepository.getProductsByIdInvoice(item.id);
       listInvoiceProducts.forEach((invProduct) async {
@@ -127,12 +120,12 @@ class BlocReports implements Bloc {
         }
       });
     });
-    return countData;
+    return countData;*/
   }
 
   //TODO metodo temporal para solucionar error con los id de los servicios dentro de las facturas
   void addIdToProductInvoiceTemp(List<Invoice> invoices) async {
-    List<Invoice> invoicesList = invoices.where((item) => item.invoiceProducts.length > 0).toList();
+    /*List<Invoice> invoicesList = invoices.where((item) => item.invoiceProducts.length > 0).toList();
 
     List<Product> productos = await _blocProduct.getAllProducts();
     List<Invoice> invoiceData = [];
@@ -158,24 +151,7 @@ class BlocReports implements Bloc {
         print('ACTUALIZO LA FACTURA # ${_invoice.consecutive.toString()}');
         _invoiceRepository.updateInvoiceData(_invoice);
       }
-    });
-
-
-    /*
-    List<Invoice> allInvoices = await _reportsRepository.getAllInvoices();
-    allInvoices.forEach((element) async {
-      List<Product> productsInvoice = await _invoiceRepository.getProductsByIdInvoice(element.id);
-      productsInvoice.forEach((item) {
-        if (item.id == 'bpdtndDhpviCzpfipQxi') {
-          print('bpdtndDhpviCzpfipQxi');
-        }
-        if (item.id == 'sDXNlRNGOBbIXody8LS7') {
-          print('sDXNlRNGOBbIXody8LS7');
-        }
-      });
-    });
-    */
-
+    });*/
   }
 
   @override

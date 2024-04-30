@@ -522,6 +522,7 @@ class _FormInvoicesList extends State<FormInvoicesList> {
         var operatorSave = User.copyUserOperatorToSaveInvoice(
           id: user.id,
           name: user.name,
+          operatorCommission: (_invoiceSelected.totalCommission??0) / _selectedOperators.length,
         );
         _operatorsToSave.add(operatorSave);
       });

@@ -88,8 +88,8 @@ class _ProductivityUserDetailPage extends State<ProductivityUserDetailPage> {
     double _totalValue = 0;
     double _totalCommission = 0;
     _productsCard.forEach((e) {
-      _totalServices = _totalServices + (e.countSpecialServices + e.countSimpleServices);
-      _totalValue = _totalValue + (e.totalSpecialValue + e.totalSimpleValue);
+      _totalServices = _totalServices + (e.countSpecialServices + e.countSimpleServices + e.countSharedServices);
+      _totalValue = _totalValue + (e.totalSpecialValue + e.totalSimpleValue + e.totalSharedValue);
       _totalCommission = _totalCommission + e.totalCommission;
     });
 

@@ -34,6 +34,7 @@ class InvoiceRepository {
         element.id,
         element.productType,
         element.serviceTime,
+        element.productCommission,
       );
       mapProducts.add(mapProduct);
     });
@@ -43,6 +44,7 @@ class InvoiceRepository {
       var mapOperator = User().toJsonInvoiceOperator(
         item.id,
         item.name,
+        item.operatorCommission,
       );
       mapOperators.add(mapOperator);
     });
@@ -331,66 +333,6 @@ class InvoiceRepository {
           .document(documentSnapshot.documentID);
     }
     return null;
-  }
-
-  //TODO esta metodo caducaria cuando el producto se guarde en la misma factura
-  /// Save Invoice Products
-  Future<void> saveInvoiceProduct(String invoiceId, Product product) async {
-    await this
-        ._db
-        .collection(FirestoreCollections.invoices)
-        .document(invoiceId)
-        .collection(FirestoreCollections.products)
-        .add(Product().toJsonInvoiceProduct(
-          product.productName,
-          product.price,
-          product.ivaPercent,
-          false,
-          product.id,
-          product.productType,
-          product.serviceTime,
-        ));
-  }
-
-  //TODO esta metodo caducaria cuando el producto se guarde en la misma factura
-  /// Save Invoice Additional Products
-  Future<void> saveInvoiceAdditionalProducts(
-      String invoiceId, AdditionalProduct additionalProduct) async {
-    await this
-        ._db
-        .collection(FirestoreCollections.invoices)
-        .document(invoiceId)
-        .collection(FirestoreCollections.products)
-        .add(Product().toJsonInvoiceProduct(
-          additionalProduct.productName,
-          double.parse(additionalProduct.productValue),
-          additionalProduct.ivaPercent,
-          true,
-          null,
-          additionalProduct.productType,
-          additionalProduct.serviceTime,
-        ));
-  }
-
-  //TODO actulizar el metodo para que actualice los productos en la tabla de invoice
-  /// Update Invoice Products
-  Future<void> updateInvoiceProduct(String invoiceId, Product product) async {
-    DocumentReference ref = _db
-        .collection(FirestoreCollections.invoices)
-        .document(invoiceId)
-        .collection(FirestoreCollections.products)
-        .document(product.productInvoiceId);
-    ref.setData(
-        Product().toJsonInvoiceProduct(
-          product.productName,
-          product.price,
-          product.ivaPercent,
-          product.isAdditional,
-          product.id,
-          product.productType,
-          product.serviceTime,
-        ),
-        merge: true);
   }
 
   ///Get invoices list from current Month

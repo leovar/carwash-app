@@ -243,7 +243,9 @@ class _CustomersReport extends State<CustomersReport> {
       var sheetObject = excel["Sheet1"];
 
       if (_newListInvoices.length > 0) {
+
         List<String> header = [
+          "Número de factura",
           "Nombre",
           "Teléfono",
           "Fecha del servicio",
@@ -257,10 +259,11 @@ class _CustomersReport extends State<CustomersReport> {
         sheetObject.appendRow(header);
         _newListInvoices.forEach((item) {
           List<String> row = [
+            "${item.consecutive}",
             "${item.customerName}",
             "${item.phoneNumber}",
             "${formatter.format(item.creationDate.toDate())}",
-            "${item.totalPrice}",
+            "${item.totalPrice.toInt()}",
             "${item.placa}",
             "${item.locationName}",
             "${item.productsSplit}",

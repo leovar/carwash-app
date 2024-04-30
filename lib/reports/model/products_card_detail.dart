@@ -10,6 +10,7 @@ class ProductsCardDetail {
   int countSpecialMoto;
   int countSimpleBicycle;
   int countSpecialBicycle;
+  int countSharedServices;
 
   //-------- totals -----
   double totalSimpleValue;
@@ -22,6 +23,7 @@ class ProductsCardDetail {
   double totalSpecialMoto;
   double totalSimpleBicycle;
   double totalSpecialBicycle;
+  double totalSharedValue;
 
   //-------- commissions -----
   double commissionSimpleAuto;
@@ -32,6 +34,7 @@ class ProductsCardDetail {
   double commissionSpecialMoto;
   double commissionSimpleBicycle;
   double commissionSpecialBicycle;
+  double commissionSharedServices;
   double totalCommission;
   double totalPrice;
   String dateServices;
@@ -47,6 +50,7 @@ class ProductsCardDetail {
       this.countSpecialMoto,
       this.countSimpleBicycle,
       this.countSpecialBicycle,
+      this.countSharedServices,
       this.totalSimpleValue,
       this.totalSpecialValue,
       this.totalSimpleAuto,
@@ -57,6 +61,7 @@ class ProductsCardDetail {
       this.totalSpecialMoto,
       this.totalSimpleBicycle,
       this.totalSpecialBicycle,
+      this.totalSharedValue,
       this.commissionSimpleAuto,
       this.commissionSpecialAuto,
       this.commissionSimpleVan,
@@ -65,7 +70,9 @@ class ProductsCardDetail {
       this.commissionSpecialMoto,
       this.commissionSimpleBicycle,
       this.commissionSpecialBicycle,
+      this.commissionSharedServices,
       this.totalCommission,
       this.totalPrice,
-      this.dateServices);
+      this.dateServices,
+      );
 }

@@ -85,7 +85,7 @@ class _ItemProductivityReportDetail
             margin: EdgeInsets.only(right: 8, top: 8),
             child: Text(
               (_serviceDetail.countSimpleServices +
-                          _serviceDetail.countSpecialServices)
+                          _serviceDetail.countSpecialServices + _serviceDetail.countSharedServices)
                       .toString() +
                   '  Servicios',
               style: TextStyle(
@@ -834,6 +834,103 @@ class _ItemProductivityReportDetail
                                       children: [
                                         Text(
                                           '\$${formatterPrice.format(_serviceDetail.commissionSimpleBicycle + _serviceDetail.commissionSpecialBicycle)}',
+                                          style: TextStyle(
+                                            fontFamily: "Lato",
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 15.0,
+                                            color:
+                                                Theme.of(context).primaryColor,
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 8),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Visibility(
+                        visible: (_serviceDetail.countSharedServices > 0),
+                        child: Flexible(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Row(
+                                mainAxisSize: MainAxisSize.max,
+                                children: [
+                                  Flexible(
+                                    flex: 1,
+                                    child: Container(
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.max,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            _serviceDetail.countSharedServices
+                                                .toString(),
+                                            style: TextStyle(
+                                              color: Theme.of(context)
+                                                  .primaryColor,
+                                              fontFamily: "Lato",
+                                              decoration: TextDecoration.none,
+                                              fontSize: 15.0,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  Flexible(
+                                    flex: 6,
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.max,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      children: [
+                                        Flexible(
+                                          child: Text(
+                                            'Servicios Compartidos',
+                                            style: TextStyle(
+                                              fontFamily: "Lato",
+                                              decoration: TextDecoration.none,
+                                              fontSize: 15.0,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Flexible(
+                                    flex: 3,
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.max,
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        Text(
+                                          '\$${formatterPrice.format(_serviceDetail.totalSharedValue)}',
+                                          style: TextStyle(
+                                            fontFamily: "Lato",
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 15.0,
+                                            color:
+                                                Theme.of(context).primaryColor,
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                  Flexible(
+                                    flex: 3,
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.max,
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        Text(
+                                          '\$${formatterPrice.format(_serviceDetail.commissionSharedServices)}',
                                           style: TextStyle(
                                             fontFamily: "Lato",
                                             fontWeight: FontWeight.w600,
