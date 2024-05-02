@@ -4,7 +4,7 @@ import 'dart:typed_data';
 import 'package:car_wash_app/invoice/model/additional_product.dart';
 import 'package:car_wash_app/invoice/model/configuration.dart';
 import 'package:car_wash_app/invoice/model/invoice.dart';
-import 'package:car_wash_app/invoice/model/payment_methods.dart';
+import 'package:car_wash_app/payment_methods/model/payment_methods.dart';
 import 'package:car_wash_app/invoice/repository/invoice_repository.dart';
 import 'package:car_wash_app/product/model/product.dart';
 import 'package:car_wash_app/user/model/user.dart';
@@ -94,15 +94,6 @@ class BlocInvoice implements Bloc {
   /*Future<List<User>> getCoordinatorUser() {
     return _invoiceRepository.getCoordinatorUsers();
   }*/
-
-  /// Payment Methods
-  Stream<QuerySnapshot> paymentMethodsStream() =>
-      _invoiceRepository.getListPaymentMethodsStream();
-
-  List<PaymentMethod> buildPaymentMethods(List<DocumentSnapshot> paymentMethodsListSnapshot) =>
-      _invoiceRepository.buildPaymentMethods(paymentMethodsListSnapshot);
-
-  Future<PaymentMethod> getPaymentMethodByName(String name) async => await _invoiceRepository.getPaymentMethodByName(name);
 
   /// Brands
   Stream<QuerySnapshot> brandsStream(int uidVehicleType) {

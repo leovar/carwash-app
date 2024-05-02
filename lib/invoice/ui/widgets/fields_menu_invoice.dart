@@ -1,5 +1,6 @@
 import 'package:car_wash_app/invoice/bloc/bloc_invoice.dart';
-import 'package:car_wash_app/invoice/model/payment_methods.dart';
+import 'package:car_wash_app/payment_methods/bloc/bloc_payment_method.dart';
+import 'package:car_wash_app/payment_methods/model/payment_methods.dart';
 import 'package:car_wash_app/user/model/user.dart';
 import 'package:car_wash_app/widgets/popup_menu_widget.dart';
 import 'package:flutter/material.dart';
@@ -59,6 +60,7 @@ class FieldsMenusInvoice extends StatefulWidget {
 
 class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
   BlocInvoice _blocInvoice;
+  BlocPaymentMethod _paymentMethodBloc = BlocPaymentMethod();
   List<User> _listUsersCoordinators;
   List<PaymentMethod> _listMasterPaymentsMethods;
   List<String> _listCoordinators = <String>[];
@@ -274,7 +276,7 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
   Widget _getPaymentMethods() {
     if (widget.listCountPaymentMethods == 0) {
       return StreamBuilder(
-        stream: _blocInvoice.paymentMethodsStream(),
+        stream: _paymentMethodBloc.paymentMethodsStream(),
         builder: (context, snapshot) {
           switch (snapshot.connectionState) {
             case ConnectionState.waiting:
@@ -290,7 +292,7 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
   }
 
   Widget showPopUpPaymentMethods(AsyncSnapshot snapshot) {
-    _listMasterPaymentsMethods = _blocInvoice.buildPaymentMethods(snapshot.data.documents);
+    _listMasterPaymentsMethods = _paymentMethodBloc.buildPaymentMethods(snapshot.data.documents);
     _listPaymentMethods = _listMasterPaymentsMethods.map((pm) => pm.name).toList();
     widget.cbHandlerPaymentMethod('', _listMasterPaymentsMethods.length, 2);
     return chargePaymentMethodsControl();

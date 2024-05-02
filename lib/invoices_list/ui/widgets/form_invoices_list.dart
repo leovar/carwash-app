@@ -1,6 +1,7 @@
 import 'package:car_wash_app/invoice/bloc/bloc_invoice.dart';
 import 'package:car_wash_app/invoice/model/invoice.dart';
-import 'package:car_wash_app/invoice/model/payment_methods.dart';
+import 'package:car_wash_app/payment_methods/bloc/bloc_payment_method.dart';
+import 'package:car_wash_app/payment_methods/model/payment_methods.dart';
 import 'package:car_wash_app/invoice/ui/screens/operators_invoice_page.dart';
 import 'package:car_wash_app/invoices_list/model/invoice_list_model.dart';
 import 'package:car_wash_app/invoices_list/ui/widgets/filter_fields_widget.dart';
@@ -39,6 +40,7 @@ class _FormInvoicesList extends State<FormInvoicesList> {
   BlocInvoice _blocInvoice;
   final _locationBloc = BlocLocation();
   UserBloc _blocUser = UserBloc();
+  BlocPaymentMethod _paymentMethodBloc = BlocPaymentMethod();
   List<Invoice> _listInvoices = <Invoice>[];
   List<InvoiceListModel> _listModel = <InvoiceListModel>[];
   User _currentUser;
@@ -398,7 +400,7 @@ class _FormInvoicesList extends State<FormInvoicesList> {
 
   void _closeInvoiceMessage() async {
     if ((_invoiceSelected.paymentMethod??'') == '') {
-      _selectedPaymentMethod = ((_invoiceSelected.paymentMethod??'') == '' || _invoiceSelected.paymentMethod == null) ? new PaymentMethod(name:'') : await _blocInvoice.getPaymentMethodByName(_invoiceSelected.paymentMethod);
+      _selectedPaymentMethod = ((_invoiceSelected.paymentMethod??'') == '' || _invoiceSelected.paymentMethod == null) ? new PaymentMethod(name:'') : await _paymentMethodBloc.getPaymentMethodByName(_invoiceSelected.paymentMethod);
       Alert(
         context: context,
         title: 'Método de pago',

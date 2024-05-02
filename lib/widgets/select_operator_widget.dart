@@ -1,5 +1,6 @@
 import 'package:car_wash_app/invoice/bloc/bloc_invoice.dart';
-import 'package:car_wash_app/invoice/model/payment_methods.dart';
+import 'package:car_wash_app/payment_methods/bloc/bloc_payment_method.dart';
+import 'package:car_wash_app/payment_methods/model/payment_methods.dart';
 import 'package:car_wash_app/user/model/user.dart';
 import 'package:car_wash_app/invoice/model/invoice.dart';
 import 'package:flutter/material.dart';
@@ -23,6 +24,7 @@ class SelectOperatorWidget extends StatefulWidget {
 
 class _SelectOperatorWidget extends State<SelectOperatorWidget> {
   BlocInvoice _blocInvoice = BlocInvoice();
+  BlocPaymentMethod _paymentMethodBloc = BlocPaymentMethod();
   List<DropdownMenuItem<PaymentMethod>> _listPaymentMethods;
   PaymentMethod _selectedPaymentMethod;
 
@@ -46,7 +48,7 @@ class _SelectOperatorWidget extends State<SelectOperatorWidget> {
 
   Widget _getPaymentMethodsList() {
     return StreamBuilder(
-      stream: _blocInvoice.paymentMethodsStream(),
+      stream: _paymentMethodBloc.paymentMethodsStream(),
       builder: (context, snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.waiting:
@@ -59,7 +61,7 @@ class _SelectOperatorWidget extends State<SelectOperatorWidget> {
   }
 
   Widget _chargeDropPaymentMethods(AsyncSnapshot snapshot) {
-    List<PaymentMethod> paymentsList = _blocInvoice.buildPaymentMethods(snapshot.data.documents);
+    List<PaymentMethod> paymentsList = _paymentMethodBloc.buildPaymentMethods(snapshot.data.documents);
     _listPaymentMethods = builtDropdownPaymentMethod(paymentsList);
     return Column(
       children: [
