@@ -32,7 +32,7 @@ class ReportsRepository {
     return querySnapshot.snapshots();
   }
 
-  List<Invoice> buildListProductivityReport(List<DocumentSnapshot> invoicesListSnapshot) {
+  List<Invoice> buildInvoiceListReport(List<DocumentSnapshot> invoicesListSnapshot) {
     List<Invoice> invoicesList = <Invoice>[];
     invoicesListSnapshot.forEach((p) {
       Invoice invoice = Invoice.fromJson(p.data, id: p.documentID);
@@ -41,6 +41,26 @@ class ReportsRepository {
     return invoicesList;
   }
 
+  ///Get Earnings report Data
+  Stream<QuerySnapshot> getListEarningsReportStream(
+      DateTime dateInit,
+      DateTime dateFinal,
+      ) {
+    DateTime dateFinalModify =
+    DateTime(dateFinal.year, dateFinal.month, dateFinal.day, 23, 59);
+
+    var querySnapshot = this
+        ._db
+        .collection(FirestoreCollections.invoices)
+        .where(FirestoreCollections.invoiceFieldCreationDate,
+        isGreaterThanOrEqualTo: Timestamp.fromDate(dateInit))
+        .where(FirestoreCollections.invoiceFieldCreationDate,
+        isLessThanOrEqualTo: Timestamp.fromDate(dateFinalModify))
+        .where(FirestoreCollections.invoiceFieldCancelled, isEqualTo: false)
+        .where(FirestoreCollections.invoiceClosed, isEqualTo: true);
+
+    return querySnapshot.snapshots();
+  }
 
   //TODO metodos hacia abajo solo se usan para corregir errores una sola vez, se deben eliminar
   Future<List<Invoice>> getAllInvoices() async {

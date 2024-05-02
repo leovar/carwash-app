@@ -7,6 +7,7 @@ import 'package:car_wash_app/invoice/model/invoice.dart';
 import 'package:car_wash_app/invoice/repository/invoice_repository.dart';
 import 'package:car_wash_app/product/bloc/product_bloc.dart';
 import 'package:car_wash_app/product/model/product.dart';
+import 'package:car_wash_app/reports/model/earnings_card_detail.dart';
 import 'package:car_wash_app/reports/repository/reports_repository.dart';
 import 'package:car_wash_app/user/model/user.dart';
 import 'package:car_wash_app/widgets/messages_utils.dart';
@@ -37,8 +38,53 @@ class BlocReports implements Bloc {
   }
 
   List<Invoice> buildProductivityReportList(List<DocumentSnapshot> invoicesListSnapshot) {
-    List<Invoice> invoices = _reportsRepository.buildListProductivityReport(invoicesListSnapshot);
+    List<Invoice> invoices = _reportsRepository.buildInvoiceListReport(invoicesListSnapshot);
     return invoices;
+  }
+
+  Stream<QuerySnapshot> earningsReportListStream(DateTime dateInit, DateTime dateFinal,) {
+    return _reportsRepository.getListEarningsReportStream(dateInit, dateFinal);
+  }
+
+  List<Invoice> buildEarningsReportList(List<DocumentSnapshot> invoicesListSnapshot) {
+    List<Invoice> invoices = _reportsRepository.buildInvoiceListReport(invoicesListSnapshot);
+    return invoices;
+  }
+
+  List<EarningsCardDetail> buildEarningCards(List<Invoice> _invoices) {
+    List<EarningsCardDetail> _cardList = [];
+    try {
+      _invoices.forEach((item) {
+        EarningsCardDetail detailInfo = _cardList.length > 0
+            ? _cardList.firstWhere((x) => x.locationName == item.locationName, orElse: () => null)
+            : null;
+        if (detailInfo == null) {
+          List<Invoice> invoicesPerLocation = [];
+          invoicesPerLocation.add(item);
+          final cardData = EarningsCardDetail(
+            item.locationName,
+            item.countProducts + item.countAdditionalProducts,
+            item.totalPrice,
+            invoicesPerLocation,
+          );
+          _cardList.add(cardData);
+        } else {
+          detailInfo.countServices = detailInfo.countServices + (item.countProducts + item.countAdditionalProducts);
+          detailInfo.totalPrice = detailInfo.totalPrice + item.totalPrice;
+          List<Invoice> listGet = detailInfo.invoicesList;
+          listGet.add(item);
+          int indexData = _cardList.indexOf(detailInfo);
+          _cardList[indexData] = detailInfo;
+        }
+      });
+      return _cardList;
+    } catch(_error) {
+      print(_error);
+      Fluttertoast.showToast(
+          msg: "Error generando el informe: $_error",
+          toastLength: Toast.LENGTH_LONG);
+      return _cardList;
+    }
   }
 
   //TODO metodo temporal para pasar el operador de la factura a una lista de operadores dentro de la factura
@@ -90,7 +136,7 @@ class BlocReports implements Bloc {
       });
     } catch(_error) {
       print(_error);
-      Fluttertoast.showToast(msg: "Error generando el informe: $_error", toastLength: Toast.LENGTH_LONG);
+      Fluttertoast.showToast(msg: "Error corrigiendo operadores: $_error", toastLength: Toast.LENGTH_LONG);
     }
   }
 

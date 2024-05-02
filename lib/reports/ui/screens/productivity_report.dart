@@ -165,7 +165,7 @@ class _ProductivityReport extends State<ProductivityReport> {
         );
       default:
         _listInvoices = _blocReports.buildProductivityReportList(snapshot.data.documents);
-        _updateInvoices(_listInvoices); //TODO esta llamada se debe comentar o eliminar cuando se actualizce al app en los celulares que la usan
+        //_updateInvoices(_listInvoices); //TODO esta llamada se debe comentar o eliminar cuando se actualizce al app en los celulares que la usan
         _listCardReport = _processInvoicesOperator(
             _listInvoices.where((f) => !f.cancelledInvoice && f.invoiceClosed).toList());
         _listCardReport
@@ -179,7 +179,8 @@ class _ProductivityReport extends State<ProductivityReport> {
         itemBuilder: (BuildContext context, int index) {
           return ItemProductivityReportList(
               cardReport: _listCardReport[index],
-              servicesDetail: _openServicesDetail);
+              servicesDetail: _openServicesDetail,
+          );
         },
       );
     } else {
@@ -833,8 +834,8 @@ class _ProductivityReport extends State<ProductivityReport> {
 
   ///TODO este metodo se llama para agregar los operadores a una lista en la misma factura
   void _updateInvoices(List<Invoice> _invoice) async {
-    await _blocReports.updateInfoOperatorsInvoices(_invoice);
-    _updateProductsCommission(_invoice);
+    _blocReports.updateInfoOperatorsInvoices(_invoice);
+    //_updateProductsCommission(_invoice);
     //_blocReports.updateInfoProductsInvoice(_invoice);
     //_blocReports.addIdToProductInvoice(_invoice);
   }

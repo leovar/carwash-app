@@ -64,7 +64,7 @@ class _ProductsInvoicePage extends State<ProductsInvoicePage> {
   }
 
   Widget getProducts() {
-    if (widget.invoice != null) {
+    if (widget.invoice != null && widget.invoice.invoiceClosed) {
       List<Product> productsList = [];
       widget.productListCallback.forEach((prod) {
         Product prodSelected = Product.copyProductInvoiceWith(
