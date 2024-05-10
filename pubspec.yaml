@@ -11,7 +11,7 @@ description: Car Wash Flutter application.
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.5.0+32
+version: 1.6.0+33
 
 
 environment:
@@ -135,6 +135,7 @@ flutter:
     - assets/images/factura-impr-2.png
     - assets/images/logo-car-wash-launcher.png
     - assets/images/icon_queue.png
+    - assets/images/account-multiple-custom1.png
 
 
   # The following line ensures that the Material Icons font is

@@ -1,6 +1,9 @@
+import 'package:car_wash_app/invoice/bloc/bloc_invoice.dart';
+import 'package:car_wash_app/invoice/model/configuration.dart';
 import 'package:car_wash_app/invoices_list/ui/screens/invoices_list_page.dart';
 import 'package:car_wash_app/location/bloc/bloc_location.dart';
 import 'package:car_wash_app/location/model/location.dart';
+import 'package:car_wash_app/reports/ui/screens/operators_report.dart';
 import 'package:car_wash_app/reports/ui/screens/reports_page.dart';
 import 'package:car_wash_app/turns/ui/screens/turns_page.dart';
 import 'package:car_wash_app/user/bloc/bloc_user.dart';
@@ -30,13 +33,16 @@ class HomePage extends StatefulWidget {
 class _HomePage extends State<HomePage> {
   GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey();
   final _locationBloc = BlocLocation();
+  final _blocInvoice = BlocInvoice();
   UserBloc _userBloc;
   User _currentUser;
   String _photoUrl = '';
   DocumentReference _locationReference;
   String _locationName = '';
   bool _isAdministrator = false;
+  bool _isCoordinator = false;
   Location _selectedLocation = Location();
+  Configuration _config = Configuration();
 
   @override
   void initState() {
@@ -95,6 +101,9 @@ class _HomePage extends State<HomePage> {
       this._currentUser.photoUrl = _photoUrl;
       if (user.isAdministrator) {
         _isAdministrator = true;
+      }
+      if (user.isCoordinator) {
+        _isCoordinator = true;
       }
       return homePage();
     } else {
@@ -236,6 +245,29 @@ class _HomePage extends State<HomePage> {
             buttonEnabled: _locationName.isNotEmpty ? true : false,
           ),
         ),
+        SizedBox(
+          height: 10.0,
+        ),
+        Visibility(
+          visible: (_isAdministrator || _isCoordinator),
+          child: ButtonFunctions(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => OperatorsReport(
+                    locationReference: _locationReference,
+                    configuration: _config,
+                )),
+              );
+            },
+            buttonName: "INFORME OPERADORES",
+            imageAsset: "assets/images/account-multiple-custom1.png",
+            buttonEnabled: _locationName.isNotEmpty ? true : false,
+          ),
+        ),
+        SizedBox(
+          height: 10.0,
+        ),
       ],
     );
   }
@@ -338,6 +370,7 @@ class _HomePage extends State<HomePage> {
     _locationReference = await _locationBloc.getLocationReference(idLocation);
     _locationName = pref.getString(Keys.locationName);
     _photoUrl = pref.getString(Keys.photoUserUrl);
+    _blocInvoice.getConfigurationObject().then((value) => _config = value);
   }
 
   Future<void> _deleteLocationPreference() async {

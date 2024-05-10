@@ -27,7 +27,8 @@ class ReportsRepository {
         .where(FirestoreCollections.invoiceFieldCreationDate,
         isLessThanOrEqualTo: Timestamp.fromDate(dateFinalModify))
         .where(FirestoreCollections.invoiceFieldLocation,
-        isEqualTo: locationReference);
+        isEqualTo: locationReference)
+        .where(FirestoreCollections.invoiceFieldCancelled, isEqualTo: false);
 
     return querySnapshot.snapshots();
   }
@@ -58,6 +59,24 @@ class ReportsRepository {
         isLessThanOrEqualTo: Timestamp.fromDate(dateFinalModify))
         .where(FirestoreCollections.invoiceFieldCancelled, isEqualTo: false)
         .where(FirestoreCollections.invoiceClosed, isEqualTo: true);
+
+    return querySnapshot.snapshots();
+  }
+
+  ///Get Operator Productivity report
+  Stream<QuerySnapshot> getOperatorInvoicesListCurrentMonth(DocumentReference locationReference) {
+    var _dateTimeInit = DateTime(DateTime.now().year, DateTime.now().month, 1);
+    DateTime _dateTimeFinal = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day, 23, 59);
+
+    var querySnapshot = this
+        ._db
+        .collection(FirestoreCollections.invoices)
+        .where(FirestoreCollections.invoiceFieldCreationDate,
+        isGreaterThanOrEqualTo: Timestamp.fromDate(_dateTimeInit))
+        .where(FirestoreCollections.invoiceFieldCreationDate,
+        isLessThanOrEqualTo: Timestamp.fromDate(_dateTimeFinal))
+        .where(FirestoreCollections.invoiceFieldLocation,
+        isEqualTo: locationReference);
 
     return querySnapshot.snapshots();
   }
