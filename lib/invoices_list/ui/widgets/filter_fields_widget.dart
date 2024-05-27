@@ -1,5 +1,6 @@
 import 'package:car_wash_app/invoice/bloc/bloc_invoice.dart';
-import 'package:car_wash_app/invoice/model/payment_methods.dart';
+import 'package:car_wash_app/payment_methods/bloc/bloc_payment_method.dart';
+import 'package:car_wash_app/payment_methods/model/payment_methods.dart';
 import 'package:car_wash_app/user/model/user.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -42,6 +43,7 @@ class FilterFieldsWidget extends StatefulWidget {
 
 class _FilterFieldsWidget extends State<FilterFieldsWidget> {
   BlocInvoice _blocInvoice =  BlocInvoice();
+  BlocPaymentMethod _paymentMethodBloc = BlocPaymentMethod();
   final _textDateInit = TextEditingController();
   final _textDateFinal = TextEditingController();
   List<DropdownMenuItem<User>> _dropdownMenuItems;
@@ -195,7 +197,7 @@ class _FilterFieldsWidget extends State<FilterFieldsWidget> {
 
   Widget _getPaymentMethods() {
     return StreamBuilder(
-      stream: _blocInvoice.paymentMethodsStream(),
+      stream: _paymentMethodBloc.paymentMethodsStream(),
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.waiting:
@@ -209,7 +211,7 @@ class _FilterFieldsWidget extends State<FilterFieldsWidget> {
 
   Widget _showPaymentMethods(AsyncSnapshot snapshot) {
     var paymentMethodSelectionEmpty = PaymentMethod(id: '0', name: 'Seleccione el método de pago...', active: true);
-    List<PaymentMethod> paymentMethods = _blocInvoice.buildPaymentMethods(snapshot.data.documents);
+    List<PaymentMethod> paymentMethods = _paymentMethodBloc.buildPaymentMethods(snapshot.data.documents);
     paymentMethods.add(paymentMethodSelectionEmpty);
     if (_selectedPaymentMethod != null && _selectedPaymentMethod.name.isEmpty) {
       _selectedPaymentMethod = paymentMethodSelectionEmpty;

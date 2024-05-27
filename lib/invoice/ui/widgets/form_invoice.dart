@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:car_wash_app/commission/bloc/bloc_commission.dart';
+import 'package:car_wash_app/commission/model/commission.dart';
 import 'package:car_wash_app/customer/bloc/bloc_customer.dart';
 import 'package:car_wash_app/customer/model/customer.dart';
 import 'package:car_wash_app/invoice/bloc/bloc_invoice.dart';
@@ -39,6 +41,7 @@ import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:popup_menu/popup_menu.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import '../../model/header_services.dart';
 import 'carousel_cars_widget.dart';
@@ -61,9 +64,9 @@ class _FormInvoice extends State<FormInvoice> {
   final _blocVehicle = BlocVehicle();
   final _userBloc = UserBloc();
   final _locationBloc = BlocLocation();
+  BlocCommission _blocCommission = BlocCommission();
   bool _enableForm;
   bool _editForm = true;
-  bool _editOperator = false;
   bool _enablePerIncidence = false;
   bool _closedInvoice = false;
 
@@ -106,14 +109,13 @@ class _FormInvoice extends State<FormInvoice> {
   final _textTimeDelivery = TextEditingController();
   final _textObservation = TextEditingController();
   final _textIncidence = TextEditingController();
-  String _selectOperator = "";
   String _selectCoordinator = "";
   List<Product> _listProduct = <Product>[];
   List<AdditionalProduct> _listAdditionalProducts = <AdditionalProduct>[];
   bool _validatePlaca = false;
   Customer _customer;
   DocumentReference _vehicleReference;
-  int _listOperatorsCount = 0;
+  int _countOperators = 0;
   int _listCoordinatorsCount = 0;
   int _countBrands = 0;
   int _countBrandReferences = 0;
@@ -130,7 +132,7 @@ class _FormInvoice extends State<FormInvoice> {
     super.initState();
     _enableForm = false;
     _clientFocusNode = FocusNode();
-    _listOperatorsCount = 0;
+    _countOperators = 0;
     _listCoordinatorsCount = 0;
     _countBrands = 0;
     _countColors = 0;
@@ -328,13 +330,11 @@ class _FormInvoice extends State<FormInvoice> {
               ),
               SizedBox(height: 9),
               FieldsMenusInvoice(
-                listCountOperators: _listOperatorsCount,
                 listCountCoordinators: _listCoordinatorsCount,
                 listCountBrands: _countBrands,
                 listCountColors: _countColors,
                 listCountBrandReference: _countBrandReferences,
                 listCountPaymentMethods: _countPaymentMethods,
-                cbHandlerOperator: _setHandlerUsersOperator,
                 cbHandlerCoordinator: _setHandlerUserCoordinator,
                 cbHandlerVehicleBrand: _setHandlerVehicleBrand,
                 cbHandlerVehicleBrandReference: _setHandlerBrandReferences,
@@ -342,7 +342,6 @@ class _FormInvoice extends State<FormInvoice> {
                 cbHandlerTypeSex: _setHandlerTypeSex,
                 cbHandlerPaymentMethod: _setHandlerPaymentMethod,
                 idLocation: _idLocation,
-                selectedOperator: _selectOperator,
                 selectedCoordinator: _selectCoordinator,
                 selectedVehicleBrand: _selectBrand,
                 selectVehicleBrandReference: _selectedBrandReference,
@@ -351,7 +350,6 @@ class _FormInvoice extends State<FormInvoice> {
                 selectedPaymentMethod: _selectedPaymentMethod,
                 uidVehicleType: vehicleTypeSelected.uid,
                 enableForm: _enableForm,
-                editOperator: _editOperator,
               ),
               SizedBox(height: 9),
               TextFieldInput(
@@ -383,6 +381,7 @@ class _FormInvoice extends State<FormInvoice> {
                   editForm: _editForm,
                   closedInvoice: _closedInvoice,
                   idLocation: _idLocation,
+                  invoice: widget.editInvoice,
               ),
               SizedBox(height: 9),
               FieldsProducts(
@@ -397,6 +396,7 @@ class _FormInvoice extends State<FormInvoice> {
                     _listProduct.where((f) => f.isSelected).toList().length +
                         _listAdditionalProducts.length,
                 editForm: _editForm,
+                invoice: widget.editInvoice,
               ),
               SizedBox(height: 9),
               Visibility(
@@ -408,11 +408,11 @@ class _FormInvoice extends State<FormInvoice> {
                 child: _saveInvoiceButton(),
               ),
               Visibility(
-                visible: !_editForm,
+                visible: (!_editForm && !_canceledInvoice),
                 child: _rePrintInvoice(),
               ),
               Visibility(
-                visible: (!_editForm && _isUserAdmin),
+                visible: (!_editForm && _isUserAdmin && !_canceledInvoice),
                 child: _cancelInvoice(),
               ),
               SizedBox(height: 9),
@@ -749,15 +749,6 @@ class _FormInvoice extends State<FormInvoice> {
   }
 
   ///Functions Select Menu
-  void _setHandlerUsersOperator(
-      String operatorSelect, int operatorsCount, int operationType) {
-    if (operationType == 1) {
-      _selectOperator = operatorSelect;
-    } else {
-      _listOperatorsCount = operatorsCount;
-    }
-  }
-
   void _setHandlerUserCoordinator(
       String selectCoordinator, int countList, int operationType) {
     if (operationType == 1) {
@@ -849,10 +840,34 @@ class _FormInvoice extends State<FormInvoice> {
   }
 
   ///Functions Operator Users List
-  void _setOperatorsDb(List<User> operatorsListSelected) {
-    setState(() {
-      _listOperators = operatorsListSelected;
-    });
+  void _setOperatorsDb(List<User> operatorsListSelected) async {
+    if (widget.editInvoice != null) {
+      int _countOperators = 0;
+      List<User> _operatorsToSave = [];
+      List<User> _selectedOperators = operatorsListSelected.where((u) => u.isSelected).toList();
+      _selectedOperators.forEach((user) {
+        var operatorSave = User.copyUserOperatorToSaveInvoice(
+          id: user.id,
+          name: user.name,
+          operatorCommission: (widget.editInvoice.totalCommission??0) / _selectedOperators.length,
+        );
+        _operatorsToSave.add(operatorSave);
+      });
+      _countOperators = _selectedOperators.length;
+      Invoice invoice = Invoice.copyWith(
+        origin: widget.editInvoice,
+        listOperators: _operatorsToSave,
+        countOperators: _countOperators,
+      );
+      await _blocInvoice.saveInvoice(invoice);
+      setState(() {
+        _listOperators = operatorsListSelected;
+      });
+    } else {
+      setState(() {
+        _listOperators = operatorsListSelected;
+      });
+    }
   }
 
   ///Function validate exist customer
@@ -1003,6 +1018,48 @@ class _FormInvoice extends State<FormInvoice> {
     }
   }
 
+  ///Function calculate commission per product
+  double _calculateCommissionProduct(List<Commission> commissionsList, String prodType, double prodPrice, int vehicleType) {
+    final commissionProd = commissionsList.firstWhere(
+            (c) =>
+        c.productType == prodType &&
+            c.uidVehicleType == vehicleType,
+        orElse: () => null);
+    bool isNormal = false;
+    double calculateComm = 0;
+    if (commissionProd != null) {
+      if (commissionProd.commissionThreshold > 0) {
+        if (prodPrice <= commissionProd.commissionThreshold) {
+          if (commissionProd.calculatePerCount) {
+            calculateComm = commissionProd.isValue
+                ? commissionProd.valueBeforeThreshold
+                : (commissionProd.valueBeforeThreshold) / 100;
+          } else {
+            calculateComm = commissionProd.isValue
+                ? prodPrice * commissionProd.valueBeforeThreshold
+                : (prodPrice * commissionProd.valueBeforeThreshold) / 100;
+          }
+        } else {
+          isNormal = true;
+        }
+      } else {
+        isNormal = true;
+      }
+      if (isNormal) {
+        if (commissionProd.calculatePerCount) {
+          calculateComm = commissionProd.isValue
+              ? commissionProd.value
+              : (commissionProd.value) / 100;
+        } else {
+          calculateComm = commissionProd.isValue
+              ? prodPrice * commissionProd.value
+              : (prodPrice * commissionProd.value) / 100;
+        }
+      }
+    }
+    return calculateComm;
+  }
+
   ///Functions Save Invoice
   void _saveInvoice() async {
     bool _haveServiceSpecial = false;
@@ -1031,7 +1088,6 @@ class _FormInvoice extends State<FormInvoice> {
         DocumentReference
             _vehicleTypeRef; //esta referencia debe traerse de la bd, en el momento se construye en la app
         DocumentReference _customerReference;
-        DocumentReference _operatorReference;
         DocumentReference _coordinatorReference;
         double _total = 0;
         double _iva = 0;
@@ -1040,15 +1096,10 @@ class _FormInvoice extends State<FormInvoice> {
         int _countAdditionalProducts = 0;
         int _servicesWashingTime = 0;
         int _countOperators = 0;
+        double _totalCommission = 0;
 
         //Get Current user reference
         DocumentReference _userRef = await _userBloc.getCurrentUserReference();
-
-        //Get Operator reference
-        if (_selectOperator.isNotEmpty) {
-          _operatorReference =
-              await _userBloc.getUserReferenceByUserName(_selectOperator);
-        }
 
         //Get Coordinator reference
         if (_selectCoordinator.isNotEmpty) {
@@ -1142,12 +1193,15 @@ class _FormInvoice extends State<FormInvoice> {
         });
 
         //Save products list
+        List<Commission> commissionsList = await _blocCommission.getAllCommissions();
         List<Product> _selectedProducts =
             _listProduct.where((f) => f.isSelected).toList();
         List<Product> _productToSave = [];
         if (_selectedProducts.length > 0) {
           _selectedProducts.forEach((product) {
             if (product.newProduct ?? true) {
+              // TODO calcular comisión por producto en este punto antes de guardarlo
+              double commission = _calculateCommissionProduct(commissionsList, product.productType, product.price, vehicleTypeSelected.uid);
               var prodSave = Product.copyProductToSaveInvoice(
                 id: product.id,
                 productName: product.productName,
@@ -1156,13 +1210,17 @@ class _FormInvoice extends State<FormInvoice> {
                 isAdditional: false,
                 productType: product.productType,
                 serviceTime: product.serviceTime,
+                commission: commission,
               );
+              _totalCommission = _totalCommission + commission;
               _productToSave.add(prodSave);
             }
           });
         }
         if (_listAdditionalProducts.length > 0) {
           _listAdditionalProducts.forEach((addProduct) {
+            // TODO calcular comisión por producto en este punto antes de guardarlo
+            double commission = _calculateCommissionProduct(commissionsList, addProduct.productType, double.parse(addProduct.productValue), vehicleTypeSelected.uid);
             var prodSave = Product.copyProductToSaveInvoice(
               id: null,
               productName: addProduct.productName,
@@ -1170,7 +1228,9 @@ class _FormInvoice extends State<FormInvoice> {
               ivaPercent: addProduct.ivaPercent,
               isAdditional: true,
               productType: addProduct.productType,
+              commission: commission,
             );
+            _totalCommission = _totalCommission + commission;
             _productToSave.add(prodSave);
           });
         }
@@ -1183,6 +1243,7 @@ class _FormInvoice extends State<FormInvoice> {
             var operatorSave = User.copyUserOperatorToSaveInvoice(
               id: user.id,
               name: user.name,
+              operatorCommission: _totalCommission / _selectedOperators.length,
             );
             _operatorsToSave.add(operatorSave);
           });
@@ -1230,8 +1291,6 @@ class _FormInvoice extends State<FormInvoice> {
           userOwner: widget.editInvoice != null
               ? widget.editInvoice.userOwner
               : _userRef,
-          userOperator: _operatorReference,
-          userOperatorName: _selectOperator,
           userCoordinator: _coordinatorReference,
           userCoordinatorName: _selectCoordinator,
           creationDate: widget.editInvoice != null
@@ -1253,32 +1312,27 @@ class _FormInvoice extends State<FormInvoice> {
           invoiceProducts: widget.editInvoice != null
               ? widget.editInvoice.invoiceProducts
               : _productToSave,
-          cancelledInvoice: _canceledInvoice,
-          paymentMethod:  _selectedPaymentMethod,
-          invoiceClosed: false,
-          endWash: false,
-          startWashing: false,
+          cancelledInvoice: widget.editInvoice != null ? widget.editInvoice.cancelledInvoice : _canceledInvoice,
+          paymentMethod: _selectedPaymentMethod,
+          closedDate: widget.editInvoice != null ? widget.editInvoice.closedDate : null,
+          invoiceClosed: widget.editInvoice != null ? widget.editInvoice.invoiceClosed : false,
+          endWash: widget.editInvoice != null ? widget.editInvoice.endWash : false,
+          dateEndWash: widget.editInvoice != null ? widget.editInvoice.dateEndWash : null,
+          startWashing: widget.editInvoice != null ? widget.editInvoice.startWashing : false,
+          dateStartWashing: widget.editInvoice != null ? widget.editInvoice.dateStartWashing : null,
+          washingTime: widget.editInvoice != null ? widget.editInvoice.washingTime : null,
+          washingCell: widget.editInvoice != null ? widget.editInvoice.washingCell : null,
+          countWashingWorkers: widget.editInvoice != null ? widget.editInvoice.countWashingWorkers : null,
           washingServicesTime: _servicesWashingTime,
           operatorUsers: _operatorsToSave,
           countOperators: _countOperators,
+          totalCommission: widget.editInvoice != null ? widget.editInvoice.totalCommission : _totalCommission,
         );
         DocumentReference invoiceReference =
             await _blocInvoice.saveInvoice(_invoice);
         String invoiceId = invoiceReference.documentID;
         Invoice _currentInvoiceSaved =
             await _blocInvoice.getInvoiceById(invoiceId);
-
-        //Save products list
-        /*List<Product> _selectedProducts = _listProduct.where((f) => f.isSelected).toList();
-        if (_selectedProducts.length > 0) {
-          _blocInvoice.saveInvoiceProduct(invoiceId, _selectedProducts);
-        }*/
-
-        //Save additional products list
-        /*if (_listAdditionalProducts.length > 0) {
-          _blocInvoice.saveInvoiceAdditionalProducts(invoiceId, _listAdditionalProducts);
-        }*/
-
 
         //Close screen
         Navigator.pop(context); //Close popUp Save
@@ -1290,12 +1344,12 @@ class _FormInvoice extends State<FormInvoice> {
         }
       } on PlatformException catch (e) {
         print('$e');
-        MessagesUtils.showAlert(
-            context: context, title: 'Error al guardar la factura');
+        Navigator.pop(context);
+        Fluttertoast.showToast(msg: "Error guardando la factura: $e", toastLength: Toast.LENGTH_LONG);
       } catch (error) {
         print('$error');
-        MessagesUtils.showAlert(
-            context: context, title: 'Error al guardar la factura');
+        Navigator.pop(context);
+        Fluttertoast.showToast(msg: "Error guardando la factura: $error", toastLength: Toast.LENGTH_LONG);
       }
     } else {
       MessagesUtils.showAlert(context: context, title: validateMessage).show();
@@ -1342,20 +1396,18 @@ class _FormInvoice extends State<FormInvoice> {
   ///Set Fields Invoice to Edit
   void _editInvoice(Invoice invoiceToEdit) async {
     _textPlaca.text = invoiceToEdit.placa;
-    _selectOperator = invoiceToEdit.userOperatorName;
     _selectCoordinator = invoiceToEdit.userCoordinatorName;
     _selectBrand = invoiceToEdit.vehicleBrand ?? '';
     _selectedBrandReference = invoiceToEdit.brandReference ?? '';
     _selectColor = invoiceToEdit.vehicleColor ?? '';
-    if (_selectOperator.isEmpty) {
-      _editOperator = true;
-    }
     _approveDataProcessing = invoiceToEdit.approveDataProcessing;
     _textTimeDelivery.text = invoiceToEdit.timeDelivery;
     _textObservation.text = invoiceToEdit.observation;
     _textIncidence.text = invoiceToEdit.incidence;
     _selectedPaymentMethod = invoiceToEdit.paymentMethod;
     _closedInvoice = invoiceToEdit.invoiceClosed;
+    _sendEmail = invoiceToEdit.sendEmailInvoice;
+    _canceledInvoice = invoiceToEdit.cancelledInvoice;
 
     //get vehicle reference
     _vehicleReference =
@@ -1451,7 +1503,7 @@ class _FormInvoice extends State<FormInvoice> {
       }
     }
 
-    return (_editOperator || _editForm || _enablePerIncidence) ? true : false;
+    return (_editForm || _enablePerIncidence) ? true : false;
   }
 
   Future<bool> _alertBackButton() {

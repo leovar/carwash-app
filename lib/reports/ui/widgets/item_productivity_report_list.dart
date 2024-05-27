@@ -9,7 +9,7 @@ import 'package:intl/intl.dart';
 
 class ItemProductivityReportList extends StatefulWidget {
   final CardReport cardReport;
-  final Function(String) servicesDetail;
+  final Function(String, List<Invoice>) servicesDetail;
 
   ItemProductivityReportList(
       {Key key,
@@ -32,7 +32,7 @@ class _ItemProductivityReportList extends State<ItemProductivityReportList> {
     final formatter = NumberFormat("#,###");
     return ConstrainedBox(
       constraints: BoxConstraints(
-        minHeight: 83,
+        minHeight: 86,
       ),
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 5),
@@ -42,7 +42,7 @@ class _ItemProductivityReportList extends State<ItemProductivityReportList> {
           child: InkWell(
             splashColor: Colors.blue.withAlpha(30),
             onTap: () {
-              widget.servicesDetail(widget.cardReport.operatorName);
+              widget.servicesDetail(widget.cardReport.operatorName, widget.cardReport.invoicesList);
             },
             child: Row(
               mainAxisSize: MainAxisSize.max,
@@ -96,17 +96,62 @@ class _ItemProductivityReportList extends State<ItemProductivityReportList> {
                     children: <Widget>[
                       Flexible(
                         child: Container(
+                          alignment: Alignment.center,
                           margin: EdgeInsets.only(
-                            right: 12,
+                            right: 8,
                           ),
-                          child: Text(
-                            widget.cardReport.countServices.toString() + ' Servicios',
-                            style: TextStyle(
-                              color: Theme.of(context).primaryColor,
-                              fontFamily: "Lato",
-                              fontWeight: FontWeight.normal,
-                              fontSize: 15,
-                            ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.account_circle,
+                                color: Theme.of(context).primaryColor,
+                                size: 20,
+                              ),
+                              SizedBox(width: 3),
+                              Flexible(
+                                child: Text(
+                                  widget.cardReport.countServices.toString() + ' Servicios',
+                                  style: TextStyle(
+                                    color: Theme.of(context).primaryColor,
+                                    fontFamily: "Lato",
+                                    fontWeight: FontWeight.normal,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 3),
+                      Flexible(
+                        child: Container(
+                          alignment: Alignment.center,
+                          margin: EdgeInsets.only(
+                            right: 8,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.supervisor_account,
+                                color: Theme.of(context).primaryColor,
+                                size: 20,
+                              ),
+                              SizedBox(width: 3),
+                              Flexible(
+                                child: Text(
+                                  widget.cardReport.countSharedServices.toString() + ' Servicios',
+                                  style: TextStyle(
+                                    color: Theme.of(context).primaryColor,
+                                    fontFamily: "Lato",
+                                    fontWeight: FontWeight.normal,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),

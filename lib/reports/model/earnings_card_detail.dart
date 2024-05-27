@@ -1,21 +1,14 @@
 import 'package:car_wash_app/invoice/model/invoice.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
-class CardReport {
-  final String operatorName;
-  final String operatorId;
+class EarningsCardDetail {
   final String locationName;
   int countServices;
-  int countSharedServices;
   double totalPrice;
   List<Invoice> invoicesList;
 
-  CardReport(
-      this.operatorName,
-      this.operatorId,
+  EarningsCardDetail(
       this.locationName,
       this.countServices,
-      this.countSharedServices,
       this.totalPrice,
       this.invoicesList,
       );

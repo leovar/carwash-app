@@ -21,6 +21,9 @@ class Product extends Equatable {
   final String productInvoiceId;
   final Timestamp dateAdded;
   final int serviceTime;
+  final double productCommission;
+  int countOperatorsInvoice;
+  int invoiceConsecutive;
 
   Product({
     this.id,
@@ -38,6 +41,9 @@ class Product extends Equatable {
     this.productInvoiceId,
     this.dateAdded,
     this.serviceTime,
+    this.productCommission,
+    this.countOperatorsInvoice,
+    this.invoiceConsecutive,
   });
 
   factory Product.fromJson(Map<String, dynamic> json, {String id}) {
@@ -88,6 +94,7 @@ class Product extends Equatable {
       isSelected: false,
       productType: json['productType'],
       serviceTime: json['serviceTime'],
+      productCommission: json['productCommission'],
     );
   }
 
@@ -112,11 +119,12 @@ class Product extends Equatable {
       productType: json['productType'],
       productInvoiceId: id,
       serviceTime: json['serviceTime'],
+      productCommission: json['productCommission'],
     );
   }
 
   factory Product.fromJsonProductIntoInvoice(
-      Map<dynamic, dynamic> json, int uidVehicleType, Timestamp addDate) {
+      Map<dynamic, dynamic> json, int uidVehicleType, Timestamp addDate, int countOperators, int consecutive) {
     return Product(
       id: json['Id'],
       productName: json['productName'],
@@ -128,6 +136,9 @@ class Product extends Equatable {
       vehicleTypeUid: uidVehicleType,
       dateAdded: addDate,
       serviceTime: json['serviceTime'],
+      productCommission: json['productCommission'],
+      countOperatorsInvoice: countOperators,
+      invoiceConsecutive : consecutive,
     );
   }
 
@@ -153,6 +164,7 @@ class Product extends Equatable {
     String productId,
     String productType,
     int serviceTime,
+    double commission,
   ) {
     return {
       'productName': productName,
@@ -162,6 +174,7 @@ class Product extends Equatable {
       'Id': productId,
       'productType': productType,
       'serviceTime': serviceTime,
+      'productCommission' : commission,
     };
   }
 
@@ -173,6 +186,7 @@ class Product extends Equatable {
     double ivaPercent,
     String productType,
     String productInvoiceId,
+    double commission,
   }) {
     return Product(
       id: id ?? origin.id,
@@ -188,6 +202,7 @@ class Product extends Equatable {
       productType: productType ?? origin.productType,
       productInvoiceId: productInvoiceId ?? '',
       serviceTime: origin.serviceTime,
+      productCommission: commission ?? origin.productCommission,
     );
   }
 
@@ -200,6 +215,7 @@ class Product extends Equatable {
     bool isAdditional,
     String productType,
     int serviceTime,
+    double commission,
   }) {
     return Product(
       id: id,
@@ -209,6 +225,7 @@ class Product extends Equatable {
       isAdditional: isAdditional ?? true,
       productType: productType,
       serviceTime: serviceTime,
+      productCommission: commission,
     );
   }
 
@@ -226,5 +243,6 @@ class Product extends Equatable {
         productType,
         productInvoiceId,
         serviceTime,
+        productCommission,
       ];
 }

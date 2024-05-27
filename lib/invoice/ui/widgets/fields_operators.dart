@@ -1,3 +1,4 @@
+import 'package:car_wash_app/invoice/model/invoice.dart';
 import 'package:car_wash_app/invoice/ui/screens/operators_invoice_page.dart';
 import 'package:car_wash_app/user/model/user.dart';
 import 'package:flutter/cupertino.dart';
@@ -11,6 +12,7 @@ class FieldsOperators extends StatefulWidget {
   final bool editForm;
   final bool closedInvoice;
   final String idLocation;
+  final Invoice invoice;
 
   FieldsOperators({
     Key key,
@@ -21,6 +23,7 @@ class FieldsOperators extends StatefulWidget {
     this.editForm,
     this.closedInvoice,
     this.idLocation,
+    this.invoice,
   });
 
   @override
@@ -37,8 +40,6 @@ class _FieldsOperators extends State<FieldsOperators> {
         Container(
           height: 50,
           child: Row(
-            //mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            //crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisSize: MainAxisSize.max,
             children: [
               Flexible(
@@ -85,6 +86,8 @@ class _FieldsOperators extends State<FieldsOperators> {
                                   editForm: widget.editForm,
                                   idLocation: widget.idLocation,
                                   closedInvoice: widget.closedInvoice,
+                                  fromCompleteInvoice: false,
+                                  invoice: widget.invoice,
                               ),
                             ),
                         );

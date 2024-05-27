@@ -1,6 +1,8 @@
 import 'package:car_wash_app/invoice/bloc/bloc_invoice.dart';
 import 'package:car_wash_app/invoice/model/invoice.dart';
-import 'package:car_wash_app/invoice/model/payment_methods.dart';
+import 'package:car_wash_app/payment_methods/bloc/bloc_payment_method.dart';
+import 'package:car_wash_app/payment_methods/model/payment_methods.dart';
+import 'package:car_wash_app/invoice/ui/screens/operators_invoice_page.dart';
 import 'package:car_wash_app/invoices_list/model/invoice_list_model.dart';
 import 'package:car_wash_app/invoices_list/ui/widgets/filter_fields_widget.dart';
 import 'package:car_wash_app/invoices_list/ui/widgets/item_invoices_list.dart';
@@ -38,6 +40,7 @@ class _FormInvoicesList extends State<FormInvoicesList> {
   BlocInvoice _blocInvoice;
   final _locationBloc = BlocLocation();
   UserBloc _blocUser = UserBloc();
+  BlocPaymentMethod _paymentMethodBloc = BlocPaymentMethod();
   List<Invoice> _listInvoices = <Invoice>[];
   List<InvoiceListModel> _listModel = <InvoiceListModel>[];
   User _currentUser;
@@ -46,8 +49,8 @@ class _FormInvoicesList extends State<FormInvoicesList> {
   double _totalMonth = 0.0;
   String _idLocation = '';
   Location _location;
-  User _selectedOperator = User(name:'', uid: '', email: '');
   PaymentMethod _selectedPaymentMethod = PaymentMethod(name:'');
+  Invoice _invoiceSelected;
 
   ///Filter Keys
   final _textPlaca = TextEditingController();
@@ -185,6 +188,7 @@ class _FormInvoicesList extends State<FormInvoicesList> {
           index: index,
           updateDate: true,
           isAdmon: _showInfoAmounts,
+          finishInvoice: _finishInvoiceCallback,
           closeInvoice: _closeInvoiceCallback,
         );
       },
@@ -388,22 +392,23 @@ class _FormInvoicesList extends State<FormInvoicesList> {
   }
 
   void _closeInvoiceCallback(Invoice _invoiceClose) async {
-    if (_invoiceClose.userOperatorName.isEmpty || (_invoiceClose.paymentMethod??'') == '') {
+    _invoiceSelected = _invoiceClose;
+    if (_invoiceSelected.countOperators > 0) {
+      _closeInvoiceMessage();
+    }
+  }
 
-      _selectedOperator = _invoiceClose.userOperatorName.isEmpty ? new User(name:'', uid: '', email: '') : await _blocUser.getUserById(_invoiceClose.userOperator.documentID);
-      _selectedPaymentMethod = ((_invoiceClose.paymentMethod??'') == '' || _invoiceClose.paymentMethod == null) ? new PaymentMethod(name:'') : await _blocInvoice.getPaymentMethodByName(_invoiceClose.paymentMethod);
+  void _closeInvoiceMessage() async {
+    if ((_invoiceSelected.paymentMethod??'') == '') {
+      _selectedPaymentMethod = ((_invoiceSelected.paymentMethod??'') == '' || _invoiceSelected.paymentMethod == null) ? new PaymentMethod(name:'') : await _paymentMethodBloc.getPaymentMethodByName(_invoiceSelected.paymentMethod);
       Alert(
         context: context,
-        title: 'Seleccione el operador y el Método de pago',
+        title: 'Método de pago',
         style: MessagesUtils.alertStyle,
         content: SelectOperatorWidget(
-          operatorSelected: _selectedOperator,
           paymentMethodSelected: _selectedPaymentMethod,
-          idLocation: _idLocation,
-          selectOperator: _callBackSelectOperator,
           selectPaymentMethod: _callBackSelectPaymentMethod,
-          currentInvoice: _invoiceClose,
-          finishInvoice: _closeInvoiceWithOperator,
+          currentInvoice: _invoiceSelected,
         ),
         buttons: [
           DialogButton(
@@ -414,7 +419,7 @@ class _FormInvoicesList extends State<FormInvoicesList> {
             ),
             onPressed: () {
               Navigator.of(context).pop();
-              _completeOrderToClose(_invoiceClose);
+              _closeInvoice(true);
             },
           ),
         ],
@@ -434,7 +439,7 @@ class _FormInvoicesList extends State<FormInvoicesList> {
             ),
             onPressed: () {
               Navigator.of(context).pop();
-              _closeInvoice(_invoiceClose);
+              _closeInvoice(false);
             },
           ),
           DialogButton(
@@ -453,32 +458,31 @@ class _FormInvoicesList extends State<FormInvoicesList> {
     }
   }
 
-  void _callBackSelectOperator(User operatorSelected) {
-    _selectedOperator = operatorSelected;
+  void _finishInvoiceCallback(Invoice _invoiceToFinish) {
+    _invoiceSelected = _invoiceToFinish;
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => OperatorsInvoicePage(
+          callbackSetOperatorsList: _saveOperators,
+          usersListCallback: _invoiceToFinish.operatorUsers,
+          editForm: false,
+          idLocation: _idLocation,
+          closedInvoice: _invoiceToFinish.invoiceClosed,
+          fromCompleteInvoice: true,
+          callbackFinishInvoice : _finishInvoice,
+        ),
+      ),
+    );
   }
 
-  void _callBackSelectPaymentMethod(PaymentMethod payment) {
-    _selectedPaymentMethod = payment;
-  }
-
-  void _completeOrderToClose(Invoice invoiceToSave) async {
-    if (_selectedPaymentMethod.name.isNotEmpty) {
-      Invoice invoice = Invoice.copyWith(
-        origin: invoiceToSave,
-        paymentMethod: _selectedPaymentMethod.name,
-      );
-      await _blocInvoice.saveInvoice(invoice);
-    }
-  }
-
-  void _closeInvoiceWithOperator(Invoice invoiceToClose) async {
-    if (_selectedOperator.name.isNotEmpty) {
+  void _finishInvoice() async {
+    if (_invoiceSelected.countOperators > 0) {
       bool endWashValue = false;
       Timestamp endWashData;
       int washingTimeValue;
-      DocumentReference _operatorReference = await _blocUser.getUserReferenceById(_selectedOperator.id);
-      if (invoiceToClose.startWashing && !invoiceToClose?.endWash?? false) { //Finaliza la factura con final de lavado
-        DateTime dateStart = invoiceToClose.dateStartWashing.toDate();
+      if (_invoiceSelected.startWashing && !_invoiceSelected?.endWash?? false) { //Finaliza la factura con final de lavado
+        DateTime dateStart = _invoiceSelected.dateStartWashing.toDate();
         DateTime dateCurrent = DateTime.now();
         Duration diff = dateCurrent.difference(dateStart);
         int washCurrentDuration = diff.inMinutes;
@@ -487,11 +491,8 @@ class _FormInvoicesList extends State<FormInvoicesList> {
         endWashData = Timestamp.now();
 
         Invoice invoice = Invoice.copyWith(
-          origin: invoiceToClose,
+          origin: _invoiceSelected,
           closedDate: Timestamp.now(),
-          invoiceClosed: true,
-          userOperator: _operatorReference,
-          userOperatorName: _selectedOperator.name,
           endWash: endWashValue,
           dateEndWash: endWashData,
           washingTime: washingTimeValue,
@@ -499,28 +500,65 @@ class _FormInvoicesList extends State<FormInvoicesList> {
         await _blocInvoice.saveInvoice(invoice);
       } else {  //Finaliza la factura sin final de lavado
         Invoice invoice = Invoice.copyWith(
-          origin: invoiceToClose,
+          origin: _invoiceSelected,
           closedDate: Timestamp.now(),
-          invoiceClosed: true,
-          userOperator: _operatorReference,
-          userOperatorName: _selectedOperator.name,
         );
         await _blocInvoice.saveInvoice(invoice);
       }
-      _validateSendCustomerNotification(invoiceToClose);
+      _validateSendCustomerNotification(_invoiceSelected);
+      setState(() {});
+      //_closeInvoiceMessage();
     }
   }
 
-  void _closeInvoice(Invoice invoiceToClose) async {
+  void _callBackSelectPaymentMethod(PaymentMethod payment) {
+    _selectedPaymentMethod = payment;
+  }
+
+  void _saveOperators(List<User> userList) async {
+    int _countOperators = 0;
+    List<User> _operatorsToSave = [];
+    List<User> _selectedOperators = userList.where((u) => u.isSelected).toList();
+    if (_selectedOperators.length > 0) {
+      _selectedOperators.forEach((user) {
+        var operatorSave = User.copyUserOperatorToSaveInvoice(
+          id: user.id,
+          name: user.name,
+          operatorCommission: (_invoiceSelected.totalCommission??0) / _selectedOperators.length,
+        );
+        _operatorsToSave.add(operatorSave);
+      });
+      _countOperators = _selectedOperators.length;
+      Invoice invoice = Invoice.copyWith(
+        origin: _invoiceSelected,
+        listOperators: _operatorsToSave,
+        countOperators: _countOperators,
+      );
+      _invoiceSelected = invoice;
+      await _blocInvoice.saveInvoice(invoice);
+      setState(() {});
+    }
+  }
+
+  void _closeInvoice(bool withPayment) async {
     MessagesUtils.showAlertWithLoading(context: context, title: 'Guardando..')
         .show();
-    Invoice invoice = Invoice.copyWith(
-      origin: invoiceToClose,
-      closedDate: Timestamp.now(),
-      invoiceClosed: true,
-    );
+    Invoice invoice;
+    if (withPayment) {
+      if (_selectedPaymentMethod.name.isNotEmpty) {
+        invoice = Invoice.copyWith(
+          origin: _invoiceSelected,
+          paymentMethod: _selectedPaymentMethod.name,
+          invoiceClosed: true,
+        );
+      } else return;
+    } else {
+      invoice = Invoice.copyWith(
+        origin: _invoiceSelected,
+        invoiceClosed: true,
+      );
+    }
     await _blocInvoice.saveInvoice(invoice);
-    _validateSendCustomerNotification(invoiceToClose);
     Navigator.pop(context);
   }
 

@@ -1,24 +1,24 @@
-import 'package:car_wash_app/location/bloc/bloc_location.dart';
-import 'package:car_wash_app/location/model/location.dart';
-import 'package:car_wash_app/location/ui/widgets/item_location_admin_list.dart';
-import 'package:car_wash_app/user/bloc/bloc_user.dart';
+import 'package:car_wash_app/payment_methods/bloc/bloc_payment_method.dart';
+import 'package:car_wash_app/payment_methods/model/payment_methods.dart';
+import 'package:car_wash_app/payment_methods/ui/widgets/item_payment_method.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 
-import 'create_location_admin_page.dart';
+import 'create_payment_method_admin_page.dart';
 
-class LocationsAdminPage extends StatefulWidget{
+class PaymentMethodAdminPage extends StatefulWidget{
   @override
-  State<StatefulWidget> createState() => _LocationsAdminPage();
+  State<StatefulWidget> createState() => _PaymentMethodAdminPage();
 }
 
-class _LocationsAdminPage extends State<LocationsAdminPage> {
-  BlocLocation _locationsBloc;
-  List<Location> _locationList = <Location>[];
+class _PaymentMethodAdminPage extends State<PaymentMethodAdminPage> {
+  BlocPaymentMethod _paymentMethodBloc;
+  List<PaymentMethod> _paymentMethodsList = [];
 
   @override
   Widget build(BuildContext context) {
-    _locationsBloc = BlocProvider.of(context);
+    _paymentMethodBloc = BlocProvider.of(context);
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -27,7 +27,7 @@ class _LocationsAdminPage extends State<LocationsAdminPage> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          "Sedes",
+          "Métodos de Pago",
           style: TextStyle(
             fontFamily: "Lato",
             decoration: TextDecoration.none,
@@ -51,36 +51,37 @@ class _LocationsAdminPage extends State<LocationsAdminPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          _listLocationsStream(),
+          _listPaymentMethodsStream(),
           _buttonNewUser(),
         ],
       ),
     );
   }
 
-  Widget _listLocationsStream() {
+  Widget _listPaymentMethodsStream() {
     return StreamBuilder(
-      stream: _locationsBloc.allLocationsStream,
+      stream: _paymentMethodBloc.allPaymentMethodsStream,
       builder: (context, snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.waiting:
             return CircularProgressIndicator();
           default:
-              return _getDataLocationsList(snapshot);
+            return _getDataPaymentMethodsList(snapshot);
         }
       },
     );
   }
 
-  Widget _getDataLocationsList(AsyncSnapshot snapshot) {
-    _locationList = _locationsBloc.buildAllLocations(snapshot.data.documents);
+  Widget _getDataPaymentMethodsList(AsyncSnapshot snapshot) {
+    _paymentMethodsList = _paymentMethodBloc.buildPaymentMethods(snapshot.data.documents);
+    _paymentMethodsList.sort((a, b) => a.name.compareTo(b.name));
     return Flexible(
       child: ListView.builder(
-        itemCount: _locationList.length,
+        itemCount: _paymentMethodsList.length,
         scrollDirection: Axis.vertical,
         shrinkWrap: true,
         itemBuilder: (BuildContext context, int index) {
-          return ItemLocationAdminList(_locationList, index);
+          return ItemPaymentMethodAdmin(_paymentMethodsList, index);
         },
       ),
     );
@@ -96,7 +97,7 @@ class _LocationsAdminPage extends State<LocationsAdminPage> {
           padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
           color: Color(0xFF59B258),
           child: Text(
-            "Nueva Sede",
+            "Nuevo método de pago",
             style: TextStyle(
               fontFamily: "Lato",
               decoration: TextDecoration.none,
@@ -111,8 +112,8 @@ class _LocationsAdminPage extends State<LocationsAdminPage> {
               MaterialPageRoute(
                 builder: (context) {
                   return BlocProvider(
-                    bloc: BlocLocation(),
-                    child: CreateLocationAdminPage(),
+                    bloc: BlocPaymentMethod(),
+                    child: CreatePaymentMethodAdminPage(),
                   );
                 },
               ),
@@ -122,4 +123,5 @@ class _LocationsAdminPage extends State<LocationsAdminPage> {
       ),
     );
   }
+
 }

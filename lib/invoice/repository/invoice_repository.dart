@@ -5,7 +5,7 @@ import 'dart:typed_data';
 import 'package:car_wash_app/invoice/model/additional_product.dart';
 import 'package:car_wash_app/invoice/model/configuration.dart';
 import 'package:car_wash_app/invoice/model/invoice.dart';
-import 'package:car_wash_app/invoice/model/payment_methods.dart';
+import 'package:car_wash_app/payment_methods/model/payment_methods.dart';
 import 'package:car_wash_app/product/model/product.dart';
 import 'package:car_wash_app/user/model/user.dart';
 import 'package:car_wash_app/vehicle_type/model/brand.dart';
@@ -34,6 +34,7 @@ class InvoiceRepository {
         element.id,
         element.productType,
         element.serviceTime,
+        element.productCommission,
       );
       mapProducts.add(mapProduct);
     });
@@ -43,6 +44,7 @@ class InvoiceRepository {
       var mapOperator = User().toJsonInvoiceOperator(
         item.id,
         item.name,
+        item.operatorCommission,
       );
       mapOperators.add(mapOperator);
     });
@@ -169,41 +171,6 @@ class InvoiceRepository {
       usersList.add(loc);
     });
     return usersList;
-  }
-
-  ///Get Payment Methods
-  Stream<QuerySnapshot> getListPaymentMethodsStream() {
-    final querySnapshot = this
-        ._db
-        .collection(FirestoreCollections.paymentMethods)
-        .where(FirestoreCollections.paymentActive, isEqualTo: true)
-        .snapshots();
-    return querySnapshot;
-  }
-
-  List<PaymentMethod> buildPaymentMethods(
-      List<DocumentSnapshot> paymentListSnapshot) {
-    List<PaymentMethod> paymentsList = <PaymentMethod>[];
-    paymentListSnapshot.forEach((p) {
-      PaymentMethod loc = PaymentMethod.fromJson(p.data, id: p.documentID);
-      paymentsList.add(loc);
-    });
-    return paymentsList;
-  }
-
-  Future<PaymentMethod> getPaymentMethodByName(String name) async {
-    final querySnapshot = await this
-        ._db
-        .collection(FirestoreCollections.paymentMethods)
-        .where(FirestoreCollections.paymentName, isEqualTo: name)
-        .getDocuments();
-
-    PaymentMethod pm = new PaymentMethod();
-    if (querySnapshot.documents.length > 0) {
-      pm = PaymentMethod.fromJson(querySnapshot.documents[0].data,
-          id: querySnapshot.documents[0].documentID);
-    }
-    return pm;
   }
 
   /// Get Brands list by vehicleType
@@ -333,66 +300,6 @@ class InvoiceRepository {
     return null;
   }
 
-  //TODO esta metodo caducaria cuando el producto se guarde en la misma factura
-  /// Save Invoice Products
-  Future<void> saveInvoiceProduct(String invoiceId, Product product) async {
-    await this
-        ._db
-        .collection(FirestoreCollections.invoices)
-        .document(invoiceId)
-        .collection(FirestoreCollections.products)
-        .add(Product().toJsonInvoiceProduct(
-          product.productName,
-          product.price,
-          product.ivaPercent,
-          false,
-          product.id,
-          product.productType,
-          product.serviceTime,
-        ));
-  }
-
-  //TODO esta metodo caducaria cuando el producto se guarde en la misma factura
-  /// Save Invoice Additional Products
-  Future<void> saveInvoiceAdditionalProducts(
-      String invoiceId, AdditionalProduct additionalProduct) async {
-    await this
-        ._db
-        .collection(FirestoreCollections.invoices)
-        .document(invoiceId)
-        .collection(FirestoreCollections.products)
-        .add(Product().toJsonInvoiceProduct(
-          additionalProduct.productName,
-          double.parse(additionalProduct.productValue),
-          additionalProduct.ivaPercent,
-          true,
-          null,
-          additionalProduct.productType,
-          additionalProduct.serviceTime,
-        ));
-  }
-
-  //TODO actulizar el metodo para que actualice los productos en la tabla de invoice
-  /// Update Invoice Products
-  Future<void> updateInvoiceProduct(String invoiceId, Product product) async {
-    DocumentReference ref = _db
-        .collection(FirestoreCollections.invoices)
-        .document(invoiceId)
-        .collection(FirestoreCollections.products)
-        .document(product.productInvoiceId);
-    ref.setData(
-        Product().toJsonInvoiceProduct(
-          product.productName,
-          product.price,
-          product.ivaPercent,
-          product.isAdditional,
-          product.id,
-          product.productType,
-          product.serviceTime,
-        ),
-        merge: true);
-  }
-
   ///Get invoices list from current Month
   Stream<QuerySnapshot> getListInvoicesByMonthStream(
     DocumentReference locationReference,
@@ -465,6 +372,7 @@ class InvoiceRepository {
         .collection(FirestoreCollections.invoices)
         .where(FirestoreCollections.invoiceFieldLocation, isEqualTo: locationReference)
         .where(FirestoreCollections.invoiceClosed, isEqualTo: false)
+        .where(FirestoreCollections.invoiceClosedDate, isNull: true)
         .where(FirestoreCollections.invoiceStartWashing, isEqualTo: false)
         .where(FirestoreCollections.invoiceCancelled, isEqualTo: false);
     return querySnapshot.snapshots();

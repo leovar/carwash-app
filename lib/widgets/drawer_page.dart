@@ -2,6 +2,8 @@ import 'package:car_wash_app/commission/bloc/bloc_commission.dart';
 import 'package:car_wash_app/commission/ui/screens/commission_list_admin_page.dart';
 import 'package:car_wash_app/location/bloc/bloc_location.dart';
 import 'package:car_wash_app/location/ui/screens/locations_admin_page.dart';
+import 'package:car_wash_app/payment_methods/bloc/bloc_payment_method.dart';
+import 'package:car_wash_app/payment_methods/ui/screens/payment_method_admin_page.dart';
 import 'package:car_wash_app/product/bloc/product_bloc.dart';
 import 'package:car_wash_app/product/ui/screens/product_list_admin_page.dart';
 import 'package:car_wash_app/user/bloc/bloc_user.dart';
@@ -264,7 +266,35 @@ class _DrawerPage extends State<DrawerPage> {
                               );
                             },
                           ),
-                        )
+                        ),
+                        Container(
+                          padding:
+                          EdgeInsets.only(left: 90, top: 17, bottom: 10),
+                          alignment: Alignment(-1.0, 0.0),
+                          child: InkWell(
+                            child: Text(
+                              "Métodos de Pago",
+                              style: TextStyle(
+                                fontFamily: "Lato",
+                                fontWeight: FontWeight.normal,
+                                fontSize: 17,
+                                color: Color(0xFFAEAEAE),
+                              ),
+                            ),
+                            onTap: () {
+                              Navigator.pop(context);
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) {
+                                  return BlocProvider<BlocPaymentMethod>(
+                                    bloc: BlocPaymentMethod(),
+                                    child: PaymentMethodAdminPage(),
+                                  );
+                                }),
+                              );
+                            },
+                          ),
+                        ),
                       ],
                     ),
                   ),

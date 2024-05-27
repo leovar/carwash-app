@@ -59,8 +59,10 @@ class FirestoreCollections {
   static String invoiceCancelled = 'cancelledInvoice';
   static String invoicePaymentMethod = 'paymentMethod';
   static String invoiceClosed = 'invoiceClosed';
+  static String invoiceClosedDate = 'closedDate';
   static String invoiceEndWash = 'endWash';
   static String invoiceStartWashing = 'startWashing';
+  static String invoiceFieldCancelled = 'cancelledInvoice';
 
   /// Fields Brands
   static String brandFieldVehicleType = 'vehicleType';

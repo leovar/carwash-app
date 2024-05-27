@@ -1,5 +1,6 @@
 import 'package:car_wash_app/invoice/model/additional_product.dart';
 import 'package:car_wash_app/invoice/model/header_services.dart';
+import 'package:car_wash_app/invoice/model/invoice.dart';
 import 'package:car_wash_app/invoice/ui/screens/additional_products_page.dart';
 import 'package:car_wash_app/invoice/ui/widgets/item_product.dart';
 import 'package:car_wash_app/product/bloc/product_bloc.dart';
@@ -14,6 +15,7 @@ class ProductsInvoicePage extends StatefulWidget {
   final HeaderServices vehicleTypeSelect;
   final String idLocation;
   final bool editForm;
+  final Invoice invoice;
 
   ProductsInvoicePage({
     Key key,
@@ -24,6 +26,7 @@ class ProductsInvoicePage extends StatefulWidget {
     this.vehicleTypeSelect,
     this.idLocation,
     this.editForm,
+    this.invoice,
   });
 
   @override
@@ -61,18 +64,33 @@ class _ProductsInvoicePage extends State<ProductsInvoicePage> {
   }
 
   Widget getProducts() {
-    return StreamBuilder(
-      stream: _productBloc.productsByLocationStream(
-          widget.idLocation, widget.vehicleTypeSelect.uid),
-      builder: (BuildContext context, AsyncSnapshot snapshot) {
-        switch (snapshot.connectionState) {
-          case ConnectionState.waiting:
-            return CircularProgressIndicator();
-          default:
-            return listProducts(snapshot);
-        }
-      },
-    );
+    if (widget.invoice != null && widget.invoice.invoiceClosed) {
+      List<Product> productsList = [];
+      widget.productListCallback.forEach((prod) {
+        Product prodSelected = Product.copyProductInvoiceWith(
+          origin: prod,
+          isSelected: true,
+          price: prod.price,
+          ivaPercent: prod.ivaPercent,
+        );
+        productsList.add(prodSelected);
+      });
+      widget.productListCallback = productsList;
+      return _showListProducts();
+    } else {
+      return StreamBuilder(
+        stream: _productBloc.productsByLocationStream(
+            widget.idLocation, widget.vehicleTypeSelect.uid),
+        builder: (BuildContext context, AsyncSnapshot snapshot) {
+          switch (snapshot.connectionState) {
+            case ConnectionState.waiting:
+              return CircularProgressIndicator();
+            default:
+              return listProducts(snapshot);
+          }
+        },
+      );
+    }
   }
 
   Widget listProducts(AsyncSnapshot snapshot) {
@@ -97,19 +115,10 @@ class _ProductsInvoicePage extends State<ProductsInvoicePage> {
     });
     widget.productListCallback = productGet;
 
-    /*if (widget.productListCallback.length > 0) {
-      widget.productListCallback.forEach((f) {
-        if (f.isSelected) {
-          productGet[productGet.indexWhere((p) => p.id == f.id)].isSelected =
-              true;
-          productGet[productGet.indexWhere((p) => p.id == f.id)].price =
-              f.price;
-        }
-      });
-      widget.productListCallback = productGet;
-    }
-    widget.productListCallback = productGet;*/
+    return _showListProducts();
+  }
 
+  Widget _showListProducts() {
     return Column(
       children: <Widget>[
         Container(
@@ -125,7 +134,7 @@ class _ProductsInvoicePage extends State<ProductsInvoicePage> {
                   decoration: BoxDecoration(
                     image: DecorationImage(
                         image:
-                            AssetImage(widget.vehicleTypeSelect.imageSelected)),
+                        AssetImage(widget.vehicleTypeSelect.imageSelected)),
                   ),
                 ),
                 Flexible(
@@ -180,9 +189,9 @@ class _ProductsInvoicePage extends State<ProductsInvoicePage> {
                         MaterialPageRoute(
                           builder: (context) => AdditionalProductPage(
                             setCbAdditionalProducts:
-                                widget.cbAdditionalProducts,
+                            widget.cbAdditionalProducts,
                             additionalProductsList:
-                                widget.additionalProductListCb,
+                            widget.additionalProductListCb,
                             editForm: widget.editForm,
                             vehicleTypeSelect: widget.vehicleTypeSelect,
                           ),

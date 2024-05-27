@@ -27,12 +27,13 @@ class ReportsRepository {
         .where(FirestoreCollections.invoiceFieldCreationDate,
         isLessThanOrEqualTo: Timestamp.fromDate(dateFinalModify))
         .where(FirestoreCollections.invoiceFieldLocation,
-        isEqualTo: locationReference);
+        isEqualTo: locationReference)
+        .where(FirestoreCollections.invoiceFieldCancelled, isEqualTo: false);
 
     return querySnapshot.snapshots();
   }
 
-  List<Invoice> buildListProductivityReport(List<DocumentSnapshot> invoicesListSnapshot) {
+  List<Invoice> buildInvoiceListReport(List<DocumentSnapshot> invoicesListSnapshot) {
     List<Invoice> invoicesList = <Invoice>[];
     invoicesListSnapshot.forEach((p) {
       Invoice invoice = Invoice.fromJson(p.data, id: p.documentID);
@@ -41,6 +42,44 @@ class ReportsRepository {
     return invoicesList;
   }
 
+  ///Get Earnings report Data
+  Stream<QuerySnapshot> getListEarningsReportStream(
+      DateTime dateInit,
+      DateTime dateFinal,
+      ) {
+    DateTime dateFinalModify =
+    DateTime(dateFinal.year, dateFinal.month, dateFinal.day, 23, 59);
+
+    var querySnapshot = this
+        ._db
+        .collection(FirestoreCollections.invoices)
+        .where(FirestoreCollections.invoiceFieldCreationDate,
+        isGreaterThanOrEqualTo: Timestamp.fromDate(dateInit))
+        .where(FirestoreCollections.invoiceFieldCreationDate,
+        isLessThanOrEqualTo: Timestamp.fromDate(dateFinalModify))
+        .where(FirestoreCollections.invoiceFieldCancelled, isEqualTo: false)
+        .where(FirestoreCollections.invoiceClosed, isEqualTo: true);
+
+    return querySnapshot.snapshots();
+  }
+
+  ///Get Operator Productivity report
+  Stream<QuerySnapshot> getOperatorInvoicesListCurrentMonth(DocumentReference locationReference) {
+    var _dateTimeInit = DateTime(DateTime.now().year, DateTime.now().month, 1);
+    DateTime _dateTimeFinal = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day, 23, 59);
+
+    var querySnapshot = this
+        ._db
+        .collection(FirestoreCollections.invoices)
+        .where(FirestoreCollections.invoiceFieldCreationDate,
+        isGreaterThanOrEqualTo: Timestamp.fromDate(_dateTimeInit))
+        .where(FirestoreCollections.invoiceFieldCreationDate,
+        isLessThanOrEqualTo: Timestamp.fromDate(_dateTimeFinal))
+        .where(FirestoreCollections.invoiceFieldLocation,
+        isEqualTo: locationReference);
+
+    return querySnapshot.snapshots();
+  }
 
   //TODO metodos hacia abajo solo se usan para corregir errores una sola vez, se deben eliminar
   Future<List<Invoice>> getAllInvoices() async {

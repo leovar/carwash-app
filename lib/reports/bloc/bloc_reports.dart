@@ -1,15 +1,19 @@
 
 import 'dart:ffi';
+import 'dart:io';
 
 import 'package:car_wash_app/invoice/bloc/bloc_invoice.dart';
 import 'package:car_wash_app/invoice/model/invoice.dart';
 import 'package:car_wash_app/invoice/repository/invoice_repository.dart';
 import 'package:car_wash_app/product/bloc/product_bloc.dart';
 import 'package:car_wash_app/product/model/product.dart';
+import 'package:car_wash_app/reports/model/earnings_card_detail.dart';
 import 'package:car_wash_app/reports/repository/reports_repository.dart';
+import 'package:car_wash_app/user/model/user.dart';
 import 'package:car_wash_app/widgets/messages_utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 
 class BlocReports implements Bloc {
@@ -34,33 +38,115 @@ class BlocReports implements Bloc {
   }
 
   List<Invoice> buildProductivityReportList(List<DocumentSnapshot> invoicesListSnapshot) {
-    List<Invoice> invoices = _reportsRepository.buildListProductivityReport(invoicesListSnapshot);
+    List<Invoice> invoices = _reportsRepository.buildInvoiceListReport(invoicesListSnapshot);
     return invoices;
   }
 
-  void updateInfoInvoices(List<Invoice> invoices) async {
-    invoices.forEach((item) async {
-      List<Product> listProducts = await _invoiceRepository.getInvoiceProductsTemporal(item.id);
-      if (listProducts.length > 0) {
-        var _invoice = Invoice.copyWith(
-          origin: item,
-          countProducts: listProducts.where((f) => !f.isAdditional).length,
-          countAdditionalProducts: listProducts.where((f) => f.isAdditional).length,
-          listProducts: listProducts,
-        );
-        if (item.invoiceProducts.length == 0) {
-          DocumentReference ref = await _invoiceRepository.updateInvoiceData(_invoice);
+  Stream<QuerySnapshot> earningsReportListStream(DateTime dateInit, DateTime dateFinal,) {
+    return _reportsRepository.getListEarningsReportStream(dateInit, dateFinal);
+  }
+
+  List<Invoice> buildEarningsReportList(List<DocumentSnapshot> invoicesListSnapshot) {
+    List<Invoice> invoices = _reportsRepository.buildInvoiceListReport(invoicesListSnapshot);
+    return invoices;
+  }
+
+  List<EarningsCardDetail> buildEarningCards(List<Invoice> _invoices) {
+    List<EarningsCardDetail> _cardList = [];
+    try {
+      _invoices.forEach((item) {
+        EarningsCardDetail detailInfo = _cardList.length > 0
+            ? _cardList.firstWhere((x) => x.locationName == item.locationName, orElse: () => null)
+            : null;
+        if (detailInfo == null) {
+          List<Invoice> invoicesPerLocation = [];
+          invoicesPerLocation.add(item);
+          final cardData = EarningsCardDetail(
+            item.locationName,
+            item.countProducts + item.countAdditionalProducts,
+            item.totalPrice,
+            invoicesPerLocation,
+          );
+          _cardList.add(cardData);
+        } else {
+          detailInfo.countServices = detailInfo.countServices + (item.countProducts + item.countAdditionalProducts);
+          detailInfo.totalPrice = detailInfo.totalPrice + item.totalPrice;
+          List<Invoice> listGet = detailInfo.invoicesList;
+          listGet.add(item);
+          int indexData = _cardList.indexOf(detailInfo);
+          _cardList[indexData] = detailInfo;
         }
-      }
-    });
+      });
+      return _cardList;
+    } catch(_error) {
+      print(_error);
+      Fluttertoast.showToast(
+          msg: "Error generando el informe: $_error",
+          toastLength: Toast.LENGTH_LONG);
+      return _cardList;
+    }
+  }
+
+  //TODO metodo temporal para pasar el operador de la factura a una lista de operadores dentro de la factura
+  void updateInfoOperatorsInvoices(List<Invoice> invoices) async {
+    try {
+      invoices.forEach((item) async {
+        if (item.userOperatorName != null && item.userOperatorName.isNotEmpty) {
+          if (item.operatorUsers != null) {
+            //valido que el operador unico no este creado en la lista
+            bool exist = false;
+            for (var elm in item.operatorUsers) {
+              if (elm.name == item.userOperatorName) {
+                exist = true;
+                break;
+              }
+            }
+            if (!exist && item.userOperator != null) {
+              List<User> _operatorsExist = item.operatorUsers;
+              var oppInsert = User.copyUserOperatorToSaveInvoice(
+                id: item.userOperator.documentID,
+                name: item.userOperatorName,
+              );
+              _operatorsExist.add(oppInsert);
+              int _countOperators = _operatorsExist.length;
+              Invoice invoice = Invoice.copyWith(
+                origin: item,
+                listOperators: _operatorsExist,
+                countOperators: _countOperators,
+              );
+              await _blocInvoice.saveInvoice(invoice);
+            }
+          } else {
+            //creo la lista de operadores con el operador y el contador y actualizo la factura
+            List<User> _operatorsExist = [];
+            var oppInsert = User.copyUserOperatorToSaveInvoice(
+              id: item.userOperator.documentID,
+              name: item.userOperatorName,
+            );
+            _operatorsExist.add(oppInsert);
+            int _countOperators = _operatorsExist.length;
+            Invoice invoice = Invoice.copyWith(
+              origin: item,
+              listOperators: _operatorsExist,
+              countOperators: _countOperators,
+            );
+            await _blocInvoice.saveInvoice(invoice);
+          }
+        }
+      });
+    } catch(_error) {
+      print(_error);
+      Fluttertoast.showToast(msg: "Error corrigiendo operadores: $_error", toastLength: Toast.LENGTH_LONG);
+    }
   }
 
   Future<List<Invoice>> getListCustomerInvoicesByLocation(DocumentReference locationReference, DateTime dateInit, DateTime dateFinal) async {
     return await _reportsRepository.getCustomerInvoicesByLocation(locationReference, dateInit, dateFinal);
   }
 
+  //TODO metodo temporal para solucionar error con los id de los servicios dentro de las facturas
   Future<int> updateInfoProductsInvoice(List<Invoice> invoices) async {
-    var countData = 0;
+    /*var countData = 0;
     invoices.forEach((item) async {
       final listInvoiceProducts = await _invoiceRepository.getProductsByIdInvoice(item.id);
       listInvoiceProducts.forEach((invProduct) async {
@@ -80,12 +166,12 @@ class BlocReports implements Bloc {
         }
       });
     });
-    return countData;
+    return countData;*/
   }
 
   //TODO metodo temporal para solucionar error con los id de los servicios dentro de las facturas
   void addIdToProductInvoiceTemp(List<Invoice> invoices) async {
-    List<Invoice> invoicesList = invoices.where((item) => item.invoiceProducts.length > 0).toList();
+    /*List<Invoice> invoicesList = invoices.where((item) => item.invoiceProducts.length > 0).toList();
 
     List<Product> productos = await _blocProduct.getAllProducts();
     List<Invoice> invoiceData = [];
@@ -111,24 +197,7 @@ class BlocReports implements Bloc {
         print('ACTUALIZO LA FACTURA # ${_invoice.consecutive.toString()}');
         _invoiceRepository.updateInvoiceData(_invoice);
       }
-    });
-
-
-    /*
-    List<Invoice> allInvoices = await _reportsRepository.getAllInvoices();
-    allInvoices.forEach((element) async {
-      List<Product> productsInvoice = await _invoiceRepository.getProductsByIdInvoice(element.id);
-      productsInvoice.forEach((item) {
-        if (item.id == 'bpdtndDhpviCzpfipQxi') {
-          print('bpdtndDhpviCzpfipQxi');
-        }
-        if (item.id == 'sDXNlRNGOBbIXody8LS7') {
-          print('sDXNlRNGOBbIXody8LS7');
-        }
-      });
-    });
-    */
-
+    });*/
   }
 
   @override

@@ -1,6 +1,7 @@
 import 'dart:core';
 
 import 'package:car_wash_app/invoice/bloc/bloc_invoice.dart';
+import 'package:car_wash_app/invoice/model/invoice.dart';
 import 'package:car_wash_app/invoice/ui/widgets/item_operator.dart';
 import 'package:car_wash_app/invoice/ui/widgets/item_product.dart';
 import 'package:car_wash_app/user/model/user.dart';
@@ -10,18 +11,24 @@ import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 
 class OperatorsInvoicePage extends StatefulWidget {
   final Function(List<User>) callbackSetOperatorsList;
+  final Function() callbackFinishInvoice;
   List<User> usersListCallback;
   final bool editForm;
   final String idLocation;
   final bool closedInvoice;
+  final bool fromCompleteInvoice;
+  final Invoice invoice;
 
   OperatorsInvoicePage({
     Key key,
     this.callbackSetOperatorsList,
+    this.callbackFinishInvoice,
     this.usersListCallback,
     this.editForm,
     this.idLocation,
     this.closedInvoice,
+    this.fromCompleteInvoice,
+    this.invoice,
   });
 
   @override
@@ -33,7 +40,6 @@ class _OperatorsInvoicePage extends State<OperatorsInvoicePage> {
 
   @override
   Widget build(BuildContext context) {
-    //_blocInvoice = BlocProvider.of(context);
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -58,21 +64,33 @@ class _OperatorsInvoicePage extends State<OperatorsInvoicePage> {
   }
 
   Widget listUsers() {
-    return StreamBuilder(
-      stream: _blocInvoice.operatorsByLocationStream(widget.idLocation),
-      builder: (BuildContext context, AsyncSnapshot snapshot) {
-        switch (snapshot.connectionState) {
-          case ConnectionState.waiting:
-            return CircularProgressIndicator();
-          default:
-            return showOperatorsWidget(snapshot);
-        }
-      },
-    );
+    if (widget.invoice != null && widget.invoice.invoiceClosed) {
+      List<User> operatorsList = [];
+      widget.usersListCallback.forEach((item) {
+        User userSelected = User.copyWith(
+          origin: item,
+          isSelected: true,
+        );
+        operatorsList.add(userSelected);
+      });
+      widget.usersListCallback = operatorsList;
+      return _showOperators();
+    } else {
+      return StreamBuilder(
+        stream: _blocInvoice.operatorsByLocationStream(widget.idLocation),
+        builder: (BuildContext context, AsyncSnapshot snapshot) {
+          switch (snapshot.connectionState) {
+            case ConnectionState.waiting:
+              return CircularProgressIndicator();
+            default:
+              return showOperatorsWidget(snapshot);
+          }
+        },
+      );
+    }
   }
 
   Widget showOperatorsWidget(AsyncSnapshot snapshot) {
-    //widget.cbHandlerOperator('', _listUsersOperators.length, 2);   //Evaluarlo luego, esta función se usa para el select de un solo operador
     List<User> _listUsersOperators =
         _blocInvoice.buildOperators(snapshot.data.documents);
     List<User> _userGet = <User>[];
@@ -90,10 +108,13 @@ class _OperatorsInvoicePage extends State<OperatorsInvoicePage> {
         _userGet.add(userSelected);
       }
     });
-
+    _userGet.sort((a, b) => a.name.compareTo(b.name));
     widget.usersListCallback = _userGet;
-    //_userGet = _userGet.map((user) => user.name).cast<User>().toList();
 
+    return _showOperators();
+  }
+
+  Widget _showOperators() {
     return Column(
       children: [
         Flexible(
@@ -102,11 +123,12 @@ class _OperatorsInvoicePage extends State<OperatorsInvoicePage> {
             scrollDirection: Axis.vertical,
             itemBuilder: (BuildContext context, int index) {
               return ItemOperator(
-                _validateSaveOperators,
+                widget.callbackSetOperatorsList,
                 widget.usersListCallback,
                 index,
                 widget.editForm,
                 widget.closedInvoice,
+                widget.fromCompleteInvoice,
               );
             },
           ),
@@ -119,7 +141,7 @@ class _OperatorsInvoicePage extends State<OperatorsInvoicePage> {
               padding: EdgeInsets.symmetric(vertical: 15, horizontal: 25),
               color: Color(0xFF59B258),
               child: Text(
-                "Aceptar",
+                widget.fromCompleteInvoice ?? false ? "Terminar" : "Aceptar",
                 style: TextStyle(
                   fontFamily: "Lato",
                   decoration: TextDecoration.none,
@@ -130,19 +152,14 @@ class _OperatorsInvoicePage extends State<OperatorsInvoicePage> {
               ),
               onPressed: () {
                 Navigator.pop(context);
+                if (widget.fromCompleteInvoice ?? false) {
+                  widget.callbackFinishInvoice();
+                }
               },
             ),
           ),
         ),
       ],
     );
-  }
-
-  void _validateSaveOperators(List<User> users) {
-    if (widget.editForm) {
-
-    } else {
-      widget.callbackSetOperatorsList(users);
-    }
   }
 }

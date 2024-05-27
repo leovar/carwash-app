@@ -1,5 +1,6 @@
 import 'package:car_wash_app/invoice/model/additional_product.dart';
 import 'package:car_wash_app/invoice/model/header_services.dart';
+import 'package:car_wash_app/invoice/model/invoice.dart';
 import 'package:car_wash_app/invoice/ui/screens/products_invoice_page.dart';
 import 'package:car_wash_app/product/model/product.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +15,7 @@ class FieldsProducts extends StatefulWidget {
   final int selectedProductsCount;
   final String idLocation;
   final bool editForm;
+  final Invoice invoice;
 
   FieldsProducts({
     Key key,
@@ -26,6 +28,7 @@ class FieldsProducts extends StatefulWidget {
     this.selectedProductsCount,
     this.idLocation,
     this.editForm,
+    this.invoice,
   });
 
   @override
@@ -98,6 +101,7 @@ class _FieldsProducts extends State<FieldsProducts> {
                               vehicleTypeSelect: widget.vehicleTypeSelect,
                               idLocation: widget.idLocation,
                               editForm: widget.editForm,
+                              invoice: widget.invoice,
                             ),
                           ),
                         );
