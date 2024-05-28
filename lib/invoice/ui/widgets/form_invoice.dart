@@ -849,7 +849,7 @@ class _FormInvoice extends State<FormInvoice> {
         var operatorSave = User.copyUserOperatorToSaveInvoice(
           id: user.id,
           name: user.name,
-          operatorCommission: (widget.editInvoice.totalCommission??0) / _selectedOperators.length,
+          operatorCommission: ((widget.editInvoice.totalCommission??0) / _selectedOperators.length).ceilToDouble(),
         );
         _operatorsToSave.add(operatorSave);
       });
@@ -1243,7 +1243,7 @@ class _FormInvoice extends State<FormInvoice> {
             var operatorSave = User.copyUserOperatorToSaveInvoice(
               id: user.id,
               name: user.name,
-              operatorCommission: _totalCommission / _selectedOperators.length,
+              operatorCommission:(_totalCommission / _selectedOperators.length).ceilToDouble(),
             );
             _operatorsToSave.add(operatorSave);
           });
