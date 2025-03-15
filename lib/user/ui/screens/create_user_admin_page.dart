@@ -54,12 +54,10 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
   @override
   void initState() {
     super.initState();
-    if (widget.currentUser != null) {
-      _userSelected = widget.currentUser;
-      _imageUrl = _userSelected.photoUrl;
-      _selectUserList();
+    _userSelected = widget.currentUser;
+    _imageUrl = _userSelected.photoUrl;
+    _selectUserList();
     }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -240,9 +238,7 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
               ),
             ),
             SizedBox(height: 9),
-            Flexible(
-              child: _buttonSave(),
-            ),
+            Flexible(child: _buttonSave()),
             SizedBox(height: 9),
           ],
         ),
@@ -268,10 +264,8 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
     if (_blocLocation.buildLocations(snapshot.data.documents).length >
         _listLocation.length) {
       _listLocation = _blocLocation.buildLocations(snapshot.data.documents);
-      if (widget.currentUser != null) {
-        _selectUserList();
-      }
-    }
+      _selectUserList();
+        }
     return InkWell(
       child: Container(
         height: 50,
@@ -294,11 +288,8 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
             Align(
               alignment: Alignment.centerRight,
               child: IconButton(
-                icon: Icon(
-                  Icons.keyboard_arrow_down,
-                  size: 30,
-                ),
-                onPressed: (){},
+                icon: Icon(Icons.keyboard_arrow_down, size: 30),
+                onPressed: () {},
               ),
             ),
           ],
@@ -312,10 +303,11 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => LocationsSelectListPage(
-              callbackSetLocationsList: _setLocationsDb,
-              locationsList: _listLocation,
-            ),
+            builder:
+                (context) => LocationsSelectListPage(
+                  callbackSetLocationsList: _setLocationsDb,
+                  locationsList: _listLocation,
+                ),
           ),
         );
       },
@@ -329,10 +321,7 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
       width: 120,
       height: 120,
       decoration: BoxDecoration(
-        border: Border.all(
-          width: 2,
-          color: Colors.grey,
-        ),
+        border: Border.all(width: 2, color: Colors.grey),
         shape: BoxShape.circle,
         image: DecorationImage(
           fit: BoxFit.cover,
@@ -417,26 +406,23 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
 
   void _changeProfileImage() {
     PopupMenu menu = PopupMenu(
-        backgroundColor: Color(0xFF59B258),
-        lineColor: Color(0xFF59B258),
-        maxColumn: 1,
-        items: [
-          MenuItem(
-              title: _cameraTag,
-              textStyle: TextStyle(color: Colors.white),
-              image: Icon(
-                Icons.camera_alt,
-                color: Colors.white,
-              )),
-          MenuItem(
-              title: _galleryTag,
-              textStyle: TextStyle(color: Colors.white),
-              image: Icon(
-                Icons.image,
-                color: Colors.white,
-              )),
-        ],
-        onClickMenu: _onClickMenuImageSelected);
+      backgroundColor: Color(0xFF59B258),
+      lineColor: Color(0xFF59B258),
+      maxColumn: 1,
+      items: [
+        MenuItem(
+          title: _cameraTag,
+          textStyle: TextStyle(color: Colors.white),
+          image: Icon(Icons.camera_alt, color: Colors.white),
+        ),
+        MenuItem(
+          title: _galleryTag,
+          textStyle: TextStyle(color: Colors.white),
+          image: Icon(Icons.image, color: Colors.white),
+        ),
+      ],
+      onClickMenu: _onClickMenuImageSelected,
+    );
     menu.show(widgetKey: btnChangeImageProfile);
   }
 
@@ -448,10 +434,11 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
 
   Future _addImageTour() async {
     var imageCapture = await ImagePicker.pickImage(
-            source: _selectSourceImagePicker == _cameraTag
-                ? ImageSource.camera
-                : ImageSource.gallery)
-        .catchError((onError) => print(onError));
+      source:
+          _selectSourceImagePicker == _cameraTag
+              ? ImageSource.camera
+              : ImageSource.gallery,
+    ).catchError((onError) => print(onError));
 
     if (imageCapture != null) {
       setState(() {
@@ -464,48 +451,47 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
   Future<Null> _cropImage(File imageCapture) async {
     File croppedFile = await ImageCropper.cropImage(
       sourcePath: imageCapture.path,
-      aspectRatioPresets: Platform.isAndroid
-          ? [
-              CropAspectRatioPreset.square,
-              CropAspectRatioPreset.ratio3x2,
-              CropAspectRatioPreset.original,
-              CropAspectRatioPreset.ratio4x3,
-              CropAspectRatioPreset.ratio16x9
-            ]
-          : [
-              CropAspectRatioPreset.original,
-              CropAspectRatioPreset.square,
-              CropAspectRatioPreset.ratio3x2,
-              CropAspectRatioPreset.ratio4x3,
-              CropAspectRatioPreset.ratio5x3,
-              CropAspectRatioPreset.ratio5x4,
-              CropAspectRatioPreset.ratio7x5,
-              CropAspectRatioPreset.ratio16x9
-            ],
+      aspectRatioPresets:
+          Platform.isAndroid
+              ? [
+                CropAspectRatioPreset.square,
+                CropAspectRatioPreset.ratio3x2,
+                CropAspectRatioPreset.original,
+                CropAspectRatioPreset.ratio4x3,
+                CropAspectRatioPreset.ratio16x9,
+              ]
+              : [
+                CropAspectRatioPreset.original,
+                CropAspectRatioPreset.square,
+                CropAspectRatioPreset.ratio3x2,
+                CropAspectRatioPreset.ratio4x3,
+                CropAspectRatioPreset.ratio5x3,
+                CropAspectRatioPreset.ratio5x4,
+                CropAspectRatioPreset.ratio7x5,
+                CropAspectRatioPreset.ratio16x9,
+              ],
       androidUiSettings: AndroidUiSettings(
-          toolbarTitle: 'Cropper',
-          toolbarColor: Colors.white,
-          toolbarWidgetColor: Theme.of(context).primaryColor,
-          initAspectRatio: CropAspectRatioPreset.original,
-          lockAspectRatio: false),
-      iosUiSettings: IOSUiSettings(
-        minimumAspectRatio: 1.0,
+        toolbarTitle: 'Cropper',
+        toolbarColor: Colors.white,
+        toolbarWidgetColor: Theme.of(context).primaryColor,
+        initAspectRatio: CropAspectRatioPreset.original,
+        lockAspectRatio: false,
       ),
+      iosUiSettings: IOSUiSettings(minimumAspectRatio: 1.0),
     );
-    if (croppedFile != null) {
-      final dir = await path_provider.getTemporaryDirectory();
-      final targetPath = dir.absolute.path +
-          "/${imageCapture.path.substring(imageCapture.path.length - 10, imageCapture.path.length)}"; //dir.absolute.path + "/temp${imageList.length}.jpg";
-      File fileCompress = await FlutterImageCompress.compressAndGetFile(
-        croppedFile.absolute.path,
-        targetPath,
-        quality: 40,
-      );
+    final dir = await path_provider.getTemporaryDirectory();
+    final targetPath =
+        dir.absolute.path +
+        "/${imageCapture.path.substring(imageCapture.path.length - 10, imageCapture.path.length)}"; //dir.absolute.path + "/temp${imageList.length}.jpg";
+    File fileCompress = await FlutterImageCompress.compressAndGetFile(
+      croppedFile.absolute.path,
+      targetPath,
+      quality: 40,
+    );
 
-      setState(() {
-        _imageUrl = fileCompress.path;
-      });
-    }
+    setState(() {
+      _imageUrl = fileCompress.path;
+    });
   }
 
   //1. administrator, 2. coordinator, 3. Operator
@@ -568,19 +554,12 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
     } else
       _validateEmail = false;
 
-    if (widget.currentUser == null) {
-      if (_textPassword.text.isEmpty) {
-        _validatePassword = true;
-        canSave = false;
-      } else
-        _validatePassword = false;
-    }
-
     if (canSave == false) {
       setState(() {
         MessagesUtils.showAlert(
-                context: context, title: 'Faltan campos por llenar')
-            .show();
+          context: context,
+          title: 'Faltan campos por llenar',
+        ).show();
       });
     }
 
@@ -605,56 +584,57 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
   Future<void> _saveUser() async {
     if (_validateInputs()) {
       try {
-        MessagesUtils.showAlertWithLoading(context: context, title: 'Guardando')
-            .show();
+        MessagesUtils.showAlertWithLoading(
+          context: context,
+          title: 'Guardando',
+        ).show();
 
         //Add new locations at user exist
-        if (_userSelected != null) {
-          _listLocation.where((l) => l.isSelected).toList().forEach((f) {
-            List<DocumentReference> listFind = _userSelected.locations
-                .where((e) => e.documentID == f.id)
-                .toList();
-            if (listFind.length <= 0) {
+        _listLocation.where((l) => l.isSelected).toList().forEach((f) {
+          List<DocumentReference> listFind =
               _userSelected.locations
-                  .add(_blocLocation.getDocumentReferenceLocationById(f.id));
-            }
-          });
-        }
-
+                  .where((e) => e.documentID == f.id)
+                  .toList();
+          if (listFind.length <= 0) {
+            _userSelected.locations.add(
+              _blocLocation.getDocumentReferenceLocationById(f.id),
+            );
+          }
+        });
+      
         //Delete locations at user exist
-        if (_userSelected != null) {
-          List<DocumentReference> locListDeleted = <DocumentReference>[];
-          _userSelected.locations.forEach((item) {
-            locListDeleted.add(item);
-          });
-          _userSelected.locations.forEach((DocumentReference locRefDelete) {
-            List<Location> lotionsFind = _listLocation
-                .where((f) => f.id == locRefDelete.documentID && f.isSelected)
-                .toList();
-            if (lotionsFind.length == 0) {
-              locListDeleted
-                  .removeAt(_userSelected.locations.indexOf(locRefDelete));
-            }
-          });
-          _userSelected.locations.clear();
-          locListDeleted.forEach((d) {
-            _userSelected.locations.add(d);
-          });
-        }
-
+        List<DocumentReference> locListDeleted = <DocumentReference>[];
+        _userSelected.locations.forEach((item) {
+          locListDeleted.add(item);
+        });
+        _userSelected.locations.forEach((DocumentReference locRefDelete) {
+          List<Location> lotionsFind =
+              _listLocation
+                  .where(
+                    (f) => f.id == locRefDelete.documentID && f.isSelected,
+                  )
+                  .toList();
+          if (lotionsFind.length == 0) {
+            locListDeleted.removeAt(
+              _userSelected.locations.indexOf(locRefDelete),
+            );
+          }
+        });
+        _userSelected.locations.clear();
+        locListDeleted.forEach((d) {
+          _userSelected.locations.add(d);
+        });
+      
         List<DocumentReference> _newListLocationsReferences =
             <DocumentReference>[];
         _listLocation.where((d) => d.isSelected).toList().forEach((f) {
-          _newListLocationsReferences
-              .add(_blocLocation.getDocumentReferenceLocationById(f.id));
+          _newListLocationsReferences.add(
+            _blocLocation.getDocumentReferenceLocationById(f.id),
+          );
         });
 
         //New User save in firestore
         String userNewRegister;
-        if (_userSelected == null) {
-          userNewRegister = await _userBloc.registerEmailUser(
-              _textEmail.text.trim(), _textPassword.text.trim());
-        }
 
         final user = User(
           id: _userSelected != null ? _userSelected.id : null,
@@ -664,9 +644,10 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
           photoUrl: _imageUrl,
           lastSignIn: Timestamp.now(),
           active: _userActive,
-          locations: _userSelected != null
-              ? _userSelected.locations
-              : _newListLocationsReferences,
+          locations:
+              _userSelected != null
+                  ? _userSelected.locations
+                  : _newListLocationsReferences,
           isAdministrator: _userAdministrator,
           isCoordinator: _userCoordinator,
           isOperator: _userOperator,

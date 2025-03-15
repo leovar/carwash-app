@@ -1,10 +1,7 @@
 import 'dart:typed_data';
 
-import 'package:car_wash_app/customer/model/customer.dart';
-import 'package:car_wash_app/location/model/location.dart';
 import 'package:car_wash_app/product/model/product.dart';
 import 'package:car_wash_app/user/model/user.dart';
-import 'package:car_wash_app/vehicle/model/vehicle.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
@@ -148,17 +145,17 @@ class Invoice extends Equatable {
       'countAdditionalProducts': this.countAdditionalProducts,
       'sendEmailInvoice': this.sendEmailInvoice,
       'cancelledInvoice': this.cancelledInvoice,
-      'paymentMethod' : this.paymentMethod,
-      'startWashing' : this.startWashing,
-      'washingCell' : this.washingCell,
-      'dateStartWashing' : this.dateStartWashing,
-      'dateEndWash' : this.dateEndWash,
-      'countWashingWorkers' : this.countWashingWorkers,
-      'endWash' : this.endWash,
-      'washingServicesTime' : this.washingServicesTime,
-      'washingTime' : this.washingTime,
-      'countOperators' : this.countOperators,
-      'totalCommission' : this.totalCommission,
+      'paymentMethod': this.paymentMethod,
+      'startWashing': this.startWashing,
+      'washingCell': this.washingCell,
+      'dateStartWashing': this.dateStartWashing,
+      'dateEndWash': this.dateEndWash,
+      'countWashingWorkers': this.countWashingWorkers,
+      'endWash': this.endWash,
+      'washingServicesTime': this.washingServicesTime,
+      'washingTime': this.washingTime,
+      'countOperators': this.countOperators,
+      'totalCommission': this.totalCommission,
     };
   }
 
@@ -169,16 +166,22 @@ class Invoice extends Equatable {
     var pSplit = '';
     var oSplit = '';
     List locationsList = json['locations'];
-    locationsList?.forEach((drLocation) {
+    locationsList.forEach((drLocation) {
       locationsListDb.add(drLocation);
     });
     var products = json['invoiceProducts'];
     products?.forEach((element) {
-      Product productResult = Product.fromJsonProductIntoInvoice(element, json['uidVehicleType'], json['creationDate'], json['countOperators'], json['consecutive']);
+      Product productResult = Product.fromJsonProductIntoInvoice(
+        element,
+        json['uidVehicleType'],
+        json['creationDate'],
+        json['countOperators'],
+        json['consecutive'],
+      );
       listProducts.add(productResult);
       pSplit = pSplit + productResult.productName + ', ';
     });
-    if (pSplit != null && pSplit.length > 0) {
+    if (pSplit.length > 0) {
       pSplit = pSplit.substring(0, pSplit.length - 2);
     }
 
@@ -188,7 +191,7 @@ class Invoice extends Equatable {
       listOperators.add(userResult);
       oSplit = oSplit + userResult.name + ', ';
     });
-    if (oSplit != null && oSplit.length > 0) {
+    if (oSplit.length > 0) {
       oSplit = oSplit.substring(0, oSplit.length - 2);
     }
 
@@ -226,20 +229,20 @@ class Invoice extends Equatable {
       sendEmailInvoice: json['sendEmailInvoice'],
       invoiceProducts: listProducts,
       productsSplit: pSplit,
-      cancelledInvoice: json['cancelledInvoice']??false,
+      cancelledInvoice: json['cancelledInvoice'] ?? false,
       paymentMethod: json['paymentMethod'],
-      startWashing : json['startWashing']??false,
-      washingCell : json['washingCell'],
-      dateStartWashing : json['dateStartWashing'],
-      dateEndWash : json['dateEndWash'],
-      countWashingWorkers : json['countWashingWorkers'],
-      endWash : json['endWash']??false,
-      washingServicesTime : json['washingServicesTime'],
-      washingTime : json['washingTime'],
-      operatorUsers : listOperators,
-      operatorsSplit : oSplit,
-      countOperators : json['countOperators'],
-      totalCommission : json['totalCommission'],
+      startWashing: json['startWashing'] ?? false,
+      washingCell: json['washingCell'],
+      dateStartWashing: json['dateStartWashing'],
+      dateEndWash: json['dateEndWash'],
+      countWashingWorkers: json['countWashingWorkers'],
+      endWash: json['endWash'] ?? false,
+      washingServicesTime: json['washingServicesTime'],
+      washingTime: json['washingTime'],
+      operatorUsers: listOperators,
+      operatorsSplit: oSplit,
+      countOperators: json['countOperators'],
+      totalCommission: json['totalCommission'],
     );
   }
 
@@ -307,69 +310,69 @@ class Invoice extends Equatable {
       sendEmailInvoice: origin.sendEmailInvoice,
       cancelledInvoice: cancelledInvoice ?? origin.cancelledInvoice,
       paymentMethod: paymentMethod ?? origin.paymentMethod,
-      startWashing : startWashing ?? origin.startWashing,
-      washingCell : washingCell ?? origin.washingCell,
-      dateStartWashing : dateStartWashing ?? origin.dateStartWashing,
-      dateEndWash : dateEndWash ?? origin.dateEndWash,
-      countWashingWorkers : countWashingWorkers ?? origin.countWashingWorkers,
-      endWash : endWash ?? origin.endWash,
-      washingServicesTime : origin.washingServicesTime,
-      washingTime : washingTime ?? origin.washingTime,
+      startWashing: startWashing ?? origin.startWashing,
+      washingCell: washingCell ?? origin.washingCell,
+      dateStartWashing: dateStartWashing ?? origin.dateStartWashing,
+      dateEndWash: dateEndWash ?? origin.dateEndWash,
+      countWashingWorkers: countWashingWorkers ?? origin.countWashingWorkers,
+      endWash: endWash ?? origin.endWash,
+      washingServicesTime: origin.washingServicesTime,
+      washingTime: washingTime ?? origin.washingTime,
       operatorUsers: listOperators ?? origin.operatorUsers,
-      operatorsSplit : origin.operatorsSplit,
-      countOperators : countOperators ?? origin.countOperators,
-      totalCommission : totalCommission ?? origin.totalCommission,
+      operatorsSplit: origin.operatorsSplit,
+      countOperators: countOperators ?? origin.countOperators,
+      totalCommission: totalCommission ?? origin.totalCommission,
     );
   }
 
   @override
   List<Object> get props => [
-        id,
-        totalPrice,
-        subtotal,
-        iva,
-        userOwner,
-        userOperator,
-        userOperatorName,
-        userCoordinator,
-        customer,
-        customerName,
-        phoneNumber,
-        vehicle,
-        placa,
-        uidVehicleType,
-        location,
-        locationName,
-        consecutive,
-        creationDate,
-        invoiceImages,
-        invoiceProducts,
-        approveDataProcessing,
-        vehicleBrand,
-        brandReference,
-        vehicleColor,
-        timeDelivery,
-        closedDate,
-        invoiceClosed,
-        observation,
-        incidence,
-        haveSpecialService,
-        countProducts,
-        countAdditionalProducts,
-        sendEmailInvoice,
-        cancelledInvoice,
-        paymentMethod,
-        startWashing,
-        washingCell,
-        dateStartWashing,
-        dateEndWash,
-        countWashingWorkers,
-        endWash,
-        washingServicesTime,
-        washingTime,
-        operatorUsers,
-        operatorsSplit,
-        countOperators,
-        totalCommission,
-      ];
+    id,
+    totalPrice,
+    subtotal,
+    iva,
+    userOwner,
+    userOperator,
+    userOperatorName,
+    userCoordinator,
+    customer,
+    customerName,
+    phoneNumber,
+    vehicle,
+    placa,
+    uidVehicleType,
+    location,
+    locationName,
+    consecutive,
+    creationDate,
+    invoiceImages,
+    invoiceProducts,
+    approveDataProcessing,
+    vehicleBrand,
+    brandReference,
+    vehicleColor,
+    timeDelivery,
+    closedDate,
+    invoiceClosed,
+    observation,
+    incidence,
+    haveSpecialService,
+    countProducts,
+    countAdditionalProducts,
+    sendEmailInvoice,
+    cancelledInvoice,
+    paymentMethod,
+    startWashing,
+    washingCell,
+    dateStartWashing,
+    dateEndWash,
+    countWashingWorkers,
+    endWash,
+    washingServicesTime,
+    washingTime,
+    operatorUsers,
+    operatorsSplit,
+    countOperators,
+    totalCommission,
+  ];
 }

@@ -1,7 +1,4 @@
-import 'package:car_wash_app/invoice/bloc/bloc_invoice.dart';
-import 'package:car_wash_app/user/model/user.dart';
 import 'package:flutter/material.dart';
-import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 
 class PopUpMenuWidget extends StatefulWidget {
   String valueSelect;

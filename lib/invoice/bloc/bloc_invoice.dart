@@ -39,7 +39,7 @@ class BlocInvoice implements Bloc {
 
   void _saveImages(Invoice invoice, String invoiceId) async {
     try{
-      if (invoice.invoiceImages != null && invoice.invoiceImages.length > 0) {
+      if (invoice.invoiceImages.length > 0) {
         for (String imageFilePath in invoice.invoiceImages) {
           if (!imageFilePath.contains('https://firebasestorage.')) {
             File imageFile = File(imageFilePath);

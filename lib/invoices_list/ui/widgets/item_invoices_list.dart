@@ -1,6 +1,5 @@
 import 'package:car_wash_app/invoice/model/invoice.dart';
 import 'package:car_wash_app/invoice/ui/screens/invoice_page.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -79,7 +78,7 @@ class _ItemInvoicesList extends State<ItemInvoicesList> {
         false;
     bool _cancelInvoice = invoiceList.cancelledInvoice ?? false;
     bool _finishedInvoice =
-    ((invoiceList.countOperators ?? 0) > 0 && invoiceList.closedDate != null) ? true : false;
+    ((invoiceList.countOperators ?? 0) > 0) ? true : false;
     final formatterNumber = NumberFormat("#,###");
     return ConstrainedBox(
       constraints: BoxConstraints(
@@ -234,8 +233,8 @@ class _ItemInvoicesList extends State<ItemInvoicesList> {
                                             new BorderRadius.circular(18.0),
                                         side: BorderSide(
                                             color:
-                                                Theme.of(context).accentColor)),
-                                    color: Theme.of(context).accentColor,
+                                                Theme.of(context).colorScheme.secondary)),
+                                    color: Theme.of(context).colorScheme.secondary,
                                     onPressed: () {
                                       widget.closeInvoice(invoiceList);
                                     },
@@ -257,8 +256,8 @@ class _ItemInvoicesList extends State<ItemInvoicesList> {
                                             new BorderRadius.circular(18.0),
                                         side: BorderSide(
                                             color:
-                                                Theme.of(context).errorColor)),
-                                    color: Theme.of(context).errorColor,
+                                                Theme.of(context).colorScheme.error)),
+                                    color: Theme.of(context).colorScheme.error,
                                     onPressed: () {
                                       widget.finishInvoice(invoiceList);
                                     },

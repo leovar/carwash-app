@@ -1,6 +1,4 @@
 import 'package:car_wash_app/invoice/model/invoice.dart';
-import 'package:car_wash_app/invoice/ui/screens/invoice_page.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -91,7 +89,7 @@ class _ItemWaitingList extends State<ItemWaitingList> {
                                   child: Text(
                                     invoiceList.consecutive.toString(),
                                     style: TextStyle(
-                                      color: Theme.of(context).accentColor,
+                                      color: Theme.of(context).colorScheme.secondary,
                                       fontFamily: "Lato",
                                       fontWeight: FontWeight.bold,
                                       fontSize: 17.0,
@@ -155,8 +153,8 @@ class _ItemWaitingList extends State<ItemWaitingList> {
                         borderRadius:
                         new BorderRadius.circular(18.0),
                         side: BorderSide(
-                            color: Theme.of(context).accentColor)),
-                    color: Theme.of(context).accentColor,
+                            color: Theme.of(context).colorScheme.secondary)),
+                    color: Theme.of(context).colorScheme.secondary,
                     onPressed: () {
                       widget.assignTurn(invoiceList);
                     },

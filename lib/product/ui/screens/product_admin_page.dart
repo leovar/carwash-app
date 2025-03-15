@@ -1,4 +1,3 @@
-import 'dart:convert';
 
 import 'package:car_wash_app/invoice/ui/widgets/text_field_input.dart';
 import 'package:car_wash_app/location/bloc/bloc_location.dart';
@@ -11,7 +10,6 @@ import 'package:car_wash_app/vehicle_type/model/vehicleType.dart';
 import 'package:car_wash_app/widgets/messages_utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 
 class ProductAdminPage extends StatefulWidget {
@@ -51,11 +49,9 @@ class _ProductAdminPage extends State<ProductAdminPage> {
   void initState() {
     super.initState();
     //_textIvaPercent.text = _initialIvaPercent;
-    if (widget.currentProduct != null) {
-      _productSelected = widget.currentProduct;
-      _selectProductList();
+    _productSelected = widget.currentProduct;
+    _selectProductList();
     }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -258,10 +254,8 @@ class _ProductAdminPage extends State<ProductAdminPage> {
   Widget _getLocationsToSelectWidget(AsyncSnapshot snapshot) {
     if (_blocLocation.buildLocations(snapshot.data.documents).length > _listLocation.length) {
       _listLocation = _blocLocation.buildLocations(snapshot.data.documents);
-      if (widget.currentProduct != null) {
-        _selectProductList();
-      }
-    }
+      _selectProductList();
+        }
     return InkWell(
       child: Container(
         height: 50,
@@ -328,10 +322,8 @@ class _ProductAdminPage extends State<ProductAdminPage> {
   Widget _getDataVehicleTypeList(AsyncSnapshot snapshot) {
     if (_vehicleTypeBloc.buildVehicleType(snapshot.data.documents).length > _lisVehicleType.length) {
       _lisVehicleType = _vehicleTypeBloc.buildVehicleType(snapshot.data.documents);
-      if (widget.currentProduct != null) {
-        _selectProductList();
-      }
-    }
+      _selectProductList();
+        }
     _dropdownVehicleTypes = _buildDropdownVehicleTypes(_lisVehicleType);
     return DropdownButton(
       isExpanded: true,
@@ -479,11 +471,6 @@ class _ProductAdminPage extends State<ProductAdminPage> {
       canSave = false;
     }
 
-    if (_selectedVehicleType == null) {
-      listVehicleTypeEmpty = true;
-      canSave = false;
-    }
-
     if (listSedesEmpty || listVehicleTypeEmpty) {
       setState(() {
         MessagesUtils.showAlert(context: context, title: 'Debe agregar Sedes y un tipo de Vehiculo').show();
@@ -523,36 +510,32 @@ class _ProductAdminPage extends State<ProductAdminPage> {
           .show();
 
       //Add new locations at product exist
-      if (_productSelected != null) {
-        _listLocation.where((l) => l.isSelected).toList().forEach((f) {
-          List<DocumentReference> listFind = _productSelected.locations
-              .where((e) => e.documentID == f.id)
-              .toList();
-          if (listFind.length <= 0) {
-            _productSelected.locations
-                .add(_blocLocation.getDocumentReferenceLocationById(f.id));
-          }
-        });
-      }
-
+      _listLocation.where((l) => l.isSelected).toList().forEach((f) {
+        List<DocumentReference> listFind = _productSelected.locations
+            .where((e) => e.documentID == f.id)
+            .toList();
+        if (listFind.length <= 0) {
+          _productSelected.locations
+              .add(_blocLocation.getDocumentReferenceLocationById(f.id));
+        }
+      });
+    
       //Delete locations at product exist
-      if (_productSelected != null) {
-        List<DocumentReference> locListDeleted = <DocumentReference>[];
-        _productSelected.locations.forEach((item) {
-          locListDeleted.add(item);
-        });
-        _productSelected.locations.forEach((DocumentReference locRefDelete) {
-          List<Location> lotionsFind = _listLocation.where((f) => f.id == locRefDelete.documentID && f.isSelected).toList();
-          if (lotionsFind.length == 0) {
-            locListDeleted.removeAt(_productSelected.locations.indexOf(locRefDelete));
-          }
-        });
-        _productSelected.locations.clear();
-        locListDeleted.forEach((d) {
-          _productSelected.locations.add(d);
-        });
-      }
-
+      List<DocumentReference> locListDeleted = <DocumentReference>[];
+      _productSelected.locations.forEach((item) {
+        locListDeleted.add(item);
+      });
+      _productSelected.locations.forEach((DocumentReference locRefDelete) {
+        List<Location> lotionsFind = _listLocation.where((f) => f.id == locRefDelete.documentID && f.isSelected).toList();
+        if (lotionsFind.length == 0) {
+          locListDeleted.removeAt(_productSelected.locations.indexOf(locRefDelete));
+        }
+      });
+      _productSelected.locations.clear();
+      locListDeleted.forEach((d) {
+        _productSelected.locations.add(d);
+      });
+    
       List<DocumentReference> _newListLocationsReferences = <DocumentReference>[];
       _listLocation.where((d) => d.isSelected).toList().forEach((f) {
         _newListLocationsReferences

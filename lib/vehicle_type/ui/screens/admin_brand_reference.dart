@@ -7,7 +7,6 @@ import 'package:car_wash_app/vehicle_type/ui/screens/admin_create_brand.dart';
 import 'package:car_wash_app/vehicle_type/ui/widgets/item_brand_reference_list.dart';
 import 'package:car_wash_app/widgets/messages_utils.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 
 class AdminBrandReference extends StatefulWidget {
@@ -117,7 +116,7 @@ class _AdminBrandReference extends State<AdminBrandReference> {
             color: Colors.white,
             size: 30,
           ),
-          backgroundColor: Theme.of(context).accentColor,
+          backgroundColor: Theme.of(context).colorScheme.secondary,
           onPressed: () {
             Navigator.push(
               context,
@@ -288,29 +287,16 @@ class _AdminBrandReference extends State<AdminBrandReference> {
 
   void _saveReference() {
     if (_textReferenceName.text.trim().isNotEmpty) {
-      if (_selectedBrand != null) {
-        BrandReference ref;
-        if (_referenceToEdit != null) {
-          ref = BrandReference(
-            id: _referenceToEdit.id,
-            reference: _textReferenceName.text,
-            active: true,
-          );
+      BrandReference ref;
+      ref = BrandReference(
+        id: _referenceToEdit.id,
+        reference: _textReferenceName.text,
+        active: true,
+      );
+          _vehicleTypeBloc.updateBrandReference(_selectedBrand.id, ref);
+      _referenceToEdit = null;
+      _textReferenceName.text = '';
         } else {
-          ref = BrandReference(
-            reference: _textReferenceName.text,
-            active: true,
-          );
-        }
-        _vehicleTypeBloc.updateBrandReference(_selectedBrand.id, ref);
-        _referenceToEdit = null;
-        _textReferenceName.text = '';
-      } else
-        MessagesUtils.showAlert(
-          context: context,
-          title: 'Seleccione una marca',
-        ).show();
-    } else {
       MessagesUtils.showAlert(
         context: context,
         title: 'Escriba una referencia',

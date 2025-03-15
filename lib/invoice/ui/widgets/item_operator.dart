@@ -1,7 +1,6 @@
 import 'package:car_wash_app/user/model/user.dart';
 import 'package:car_wash_app/widgets/messages_utils.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 class ItemOperator extends StatefulWidget {
   final Function(List<User>) operatorListCallback;

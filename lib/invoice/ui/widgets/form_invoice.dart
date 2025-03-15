@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:car_wash_app/commission/bloc/bloc_commission.dart';
 import 'package:car_wash_app/commission/model/commission.dart';
@@ -18,18 +17,16 @@ import 'package:car_wash_app/invoice/ui/widgets/print_invoice.dart';
 import 'package:car_wash_app/invoice/ui/widgets/radio_item.dart';
 import 'package:car_wash_app/invoice/ui/widgets/text_field_input.dart';
 import 'package:car_wash_app/location/bloc/bloc_location.dart';
-import 'package:car_wash_app/product/bloc/product_bloc.dart';
 import 'package:car_wash_app/product/model/product.dart';
 import 'package:car_wash_app/user/bloc/bloc_user.dart';
 import 'package:car_wash_app/user/model/user.dart';
 import 'package:car_wash_app/vehicle/bloc/bloc_vehicle.dart';
-import 'package:car_wash_app/vehicle/model/vehicle.dart';
 import 'package:car_wash_app/widgets/gradient_back.dart';
 import 'package:car_wash_app/widgets/info_header_container.dart';
 import 'package:car_wash_app/widgets/keys.dart';
 import 'package:car_wash_app/widgets/messages_utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:connectivity/connectivity.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
@@ -137,36 +134,51 @@ class _FormInvoice extends State<FormInvoice> {
     _countBrands = 0;
     _countColors = 0;
     //TODO traer estos datos desde la base de datos y cargarlos en un widget aparte con un stream
-    vehicleTypeList.add(HeaderServices(false, "Auto", 1, 38,
-        "assets/images/icon_car_admin.png", "assets/images/icon_car.png"));
-    vehicleTypeList.add(HeaderServices(
+    vehicleTypeList.add(
+      HeaderServices(
+        false,
+        "Auto",
+        1,
+        38,
+        "assets/images/icon_car_admin.png",
+        "assets/images/icon_car.png",
+      ),
+    );
+    vehicleTypeList.add(
+      HeaderServices(
         false,
         "Camioneta",
         2,
         37,
         'assets/images/icon_suv_car_admin.png',
-        "assets/images/icon_suv_car.png"));
-    vehicleTypeList.add(HeaderServices(
+        "assets/images/icon_suv_car.png",
+      ),
+    );
+    vehicleTypeList.add(
+      HeaderServices(
         false,
         "Moto",
         3,
         34,
         "assets/images/icon_motorcycle_admin.png",
-        "assets/images/icon_motorcycle.png"));
-    vehicleTypeList.add(HeaderServices(
+        "assets/images/icon_motorcycle.png",
+      ),
+    );
+    vehicleTypeList.add(
+      HeaderServices(
         false,
         "Bicicleta",
         4,
         34,
         "assets/images/icon_motorcycle_admin.png",
-        "assets/images/icon_motorcycle.png"));
+        "assets/images/icon_motorcycle.png",
+      ),
+    );
     vehicleTypeList[0].isSelected = true;
     vehicleTypeSelected = vehicleTypeList[0];
-    if (widget.editInvoice != null) {
-      _editInvoice(widget.editInvoice);
-      _editForm = false;
-    }
-    _userBloc.getCurrentUser().then((User user) {
+    _editInvoice(widget.editInvoice);
+    _editForm = false;
+      _userBloc.getCurrentUser().then((User user) {
       _currentUser = user;
       if (user.isAdministrator) {
         setState(() {
@@ -174,7 +186,6 @@ class _FormInvoice extends State<FormInvoice> {
         });
       }
     });
-
   }
 
   @override
@@ -190,30 +201,23 @@ class _FormInvoice extends State<FormInvoice> {
     PopupMenu.context = context;
     getPreferences();
 
-    if (_imageSelect != null) {
-      if (_imageSelect.path.contains('imageFirm')) {
-        var _imagePath = _imageSelect.path;
-        var _oldImageFirmPath =
-            imageList.where((e) => e.contains('imageFirm')).toList();
-        _deleteImageList(_oldImageFirmPath.length > 0
-            ? _oldImageFirmPath[0].toString()
-            : '');
-        imageList.add(_imagePath);
-      } else {
-        if (!imageList.contains(_imageSelect.path)) {
-          imageList.add(_imageSelect.path);
-        }
+    if (_imageSelect.path.contains('imageFirm')) {
+      var _imagePath = _imageSelect.path;
+      var _oldImageFirmPath =
+          imageList.where((e) => e.contains('imageFirm')).toList();
+      _deleteImageList(
+        _oldImageFirmPath.length > 0 ? _oldImageFirmPath[0].toString() : '',
+      );
+      imageList.add(_imagePath);
+    } else {
+      if (!imageList.contains(_imageSelect.path)) {
+        imageList.add(_imageSelect.path);
       }
-      _imageSelect = null;
     }
+    _imageSelect = null;
 
     return WillPopScope(
-      child: Stack(
-        children: <Widget>[
-          GradientBack(),
-          bodyContainer(),
-        ],
-      ),
+      child: Stack(children: <Widget>[GradientBack(), bodyContainer()]),
       onWillPop: () {
         if (_textPlaca.text.isNotEmpty) {
           return _alertBackButton();
@@ -249,12 +253,10 @@ class _FormInvoice extends State<FormInvoice> {
 
   headerContainerOptions() => Container(
         height: 55,
-        decoration: BoxDecoration(shape: BoxShape.rectangle, boxShadow: [
-          BoxShadow(
-            color: Colors.grey,
-            blurRadius: 5.0,
-          ),
-        ]),
+        decoration: BoxDecoration(
+          shape: BoxShape.rectangle,
+          boxShadow: [BoxShadow(color: Colors.grey, blurRadius: 5.0)],
+        ),
         child: topSelectVehicle(),
       );
 
@@ -267,8 +269,9 @@ class _FormInvoice extends State<FormInvoice> {
             onTap: _editForm
                 ? () {
                     setState(() {
-                      vehicleTypeList
-                          .forEach((element) => element.isSelected = false);
+                      vehicleTypeList.forEach(
+                        (element) => element.isSelected = false,
+                      );
                       vehicleTypeList[index].isSelected = true;
                       vehicleTypeSelected = vehicleTypeList[index];
                       _listAdditionalProducts = <AdditionalProduct>[];
@@ -299,12 +302,7 @@ class _FormInvoice extends State<FormInvoice> {
         borderRadius: BorderRadius.circular(7.0),
       ),
       child: Container(
-        padding: EdgeInsets.only(
-          right: 15,
-          left: 15,
-          top: 15,
-          bottom: 15,
-        ),
+        padding: EdgeInsets.only(right: 15, left: 15, top: 15, bottom: 15),
         child: Center(
           child: Column(
             children: <Widget>[
@@ -374,14 +372,15 @@ class _FormInvoice extends State<FormInvoice> {
               ),
               SizedBox(height: 9),
               FieldsOperators(
-                  callbackOperatorsList: _setOperatorsDb,
-                  operatorsListCallback: _listOperators,
-                  enableForm: _enableForm,
-                  selectedOperatorsCount: _listOperators.where((f) => f.isSelected).toList().length,
-                  editForm: _editForm,
-                  closedInvoice: _closedInvoice,
-                  idLocation: _idLocation,
-                  invoice: widget.editInvoice,
+                callbackOperatorsList: _setOperatorsDb,
+                operatorsListCallback: _listOperators,
+                enableForm: _enableForm,
+                selectedOperatorsCount:
+                    _listOperators.where((f) => f.isSelected).toList().length,
+                editForm: _editForm,
+                closedInvoice: _closedInvoice,
+                idLocation: _idLocation,
+                invoice: widget.editInvoice,
               ),
               SizedBox(height: 9),
               FieldsProducts(
@@ -399,10 +398,7 @@ class _FormInvoice extends State<FormInvoice> {
                 invoice: widget.editInvoice,
               ),
               SizedBox(height: 9),
-              Visibility(
-                visible: _editForm,
-                child: _showDraw(),
-              ),
+              Visibility(visible: _editForm, child: _showDraw()),
               Visibility(
                 visible: _validateEnableSave(),
                 child: _saveInvoiceButton(),
@@ -431,11 +427,7 @@ class _FormInvoice extends State<FormInvoice> {
         child: Container(
           child: FloatingActionButton(
             key: btnAddImage,
-            child: Icon(
-              Icons.add,
-              color: Colors.black,
-              size: 30,
-            ),
+            child: Icon(Icons.add, color: Colors.black, size: 30),
             backgroundColor: Colors.white,
             elevation: 14,
             heroTag: null,
@@ -496,7 +488,7 @@ class _FormInvoice extends State<FormInvoice> {
           height: 50,
           child: RaisedButton(
             padding: EdgeInsets.symmetric(vertical: 15, horizontal: 10),
-            color: Theme.of(context).accentColor,
+            color: Theme.of(context).colorScheme.secondary,
             child: Text(
               "GUARDAR",
               style: TextStyle(
@@ -524,7 +516,7 @@ class _FormInvoice extends State<FormInvoice> {
           height: 50,
           child: RaisedButton(
             padding: EdgeInsets.symmetric(vertical: 15, horizontal: 10),
-            color: Theme.of(context).accentColor,
+            color: Theme.of(context).colorScheme.secondary,
             child: Text(
               "IMPRIMIR FACTURA",
               style: TextStyle(
@@ -536,14 +528,13 @@ class _FormInvoice extends State<FormInvoice> {
               ),
             ),
             onPressed: () {
-              if (widget.editInvoice != null) {
-                _printInvoice(
-                    widget.editInvoice,
-                    _listProduct.where((f) => f.isSelected).toList(),
-                    _listAdditionalProducts,
-                    _textEmail.text.trim());
-              }
-            },
+              _printInvoice(
+                widget.editInvoice,
+                _listProduct.where((f) => f.isSelected).toList(),
+                _listAdditionalProducts,
+                _textEmail.text.trim(),
+              );
+                        },
           ),
         ),
       ),
@@ -560,7 +551,7 @@ class _FormInvoice extends State<FormInvoice> {
           height: 45,
           child: RaisedButton(
             padding: EdgeInsets.symmetric(vertical: 15, horizontal: 10),
-            color: Theme.of(context).accentColor,
+            color: Theme.of(context).colorScheme.secondary,
             child: Text(
               "CANCELAR FACTURA",
               style: TextStyle(
@@ -572,39 +563,38 @@ class _FormInvoice extends State<FormInvoice> {
               ),
             ),
             onPressed: () {
-              if (widget.editInvoice != null) {
-                Alert(
-                    context: context,
-                    type: AlertType.warning,
-                    title: 'Esta seguro de anular la factura?',
-                    style: MessagesUtils.alertStyle,
-                    buttons: [
-                      DialogButton(
-                        color: Theme.of(context).accentColor,
-                        child: Text(
-                          'CANCELAR',
-                          style: Theme.of(context).textTheme.button,
-                        ),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          setState(() {});
+              Alert(
+                context: context,
+                type: AlertType.warning,
+                title: 'Esta seguro de anular la factura?',
+                style: MessagesUtils.alertStyle,
+                buttons: [
+                  DialogButton(
+                    color: Theme.of(context).colorScheme.secondary,
+                    child: Text(
+                      'CANCELAR',
+                      style: Theme.of(context).textTheme.labelLarge,
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      setState(() {});
+                    },
+                  ),
+                  DialogButton(
+                    color: Theme.of(context).colorScheme.secondary,
+                    child: Text(
+                      'ACEPTAR',
+                      style: Theme.of(context).textTheme.labelLarge,
+                    ),
+                    onPressed: () {
+                      _canceledInvoice = true;
+                      Navigator.of(context).pop();
+                      _cancelInvoiceFunction();
+                    },
+                  ),
+                ],
+              ).show();
                         },
-                      ),
-                      DialogButton(
-                        color: Theme.of(context).accentColor,
-                        child: Text(
-                          'ACEPTAR',
-                          style: Theme.of(context).textTheme.button,
-                        ),
-                        onPressed: () {
-                          _canceledInvoice = true;
-                          Navigator.of(context).pop();
-                          _cancelInvoiceFunction();
-                        },
-                      )
-                    ]).show();
-              }
-            },
           ),
         ),
       ),
@@ -618,7 +608,7 @@ class _FormInvoice extends State<FormInvoice> {
         alignment: Alignment.center,
         child: RaisedButton(
           padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
-          color: Theme.of(context).accentColor,
+          color: Theme.of(context).colorScheme.secondary,
           child: Text(
             "IMPRIMIR TEST",
             style: TextStyle(
@@ -630,8 +620,10 @@ class _FormInvoice extends State<FormInvoice> {
             ),
           ),
           onPressed: () {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => PrintInvoice()));
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => PrintInvoice()),
+            );
           },
         ),
       ),
@@ -643,26 +635,23 @@ class _FormInvoice extends State<FormInvoice> {
   ///Image Functions
   void _menuSourceAddImage() {
     PopupMenu menu = PopupMenu(
-        backgroundColor: Theme.of(context).accentColor,
-        lineColor: Theme.of(context).accentColor,
-        maxColumn: 1,
-        items: [
-          MenuItem(
-              title: cameraTag,
-              textStyle: TextStyle(color: Colors.white),
-              image: Icon(
-                Icons.camera_alt,
-                color: Colors.white,
-              )),
-          MenuItem(
-              title: galleryTag,
-              textStyle: TextStyle(color: Colors.white),
-              image: Icon(
-                Icons.image,
-                color: Colors.white,
-              )),
-        ],
-        onClickMenu: _onClickMenuImageSelected);
+      backgroundColor: Theme.of(context).colorScheme.secondary,
+      lineColor: Theme.of(context).colorScheme.secondary,
+      maxColumn: 1,
+      items: [
+        MenuItem(
+          title: cameraTag,
+          textStyle: TextStyle(color: Colors.white),
+          image: Icon(Icons.camera_alt, color: Colors.white),
+        ),
+        MenuItem(
+          title: galleryTag,
+          textStyle: TextStyle(color: Colors.white),
+          image: Icon(Icons.image, color: Colors.white),
+        ),
+      ],
+      onClickMenu: _onClickMenuImageSelected,
+    );
     menu.show(widgetKey: btnAddImage);
   }
 
@@ -680,10 +669,11 @@ class _FormInvoice extends State<FormInvoice> {
   Future _addImageTour() async {
     var imageCapture = await picker
         .getImage(
-            source: _selectSourceImagePicker == cameraTag
-                ? ImageSource.camera
-                : ImageSource.gallery,
-            imageQuality: 80)
+          source: _selectSourceImagePicker == cameraTag
+              ? ImageSource.camera
+              : ImageSource.gallery,
+          imageQuality: 80,
+        )
         .catchError((onError) => print(onError));
 
     if (imageCapture != null) {
@@ -715,7 +705,7 @@ class _FormInvoice extends State<FormInvoice> {
               CropAspectRatioPreset.ratio3x2,
               CropAspectRatioPreset.original,
               CropAspectRatioPreset.ratio4x3,
-              CropAspectRatioPreset.ratio16x9
+              CropAspectRatioPreset.ratio16x9,
             ]
           : [
               CropAspectRatioPreset.original,
@@ -725,32 +715,34 @@ class _FormInvoice extends State<FormInvoice> {
               CropAspectRatioPreset.ratio5x3,
               CropAspectRatioPreset.ratio5x4,
               CropAspectRatioPreset.ratio7x5,
-              CropAspectRatioPreset.ratio16x9
+              CropAspectRatioPreset.ratio16x9,
             ],
       androidUiSettings: AndroidUiSettings(
-          toolbarTitle: 'Cropper',
-          toolbarColor: Colors.white,
-          toolbarWidgetColor: Theme.of(context).primaryColor,
-          initAspectRatio: CropAspectRatioPreset.original,
-          lockAspectRatio: false),
-      iosUiSettings: IOSUiSettings(
-        minimumAspectRatio: 1.0,
+        toolbarTitle: 'Cropper',
+        toolbarColor: Colors.white,
+        toolbarWidgetColor: Theme.of(context).primaryColor,
+        initAspectRatio: CropAspectRatioPreset.original,
+        lockAspectRatio: false,
       ),
+      iosUiSettings: IOSUiSettings(minimumAspectRatio: 1.0),
     );
-    if (croppedFile != null) {
-      File fileCompress = await FlutterImageCompress.compressAndGetFile(
-          croppedFile.absolute.path, croppedFile.path,
-          quality: 40);
+    File fileCompress = await FlutterImageCompress.compressAndGetFile(
+      croppedFile.absolute.path,
+      croppedFile.path,
+      quality: 40,
+    );
 
-      setState(() {
-        _imageSelect = fileCompress;
-      });
-    }
+    setState(() {
+      _imageSelect = fileCompress;
+    });
   }
 
   ///Functions Select Menu
   void _setHandlerUserCoordinator(
-      String selectCoordinator, int countList, int operationType) {
+    String selectCoordinator,
+    int countList,
+    int operationType,
+  ) {
     if (operationType == 1) {
       _selectCoordinator = selectCoordinator;
     } else {
@@ -760,7 +752,10 @@ class _FormInvoice extends State<FormInvoice> {
 
   //operationType 1=setBrand, 2= setCountBrands
   void _setHandlerVehicleBrand(
-      String brand, int countBrands, int operationType) {
+    String brand,
+    int countBrands,
+    int operationType,
+  ) {
     if (operationType == 1) {
       _selectBrand = brand;
     } else {
@@ -770,7 +765,10 @@ class _FormInvoice extends State<FormInvoice> {
 
   //operationType 1=setBrand, 2= setCountBrands
   void _setHandlerBrandReferences(
-      String brandReference, int countBrands, int operationType) {
+    String brandReference,
+    int countBrands,
+    int operationType,
+  ) {
     if (operationType == 1) {
       _selectedBrandReference = brandReference;
     } else {
@@ -780,7 +778,10 @@ class _FormInvoice extends State<FormInvoice> {
 
   //operationType 1=setColor, 2= setCountColors
   void _setHandlerVehicleColor(
-      String vehicleColor, int countColors, int operationType) {
+    String vehicleColor,
+    int countColors,
+    int operationType,
+  ) {
     if (operationType == 1) {
       _selectColor = vehicleColor;
     } else {
@@ -794,7 +795,11 @@ class _FormInvoice extends State<FormInvoice> {
   }
 
   //Payment Methods
-  void _setHandlerPaymentMethod(String paymentMethod, int countPayment, int operationType) {
+  void _setHandlerPaymentMethod(
+    String paymentMethod,
+    int countPayment,
+    int operationType,
+  ) {
     if (operationType == 1) {
       _selectedPaymentMethod = paymentMethod;
     } else {
@@ -816,9 +821,9 @@ class _FormInvoice extends State<FormInvoice> {
     _imageFirmInMemory = imageFirm;
     String formattedDate = DateFormat('kk_mm_ss').format(DateTime.now());
     final dir = await path_provider.getTemporaryDirectory();
-    final file =
-        await new File('${dir.absolute.path}/imageFirm$formattedDate.jpg')
-            .create();
+    final file = await new File(
+      '${dir.absolute.path}/imageFirm$formattedDate.jpg',
+    ).create();
     file.writeAsBytesSync(imageFirm);
     print(file.path);
     setState(() {
@@ -841,34 +846,31 @@ class _FormInvoice extends State<FormInvoice> {
 
   ///Functions Operator Users List
   void _setOperatorsDb(List<User> operatorsListSelected) async {
-    if (widget.editInvoice != null) {
-      int _countOperators = 0;
-      List<User> _operatorsToSave = [];
-      List<User> _selectedOperators = operatorsListSelected.where((u) => u.isSelected).toList();
-      _selectedOperators.forEach((user) {
-        var operatorSave = User.copyUserOperatorToSaveInvoice(
-          id: user.id,
-          name: user.name,
-          operatorCommission: ((widget.editInvoice.totalCommission??0) / _selectedOperators.length).ceilToDouble(),
-        );
-        _operatorsToSave.add(operatorSave);
-      });
-      _countOperators = _selectedOperators.length;
-      Invoice invoice = Invoice.copyWith(
-        origin: widget.editInvoice,
-        listOperators: _operatorsToSave,
-        countOperators: _countOperators,
+    int _countOperators = 0;
+    List<User> _operatorsToSave = [];
+    List<User> _selectedOperators =
+        operatorsListSelected.where((u) => u.isSelected).toList();
+    _selectedOperators.forEach((user) {
+      var operatorSave = User.copyUserOperatorToSaveInvoice(
+        id: user.id,
+        name: user.name,
+        operatorCommission: ((widget.editInvoice.totalCommission ?? 0) /
+                _selectedOperators.length)
+            .ceilToDouble(),
       );
-      await _blocInvoice.saveInvoice(invoice);
-      setState(() {
-        _listOperators = operatorsListSelected;
-      });
-    } else {
-      setState(() {
-        _listOperators = operatorsListSelected;
-      });
+      _operatorsToSave.add(operatorSave);
+    });
+    _countOperators = _selectedOperators.length;
+    Invoice invoice = Invoice.copyWith(
+      origin: widget.editInvoice,
+      listOperators: _operatorsToSave,
+      countOperators: _countOperators,
+    );
+    await _blocInvoice.saveInvoice(invoice);
+    setState(() {
+      _listOperators = operatorsListSelected;
+    });
     }
-  }
 
   ///Function validate exist customer
   /// After digit placa validate Vehicle and Customer
@@ -886,64 +888,46 @@ class _FormInvoice extends State<FormInvoice> {
         _enableForm = true;
 
         //Get vehicle if exist
-        _blocVehicle
-            .getVehicleReferenceByPlaca(_placa)
-            .then((DocumentReference vehicleRef) {
+        _blocVehicle.getVehicleReferenceByPlaca(_placa).then((
+          DocumentReference vehicleRef,
+        ) {
           _vehicleReference = vehicleRef;
 
-          if (vehicleRef != null) {
-            _blocVehicle.getVehicleById(vehicleRef.documentID).then((vehicle) {
-              _selectBrand = vehicle.brand;
-              _selectColor = vehicle.color;
-              _selectedBrandReference = vehicle.brandReference;
-              HeaderServices vehicleTypeFind = vehicleTypeList
-                  .where((f) => f.text == vehicle.vehicleType)
-                  .first;
-              vehicleTypeSelected = vehicleTypeFind;
-              setState(() {
-                vehicleTypeList
-                    .forEach((element) => element.isSelected = false);
-                vehicleTypeList[vehicleTypeList.indexOf(vehicleTypeSelected)]
-                    .isSelected = true;
-              });
-            });
-          } else {
-            _selectBrand = '';
-            _selectColor = '';
-            _selectedBrandReference = '';
-            setState(() {});
-          }
-
-          //Validate services from the last 2 months
-          if (_vehicleReference != null) {
-            _getInvoicesForPlaca(_placa);
-          }
-
-          //Validate if Customer exist for this vehicle
-          if (_vehicleReference != null) {
-            _customerBloc
-                .getCustomerByVehicle(_vehicleReference)
-                .then((Customer customer) {
-              setState(() {
-                if (customer == null) {
-                  _cleanTextFields();
-                } else {
-                  _customer = customer;
-                  _textClient.text = customer.name;
-                  _textEmail.text = customer.email;
-                  _textPhoneNumber.text = customer.phoneNumber;
-                  _textNeighborhood.text = customer.neighborhood;
-                  _textBirthDate.text = customer.birthDate;
-                  _selectTypeSex = customer.typeSex;
-                }
-              });
-            });
-          } else {
+          _blocVehicle.getVehicleById(vehicleRef.documentID).then((vehicle) {
+            _selectBrand = vehicle.brand;
+            _selectColor = vehicle.color;
+            _selectedBrandReference = vehicle.brandReference;
+            HeaderServices vehicleTypeFind = vehicleTypeList
+                .where((f) => f.text == vehicle.vehicleType)
+                .first;
+            vehicleTypeSelected = vehicleTypeFind;
             setState(() {
-              _cleanTextFields();
+              vehicleTypeList.forEach(
+                (element) => element.isSelected = false,
+              );
+              vehicleTypeList[vehicleTypeList.indexOf(vehicleTypeSelected)]
+                  .isSelected = true;
             });
-          }
-        });
+          });
+        
+          //Validate services from the last 2 months
+          _getInvoicesForPlaca(_placa);
+        
+          //Validate if Customer exist for this vehicle
+          _customerBloc.getCustomerByVehicle(_vehicleReference).then((
+            Customer customer,
+          ) {
+            setState(() {
+              _customer = customer;
+              _textClient.text = customer.name;
+              _textEmail.text = customer.email;
+              _textPhoneNumber.text = customer.phoneNumber;
+              _textNeighborhood.text = customer.neighborhood;
+              _textBirthDate.text = customer.birthDate;
+              _selectTypeSex = customer.typeSex;
+                        });
+          });
+                });
       } else {
         setState(() {
           _cleanTextFields();
@@ -983,35 +967,34 @@ class _FormInvoice extends State<FormInvoice> {
           await _blocInvoice.getListInvoicesByVehicle(placa) ?? [];
       if (listInvoicesByVehicle.length > 0) {
         final dataList = listInvoicesByVehicle
-            .map((vehicleInvoice) => InvoiceHistoryList(
+            .map(
+              (vehicleInvoice) => InvoiceHistoryList(
                 vehicleInvoice.creationDate,
                 vehicleInvoice.consecutive.toString(),
                 vehicleInvoice.invoiceProducts.length > 0
                     ? vehicleInvoice.invoiceProducts[0].productName
                     : '',
-                vehicleInvoice.totalPrice))
+                vehicleInvoice.totalPrice,
+              ),
+            )
             .toList();
 
         Alert(
-            context: context,
-            title: 'Historia',
-            style: MessagesUtils.alertStyle,
-            content: InfoLastServicesByVehicle(
-              listHistoryInvoices: dataList,
+          context: context,
+          title: 'Historia',
+          style: MessagesUtils.alertStyle,
+          content: InfoLastServicesByVehicle(listHistoryInvoices: dataList),
+          buttons: [
+            DialogButton(
+              color: Theme.of(context).colorScheme.secondary,
+              child: Text('ACEPTAR', style: Theme.of(context).textTheme.labelLarge),
+              onPressed: () {
+                Navigator.of(context).pop();
+                setState(() {});
+              },
             ),
-            buttons: [
-              DialogButton(
-                color: Theme.of(context).accentColor,
-                child: Text(
-                  'ACEPTAR',
-                  style: Theme.of(context).textTheme.button,
-                ),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  setState(() {});
-                },
-              )
-            ]).show();
+          ],
+        ).show();
       }
     } catch (e) {
       print(e);
@@ -1019,45 +1002,47 @@ class _FormInvoice extends State<FormInvoice> {
   }
 
   ///Function calculate commission per product
-  double _calculateCommissionProduct(List<Commission> commissionsList, String prodType, double prodPrice, int vehicleType) {
+  double _calculateCommissionProduct(
+    List<Commission> commissionsList,
+    String prodType,
+    double prodPrice,
+    int vehicleType,
+  ) {
     final commissionProd = commissionsList.firstWhere(
-            (c) =>
-        c.productType == prodType &&
-            c.uidVehicleType == vehicleType,
-        orElse: () => null);
+      (c) => c.productType == prodType && c.uidVehicleType == vehicleType,
+      orElse: () => null,
+    );
     bool isNormal = false;
     double calculateComm = 0;
-    if (commissionProd != null) {
-      if (commissionProd.commissionThreshold > 0) {
-        if (prodPrice <= commissionProd.commissionThreshold) {
-          if (commissionProd.calculatePerCount) {
-            calculateComm = commissionProd.isValue
-                ? commissionProd.valueBeforeThreshold
-                : (commissionProd.valueBeforeThreshold) / 100;
-          } else {
-            calculateComm = commissionProd.isValue
-                ? prodPrice * commissionProd.valueBeforeThreshold
-                : (prodPrice * commissionProd.valueBeforeThreshold) / 100;
-          }
+    if (commissionProd.commissionThreshold > 0) {
+      if (prodPrice <= commissionProd.commissionThreshold) {
+        if (commissionProd.calculatePerCount) {
+          calculateComm = commissionProd.isValue
+              ? commissionProd.valueBeforeThreshold
+              : (commissionProd.valueBeforeThreshold) / 100;
         } else {
-          isNormal = true;
+          calculateComm = commissionProd.isValue
+              ? prodPrice * commissionProd.valueBeforeThreshold
+              : (prodPrice * commissionProd.valueBeforeThreshold) / 100;
         }
       } else {
         isNormal = true;
       }
-      if (isNormal) {
-        if (commissionProd.calculatePerCount) {
-          calculateComm = commissionProd.isValue
-              ? commissionProd.value
-              : (commissionProd.value) / 100;
-        } else {
-          calculateComm = commissionProd.isValue
-              ? prodPrice * commissionProd.value
-              : (prodPrice * commissionProd.value) / 100;
-        }
+    } else {
+      isNormal = true;
+    }
+    if (isNormal) {
+      if (commissionProd.calculatePerCount) {
+        calculateComm = commissionProd.isValue
+            ? commissionProd.value
+            : (commissionProd.value) / 100;
+      } else {
+        calculateComm = commissionProd.isValue
+            ? prodPrice * commissionProd.value
+            : (prodPrice * commissionProd.value) / 100;
       }
     }
-    return calculateComm;
+      return calculateComm;
   }
 
   ///Functions Save Invoice
@@ -1070,10 +1055,10 @@ class _FormInvoice extends State<FormInvoice> {
       var connectionWifi = connectivityResult == ConnectivityResult.wifi;
       if (!connectionMobile && !connectionWifi) {
         MessagesUtils.showAlert(
-                context: context,
-                title:
-                    'No tiene conexión a internet! no se pueden guardar las imagenes')
-            .show();
+          context: context,
+          title:
+              'No tiene conexión a internet! no se pueden guardar las imagenes',
+        ).show();
         return;
       }
     }
@@ -1081,8 +1066,10 @@ class _FormInvoice extends State<FormInvoice> {
     String validateMessage = _validateFields();
     if (validateMessage.isEmpty) {
       //Open message Saving
-      MessagesUtils.showAlertWithLoading(context: context, title: 'Guardando')
-          .show();
+      MessagesUtils.showAlertWithLoading(
+        context: context,
+        title: 'Guardando',
+      ).show();
 
       try {
         DocumentReference
@@ -1103,64 +1090,29 @@ class _FormInvoice extends State<FormInvoice> {
 
         //Get Coordinator reference
         if (_selectCoordinator.isNotEmpty) {
-          _coordinatorReference =
-              await _userBloc.getUserReferenceByUserName(_selectCoordinator);
-        }
-
-        //Get Vehicle reference, save if not exist
-        if (_vehicleReference == null) {
-          Vehicle updateVehicle = Vehicle(
-            brand: _selectBrand,
-            model: '',
-            placa: _textPlaca.text.trim(),
-            color: _selectColor,
-            vehicleType: vehicleTypeSelected.text,
-            //_vehicleTypeRef,
-            creationDate: Timestamp.now(),
-            brandReference: _selectedBrandReference,
+          _coordinatorReference = await _userBloc.getUserReferenceByUserName(
+            _selectCoordinator,
           );
-          DocumentReference vehicleRef =
-              await _blocVehicle.updateVehicle(updateVehicle);
-          _vehicleReference = vehicleRef;
         }
 
         //Get Customer reference or create customer or update customer
-        if (_customer == null) {
-          List<DocumentReference> listVehicles = <DocumentReference>[];
-          listVehicles.add(_vehicleReference);
-
-          Customer customer = Customer(
-            name: _textClient.text.trim(),
-            address: '',
-            phoneNumber: _textPhoneNumber.text.trim(),
-            birthDate: _textBirthDate.text,
-            neighborhood: _textNeighborhood.text,
-            typeSex: _selectTypeSex,
-            email: _textEmail.text.trim(),
-            creationDate: Timestamp.now(),
-            vehicles: listVehicles,
-          );
-          DocumentReference customerRef =
-              await _customerBloc.updateCustomer(customer);
-          _customerReference = customerRef;
-        } else {
-          if (!_customer.vehicles.contains(_vehicleReference)) {
-            _customer.vehicles.add(_vehicleReference);
-          }
-
-          Customer customerUpdate = Customer.copyWith(
-            origin: _customer,
-            name: _textClient.text.trim(),
-            phoneNumber: _textPhoneNumber.text.trim(),
-            email: _textEmail.text.trim(),
-            birthDate: _textBirthDate.text,
-            neighborhood: _textNeighborhood.text,
-            typeSex: _selectTypeSex,
-          );
-          _customerReference =
-              await _customerBloc.updateCustomer(customerUpdate);
+        if (!_customer.vehicles.contains(_vehicleReference)) {
+          _customer.vehicles.add(_vehicleReference);
         }
 
+        Customer customerUpdate = Customer.copyWith(
+          origin: _customer,
+          name: _textClient.text.trim(),
+          phoneNumber: _textPhoneNumber.text.trim(),
+          email: _textEmail.text.trim(),
+          birthDate: _textBirthDate.text,
+          neighborhood: _textNeighborhood.text,
+          typeSex: _selectTypeSex,
+        );
+        _customerReference = await _customerBloc.updateCustomer(
+          customerUpdate,
+        );
+      
         //Obtiene los valores de los productos para calcular el subtotal, iva y total
         _listProduct.forEach((product) {
           //If at least only one services is special
@@ -1193,7 +1145,8 @@ class _FormInvoice extends State<FormInvoice> {
         });
 
         //Save products list
-        List<Commission> commissionsList = await _blocCommission.getAllCommissions();
+        List<Commission> commissionsList =
+            await _blocCommission.getAllCommissions();
         List<Product> _selectedProducts =
             _listProduct.where((f) => f.isSelected).toList();
         List<Product> _productToSave = [];
@@ -1201,7 +1154,12 @@ class _FormInvoice extends State<FormInvoice> {
           _selectedProducts.forEach((product) {
             if (product.newProduct ?? true) {
               // TODO calcular comisión por producto en este punto antes de guardarlo
-              double commission = _calculateCommissionProduct(commissionsList, product.productType, product.price, vehicleTypeSelected.uid);
+              double commission = _calculateCommissionProduct(
+                commissionsList,
+                product.productType,
+                product.price,
+                vehicleTypeSelected.uid,
+              );
               var prodSave = Product.copyProductToSaveInvoice(
                 id: product.id,
                 productName: product.productName,
@@ -1220,7 +1178,12 @@ class _FormInvoice extends State<FormInvoice> {
         if (_listAdditionalProducts.length > 0) {
           _listAdditionalProducts.forEach((addProduct) {
             // TODO calcular comisión por producto en este punto antes de guardarlo
-            double commission = _calculateCommissionProduct(commissionsList, addProduct.productType, double.parse(addProduct.productValue), vehicleTypeSelected.uid);
+            double commission = _calculateCommissionProduct(
+              commissionsList,
+              addProduct.productType,
+              double.parse(addProduct.productValue),
+              vehicleTypeSelected.uid,
+            );
             var prodSave = Product.copyProductToSaveInvoice(
               id: null,
               productName: addProduct.productName,
@@ -1237,28 +1200,33 @@ class _FormInvoice extends State<FormInvoice> {
 
         //Save user operators
         List<User> _operatorsToSave = [];
-        List<User> _selectedOperators = _listOperators.where((u) => u.isSelected).toList();
+        List<User> _selectedOperators =
+            _listOperators.where((u) => u.isSelected).toList();
         if (_selectedOperators.length > 0) {
           _selectedOperators.forEach((user) {
             var operatorSave = User.copyUserOperatorToSaveInvoice(
               id: user.id,
               name: user.name,
-              operatorCommission:(_totalCommission / _selectedOperators.length).ceilToDouble(),
+              operatorCommission:
+                  (_totalCommission / _selectedOperators.length).ceilToDouble(),
             );
             _operatorsToSave.add(operatorSave);
           });
         }
 
         //Get count operators
-        _countOperators = _listOperators.where((u) => u.isSelected).toList().length;
+        _countOperators =
+            _listOperators.where((u) => u.isSelected).toList().length;
 
         //Get count products
-        _countProducts = _listProduct.where((f) => f.isSelected).toList().length;
+        _countProducts =
+            _listProduct.where((f) => f.isSelected).toList().length;
         _countAdditionalProducts = _listAdditionalProducts.length;
 
         //Get Consecutive
-        int _consecutive =
-            await _blocInvoice.getLastConsecutiveByLocation(_locationReference);
+        int _consecutive = await _blocInvoice.getLastConsecutiveByLocation(
+          _locationReference,
+        );
         if (_consecutive == 0) {
           _consecutive = int.parse(_initConsecLocation);
         } else {
@@ -1305,51 +1273,76 @@ class _FormInvoice extends State<FormInvoice> {
           timeDelivery: _textTimeDelivery.text,
           observation: _textObservation.text.trim(),
           incidence: _textIncidence.text.trim(),
-          haveSpecialService: widget.editInvoice != null ? widget.editInvoice.haveSpecialService : _haveServiceSpecial,
+          haveSpecialService: widget.editInvoice != null
+              ? widget.editInvoice.haveSpecialService
+              : _haveServiceSpecial,
           countProducts: _countProducts,
           countAdditionalProducts: _countAdditionalProducts,
           sendEmailInvoice: _sendEmail,
           invoiceProducts: widget.editInvoice != null
               ? widget.editInvoice.invoiceProducts
               : _productToSave,
-          cancelledInvoice: widget.editInvoice != null ? widget.editInvoice.cancelledInvoice : _canceledInvoice,
+          cancelledInvoice: widget.editInvoice != null
+              ? widget.editInvoice.cancelledInvoice
+              : _canceledInvoice,
           paymentMethod: _selectedPaymentMethod,
-          closedDate: widget.editInvoice != null ? widget.editInvoice.closedDate : null,
-          invoiceClosed: widget.editInvoice != null ? widget.editInvoice.invoiceClosed : false,
-          endWash: widget.editInvoice != null ? widget.editInvoice.endWash : false,
-          dateEndWash: widget.editInvoice != null ? widget.editInvoice.dateEndWash : null,
-          startWashing: widget.editInvoice != null ? widget.editInvoice.startWashing : false,
-          dateStartWashing: widget.editInvoice != null ? widget.editInvoice.dateStartWashing : null,
-          washingTime: widget.editInvoice != null ? widget.editInvoice.washingTime : null,
-          washingCell: widget.editInvoice != null ? widget.editInvoice.washingCell : null,
-          countWashingWorkers: widget.editInvoice != null ? widget.editInvoice.countWashingWorkers : null,
+          closedDate:
+              widget.editInvoice != null ? widget.editInvoice.closedDate : null,
+          invoiceClosed: widget.editInvoice != null
+              ? widget.editInvoice.invoiceClosed
+              : false,
+          endWash:
+              widget.editInvoice != null ? widget.editInvoice.endWash : false,
+          dateEndWash: widget.editInvoice != null
+              ? widget.editInvoice.dateEndWash
+              : null,
+          startWashing: widget.editInvoice != null
+              ? widget.editInvoice.startWashing
+              : false,
+          dateStartWashing: widget.editInvoice != null
+              ? widget.editInvoice.dateStartWashing
+              : null,
+          washingTime: widget.editInvoice != null
+              ? widget.editInvoice.washingTime
+              : null,
+          washingCell: widget.editInvoice != null
+              ? widget.editInvoice.washingCell
+              : null,
+          countWashingWorkers: widget.editInvoice != null
+              ? widget.editInvoice.countWashingWorkers
+              : null,
           washingServicesTime: _servicesWashingTime,
           operatorUsers: _operatorsToSave,
           countOperators: _countOperators,
-          totalCommission: widget.editInvoice != null ? widget.editInvoice.totalCommission : _totalCommission,
+          totalCommission: widget.editInvoice != null
+              ? widget.editInvoice.totalCommission
+              : _totalCommission,
         );
-        DocumentReference invoiceReference =
-            await _blocInvoice.saveInvoice(_invoice);
+        DocumentReference invoiceReference = await _blocInvoice.saveInvoice(
+          _invoice,
+        );
         String invoiceId = invoiceReference.documentID;
-        Invoice _currentInvoiceSaved =
-            await _blocInvoice.getInvoiceById(invoiceId);
+        Invoice _currentInvoiceSaved = await _blocInvoice.getInvoiceById(
+          invoiceId,
+        );
 
         //Close screen
         Navigator.pop(context); //Close popUp Save
-        Navigator.pop(context); //Close form Create Invoice
-
-        if (widget.editInvoice == null) {
-          _printInvoice(_currentInvoiceSaved, _selectedProducts,
-              _listAdditionalProducts, _textEmail.text.trim());
-        }
+        Navigator.pop(context);
       } on PlatformException catch (e) {
         print('$e');
         Navigator.pop(context);
-        Fluttertoast.showToast(msg: "Error guardando la factura: $e", toastLength: Toast.LENGTH_LONG);
+        Fluttertoast.showToast(
+          msg: "Error guardando la factura: $e",
+          toastLength: Toast.LENGTH_LONG,
+        );
       } catch (error) {
         print('$error');
         Navigator.pop(context);
-        Fluttertoast.showToast(msg: "Error guardando la factura: $error", toastLength: Toast.LENGTH_LONG);
+        Fluttertoast.showToast(
+          msg: "Error guardando la factura: $error",
+          toastLength: Toast.LENGTH_LONG,
+        );
       }
     } else {
       MessagesUtils.showAlert(context: context, title: validateMessage).show();
@@ -1410,12 +1403,14 @@ class _FormInvoice extends State<FormInvoice> {
     _canceledInvoice = invoiceToEdit.cancelledInvoice;
 
     //get vehicle reference
-    _vehicleReference =
-        await _blocVehicle.getVehicleReferenceByPlaca(invoiceToEdit.placa);
+    _vehicleReference = await _blocVehicle.getVehicleReferenceByPlaca(
+      invoiceToEdit.placa,
+    );
 
     //get customer information
-    _customer = await _customerBloc
-        .getCustomerByIdCustomer(invoiceToEdit.customer.documentID);
+    _customer = await _customerBloc.getCustomerByIdCustomer(
+      invoiceToEdit.customer.documentID,
+    );
     _textClient.text = _customer.name;
     _textEmail.text = _customer.email;
     _textPhoneNumber.text = _customer.phoneNumber;
@@ -1423,8 +1418,9 @@ class _FormInvoice extends State<FormInvoice> {
     _textNeighborhood.text = _customer.neighborhood;
     _selectTypeSex = _customer.typeSex;
     vehicleTypeList.forEach((element) => element.isSelected = false);
-    vehicleTypeSelected = vehicleTypeList
-        .firstWhere((f) => f.uid == invoiceToEdit.uidVehicleType);
+    vehicleTypeSelected = vehicleTypeList.firstWhere(
+      (f) => f.uid == invoiceToEdit.uidVehicleType,
+    );
     setState(() {
       vehicleTypeList[vehicleTypeList.indexOf(vehicleTypeSelected)].isSelected =
           true;
@@ -1451,32 +1447,34 @@ class _FormInvoice extends State<FormInvoice> {
       _listProduct = productEditList;
       _listOperators = invoiceToEdit.operatorUsers;
     });
-    List<String> imagesList =
-        await _blocInvoice.getInvoiceImages(invoiceToEdit.id);
+    List<String> imagesList = await _blocInvoice.getInvoiceImages(
+      invoiceToEdit.id,
+    );
     setState(() {
       imageList = imagesList;
     });
   }
 
   void _cancelInvoiceFunction() async {
-    if (widget.editInvoice != null) {
-      MessagesUtils.showAlertWithLoading(context: context, title: 'Guardando')
-          .show();
-      Invoice invoiceCopy = Invoice.copyWith(
-        origin: widget.editInvoice,
-        cancelledInvoice: _canceledInvoice,
-      );
-      _blocInvoice.saveInvoice(invoiceCopy);
-      Navigator.pop(context);
-      Navigator.pop(context);
-    } else {
-      MessagesUtils.showAlert(
-          context: context, title: 'No se puede cancelar la factura');
+    MessagesUtils.showAlertWithLoading(
+      context: context,
+      title: 'Guardando',
+    ).show();
+    Invoice invoiceCopy = Invoice.copyWith(
+      origin: widget.editInvoice,
+      cancelledInvoice: _canceledInvoice,
+    );
+    _blocInvoice.saveInvoice(invoiceCopy);
+    Navigator.pop(context);
+    Navigator.pop(context);
     }
-  }
 
-  void _printInvoice(Invoice invoicePrint, List<Product> listProducts,
-      List<AdditionalProduct> listAddProducts, String customerEmail) {
+  void _printInvoice(
+    Invoice invoicePrint,
+    List<Product> listProducts,
+    List<AdditionalProduct> listAddProducts,
+    String customerEmail,
+  ) {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -1492,17 +1490,15 @@ class _FormInvoice extends State<FormInvoice> {
   }
 
   bool _validateEnableSave() {
-    if (widget.editInvoice != null) {
-      //valido que la factura no tenga mas de 3 dias para permitir agregar un incidente
-      String _incidence = widget.editInvoice.incidence ?? '';
-      var dateInvoice = widget.editInvoice.creationDate;
-      var daysAfterInvoice = dateInvoice.toDate().add(Duration(days: 3));
-      int _validDate = DateTime.now().compareTo(daysAfterInvoice);
-      if (_incidence.isEmpty && _validDate < 0) {
-        _enablePerIncidence = true;
-      }
+    //valido que la factura no tenga mas de 3 dias para permitir agregar un incidente
+    String _incidence = widget.editInvoice.incidence ?? '';
+    var dateInvoice = widget.editInvoice.creationDate;
+    var daysAfterInvoice = dateInvoice.toDate().add(Duration(days: 3));
+    int _validDate = DateTime.now().compareTo(daysAfterInvoice);
+    if (_incidence.isEmpty && _validDate < 0) {
+      _enablePerIncidence = true;
     }
-
+  
     return (_editForm || _enablePerIncidence) ? true : false;
   }
 
@@ -1514,22 +1510,16 @@ class _FormInvoice extends State<FormInvoice> {
       style: MessagesUtils.alertStyle,
       buttons: [
         DialogButton(
-          color: Theme.of(context).accentColor,
-          child: Text(
-            'ACEPTAR',
-            style: Theme.of(context).textTheme.button,
-          ),
+          color: Theme.of(context).colorScheme.secondary,
+          child: Text('ACEPTAR', style: Theme.of(context).textTheme.labelLarge),
           onPressed: () {
             Navigator.of(context).pop();
             Navigator.pop(context);
           },
         ),
         DialogButton(
-          color: Theme.of(context).accentColor,
-          child: Text(
-            'CANCELAR',
-            style: Theme.of(context).textTheme.button,
-          ),
+          color: Theme.of(context).colorScheme.secondary,
+          child: Text('CANCELAR', style: Theme.of(context).textTheme.labelLarge),
           onPressed: () {
             Navigator.of(context).pop();
             return false;

@@ -1,5 +1,3 @@
-import 'package:car_wash_app/vehicle_type/model/vehicleType.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 

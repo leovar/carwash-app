@@ -49,11 +49,9 @@ class _CreateLocationAdminPage extends State<CreateLocationAdminPage> {
   @override
   void initState() {
     super.initState();
-    if (widget.currentLocation != null) {
-      _locationSelected = widget.currentLocation;
-      _selectLocationList();
+    _locationSelected = widget.currentLocation;
+    _selectLocationList();
     }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -449,14 +447,12 @@ class _CreateLocationAdminPage extends State<CreateLocationAdminPage> {
           .show();
 
       var minActiveCells = 0;
-      if (_locationSelected != null) {
-        var totalCells = int.tryParse(_textTotalCells.text.trim()) ?? 0;
-        if ((_locationSelected?.activeCells ?? 0) > totalCells)
-          minActiveCells = 0;
-        else
-          minActiveCells = _locationSelected?.activeCells ?? 0;
-      }
-
+      var totalCells = int.tryParse(_textTotalCells.text.trim()) ?? 0;
+      if ((_locationSelected.activeCells ?? 0) > totalCells)
+        minActiveCells = 0;
+      else
+        minActiveCells = _locationSelected.activeCells ?? 0;
+    
       var location = Location(
         id: _locationSelected != null ? _locationSelected.id : null,
         locationName: _textLocationName.text.trim(),

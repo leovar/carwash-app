@@ -1,7 +1,6 @@
 import 'package:car_wash_app/location/bloc/bloc_location.dart';
 import 'package:car_wash_app/location/model/location.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 
 class SelectLocationWidget extends StatefulWidget {
   final Function(Location) selectLocation;
@@ -21,10 +20,8 @@ class _SelectLocationWidget extends State<SelectLocationWidget> {
   @override
   void initState() {
     super.initState();
-    if (widget.locationSelected.locationName != null) {
-      _selectedLocation = widget.locationSelected;
+    _selectedLocation = widget.locationSelected;
     }
-  }
 
   @override
   Widget build(BuildContext context) {

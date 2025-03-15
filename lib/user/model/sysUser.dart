@@ -4,25 +4,25 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 @immutable
-class User extends Equatable {
-  final String id;
+class SysUser extends Equatable {
+  final String? id;
   final String uid;
   final String name;
   final String email;
-  String photoUrl;
-  final Timestamp lastSignIn;
-  final bool active;
-  final List<DocumentReference> locations;
-  final bool isAdministrator;
-  final bool isCoordinator;
-  final bool isOperator;
-  final double operatorCommission;
-  bool isSelected;
+  String? photoUrl;
+  final Timestamp? lastSignIn;
+  final bool? active;
+  final List<DocumentReference>? locations;
+  final bool? isAdministrator;
+  final bool? isCoordinator;
+  final bool? isOperator;
+  final double? operatorCommission;
+  bool? isSelected;
 
-  User({
-    @required this.uid,
-    @required this.name,
-    @required this.email,
+  SysUser({
+    required this.uid,
+    required this.name,
+    required this.email,
     this.id,
     this.photoUrl,
     this.lastSignIn,
@@ -35,14 +35,14 @@ class User extends Equatable {
     this.operatorCommission,
   });
 
-  factory User.fromJson(Map<String, dynamic> json, {String id}) {
+  factory SysUser.fromJson(Map<String, dynamic> json, {required String id}) {
     List<DocumentReference> operatorsListDb = <DocumentReference>[];
     List operatorsList = json['locations'];
-    operatorsList?.forEach((drLocation) {
+    operatorsList.forEach((drLocation) {
       operatorsListDb.add(drLocation);
     });
 
-    return User(
+    return SysUser(
       id: id ?? '',
       uid: json['uid'],
       name: json['name'],
@@ -73,16 +73,16 @@ class User extends Equatable {
     };
   }
 
-  factory User.copyWith({
-    @required User origin,
-    String uid,
-    String name,
-    String email,
-    String photoUrl,
-    Timestamp lastSignIn,
-    bool isSelected,
+  factory SysUser.copyWith({
+    required SysUser origin,
+    String? uid,
+    String? name,
+    String? email,
+    String? photoUrl,
+    Timestamp? lastSignIn,
+    bool? isSelected,
   }) {
-    return User(
+    return SysUser(
       id: origin.id,
       uid: uid ?? origin.uid,
       active: origin.active,
@@ -97,28 +97,30 @@ class User extends Equatable {
     );
   }
 
-  factory User.copyUserOperatorToSaveInvoice({String id, String name, double operatorCommission}) {
-    return User(
-      id: id,
-      name: name,
-      operatorCommission: operatorCommission,
-    );
+  factory SysUser.copyUserOperatorToSaveInvoice({
+    String? id,
+    required String name,
+    double? operatorCommission,
+  }) {
+    return SysUser(id: id, name: name, operatorCommission: operatorCommission, uid: '', email: '');
   }
 
-  factory User.fromJsonOperatorIntoInvoice(Map<dynamic, dynamic> json) {
-    return User(
+  factory SysUser.fromJsonOperatorIntoInvoice(Map<dynamic, dynamic> json) {
+    return SysUser(
       id: json['id'],
       name: json['name'],
       operatorCommission: json['operatorCommission'],
       isSelected: true,
+      uid: '',
+      email: '',
     );
   }
 
   Map<String, dynamic> toJsonInvoiceOperator(
-      String userId,
-      String name,
-      double operatorCommission,
-      ) {
+    String userId,
+    String name,
+    double operatorCommission,
+  ) {
     return {
       'id': userId,
       'name': name,
@@ -128,18 +130,18 @@ class User extends Equatable {
 
   @override
   List<Object> get props => [
-        id,
-        uid,
-        name,
-        email,
-        photoUrl,
-        lastSignIn,
-        active,
-        locations,
-        isAdministrator,
-        isCoordinator,
-        isOperator,
-        isSelected,
-        operatorCommission,
-      ];
+    id!,
+    uid,
+    name,
+    email,
+    photoUrl!,
+    lastSignIn!,
+    active!,
+    locations!,
+    isAdministrator!,
+    isCoordinator!,
+    isOperator!,
+    isSelected!,
+    operatorCommission!,
+  ];
 }

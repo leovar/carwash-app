@@ -69,25 +69,21 @@ class _FieldsInvoice extends State<FieldsInvoice> {
           textController: widget.textPlaca,
           isUpperCase: true,
           textInputFormatter: [
-            FilteringTextInputFormatter.allow(RegExp("^[a-zA-Z0-9]*"))
+            FilteringTextInputFormatter.allow(RegExp("^[a-zA-Z0-9]*")),
           ],
           onFinalEditText: widget.finalEditPlaca,
           validate: widget.validatePlaca,
           textValidate: 'El Campo no puede estar vacio',
           autofocus: widget.autofocusPlaca,
         ),
-        SizedBox(
-          height: 9,
-        ),
+        SizedBox(height: 9),
         TextFieldInput(
           labelText: "Cliente",
           textController: widget.textClient,
           enable: widget.enableForm,
           focusNode: widget.focusClient,
         ),
-        SizedBox(
-          height: 9,
-        ),
+        SizedBox(height: 9),
         TextFieldInput(
           labelText: "Telefono",
           textController: widget.textPhoneNumber,
@@ -96,9 +92,7 @@ class _FieldsInvoice extends State<FieldsInvoice> {
           autofocus: false,
           maxLength: 10,
         ),
-        SizedBox(
-          height: 9,
-        ),
+        SizedBox(height: 9),
         TextFieldInput(
           labelText: "Correo Electrónico",
           textController: widget.textEmail,
@@ -106,9 +100,7 @@ class _FieldsInvoice extends State<FieldsInvoice> {
           //enable: widget.enableForm,
           autofocus: false,
         ),
-        SizedBox(
-          height: 9,
-        ),
+        SizedBox(height: 9),
         TextFieldInput(
           labelText: "Barrio",
           textController: widget.textNeighborhood,
@@ -128,9 +120,7 @@ class _FieldsInvoice extends State<FieldsInvoice> {
             ),
           ),
         ),
-        SizedBox(
-          height: 9,
-        ),
+        SizedBox(height: 9),
         GestureDetector(
           onTap: widget.enableForm ? () => _selectTime(context) : null,
           child: AbsorbPointer(
@@ -143,21 +133,20 @@ class _FieldsInvoice extends State<FieldsInvoice> {
             ),
           ),
         ),
-        SizedBox(
-          height: 9,
-        ),
+        SizedBox(height: 9),
         Row(
           children: <Widget>[
             Checkbox(
               value: _sendEmail,
-              onChanged: true //widget.enableForm
-                  ? (bool value) {
-                setState(() {
-                  _sendEmail = value;
-                });
-                widget.cbHandlerSendEmail(value);
-              }
-                  : null,
+              onChanged:
+                  true //widget.enableForm
+                      ? (bool value) {
+                        setState(() {
+                          _sendEmail = value;
+                        });
+                        widget.cbHandlerSendEmail(value);
+                      }
+                      : null,
               checkColor: Colors.white,
               activeColor: Color(0xFF59B258),
             ),
@@ -182,16 +171,18 @@ class _FieldsInvoice extends State<FieldsInvoice> {
     final formatDate = DateFormat.yMd('ES');
     Locale myLocale = Localizations.localeOf(context);
     final DateTime picked = await showDatePicker(
-        context: context,
-        initialDate: _date,
-        locale: myLocale,
-        firstDate: DateTime(1901, 1),
-        lastDate: DateTime(2100));
-    if (picked != null && picked != _date)
+      context: context,
+      initialDate: _date,
+      locale: myLocale,
+      firstDate: DateTime(1901, 1),
+      lastDate: DateTime(2100),
+    );
+    if (picked != _date)
       setState(() {
         _date = picked;
-        widget.textBirthDate.value =
-            TextEditingValue(text: formatDate.format(picked));
+        widget.textBirthDate.value = TextEditingValue(
+          text: formatDate.format(picked),
+        );
       });
   }
 
@@ -201,7 +192,7 @@ class _FieldsInvoice extends State<FieldsInvoice> {
       context: context,
       initialTime: TimeOfDay.now(),
     );
-    if (picked != null && picked != _time)
+    if (picked != _time)
       setState(() {
         _time = picked;
         TimeOfDay _hour12Format = picked.replacing(hour: picked.hourOfPeriod);

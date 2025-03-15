@@ -1,7 +1,6 @@
 import 'package:car_wash_app/commission/bloc/bloc_commission.dart';
 import 'package:car_wash_app/commission/model/commission.dart';
 import 'package:car_wash_app/commission/ui/screens/commission_admin_page.dart';
-import 'package:car_wash_app/product/ui/screens/product_admin_page.dart';
 import 'package:flutter/material.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 import 'package:intl/intl.dart';

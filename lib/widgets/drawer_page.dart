@@ -13,7 +13,6 @@ import 'package:car_wash_app/user/ui/screens/users_admin_page.dart';
 import 'package:car_wash_app/vehicle_type/bloc/vehicle_type_bloc.dart';
 import 'package:car_wash_app/vehicle_type/ui/screens/admin_brand_reference.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/painting.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -45,62 +44,280 @@ class _DrawerPage extends State<DrawerPage> {
   }
 
   drawerPage() => Drawer(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Flexible(
-              flex: 5,
-              child: Column(
-                children: <Widget>[
-                  UserAccountsDrawerHeader(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                    ),
-                    accountName: Text(
-                      _userName ?? '',
-                      style: TextStyle(
-                        fontFamily: "Lato",
-                        fontWeight: FontWeight.w600,
-                        fontSize: 17,
-                        color: Color(0xFF27AEBB),
-                      ),
-                    ),
-                    accountEmail: Text(
-                      _userEmail ?? '',
-                    ),
-                    otherAccountsPictures: <Widget>[
-                      IconButton(
-                        iconSize: 35,
-                        alignment: Alignment.centerLeft,
-                        icon: Icon(
-                          Icons.arrow_back,
-                          color: Color(0xFF59B258),
-                        ),
-                        onPressed: () => Navigator.of(context).pop(),
-                      )
-                    ],
-                    currentAccountPicture: Container(
-                      width: 46,
-                      height: 46,
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          width: 2,
-                          color: Colors.grey,
-                        ),
-                        shape: BoxShape.circle,
-                        image: DecorationImage(
-                          fit: BoxFit.cover,
-                          image: (_photoUser == null || _photoUser.isEmpty)
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Flexible(
+          flex: 5,
+          child: Column(
+            children: <Widget>[
+              UserAccountsDrawerHeader(
+                decoration: BoxDecoration(color: Colors.white),
+                accountName: Text(
+                  _userName ?? '',
+                  style: TextStyle(
+                    fontFamily: "Lato",
+                    fontWeight: FontWeight.w600,
+                    fontSize: 17,
+                    color: Color(0xFF27AEBB),
+                  ),
+                ),
+                accountEmail: Text(_userEmail ?? ''),
+                otherAccountsPictures: <Widget>[
+                  IconButton(
+                    iconSize: 35,
+                    alignment: Alignment.centerLeft,
+                    icon: Icon(Icons.arrow_back, color: Color(0xFF59B258)),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ],
+                currentAccountPicture: Container(
+                  width: 46,
+                  height: 46,
+                  decoration: BoxDecoration(
+                    border: Border.all(width: 2, color: Colors.grey),
+                    shape: BoxShape.circle,
+                    image: DecorationImage(
+                      fit: BoxFit.cover,
+                      image:
+                          (_photoUser.isEmpty)
                               ? AssetImage(
-                              'assets/images/profile_placeholder.png')
+                                'assets/images/profile_placeholder.png',
+                              )
                               : NetworkImage(_photoUser),
-                        ),
-                      ),
                     ),
                   ),
-                  ListTile(
+                ),
+              ),
+              ListTile(
+                title: Text(
+                  "Inicio",
+                  style: TextStyle(
+                    fontFamily: "Lato",
+                    fontWeight: FontWeight.normal,
+                    fontSize: 17,
+                    color: Color(0xFF27AEBB),
+                  ),
+                ),
+                leading: Ink.image(
+                  image: AssetImage("assets/images/icon_home.png"),
+                  width: 22,
+                ),
+              ),
+              Visibility(
+                visible: _showInfoAdministrator,
+                child: ExpansionTile(
+                  title: Text(
+                    "Administración",
+                    style: TextStyle(
+                      fontFamily: "Lato",
+                      fontWeight: FontWeight.normal,
+                      fontSize: 17,
+                      color: Color(0xFF27AEBB),
+                    ),
+                  ),
+                  leading: Ink.image(
+                    image: AssetImage("assets/images/icon_admin.png"),
+                    width: 22,
+                  ),
+                  children: <Widget>[
+                    Container(
+                      padding: EdgeInsets.only(left: 90, top: 17),
+                      alignment: Alignment(-1.0, 0.0),
+                      child: InkWell(
+                        child: Text(
+                          "Usuarios",
+                          style: TextStyle(
+                            fontFamily: "Lato",
+                            fontWeight: FontWeight.normal,
+                            fontSize: 17,
+                            color: Color(0xFFAEAEAE),
+                          ),
+                        ),
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return BlocProvider(
+                                  bloc: UserBloc(),
+                                  child: UsersAdminPage(),
+                                );
+                              },
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.only(left: 90, top: 17),
+                      alignment: Alignment(-1.0, 0.0),
+                      child: InkWell(
+                        child: Text(
+                          "Servicios",
+                          style: TextStyle(
+                            fontFamily: "Lato",
+                            fontWeight: FontWeight.normal,
+                            fontSize: 17,
+                            color: Color(0xFFAEAEAE),
+                          ),
+                        ),
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return BlocProvider<ProductBloc>(
+                                  bloc: ProductBloc(),
+                                  child: ProductListAdminPage(),
+                                );
+                              },
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.only(left: 90, top: 17),
+                      alignment: Alignment(-1.0, 0.0),
+                      child: InkWell(
+                        child: Text(
+                          "Sedes",
+                          style: TextStyle(
+                            fontFamily: "Lato",
+                            fontWeight: FontWeight.normal,
+                            fontSize: 17,
+                            color: Color(0xFFAEAEAE),
+                          ),
+                        ),
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return BlocProvider<BlocLocation>(
+                                  bloc: BlocLocation(),
+                                  child: LocationsAdminPage(),
+                                );
+                              },
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.only(left: 90, top: 17, bottom: 10),
+                      alignment: Alignment(-1.0, 0.0),
+                      child: InkWell(
+                        child: Text(
+                          "Referencias de Vehiculo",
+                          style: TextStyle(
+                            fontFamily: "Lato",
+                            fontWeight: FontWeight.normal,
+                            fontSize: 17,
+                            color: Color(0xFFAEAEAE),
+                          ),
+                        ),
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return BlocProvider<VehicleTypeBloc>(
+                                  bloc: VehicleTypeBloc(),
+                                  child: AdminBrandReference(),
+                                );
+                              },
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.only(left: 90, top: 17, bottom: 10),
+                      alignment: Alignment(-1.0, 0.0),
+                      child: InkWell(
+                        child: Text(
+                          "Comisiones",
+                          style: TextStyle(
+                            fontFamily: "Lato",
+                            fontWeight: FontWeight.normal,
+                            fontSize: 17,
+                            color: Color(0xFFAEAEAE),
+                          ),
+                        ),
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return BlocProvider<BlocCommission>(
+                                  bloc: BlocCommission(),
+                                  child: CommissionListAdminPage(),
+                                );
+                              },
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.only(left: 90, top: 17, bottom: 10),
+                      alignment: Alignment(-1.0, 0.0),
+                      child: InkWell(
+                        child: Text(
+                          "Métodos de Pago",
+                          style: TextStyle(
+                            fontFamily: "Lato",
+                            fontWeight: FontWeight.normal,
+                            fontSize: 17,
+                            color: Color(0xFFAEAEAE),
+                          ),
+                        ),
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return BlocProvider<BlocPaymentMethod>(
+                                  bloc: BlocPaymentMethod(),
+                                  child: PaymentMethodAdminPage(),
+                                );
+                              },
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              ListTile(
+                title: Text(
+                  "Vehículos",
+                  style: TextStyle(
+                    fontFamily: "Lato",
+                    fontWeight: FontWeight.normal,
+                    fontSize: 17,
+                    color: Color(0xFF27AEBB),
+                  ),
+                ),
+                leading: Ink.image(
+                  image: AssetImage("assets/images/icon_car_admin.png"),
+                  width: 25,
+                ),
+              ),
+              Flexible(
+                child: InkWell(
+                  child: ListTile(
                     title: Text(
-                      "Inicio",
+                      "Perfil",
                       style: TextStyle(
                         fontFamily: "Lato",
                         fontWeight: FontWeight.normal,
@@ -108,216 +325,53 @@ class _DrawerPage extends State<DrawerPage> {
                         color: Color(0xFF27AEBB),
                       ),
                     ),
-                    leading: Ink.image(
-                      image: AssetImage("assets/images/icon_home.png"),
-                      width: 22,
+                    leading: Icon(
+                      Icons.perm_identity,
+                      color: Color(0xFF59B258),
                     ),
                   ),
-                  Visibility(
-                    visible: _showInfoAdministrator,
-                    child: ExpansionTile(
-                      title: Text(
-                        "Administración",
-                        style: TextStyle(
-                          fontFamily: "Lato",
-                          fontWeight: FontWeight.normal,
-                          fontSize: 17,
-                          color: Color(0xFF27AEBB),
-                        ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => UserProfilePage(),
                       ),
-                      leading: Ink.image(
-                        image: AssetImage("assets/images/icon_admin.png"),
-                        width: 22,
-                      ),
-                      children: <Widget>[
-                        Container(
-                          padding: EdgeInsets.only(left: 90, top: 17),
-                          alignment: Alignment(-1.0, 0.0),
-                          child: InkWell(
-                            child: Text(
-                              "Usuarios",
-                              style: TextStyle(
-                                fontFamily: "Lato",
-                                fontWeight: FontWeight.normal,
-                                fontSize: 17,
-                                color: Color(0xFFAEAEAE),
-                              ),
-                            ),
-                            onTap: () {
-                              Navigator.pop(context);
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) {
-                                  return BlocProvider(
-                                    bloc: UserBloc(),
-                                    child: UsersAdminPage(),
-                                  );
-                                }),
-                              );
-                            },
-                          ),
-                        ),
-                        Container(
-                          padding: EdgeInsets.only(left: 90, top: 17),
-                          alignment: Alignment(-1.0, 0.0),
-                          child: InkWell(
-                            child: Text(
-                              "Servicios",
-                              style: TextStyle(
-                                fontFamily: "Lato",
-                                fontWeight: FontWeight.normal,
-                                fontSize: 17,
-                                color: Color(0xFFAEAEAE),
-                              ),
-                            ),
-                            onTap: () {
-                              Navigator.pop(context);
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) {
-                                  return BlocProvider<ProductBloc>(
-                                    bloc: ProductBloc(),
-                                    child: ProductListAdminPage(),
-                                  );
-                                }),
-                              );
-                            },
-                          ),
-                        ),
-                        Container(
-                          padding: EdgeInsets.only(left: 90, top: 17),
-                          alignment: Alignment(-1.0, 0.0),
-                          child: InkWell(
-                            child: Text(
-                              "Sedes",
-                              style: TextStyle(
-                                fontFamily: "Lato",
-                                fontWeight: FontWeight.normal,
-                                fontSize: 17,
-                                color: Color(0xFFAEAEAE),
-                              ),
-                            ),
-                            onTap: () {
-                              Navigator.pop(context);
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) {
-                                  return BlocProvider<BlocLocation>(
-                                    bloc: BlocLocation(),
-                                    child: LocationsAdminPage(),
-                                  );
-                                }),
-                              );
-                            },
-                          ),
-                        ),
-                        Container(
-                          padding:
-                          EdgeInsets.only(left: 90, top: 17, bottom: 10),
-                          alignment: Alignment(-1.0, 0.0),
-                          child: InkWell(
-                            child: Text(
-                              "Referencias de Vehiculo",
-                              style: TextStyle(
-                                fontFamily: "Lato",
-                                fontWeight: FontWeight.normal,
-                                fontSize: 17,
-                                color: Color(0xFFAEAEAE),
-                              ),
-                            ),
-                            onTap: () {
-                              Navigator.pop(context);
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) {
-                                  return BlocProvider<VehicleTypeBloc>(
-                                    bloc: VehicleTypeBloc(),
-                                    child: AdminBrandReference(),
-                                  );
-                                }),
-                              );
-                            },
-                          ),
-                        ),
-                        Container(
-                          padding:
-                          EdgeInsets.only(left: 90, top: 17, bottom: 10),
-                          alignment: Alignment(-1.0, 0.0),
-                          child: InkWell(
-                            child: Text(
-                              "Comisiones",
-                              style: TextStyle(
-                                fontFamily: "Lato",
-                                fontWeight: FontWeight.normal,
-                                fontSize: 17,
-                                color: Color(0xFFAEAEAE),
-                              ),
-                            ),
-                            onTap: () {
-                              Navigator.pop(context);
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) {
-                                  return BlocProvider<BlocCommission>(
-                                    bloc: BlocCommission(),
-                                    child: CommissionListAdminPage(),
-                                  );
-                                }),
-                              );
-                            },
-                          ),
-                        ),
-                        Container(
-                          padding:
-                          EdgeInsets.only(left: 90, top: 17, bottom: 10),
-                          alignment: Alignment(-1.0, 0.0),
-                          child: InkWell(
-                            child: Text(
-                              "Métodos de Pago",
-                              style: TextStyle(
-                                fontFamily: "Lato",
-                                fontWeight: FontWeight.normal,
-                                fontSize: 17,
-                                color: Color(0xFFAEAEAE),
-                              ),
-                            ),
-                            onTap: () {
-                              Navigator.pop(context);
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) {
-                                  return BlocProvider<BlocPaymentMethod>(
-                                    bloc: BlocPaymentMethod(),
-                                    child: PaymentMethodAdminPage(),
-                                  );
-                                }),
-                              );
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+        Flexible(
+          flex: 1,
+          child: Container(
+            alignment: Alignment.bottomCenter,
+            height: 35,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: <Widget>[
+                Flexible(
+                  child: Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Container(child: Text('Version 1.0.7')),
                   ),
-                  ListTile(
-                    title: Text(
-                      "Vehículos",
-                      style: TextStyle(
-                        fontFamily: "Lato",
-                        fontWeight: FontWeight.normal,
-                        fontSize: 17,
-                        color: Color(0xFF27AEBB),
+                ),
+                Flexible(
+                  child: Align(
+                    alignment: Alignment.bottomRight,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        border: Border(
+                          top: BorderSide(color: Color(0xFFD8D8D8), width: 1.0),
+                        ),
                       ),
-                    ),
-                    leading: Ink.image(
-                      image: AssetImage("assets/images/icon_car_admin.png"),
-                      width: 25,
-                    ),
-                  ),
-                  Flexible(
-                    child: InkWell(
                       child: ListTile(
                         title: Text(
-                          "Perfil",
+                          "Salir",
                           style: TextStyle(
                             fontFamily: "Lato",
                             fontWeight: FontWeight.normal,
@@ -325,83 +379,26 @@ class _DrawerPage extends State<DrawerPage> {
                             color: Color(0xFF27AEBB),
                           ),
                         ),
-                        leading: Icon(
-                          Icons.perm_identity,
-                          color: Color(0xFF59B258),
+                        leading: Ink.image(
+                          image: AssetImage("assets/images/icon_logout.png"),
+                          width: 25,
                         ),
+                        onTap: () {
+                          Navigator.pop(context);
+                          _deleteLocationPreference();
+                          _logOut();
+                        },
                       ),
-                      onTap: () {
-                        Navigator.pop(context);
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => UserProfilePage()),
-                        );
-                      },
                     ),
                   ),
-                ],
-              ),
-            ),
-            Flexible(
-              flex: 1,
-              child: Container(
-                alignment: Alignment.bottomCenter,
-                height: 35,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: <Widget>[
-                    Flexible(
-                      child: Align(
-                        alignment: Alignment.bottomCenter,
-                        child: Container(
-                          child: Text('Version 1.0.7'),
-                        ),
-                      ),
-                    ),
-                    Flexible(
-                      child: Align(
-                        alignment: Alignment.bottomRight,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            border: Border(
-                              top: BorderSide(
-                                color: Color(0xFFD8D8D8),
-                                width: 1.0,
-                              ),
-                            ),
-                          ),
-                          child: ListTile(
-                            title: Text(
-                              "Salir",
-                              style: TextStyle(
-                                fontFamily: "Lato",
-                                fontWeight: FontWeight.normal,
-                                fontSize: 17,
-                                color: Color(0xFF27AEBB),
-                              ),
-                            ),
-                            leading: Ink.image(
-                              image: AssetImage("assets/images/icon_logout.png"),
-                              width: 25,
-                            ),
-                            onTap: () {
-                              Navigator.pop(context);
-                              _deleteLocationPreference();
-                              _logOut();
-                            },
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
                 ),
-              ),
-            )
-          ],
+              ],
+            ),
+          ),
         ),
-      );
+      ],
+    ),
+  );
 
   void _getPreferences() async {
     SharedPreferences pref = await SharedPreferences.getInstance();

@@ -1,7 +1,6 @@
 import 'package:car_wash_app/invoice/model/invoice.dart';
 import 'package:car_wash_app/invoice/ui/screens/operators_invoice_page.dart';
 import 'package:car_wash_app/user/model/user.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class FieldsOperators extends StatefulWidget {
@@ -53,7 +52,7 @@ class _FieldsOperators extends State<FieldsOperators> {
                         style: TextStyle(
                           fontFamily: "Lato",
                           decoration: TextDecoration.none,
-                          color: Theme.of(context).accentColor,
+                          color: Theme.of(context).colorScheme.secondary,
                           fontSize: 17,
                         ),
                       ),
@@ -72,10 +71,10 @@ class _FieldsOperators extends State<FieldsOperators> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(18.0),
                         side: BorderSide(
-                          color: Theme.of(context).accentColor,
+                          color: Theme.of(context).colorScheme.secondary,
                         ),
                       ),
-                      color: Theme.of(context).accentColor,
+                      color: Theme.of(context).colorScheme.secondary,
                       onPressed: (widget.enableForm || !widget.editForm) ? () {
                         Navigator.push(
                             context,

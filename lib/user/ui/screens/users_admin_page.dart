@@ -12,8 +12,8 @@ class UsersAdminPage extends StatefulWidget {
 
 class _UsersAdminPage extends State<UsersAdminPage>
     with SingleTickerProviderStateMixin {
-  UserBloc _userBloc;
-  TabController _tabController;
+  late UserBloc _userBloc;
+  late TabController _tabController;
   List<User> _userList = <User>[];
 
   @override
@@ -86,7 +86,7 @@ class _UsersAdminPage extends State<UsersAdminPage>
               controller: _tabController,
               indicatorSize: TabBarIndicatorSize.tab,
               unselectedLabelColor: Theme.of(context).primaryColor,
-              labelColor: Theme.of(context).accentColor,
+              labelColor: Theme.of(context).colorScheme.secondary,
               tabs: [
                 Tab(
                   text: 'Usuarios activos',
@@ -140,7 +140,7 @@ class _UsersAdminPage extends State<UsersAdminPage>
             controller: _tabController,
             indicatorSize: TabBarIndicatorSize.tab,
             unselectedLabelColor: Theme.of(context).primaryColor,
-            labelColor: Theme.of(context).accentColor,
+            labelColor: Theme.of(context).colorScheme.secondary,
             tabs: [
               Tab(
                 text: 'Usuarios activos',

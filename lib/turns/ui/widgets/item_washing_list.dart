@@ -1,7 +1,4 @@
 import 'package:car_wash_app/invoice/model/invoice.dart';
-import 'package:car_wash_app/invoice/ui/screens/invoice_page.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
@@ -121,7 +118,7 @@ class _ItemWashingList extends State<ItemWashingList> {
                                   child: Text(
                                     _invoiceList.consecutive.toString(),
                                     style: TextStyle(
-                                      color: Theme.of(context).accentColor,
+                                      color: Theme.of(context).colorScheme.secondary,
                                       fontFamily: "Lato",
                                       fontWeight: FontWeight.bold,
                                       fontSize: 17.0,
@@ -214,8 +211,8 @@ class _ItemWashingList extends State<ItemWashingList> {
                   child: RaisedButton(
                     shape: RoundedRectangleBorder(
                         borderRadius: new BorderRadius.circular(18.0),
-                        side: BorderSide(color: Theme.of(context).accentColor)),
-                    color: Theme.of(context).accentColor,
+                        side: BorderSide(color: Theme.of(context).colorScheme.secondary)),
+                    color: Theme.of(context).colorScheme.secondary,
                     onPressed: () {
                       widget.endWash(_invoiceList);
                     },

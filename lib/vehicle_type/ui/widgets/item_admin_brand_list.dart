@@ -1,7 +1,5 @@
 import 'package:car_wash_app/vehicle_type/model/brand.dart';
-import 'package:car_wash_app/vehicle_type/model/brand_reference.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 
 class ItemAdminBrandList extends StatefulWidget {
   final Brand brand;

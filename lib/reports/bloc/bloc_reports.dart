@@ -1,18 +1,13 @@
 
-import 'dart:ffi';
-import 'dart:io';
 
 import 'package:car_wash_app/invoice/bloc/bloc_invoice.dart';
 import 'package:car_wash_app/invoice/model/invoice.dart';
 import 'package:car_wash_app/invoice/repository/invoice_repository.dart';
 import 'package:car_wash_app/product/bloc/product_bloc.dart';
-import 'package:car_wash_app/product/model/product.dart';
 import 'package:car_wash_app/reports/model/earnings_card_detail.dart';
 import 'package:car_wash_app/reports/repository/reports_repository.dart';
 import 'package:car_wash_app/user/model/user.dart';
-import 'package:car_wash_app/widgets/messages_utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 
@@ -58,25 +53,13 @@ class BlocReports implements Bloc {
         EarningsCardDetail detailInfo = _cardList.length > 0
             ? _cardList.firstWhere((x) => x.locationName == item.locationName, orElse: () => null)
             : null;
-        if (detailInfo == null) {
-          List<Invoice> invoicesPerLocation = [];
-          invoicesPerLocation.add(item);
-          final cardData = EarningsCardDetail(
-            item.locationName,
-            item.countProducts + item.countAdditionalProducts,
-            item.totalPrice,
-            invoicesPerLocation,
-          );
-          _cardList.add(cardData);
-        } else {
-          detailInfo.countServices = detailInfo.countServices + (item.countProducts + item.countAdditionalProducts);
-          detailInfo.totalPrice = detailInfo.totalPrice + item.totalPrice;
-          List<Invoice> listGet = detailInfo.invoicesList;
-          listGet.add(item);
-          int indexData = _cardList.indexOf(detailInfo);
-          _cardList[indexData] = detailInfo;
-        }
-      });
+        detailInfo.countServices = detailInfo.countServices + (item.countProducts + item.countAdditionalProducts);
+        detailInfo.totalPrice = detailInfo.totalPrice + item.totalPrice;
+        List<Invoice> listGet = detailInfo.invoicesList;
+        listGet.add(item);
+        int indexData = _cardList.indexOf(detailInfo);
+        _cardList[indexData] = detailInfo;
+            });
       return _cardList;
     } catch(_error) {
       print(_error);
@@ -91,34 +74,17 @@ class BlocReports implements Bloc {
   void updateInfoOperatorsInvoices(List<Invoice> invoices) async {
     try {
       invoices.forEach((item) async {
-        if (item.userOperatorName != null && item.userOperatorName.isNotEmpty) {
-          if (item.operatorUsers != null) {
-            //valido que el operador unico no este creado en la lista
-            bool exist = false;
-            for (var elm in item.operatorUsers) {
-              if (elm.name == item.userOperatorName) {
-                exist = true;
-                break;
-              }
+        if (item.userOperatorName.isNotEmpty) {
+          //valido que el operador unico no este creado en la lista
+          bool exist = false;
+          for (var elm in item.operatorUsers) {
+            if (elm.name == item.userOperatorName) {
+              exist = true;
+              break;
             }
-            if (!exist && item.userOperator != null) {
-              List<User> _operatorsExist = item.operatorUsers;
-              var oppInsert = User.copyUserOperatorToSaveInvoice(
-                id: item.userOperator.documentID,
-                name: item.userOperatorName,
-              );
-              _operatorsExist.add(oppInsert);
-              int _countOperators = _operatorsExist.length;
-              Invoice invoice = Invoice.copyWith(
-                origin: item,
-                listOperators: _operatorsExist,
-                countOperators: _countOperators,
-              );
-              await _blocInvoice.saveInvoice(invoice);
-            }
-          } else {
-            //creo la lista de operadores con el operador y el contador y actualizo la factura
-            List<User> _operatorsExist = [];
+          }
+          if (!exist) {
+            List<User> _operatorsExist = item.operatorUsers;
             var oppInsert = User.copyUserOperatorToSaveInvoice(
               id: item.userOperator.documentID,
               name: item.userOperatorName,
@@ -132,7 +98,7 @@ class BlocReports implements Bloc {
             );
             await _blocInvoice.saveInvoice(invoice);
           }
-        }
+                }
       });
     } catch(_error) {
       print(_error);

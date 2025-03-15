@@ -19,7 +19,7 @@ import 'package:car_wash_app/widgets/select_operator_widget.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_open_whatsapp/flutter_open_whatsapp.dart';
+//import 'package:flutter_open_whatsapp/flutter_open_whatsapp.dart';
 import 'package:flutter_sms/flutter_sms.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
@@ -49,7 +49,7 @@ class _FormInvoicesList extends State<FormInvoicesList> {
   double _totalMonth = 0.0;
   String _idLocation = '';
   Location _location;
-  PaymentMethod _selectedPaymentMethod = PaymentMethod(name:'');
+  PaymentMethod _selectedPaymentMethod = PaymentMethod(name: '');
   Invoice _invoiceSelected;
 
   ///Filter Keys
@@ -57,10 +57,10 @@ class _FormInvoicesList extends State<FormInvoicesList> {
   final _textConsecutive = TextEditingController();
   var _dateFilterInit = DateTime(DateTime.now().year, DateTime.now().month, 1);
   var _dateFilterFinal = DateTime.now();
-  User _operatorFilter = User(name:'', uid: '', email: '');
+  User _operatorFilter = User(name: '', uid: '', email: '');
   double _totalPriceFilters = 0.0;
   String _productTypeSelected = '';
-  PaymentMethod _paymentMethodFilter = PaymentMethod(id: '', name:'');
+  PaymentMethod _paymentMethodFilter = PaymentMethod(id: '', name: '');
 
   @override
   void initState() {
@@ -88,12 +88,7 @@ class _FormInvoicesList extends State<FormInvoicesList> {
 
     this._getPreferences();
 
-    return Stack(
-      children: <Widget>[
-        GradientBack(),
-        _bodyContainer(),
-      ],
-    );
+    return Stack(children: <Widget>[GradientBack(), _bodyContainer()]);
   }
 
   Widget _bodyContainer() {
@@ -103,9 +98,7 @@ class _FormInvoicesList extends State<FormInvoicesList> {
           image: 'assets/images/icon_facturas_blanco.png',
           textInfo: 'Facturas',
         ),
-        Flexible(
-          child: _getInvoices(),
-        ),
+        Flexible(child: _getInvoices()),
       ],
     );
   }
@@ -134,8 +127,9 @@ class _FormInvoicesList extends State<FormInvoicesList> {
         _listInvoices = [];
         break;
       default:
-        _listInvoices =
-            _blocInvoice.buildInvoicesListByMonth(snapshot.data.documents);
+        _listInvoices = _blocInvoice.buildInvoicesListByMonth(
+          snapshot.data.documents,
+        );
         _listInvoices.sort((a, b) => b.consecutive.compareTo(a.consecutive));
         _countAmountPerDayMonth();
     }
@@ -148,26 +142,17 @@ class _FormInvoicesList extends State<FormInvoicesList> {
       ),
       child: Column(
         children: <Widget>[
-          Visibility(
-            visible: _showInfoAmounts,
-            child: _infoAmounts(),
-          ),
+          Visibility(visible: _showInfoAmounts, child: _infoAmounts()),
           Expanded(
             child: Container(
-              padding: EdgeInsets.only(
-                right: 15,
-                left: 15,
-                bottom: 15,
-              ),
+              padding: EdgeInsets.only(right: 15, left: 15, bottom: 15),
               child: Column(
                 children: <Widget>[
                   TotalFilterInvoicesWidget(
                     listInvoices: _listInvoices,
                     openFilters: _callBackOpenFilter,
                   ),
-                  Expanded(
-                    child: _listItems(),
-                  ),
+                  Expanded(child: _listItems()),
                 ],
               ),
             ),
@@ -270,7 +255,7 @@ class _FormInvoicesList extends State<FormInvoicesList> {
                     ),
                   ),
                 ),
-              )
+              ),
             ],
           ),
         ),
@@ -288,7 +273,7 @@ class _FormInvoicesList extends State<FormInvoicesList> {
               color: Color(0xFF27AEBB),
             ),
           ),
-        )
+        ),
       ],
     );
   }
@@ -309,26 +294,38 @@ class _FormInvoicesList extends State<FormInvoicesList> {
     _totalPriceFilters = 0.0;
     if (_listInvoices.length > 0) {
       _listInvoices.forEach((invoice) {
-        DateTime nowMonth =
-            new DateTime(DateTime.now().year, DateTime.now().month);
+        DateTime nowMonth = new DateTime(
+          DateTime.now().year,
+          DateTime.now().month,
+        );
         DateTime nowDay = new DateTime(
-            DateTime.now().year, DateTime.now().month, DateTime.now().day);
-        DateTime dateMonthInvoice = DateTime(invoice.creationDate.toDate().year,
-            invoice.creationDate.toDate().month);
+          DateTime.now().year,
+          DateTime.now().month,
+          DateTime.now().day,
+        );
+        DateTime dateMonthInvoice = DateTime(
+          invoice.creationDate.toDate().year,
+          invoice.creationDate.toDate().month,
+        );
         DateTime dateDayInvoice = DateTime(
-            invoice.creationDate.toDate().year,
-            invoice.creationDate.toDate().month,
-            invoice.creationDate.toDate().day);
+          invoice.creationDate.toDate().year,
+          invoice.creationDate.toDate().month,
+          invoice.creationDate.toDate().day,
+        );
 
         if (dateDayInvoice.compareTo(nowDay) == 0) {
-          _totalDay = _totalDay + (invoice.cancelledInvoice ? 0 : invoice.totalPrice);
+          _totalDay =
+              _totalDay + (invoice.cancelledInvoice ? 0 : invoice.totalPrice);
         }
 
         if (nowMonth.compareTo(dateMonthInvoice) == 0) {
-          _totalMonth = _totalMonth + (invoice.cancelledInvoice ? 0 : invoice.totalPrice);
+          _totalMonth =
+              _totalMonth + (invoice.cancelledInvoice ? 0 : invoice.totalPrice);
         }
 
-        _totalPriceFilters = _totalPriceFilters + (invoice.cancelledInvoice ? 0 : invoice.totalPrice);
+        _totalPriceFilters =
+            _totalPriceFilters +
+            (invoice.cancelledInvoice ? 0 : invoice.totalPrice);
       });
     }
   }
@@ -354,16 +351,13 @@ class _FormInvoicesList extends State<FormInvoicesList> {
       ),
       buttons: [
         DialogButton(
-          color: Theme.of(context).accentColor,
-          child: Text(
-            'ACEPTAR',
-            style: Theme.of(context).textTheme.button,
-          ),
+          color: Theme.of(context).colorScheme.secondary,
+          child: Text('ACEPTAR', style: Theme.of(context).textTheme.labelLarge),
           onPressed: () {
             Navigator.of(context).pop();
             setState(() {});
           },
-        )
+        ),
       ],
     ).show();
   }
@@ -399,8 +393,13 @@ class _FormInvoicesList extends State<FormInvoicesList> {
   }
 
   void _closeInvoiceMessage() async {
-    if ((_invoiceSelected.paymentMethod??'') == '') {
-      _selectedPaymentMethod = ((_invoiceSelected.paymentMethod??'') == '' || _invoiceSelected.paymentMethod == null) ? new PaymentMethod(name:'') : await _paymentMethodBloc.getPaymentMethodByName(_invoiceSelected.paymentMethod);
+    if ((_invoiceSelected.paymentMethod ?? '') == '') {
+      _selectedPaymentMethod =
+          ((_invoiceSelected.paymentMethod ?? '') == '')
+              ? new PaymentMethod(name: '')
+              : await _paymentMethodBloc.getPaymentMethodByName(
+                _invoiceSelected.paymentMethod,
+              );
       Alert(
         context: context,
         title: 'Método de pago',
@@ -412,11 +411,8 @@ class _FormInvoicesList extends State<FormInvoicesList> {
         ),
         buttons: [
           DialogButton(
-            color: Theme.of(context).accentColor,
-            child: Text(
-              'GUARDAR',
-              style: Theme.of(context).textTheme.button,
-            ),
+            color: Theme.of(context).colorScheme.secondary,
+            child: Text('GUARDAR', style: Theme.of(context).textTheme.labelLarge),
             onPressed: () {
               Navigator.of(context).pop();
               _closeInvoice(true);
@@ -432,22 +428,16 @@ class _FormInvoicesList extends State<FormInvoicesList> {
         style: MessagesUtils.alertStyle,
         buttons: [
           DialogButton(
-            color: Theme.of(context).accentColor,
-            child: Text(
-              'ACEPTAR',
-              style: Theme.of(context).textTheme.button,
-            ),
+            color: Theme.of(context).colorScheme.secondary,
+            child: Text('ACEPTAR', style: Theme.of(context).textTheme.labelLarge),
             onPressed: () {
               Navigator.of(context).pop();
               _closeInvoice(false);
             },
           ),
           DialogButton(
-            color: Theme.of(context).accentColor,
-            child: Text(
-              'CANCELAR',
-              style: Theme.of(context).textTheme.button,
-            ),
+            color: Theme.of(context).colorScheme.secondary,
+            child: Text('CANCELAR', style: Theme.of(context).textTheme.labelLarge),
             onPressed: () {
               Navigator.of(context).pop();
               setState(() {});
@@ -463,15 +453,16 @@ class _FormInvoicesList extends State<FormInvoicesList> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => OperatorsInvoicePage(
-          callbackSetOperatorsList: _saveOperators,
-          usersListCallback: _invoiceToFinish.operatorUsers,
-          editForm: false,
-          idLocation: _idLocation,
-          closedInvoice: _invoiceToFinish.invoiceClosed,
-          fromCompleteInvoice: true,
-          callbackFinishInvoice : _finishInvoice,
-        ),
+        builder:
+            (context) => OperatorsInvoicePage(
+              callbackSetOperatorsList: _saveOperators,
+              usersListCallback: _invoiceToFinish.operatorUsers,
+              editForm: false,
+              idLocation: _idLocation,
+              closedInvoice: _invoiceToFinish.invoiceClosed,
+              fromCompleteInvoice: true,
+              callbackFinishInvoice: _finishInvoice,
+            ),
       ),
     );
   }
@@ -481,7 +472,9 @@ class _FormInvoicesList extends State<FormInvoicesList> {
       bool endWashValue = false;
       Timestamp endWashData;
       int washingTimeValue;
-      if (_invoiceSelected.startWashing && !_invoiceSelected?.endWash?? false) { //Finaliza la factura con final de lavado
+      if (_invoiceSelected.startWashing && !_invoiceSelected.endWash ??
+          false) {
+        //Finaliza la factura con final de lavado
         DateTime dateStart = _invoiceSelected.dateStartWashing.toDate();
         DateTime dateCurrent = DateTime.now();
         Duration diff = dateCurrent.difference(dateStart);
@@ -498,7 +491,8 @@ class _FormInvoicesList extends State<FormInvoicesList> {
           washingTime: washingTimeValue,
         );
         await _blocInvoice.saveInvoice(invoice);
-      } else {  //Finaliza la factura sin final de lavado
+      } else {
+        //Finaliza la factura sin final de lavado
         Invoice invoice = Invoice.copyWith(
           origin: _invoiceSelected,
           closedDate: Timestamp.now(),
@@ -518,13 +512,17 @@ class _FormInvoicesList extends State<FormInvoicesList> {
   void _saveOperators(List<User> userList) async {
     int _countOperators = 0;
     List<User> _operatorsToSave = [];
-    List<User> _selectedOperators = userList.where((u) => u.isSelected).toList();
+    List<User> _selectedOperators =
+        userList.where((u) => u.isSelected).toList();
     if (_selectedOperators.length > 0) {
       _selectedOperators.forEach((user) {
         var operatorSave = User.copyUserOperatorToSaveInvoice(
           id: user.id,
           name: user.name,
-          operatorCommission: ((_invoiceSelected.totalCommission??0) / _selectedOperators.length).ceilToDouble(),
+          operatorCommission:
+              ((_invoiceSelected.totalCommission ?? 0) /
+                      _selectedOperators.length)
+                  .ceilToDouble(),
         );
         _operatorsToSave.add(operatorSave);
       });
@@ -541,8 +539,10 @@ class _FormInvoicesList extends State<FormInvoicesList> {
   }
 
   void _closeInvoice(bool withPayment) async {
-    MessagesUtils.showAlertWithLoading(context: context, title: 'Guardando..')
-        .show();
+    MessagesUtils.showAlertWithLoading(
+      context: context,
+      title: 'Guardando..',
+    ).show();
     Invoice invoice;
     if (withPayment) {
       if (_selectedPaymentMethod.name.isNotEmpty) {
@@ -551,12 +551,10 @@ class _FormInvoicesList extends State<FormInvoicesList> {
           paymentMethod: _selectedPaymentMethod.name,
           invoiceClosed: true,
         );
-      } else return;
+      } else
+        return;
     } else {
-      invoice = Invoice.copyWith(
-        origin: _invoiceSelected,
-        invoiceClosed: true,
-      );
+      invoice = Invoice.copyWith(origin: _invoiceSelected, invoiceClosed: true);
     }
     await _blocInvoice.saveInvoice(invoice);
     Navigator.pop(context);
@@ -569,21 +567,20 @@ class _FormInvoicesList extends State<FormInvoicesList> {
           "Cómo estamos comprometidos con tu satisfacción 😃, por favor ayúdanos con tu opinion en cortas respuestas en el siguinte link ➡️"
           "https://docs.google.com/forms/d/1gdq9rSR8pMqlukEalGLxF_m5954m7_Hpm5k5HYX89yU/edit";
       List<String> recipents = [invoiceToClose.phoneNumber];
-      if (_location != null) {
-        if (_location.sendMessageSms ?? false) {
-          _sendSMS(message, recipents);
-        } else if (_location.sendMessageWp ?? false) {
-          _sendWhatsAppMessage(message, invoiceToClose.phoneNumber);
-        }
+      if (_location.sendMessageSms ?? false) {
+        _sendSMS(message, recipents);
+      } else if (_location.sendMessageWp ?? false) {
+        _sendWhatsAppMessage(message, invoiceToClose.phoneNumber);
       }
-    }
+        }
   }
 
   void _sendSMS(String message, List<String> recipents) async {
     try {
-      String _result =
-          await FlutterSms.sendSMS(message: message, recipients: recipents)
-              .catchError((onError) {
+      String _result = await FlutterSms.sendSMS(
+        message: message,
+        recipients: recipents,
+      ).catchError((onError) {
         print(onError);
       });
     } catch (_) {

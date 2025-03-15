@@ -113,11 +113,9 @@ class ReportsRepository {
         .where(FirestoreCollections.invoiceFieldCreationDate,
           isLessThanOrEqualTo: Timestamp.fromDate(dateFinalModify));
 
-    if (locationReference != null) {
-      queryFirestore = queryFirestore.where(FirestoreCollections.invoiceFieldLocation,
-        isEqualTo: locationReference);
-    }
-
+    queryFirestore = queryFirestore.where(FirestoreCollections.invoiceFieldLocation,
+      isEqualTo: locationReference);
+  
     querySnapshot = await queryFirestore.getDocuments();
     final responses = await Future.wait(
       querySnapshot.documents.map((p) async {

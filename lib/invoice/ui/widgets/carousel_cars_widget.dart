@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:ui';
 
 import 'package:car_wash_app/invoice/ui/screens/image_viewer_page.dart';
 import 'package:carousel_slider/carousel_slider.dart';
@@ -28,7 +27,7 @@ class _CarouselCarsWidget extends State<CarouselCarsWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return widget.imgList.length != null && widget.imgList.length > 0
+    return widget.imgList.length > 0
         ? carouselCars()
         : placeholder();
   }

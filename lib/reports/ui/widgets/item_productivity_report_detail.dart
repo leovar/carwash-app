@@ -1,5 +1,4 @@
 import 'package:car_wash_app/reports/model/products_card_detail.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -20,10 +19,8 @@ class _ItemProductivityReportDetail
   @override
   void initState() {
     super.initState();
-    if (widget.serviceDetail != null) {
-      _serviceDetail = widget.serviceDetail;
+    _serviceDetail = widget.serviceDetail;
     }
-  }
 
   @override
   Widget build(BuildContext context) {

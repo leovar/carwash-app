@@ -5,7 +5,6 @@ import 'package:car_wash_app/vehicle_type/model/brand.dart';
 import 'package:car_wash_app/vehicle_type/ui/widgets/item_admin_brand_list.dart';
 import 'package:car_wash_app/widgets/messages_utils.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 
 class AdminCreateBrand extends StatefulWidget {
@@ -257,23 +256,14 @@ class _AdminCreateBrand extends State<AdminCreateBrand> {
           title: 'Ya existe una marca con ese nombre',
         ).show();
       } else if(_typeCar || _typeSuperBike || _typeBike) {
-        if (_brandToEdit != null) {
-          ref = Brand(
-            id: _brandToEdit.id,
-            brand: _textReferenceName.text,
-            vehicleType: selectType,
-          );
-          _vehicleTypeBloc.updateBrand(ref);
-          _clearData();
-        } else {
-          ref = Brand(
-            brand: _textReferenceName.text,
-            vehicleType: selectType,
-          );
-          _vehicleTypeBloc.updateBrand(ref);
-          _clearData();
-        }
-        setState(() {
+        ref = Brand(
+          id: _brandToEdit.id,
+          brand: _textReferenceName.text,
+          vehicleType: selectType,
+        );
+        _vehicleTypeBloc.updateBrand(ref);
+        _clearData();
+              setState(() {
 
         });
       } else {

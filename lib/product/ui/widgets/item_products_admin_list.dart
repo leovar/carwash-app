@@ -1,4 +1,3 @@
-import 'package:car_wash_app/location/model/location.dart';
 import 'package:car_wash_app/product/bloc/product_bloc.dart';
 import 'package:car_wash_app/product/model/product.dart';
 import 'package:car_wash_app/product/ui/screens/product_admin_page.dart';

@@ -1,4 +1,3 @@
-import 'dart:ffi';
 
 import 'package:car_wash_app/invoice/model/configuration.dart';
 import 'package:car_wash_app/reports/model/operator_prod_card.dart';
@@ -80,7 +79,7 @@ class ItemOperatorProductivityDetail extends StatelessWidget {
                       child: Text(
                         'Acumulado del día: ' + '${cardReport.invoicesPerDay} Lavadas',
                         style: TextStyle(
-                          color: Theme.of(context).accentColor,
+                          color: Theme.of(context).colorScheme.secondary,
                           fontFamily: "Lato",
                           fontWeight: FontWeight.normal,
                           fontSize: 14,
@@ -125,7 +124,7 @@ class ItemOperatorProductivityDetail extends StatelessWidget {
                       child: Text(
                         'Acumulado del mes: ' + '${cardReport.invoicesList.length} Lavadas',
                         style: TextStyle(
-                          color: Theme.of(context).accentColor,
+                          color: Theme.of(context).colorScheme.secondary,
                           fontFamily: "Lato",
                           fontWeight: FontWeight.normal,
                           fontSize: 14,

@@ -1,10 +1,8 @@
 import 'package:car_wash_app/invoice/bloc/bloc_invoice.dart';
 import 'package:car_wash_app/payment_methods/bloc/bloc_payment_method.dart';
 import 'package:car_wash_app/payment_methods/model/payment_methods.dart';
-import 'package:car_wash_app/user/model/user.dart';
 import 'package:car_wash_app/invoice/model/invoice.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 
 class SelectOperatorWidget extends StatefulWidget {
   final PaymentMethod paymentMethodSelected;
@@ -31,8 +29,7 @@ class _SelectOperatorWidget extends State<SelectOperatorWidget> {
   @override
   void initState() {
     super.initState();
-    if (widget.paymentMethodSelected.name != null &&
-        widget.paymentMethodSelected.name != '') {
+    if (widget.paymentMethodSelected.name != '') {
       _selectedPaymentMethod = widget.paymentMethodSelected;
     }
   }

@@ -11,6 +11,8 @@ import 'package:car_wash_app/widgets/keys.dart';
 import 'package:car_wash_app/widgets/messages_utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
@@ -28,12 +30,12 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPage extends State<LoginPage> {
-  UserBloc _userBloc;
+  late UserBloc _userBloc;
   final blocLocation = BlocLocation();
   final _textUser = TextEditingController();
   final _textPassword = TextEditingController();
 
-  List<DropdownMenuItem<Location>> _dropdownMenuItems;
+  late List<DropdownMenuItem<Location>> _dropdownMenuItems;
   Location _selectedLocation = Location();
 
   @override
@@ -45,7 +47,10 @@ class _LoginPage extends State<LoginPage> {
   }
 
   Future _init() async {
-    await Firestore.instance.settings(persistenceEnabled: true);
+    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    FirebaseFirestore.instance.settings = const Settings(
+      persistenceEnabled: true,
+    );
   }
 
   @override
@@ -69,10 +74,7 @@ class _LoginPage extends State<LoginPage> {
 
           _deleteCacheDir();
           _deleteAppDir();
-          return BlocProvider(
-            bloc: UserBloc(),
-            child: HomePage(),
-          );
+          return BlocProvider(bloc: UserBloc(), child: HomePage());
         }
       },
     );
@@ -89,7 +91,7 @@ class _LoginPage extends State<LoginPage> {
   Future<void> _deleteAppDir() async {
     final appDir = await getApplicationSupportDirectory();
 
-    if(appDir.existsSync()){
+    if (appDir.existsSync()) {
       appDir.deleteSync(recursive: true);
     }
   }
@@ -97,59 +99,48 @@ class _LoginPage extends State<LoginPage> {
   Widget loginScreen() {
     return Scaffold(
       body: SafeArea(
-        child: Stack(
-          children: <Widget>[
-            GradientBack(),
-            bodyContainer(),
-          ],
-        ),
+        child: Stack(children: <Widget>[GradientBack(), bodyContainer()]),
       ),
     );
   }
 
   bodyContainer() => Center(
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: <Widget>[
-              loginHeader(),
-              loginFields(),
-            ],
-          ),
-        ),
-      );
+    child: SingleChildScrollView(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: <Widget>[loginHeader(), loginFields()],
+      ),
+    ),
+  );
 
   loginHeader() => Container(
-        margin: EdgeInsets.only(top: 40),
-        width: 250,
-        height: 86,
-        decoration: BoxDecoration(
-            image: DecorationImage(
-              fit: BoxFit.cover,
-              image: AssetImage("assets/images/car_wash_movil_logo_blanco.png"),
-            ),
-            shape: BoxShape.rectangle),
-      );
+    margin: EdgeInsets.only(top: 40),
+    width: 250,
+    height: 86,
+    decoration: BoxDecoration(
+      image: DecorationImage(
+        fit: BoxFit.cover,
+        image: AssetImage("assets/images/car_wash_movil_logo_blanco.png"),
+      ),
+      shape: BoxShape.rectangle,
+    ),
+  );
 
   loginFields() => Container(
-        margin: EdgeInsets.only(
-          top: 40,
-          left: 52,
-          right: 52,
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: <Widget>[
-            //dropDawnLocations(),
-            inputUserName(),
-            inputPassword(),
-            _loginButton(),
-            loginFacebookGoogle(),
-            olvidoContrasena(),
-            registrese(),
-          ],
-        ),
-      );
+    margin: EdgeInsets.only(top: 40, left: 52, right: 52),
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: <Widget>[
+        //dropDawnLocations(),
+        inputUserName(),
+        inputPassword(),
+        _loginButton(),
+        loginFacebookGoogle(),
+        olvidoContrasena(),
+        registrese(),
+      ],
+    ),
+  );
 
   Widget dropDawnLocations() {
     return StreamBuilder(
@@ -166,8 +157,9 @@ class _LoginPage extends State<LoginPage> {
   }
 
   Widget dropListLocations(AsyncSnapshot snapshot) {
-    List<Location> locationList =
-        blocLocation.buildLocations(snapshot.data.documents);
+    List<Location> locationList = blocLocation.buildLocations(
+      snapshot.data.documents,
+    );
     _dropdownMenuItems = builDropdownMenuItems(locationList);
     return DropdownButton(
       isExpanded: true,
@@ -176,14 +168,9 @@ class _LoginPage extends State<LoginPage> {
       onChanged: onChangeDropDawn,
       hint: Text(
         "Seleccione la Sede...",
-        style: TextStyle(
-          color: Colors.white,
-        ),
+        style: TextStyle(color: Colors.white),
       ),
-      icon: Icon(
-        Icons.keyboard_arrow_down,
-        color: Colors.white,
-      ),
+      icon: Icon(Icons.keyboard_arrow_down, color: Colors.white),
       iconSize: 24,
       elevation: 16,
       style: TextStyle(
@@ -191,113 +178,90 @@ class _LoginPage extends State<LoginPage> {
         fontWeight: FontWeight.normal,
         color: Colors.black,
       ),
-      underline: Container(
-        height: 1,
-        color: Colors.white,
-      ),
+      underline: Container(height: 1, color: Colors.white),
     );
   }
 
   inputUserName() => Container(
-        padding: EdgeInsets.symmetric(vertical: 29.0),
-        child: TextField(
-          maxLines: 1,
-          controller: _textUser,
-          keyboardType: TextInputType.emailAddress,
-          autofocus: false,
-          decoration: InputDecoration(
-            contentPadding: const EdgeInsetsDirectional.only(top: 8),
-            suffixIcon: Padding(
-              padding: const EdgeInsetsDirectional.only(start: 12, top: 12),
-              child: Icon(
-                Icons.person,
-                color: Colors.white,
-              ),
-            ),
-            labelText: "Usuario",
-            labelStyle: TextStyle(
-              decoration: TextDecoration.none,
-              fontFamily: "AvenirNext",
-              color: Colors.white,
-              fontSize: 15,
-            ),
-            enabledBorder: UnderlineInputBorder(
-              borderSide: BorderSide(
-                color: Colors.white,
-              ),
-            ),
-            focusedBorder: UnderlineInputBorder(
-              borderSide: BorderSide(
-                color: Colors.white,
-              ),
-            ),
-          ),
-          cursorColor: Colors.white,
-          style: TextStyle(
-            fontFamily: "AvenirNext",
-            decoration: TextDecoration.none,
-            color: Colors.white,
-            fontSize: 15,
-          ),
+    padding: EdgeInsets.symmetric(vertical: 29.0),
+    child: TextField(
+      maxLines: 1,
+      controller: _textUser,
+      keyboardType: TextInputType.emailAddress,
+      autofocus: false,
+      decoration: InputDecoration(
+        contentPadding: const EdgeInsetsDirectional.only(top: 8),
+        suffixIcon: Padding(
+          padding: const EdgeInsetsDirectional.only(start: 12, top: 12),
+          child: Icon(Icons.person, color: Colors.white),
         ),
-      );
+        labelText: "Usuario",
+        labelStyle: TextStyle(
+          decoration: TextDecoration.none,
+          fontFamily: "AvenirNext",
+          color: Colors.white,
+          fontSize: 15,
+        ),
+        enabledBorder: UnderlineInputBorder(
+          borderSide: BorderSide(color: Colors.white),
+        ),
+        focusedBorder: UnderlineInputBorder(
+          borderSide: BorderSide(color: Colors.white),
+        ),
+      ),
+      cursorColor: Colors.white,
+      style: TextStyle(
+        fontFamily: "AvenirNext",
+        decoration: TextDecoration.none,
+        color: Colors.white,
+        fontSize: 15,
+      ),
+    ),
+  );
 
   inputPassword() => Container(
-        child: TextField(
-          maxLines: 1,
-          controller: _textPassword,
-          obscureText: true,
-          autofocus: false,
-          decoration: InputDecoration(
-            contentPadding: const EdgeInsetsDirectional.only(top: 8),
-            suffixIcon: Padding(
-              padding: const EdgeInsetsDirectional.only(start: 12, top: 12),
-              child: Icon(
-                Icons.lock,
-                color: Colors.white,
-              ),
-            ),
-            labelText: "Contraseña",
-            labelStyle: TextStyle(
-              decoration: TextDecoration.none,
-              fontFamily: "AvenirNext",
-              color: Colors.white,
-              fontSize: 15,
-            ),
-            enabledBorder: UnderlineInputBorder(
-              borderSide: BorderSide(
-                color: Colors.white,
-              ),
-            ),
-            focusedBorder: UnderlineInputBorder(
-              borderSide: BorderSide(
-                color: Colors.white,
-              ),
-            ),
-          ),
-          cursorColor: Colors.white,
-          style: TextStyle(
-            fontFamily: "AvenirNext",
-            decoration: TextDecoration.none,
-            color: Colors.white,
-            fontSize: 15,
-          ),
+    child: TextField(
+      maxLines: 1,
+      controller: _textPassword,
+      obscureText: true,
+      autofocus: false,
+      decoration: InputDecoration(
+        contentPadding: const EdgeInsetsDirectional.only(top: 8),
+        suffixIcon: Padding(
+          padding: const EdgeInsetsDirectional.only(start: 12, top: 12),
+          child: Icon(Icons.lock, color: Colors.white),
         ),
-      );
+        labelText: "Contraseña",
+        labelStyle: TextStyle(
+          decoration: TextDecoration.none,
+          fontFamily: "AvenirNext",
+          color: Colors.white,
+          fontSize: 15,
+        ),
+        enabledBorder: UnderlineInputBorder(
+          borderSide: BorderSide(color: Colors.white),
+        ),
+        focusedBorder: UnderlineInputBorder(
+          borderSide: BorderSide(color: Colors.white),
+        ),
+      ),
+      cursorColor: Colors.white,
+      style: TextStyle(
+        fontFamily: "AvenirNext",
+        decoration: TextDecoration.none,
+        color: Colors.white,
+        fontSize: 15,
+      ),
+    ),
+  );
 
   Widget _buttonGo() {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 49),
       child: OutlineButton(
         color: Colors.white,
-        padding: EdgeInsets.symmetric(
-          vertical: 15,
-          horizontal: 58,
-        ),
-        borderSide: BorderSide(
-          width: 1,
-          color: Colors.white,
-        ),
+        padding: EdgeInsets.symmetric(vertical: 15, horizontal: 58),
+        borderSide: BorderSide(width: 1, color: Colors.white),
         child: Text(
           "INGRESAR",
           style: TextStyle(
@@ -339,86 +303,79 @@ class _LoginPage extends State<LoginPage> {
         color: Colors.transparent,
       ),
       decoration: BoxDecoration(
-        border: Border.all(
-          color: Colors.white,
-          width: 1.0,
-        ),
+        border: Border.all(color: Colors.white, width: 1.0),
         borderRadius: BorderRadius.circular(7.0),
       ),
     );
   }
 
   loginFacebookGoogle() => Padding(
-        padding: EdgeInsets.only(top: 35),
-        child: Center(
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                ),
-                child: Material(
-                  shape: CircleBorder(),
-                  color: Colors.transparent,
-                  child: Ink.image(
-                    image: AssetImage('assets/images/icon_facebook.png'),
-                    fit: BoxFit.cover,
-                    width: 55.0,
-                    height: 55.0,
-                    child: InkWell(
-                      onTap: () {
-                        _facebookLogin();
-                      },
-                      child: null,
-                    ),
-                  ),
+    padding: EdgeInsets.only(top: 35),
+    child: Center(
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Container(
+            decoration: BoxDecoration(shape: BoxShape.circle),
+            child: Material(
+              shape: CircleBorder(),
+              color: Colors.transparent,
+              child: Ink.image(
+                image: AssetImage('assets/images/icon_facebook.png'),
+                fit: BoxFit.cover,
+                width: 55.0,
+                height: 55.0,
+                child: InkWell(
+                  onTap: () {
+                    _facebookLogin();
+                  },
+                  child: null,
                 ),
               ),
-              Container(
-                padding: EdgeInsets.only(left: 30),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                ),
-                child: Material(
-                  shape: CircleBorder(),
-                  color: Colors.transparent,
-                  child: Ink.image(
-                    image: AssetImage('assets/images/icon_google.png'),
-                    fit: BoxFit.cover,
-                    width: 55.0,
-                    height: 55.0,
-                    child: InkWell(
-                      onTap: () {
-                        _googleLogin();
-                      },
-                      child: null,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-
-  olvidoContrasena() => Container(
-        padding: EdgeInsets.only(top: 11),
-        child: FlatButton(
-          onPressed: () {
-            this._reloadPasswordPressed(_textUser.text.trim());
-          },
-          child: Text(
-            "¿Olvidó su contraseña?",
-            style: TextStyle(
-              fontFamily: "AvenirNext",
-              fontWeight: FontWeight.w300,
-              color: Colors.white,
-              fontSize: 15,
             ),
           ),
+          Container(
+            padding: EdgeInsets.only(left: 30),
+            decoration: BoxDecoration(shape: BoxShape.circle),
+            child: Material(
+              shape: CircleBorder(),
+              color: Colors.transparent,
+              child: Ink.image(
+                image: AssetImage('assets/images/icon_google.png'),
+                fit: BoxFit.cover,
+                width: 55.0,
+                height: 55.0,
+                child: InkWell(
+                  onTap: () {
+                    _googleLogin();
+                  },
+                  child: null,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+
+  olvidoContrasena() => Container(
+    padding: EdgeInsets.only(top: 11),
+    child: FlatButton(
+      onPressed: () {
+        this._reloadPasswordPressed(_textUser.text.trim());
+      },
+      child: Text(
+        "¿Olvidó su contraseña?",
+        style: TextStyle(
+          fontFamily: "AvenirNext",
+          fontWeight: FontWeight.w300,
+          color: Colors.white,
+          fontSize: 15,
         ),
-      );
+      ),
+    ),
+  );
 
   Widget registrese() {
     return Container(
@@ -426,9 +383,7 @@ class _LoginPage extends State<LoginPage> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => RegisterUser(),
-            ),
+            MaterialPageRoute(builder: (context) => RegisterUser()),
           );
         },
         child: Text(
@@ -450,7 +405,9 @@ class _LoginPage extends State<LoginPage> {
     if (typeLogin == 'email') {
       if (_textUser.text.isEmpty || _textPassword.text.isEmpty) {
         MessagesUtils.showAlert(
-            context: context, title: 'Falta ingresar usuario u contraseña');
+          context: context,
+          title: 'Falta ingresar usuario u contraseña',
+        );
         return false;
       }
     }
@@ -463,13 +420,13 @@ class _LoginPage extends State<LoginPage> {
     User currentUser = await _userBloc.searchUserByEmail(user.email);
 
     // Select photoUrl
-    if (currentUser != null && (currentUser.photoUrl??'').isNotEmpty)
+    if (currentUser != null && (currentUser.photoUrl ?? '').isNotEmpty)
       _imageUserProfile = currentUser.photoUrl;
     else
-      _imageUserProfile = user.photoUrl??'';
+      _imageUserProfile = user.photoUrl ?? '';
 
     // Select userName
-    if (currentUser != null && (currentUser.name??'').isNotEmpty)
+    if (currentUser != null && (currentUser.name ?? '').isNotEmpty)
       _userName = currentUser.name;
     else
       _userName = user.displayName;
@@ -478,9 +435,9 @@ class _LoginPage extends State<LoginPage> {
       _userBloc.updateUserData(
         User(
           uid: user.uid,
-          name: user.displayName??'',
+          name: user.displayName ?? '',
           email: user.email,
-          photoUrl: user.photoUrl??'',
+          photoUrl: user.photoUrl ?? '',
           lastSignIn: Timestamp.now(),
           active: true,
           isAdministrator: false,
@@ -516,7 +473,11 @@ class _LoginPage extends State<LoginPage> {
     ); */
   }
 
-  Future<void> _setLocationInPreferences(FirebaseUser user, String imageUserProfile, String userName) async {
+  Future<void> _setLocationInPreferences(
+    FirebaseUser user,
+    String imageUserProfile,
+    String userName,
+  ) async {
     User userDatabase = await _userBloc.getCurrentUser();
     if (userDatabase != null) {
       SharedPreferences pref = await SharedPreferences.getInstance();
@@ -525,10 +486,10 @@ class _LoginPage extends State<LoginPage> {
       pref.setString(Keys.locationInitCount, '');
       pref.setString(Keys.locationFinalCount, '');
       pref.setString(Keys.photoUserUrl, imageUserProfile);
-      pref.setString(Keys.userId, user.uid??'');
+      pref.setString(Keys.userId, user.uid ?? '');
       pref.setString(Keys.userName, userName);
-      pref.setString(Keys.userEmail, user.email??'');
-      pref.setBool(Keys.isAdministrator, userDatabase.isAdministrator??false);
+      pref.setString(Keys.userEmail, user.email ?? '');
+      pref.setBool(Keys.isAdministrator, userDatabase.isAdministrator ?? false);
     }
   }
 
@@ -538,9 +499,7 @@ class _LoginPage extends State<LoginPage> {
       listItems.add(
         DropdownMenuItem(
           value: documentLoc,
-          child: Text(
-            documentLoc.locationName,
-          ),
+          child: Text(documentLoc.locationName),
         ),
       );
     }
@@ -564,14 +523,15 @@ class _LoginPage extends State<LoginPage> {
         _userBloc.singOut();
         FirebaseUser user = await _userBloc.signInGoogle();
         if (user != null) {
-           this._registerLogin(user);
+          this._registerLogin(user);
           _clearTextLogin();
         }
       } on PlatformException catch (e) {
         print('error desde google login  $e');
         MessagesUtils.showAlert(
-                context: context, title: 'Error en login con Google $e')
-            .show();
+          context: context,
+          title: 'Error en login con Google $e',
+        ).show();
       }
     }
   }
@@ -587,9 +547,9 @@ class _LoginPage extends State<LoginPage> {
       } on PlatformException catch (e) {
         print('error desde facebook login  $e');
         MessagesUtils.showAlert(
-                context: context,
-                title: 'Error en login con Facebook, vuelva a Intentarlo')
-            .show();
+          context: context,
+          title: 'Error en login con Facebook, vuelva a Intentarlo',
+        ).show();
       }
     }
   }
@@ -599,19 +559,21 @@ class _LoginPage extends State<LoginPage> {
       if (_textUser.text.isNotEmpty && _textPassword.text.isNotEmpty) {
         try {
           FirebaseUser user = await _userBloc.signInEmail(
-              _textUser.text.trim(), _textPassword.text.trim());
+            _textUser.text.trim(),
+            _textPassword.text.trim(),
+          );
           if (user != null) {
             this._registerLogin(user);
             _clearTextLogin();
           }
-        } on PlatformException catch (e) {
+        } on PlatformException {
           MessagesUtils.showAlert(
             context: context,
             title:
                 'Usuario o Contraseña incorrectos, recuerde que debe registrarte primero!',
             alertType: AlertType.warning,
           ).show();
-        } catch(error) {
+        } catch (error) {
           print(error.message);
         }
       }
@@ -632,16 +594,13 @@ class _LoginPage extends State<LoginPage> {
         ),
         buttons: [
           DialogButton(
-            color: Theme.of(context).accentColor,
-            child: Text(
-              'ACEPTAR',
-              style: Theme.of(context).textTheme.button,
-            ),
+            color: Theme.of(context).colorScheme.secondary,
+            child: Text('ACEPTAR', style: Theme.of(context).textTheme.labelLarge),
             onPressed: () {
               Navigator.of(context).pop();
               setState(() {});
             },
-          )
+          ),
         ],
       ).show();
     }
@@ -657,9 +616,13 @@ class _LoginPage extends State<LoginPage> {
     pref.setString(Keys.idLocation, locationSelected.id);
     pref.setString(Keys.locationName, locationSelected.locationName);
     pref.setString(
-        Keys.locationInitCount, locationSelected.initConcec.toString());
+      Keys.locationInitCount,
+      locationSelected.initConcec.toString(),
+    );
     pref.setString(
-        Keys.locationFinalCount, locationSelected.finalConsec.toString());
+      Keys.locationFinalCount,
+      locationSelected.finalConsec.toString(),
+    );
   }
 
   void _reloadPasswordPressed(String userEmail) {
@@ -669,26 +632,20 @@ class _LoginPage extends State<LoginPage> {
         title: 'Olvido su Contraseña',
         style: MessagesUtils.alertStyle,
         content: Text(
-            'Desea restaurar la contraseña para el usuario $userEmail ?'
+          'Desea restaurar la contraseña para el usuario $userEmail ?',
         ),
         buttons: [
           DialogButton(
-            color: Theme.of(context).accentColor,
-            child: Text(
-              'ACEPTAR',
-              style: Theme.of(context).textTheme.button,
-            ),
+            color: Theme.of(context).colorScheme.secondary,
+            child: Text('ACEPTAR', style: Theme.of(context).textTheme.labelLarge),
             onPressed: () {
               _sendEmailResetPassword(userEmail);
               Navigator.of(context).pop();
             },
           ),
           DialogButton(
-            color: Theme.of(context).accentColor,
-            child: Text(
-              'CANCELAR',
-              style: Theme.of(context).textTheme.button,
-            ),
+            color: Theme.of(context).colorScheme.secondary,
+            child: Text('CANCELAR', style: Theme.of(context).textTheme.labelLarge),
             onPressed: () {
               Navigator.of(context).pop();
               return false;

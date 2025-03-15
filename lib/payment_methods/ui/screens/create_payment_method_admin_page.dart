@@ -2,7 +2,6 @@ import 'package:car_wash_app/invoice/ui/widgets/text_field_input.dart';
 import 'package:car_wash_app/payment_methods/bloc/bloc_payment_method.dart';
 import 'package:car_wash_app/payment_methods/model/payment_methods.dart';
 import 'package:car_wash_app/widgets/messages_utils.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 
@@ -27,11 +26,9 @@ class _CreatePaymentMethodAdminPage
   @override
   void initState() {
     super.initState();
-    if (widget.currentPaymentMethod != null) {
-      _paymentMethodSelected = widget.currentPaymentMethod;
-      _selectLocationList();
+    _paymentMethodSelected = widget.currentPaymentMethod;
+    _selectLocationList();
     }
-  }
 
   @override
   Widget build(BuildContext context) {

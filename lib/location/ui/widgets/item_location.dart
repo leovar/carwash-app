@@ -1,5 +1,4 @@
 import 'package:car_wash_app/location/model/location.dart';
-import 'package:car_wash_app/product/model/product.dart';
 import 'package:flutter/material.dart';
 
 class ItemLocation extends StatefulWidget {

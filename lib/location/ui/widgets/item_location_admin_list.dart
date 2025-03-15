@@ -1,16 +1,8 @@
 import 'package:car_wash_app/location/bloc/bloc_location.dart';
 import 'package:car_wash_app/location/model/location.dart';
 import 'package:car_wash_app/location/ui/screens/create_location_admin_page.dart';
-import 'package:car_wash_app/product/bloc/product_bloc.dart';
-import 'package:car_wash_app/product/model/product.dart';
-import 'package:car_wash_app/product/ui/screens/product_admin_page.dart';
-import 'package:car_wash_app/user/bloc/bloc_user.dart';
-import 'package:car_wash_app/user/model/user.dart';
-import 'package:car_wash_app/user/ui/screens/create_user_admin_page.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
-import 'package:intl/intl.dart';
 
 class ItemLocationAdminList extends StatefulWidget {
   final List<Location> locationList;

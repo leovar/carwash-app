@@ -486,7 +486,7 @@ class InvoiceRepository {
     if (documents.length > 0) {
       Invoice invoice = Invoice.fromJson(documents.first.data,
           id: documents.first.documentID);
-      if (invoice.consecutive != null && invoice.consecutive > 0) {
+      if (invoice.consecutive > 0) {
         return invoice.consecutive;
       } else {
         return 0;

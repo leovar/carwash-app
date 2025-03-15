@@ -1,7 +1,6 @@
 import 'package:car_wash_app/reports/bloc/bloc_reports.dart';
 import 'package:car_wash_app/reports/model/products_card_detail.dart';
 import 'package:car_wash_app/reports/ui/widgets/item_productivity_report_detail.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 import 'package:intl/intl.dart';
@@ -22,10 +21,8 @@ class _ProductivityUserDetailPage extends State<ProductivityUserDetailPage> {
   @override
   void initState() {
     super.initState();
-    if (widget.productsList != null) {
-      _productsCard = widget.productsList;
+    _productsCard = widget.productsList;
     }
-  }
 
   @override
   Widget build(BuildContext context) {

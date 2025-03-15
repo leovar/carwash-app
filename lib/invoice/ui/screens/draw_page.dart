@@ -1,9 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
-import 'dart:ui';
 import 'dart:ui' as ui;
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
@@ -44,19 +42,13 @@ class _DrawPage extends State<DrawPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
-        child: Icon(
-          Icons.done,
-          color: Colors.white,
-        ),
+        child: Icon(Icons.done, color: Colors.white),
         onPressed: _capturePng,
       ),
       body: Stack(
         children: <Widget>[
           _containerImage(),
-          RepaintBoundary(
-            key: _globalKey,
-            child: _drawerScreen(),
-          ),
+          RepaintBoundary(key: _globalKey, child: _drawerScreen()),
           _termsAndConditions(),
           _deleteImage(),
         ],
@@ -68,10 +60,7 @@ class _DrawPage extends State<DrawPage> {
     return Container(
       margin: EdgeInsets.only(top: 30, left: 10, right: 10, bottom: 100),
       decoration: BoxDecoration(
-        border: Border.all(
-          width: 1.2,
-          color: Color(0xFFAEAEAE),
-        ),
+        border: Border.all(width: 1.2, color: Color(0xFFAEAEAE)),
         color: Colors.white,
         borderRadius: BorderRadius.circular(5),
       ),
@@ -116,25 +105,33 @@ class _DrawPage extends State<DrawPage> {
       onPanUpdate: (details) {
         setState(() {
           RenderBox renderBox = context.findRenderObject();
-          points.add(DrawingPoints(
+          points.add(
+            DrawingPoints(
               points: renderBox.globalToLocal(details.globalPosition),
-              paint: Paint()
-                ..strokeCap = strokeCap
-                ..isAntiAlias = true
-                ..color = selectedColor.withOpacity(opacity)
-                ..strokeWidth = strokeWidth));
+              paint:
+                  Paint()
+                    ..strokeCap = strokeCap
+                    ..isAntiAlias = true
+                    ..color = selectedColor.withOpacity(opacity)
+                    ..strokeWidth = strokeWidth,
+            ),
+          );
         });
       },
       onPanStart: (details) {
         setState(() {
           RenderBox renderBox = context.findRenderObject();
-          points.add(DrawingPoints(
+          points.add(
+            DrawingPoints(
               points: renderBox.globalToLocal(details.globalPosition),
-              paint: Paint()
-                ..strokeCap = strokeCap
-                ..isAntiAlias = true
-                ..color = selectedColor.withOpacity(opacity)
-                ..strokeWidth = strokeWidth));
+              paint:
+                  Paint()
+                    ..strokeCap = strokeCap
+                    ..isAntiAlias = true
+                    ..color = selectedColor.withOpacity(opacity)
+                    ..strokeWidth = strokeWidth,
+            ),
+          );
         });
       },
       onPanEnd: (details) {
@@ -147,9 +144,7 @@ class _DrawPage extends State<DrawPage> {
           MediaQuery.of(context).size.width,
           MediaQuery.of(context).size.height,
         ),
-        painter: DrawingPainter(
-          pointsList: points,
-        ),
+        painter: DrawingPainter(pointsList: points),
       ),
     );
   }
@@ -179,12 +174,13 @@ class _DrawPage extends State<DrawPage> {
       RenderRepaintBoundary boundary =
           _globalKey.currentContext.findRenderObject();
       ui.Image image = await boundary.toImage(pixelRatio: 3.0);
-      ByteData byteData =
-          await image.toByteData(format: ui.ImageByteFormat.png);
+      ByteData byteData = await image.toByteData(
+        format: ui.ImageByteFormat.png,
+      );
       Uint8List pngBytes = byteData.buffer.asUint8List();
-//      String bs64 = base64Encode(pngBytes);
-//      print(pngBytes);
-//      print(bs64);
+      //      String bs64 = base64Encode(pngBytes);
+      //      print(pngBytes);
+      //      print(bs64);
       //print('png done');
       await widget.callBackChargeImageFirm(pngBytes);
       setState(() {
@@ -208,17 +204,12 @@ class DrawingPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     for (int i = 0; i < pointsList.length - 1; i++) {
-      if (pointsList[i] != null && pointsList[i + 1] != null) {
-        canvas.drawLine(pointsList[i].points, pointsList[i + 1].points,
-            pointsList[i].paint);
-      } else if (pointsList[i] != null && pointsList[i + 1] == null) {
-        offsetPoints.clear();
-        offsetPoints.add(pointsList[i].points);
-        offsetPoints.add(Offset(
-            pointsList[i].points.dx + 0.1, pointsList[i].points.dy + 0.1));
-        canvas.drawPoints(PointMode.points, offsetPoints, pointsList[i].paint);
-      }
-    }
+      canvas.drawLine(
+        pointsList[i].points,
+        pointsList[i + 1].points,
+        pointsList[i].paint,
+      );
+        }
   }
 
   @override

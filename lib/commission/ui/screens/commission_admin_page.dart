@@ -3,9 +3,7 @@ import 'package:car_wash_app/commission/model/commission.dart';
 import 'package:car_wash_app/invoice/ui/widgets/text_field_input.dart';
 import 'package:car_wash_app/vehicle_type/bloc/vehicle_type_bloc.dart';
 import 'package:car_wash_app/widgets/messages_utils.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 
 class CommissionAdminPage extends StatefulWidget {
@@ -37,11 +35,9 @@ class _CommissionAdminPage extends State<CommissionAdminPage> {
   @override
   void initState() {
     super.initState();
-    if (widget.currentCommission != null) {
-      _commissionSelected = widget.currentCommission;
-      _selectCommissionList();
+    _commissionSelected = widget.currentCommission;
+    _selectCommissionList();
     }
-  }
 
   @override
   Widget build(BuildContext context) {

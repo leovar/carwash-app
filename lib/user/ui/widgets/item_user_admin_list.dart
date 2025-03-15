@@ -1,14 +1,8 @@
-import 'package:car_wash_app/location/model/location.dart';
-import 'package:car_wash_app/product/bloc/product_bloc.dart';
-import 'package:car_wash_app/product/model/product.dart';
-import 'package:car_wash_app/product/ui/screens/product_admin_page.dart';
 import 'package:car_wash_app/user/bloc/bloc_user.dart';
 import 'package:car_wash_app/user/model/user.dart';
 import 'package:car_wash_app/user/ui/screens/create_user_admin_page.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
-import 'package:intl/intl.dart';
 
 class ItemUserAdminList extends StatefulWidget {
   final List<User> userList;
@@ -93,7 +87,7 @@ class _ItemUserAdminList extends State<ItemUserAdminList> {
                       shape: BoxShape.circle,
                       image: DecorationImage(
                         fit: BoxFit.cover,
-                        image: (_itemUser.photoUrl == null || _itemUser.photoUrl.isEmpty)
+                        image: (_itemUser.photoUrl.isEmpty)
                             ? AssetImage('assets/images/profile_placeholder.png')
                             : NetworkImage(_itemUser.photoUrl),
                       ),
@@ -130,7 +124,7 @@ class _ItemUserAdminList extends State<ItemUserAdminList> {
                             _userType,
                             style: TextStyle(
                               fontFamily: "Lato",
-                              color: Theme.of(context).accentColor,
+                              color: Theme.of(context).colorScheme.secondary,
                               fontWeight: FontWeight.bold,
                               fontSize: 17,
                             ),

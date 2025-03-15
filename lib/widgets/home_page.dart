@@ -333,10 +333,10 @@ class _HomePage extends State<HomePage> {
       ),
       buttons: [
         DialogButton(
-          color: Theme.of(context).accentColor,
+          color: Theme.of(context).colorScheme.secondary,
           child: Text(
             'ACEPTAR',
-            style: Theme.of(context).textTheme.button,
+            style: Theme.of(context).textTheme.labelLarge,
           ),
           onPressed: () {
             Navigator.of(context).pop();

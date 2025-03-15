@@ -3,11 +3,8 @@ import 'dart:core';
 import 'package:car_wash_app/invoice/bloc/bloc_invoice.dart';
 import 'package:car_wash_app/invoice/model/invoice.dart';
 import 'package:car_wash_app/invoice/ui/widgets/item_operator.dart';
-import 'package:car_wash_app/invoice/ui/widgets/item_product.dart';
 import 'package:car_wash_app/user/model/user.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 
 class OperatorsInvoicePage extends StatefulWidget {
   final Function(List<User>) callbackSetOperatorsList;
@@ -64,7 +61,7 @@ class _OperatorsInvoicePage extends State<OperatorsInvoicePage> {
   }
 
   Widget listUsers() {
-    if (widget.invoice != null && widget.invoice.invoiceClosed) {
+    if (widget.invoice.invoiceClosed) {
       List<User> operatorsList = [];
       widget.usersListCallback.forEach((item) {
         User userSelected = User.copyWith(
@@ -98,16 +95,12 @@ class _OperatorsInvoicePage extends State<OperatorsInvoicePage> {
       User userFind = widget.usersListCallback.firstWhere(
           (element) => element.id == item.id && element.isSelected,
           orElse: () => null);
-      if (userFind == null) {
-        _userGet.add(item);
-      } else {
-        User userSelected = User.copyWith(
-          origin: item,
-          isSelected: true,
-        );
-        _userGet.add(userSelected);
-      }
-    });
+      User userSelected = User.copyWith(
+        origin: item,
+        isSelected: true,
+      );
+      _userGet.add(userSelected);
+        });
     _userGet.sort((a, b) => a.name.compareTo(b.name));
     widget.usersListCallback = _userGet;
 

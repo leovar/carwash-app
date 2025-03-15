@@ -2,7 +2,6 @@
 import 'package:car_wash_app/invoice/bloc/bloc_invoice.dart';
 import 'package:car_wash_app/invoice/model/invoice.dart';
 import 'package:car_wash_app/invoice/ui/widgets/form_invoice.dart';
-import 'package:car_wash_app/user/model/user.dart';
 import 'package:car_wash_app/widgets/app_bar_widget.dart';
 import 'package:car_wash_app/widgets/drawer_page.dart';
 import 'package:car_wash_app/widgets/keys.dart';

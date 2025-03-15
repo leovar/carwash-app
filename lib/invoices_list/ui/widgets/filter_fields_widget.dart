@@ -3,10 +3,8 @@ import 'package:car_wash_app/payment_methods/bloc/bloc_payment_method.dart';
 import 'package:car_wash_app/payment_methods/model/payment_methods.dart';
 import 'package:car_wash_app/user/model/user.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'package:rflutter_alert/rflutter_alert.dart';
 
 class FilterFieldsWidget extends StatefulWidget {
   final TextEditingController placaController;
@@ -22,7 +20,8 @@ class FilterFieldsWidget extends StatefulWidget {
   final Function(String) selectProductType;
   final Function(PaymentMethod) selectPaymentMethod;
 
-  FilterFieldsWidget({Key key,
+  FilterFieldsWidget({
+    Key key,
     this.placaController,
     this.consecutiveController,
     this.dateInit,
@@ -42,7 +41,7 @@ class FilterFieldsWidget extends StatefulWidget {
 }
 
 class _FilterFieldsWidget extends State<FilterFieldsWidget> {
-  BlocInvoice _blocInvoice =  BlocInvoice();
+  BlocInvoice _blocInvoice = BlocInvoice();
   BlocPaymentMethod _paymentMethodBloc = BlocPaymentMethod();
   final _textDateInit = TextEditingController();
   final _textDateFinal = TextEditingController();
@@ -64,18 +63,14 @@ class _FilterFieldsWidget extends State<FilterFieldsWidget> {
     _productsTypeList.add('Sencillo');
     _productsTypeList.add('Especial');
     _productsTypeList.add(_emptySelectionProductType);
-    if(widget.operatorSelected.name != null) {
-      _selectedOperator = widget.operatorSelected;
-    }
-    _dateTimeInit = widget.dateInit;
+    _selectedOperator = widget.operatorSelected;
+      _dateTimeInit = widget.dateInit;
     _dateTimeFinal = widget.dateFinal;
     _textDateInit.text = formatter.format(_dateTimeInit);
     _textDateFinal.text = formatter.format(_dateTimeFinal);
     _selectProductType = widget.productTypeSelected;
-    if(widget.paymentMethodSelected.name != null) {
-      _selectedPaymentMethod = widget.paymentMethodSelected;
+    _selectedPaymentMethod = widget.paymentMethodSelected;
     }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -89,7 +84,7 @@ class _FilterFieldsWidget extends State<FilterFieldsWidget> {
             labelText: 'Placa',
           ),
           inputFormatters: [
-            WhitelistingTextInputFormatter(RegExp("^[a-zA-Z0-9]*"))
+            WhitelistingTextInputFormatter(RegExp("^[a-zA-Z0-9]*")),
           ],
           textCapitalization: TextCapitalization.characters,
         ),
@@ -106,9 +101,7 @@ class _FilterFieldsWidget extends State<FilterFieldsWidget> {
             //icon: Icon(Icons.account_circle),
             labelText: 'Consecutivo',
           ),
-          inputFormatters: [
-            FilteringTextInputFormatter.allow(RegExp('[0-9]')),
-          ],
+          inputFormatters: [FilteringTextInputFormatter.allow(RegExp('[0-9]'))],
           keyboardType: TextInputType.number,
         ),
         SizedBox(height: 10),
@@ -119,15 +112,13 @@ class _FilterFieldsWidget extends State<FilterFieldsWidget> {
     );
   }
 
-  Widget _selectDateInit(){
+  Widget _selectDateInit() {
     return TextField(
       controller: _textDateInit,
-      decoration: InputDecoration(
-        labelText: 'Fecha Desde',
-      ),
+      decoration: InputDecoration(labelText: 'Fecha Desde'),
       keyboardType: TextInputType.datetime,
       readOnly: true,
-      onTap: (){
+      onTap: () {
         _datePickerFrom();
       },
     );
@@ -136,12 +127,10 @@ class _FilterFieldsWidget extends State<FilterFieldsWidget> {
   Widget _selectDateFinal() {
     return TextField(
       controller: _textDateFinal,
-      decoration: InputDecoration(
-        labelText: 'Fecha Hasta',
-      ),
+      decoration: InputDecoration(labelText: 'Fecha Hasta'),
       keyboardType: TextInputType.datetime,
       readOnly: true,
-      onTap: (){
+      onTap: () {
         _datePickerFinal();
       },
     );
@@ -162,10 +151,14 @@ class _FilterFieldsWidget extends State<FilterFieldsWidget> {
   }
 
   Widget _showOperators(AsyncSnapshot snapshot) {
-    var userSelectionEmpty = User(uid: '0', name: 'Seleccione el Operador...', email: '');
+    var userSelectionEmpty = User(
+      uid: '0',
+      name: 'Seleccione el Operador...',
+      email: '',
+    );
     List<User> operators = _blocInvoice.buildOperators(snapshot.data.documents);
     operators.add(userSelectionEmpty);
-    if (_selectedOperator != null && _selectedOperator.name.isEmpty) {
+    if (_selectedOperator.name.isEmpty) {
       _selectedOperator = userSelectionEmpty;
     }
     _dropdownMenuItems = _builtDropdownMenuItems(operators);
@@ -174,13 +167,8 @@ class _FilterFieldsWidget extends State<FilterFieldsWidget> {
       items: _dropdownMenuItems,
       value: _selectedOperator,
       onChanged: onChangeDropDawn,
-      hint: Text(
-        "Seleccione el Operador...",
-      ),
-      icon: Icon(
-        Icons.keyboard_arrow_down,
-        color: Theme.of(context).cardColor,
-      ),
+      hint: Text("Seleccione el Operador..."),
+      icon: Icon(Icons.keyboard_arrow_down, color: Theme.of(context).cardColor),
       iconSize: 24,
       elevation: 16,
       style: TextStyle(
@@ -188,10 +176,7 @@ class _FilterFieldsWidget extends State<FilterFieldsWidget> {
         fontWeight: FontWeight.normal,
         color: Theme.of(context).cardColor,
       ),
-      underline: Container(
-        height: 1,
-        color: Theme.of(context).cursorColor,
-      ),
+      underline: Container(height: 1, color: Theme.of(context).cursorColor),
     );
   }
 
@@ -210,25 +195,28 @@ class _FilterFieldsWidget extends State<FilterFieldsWidget> {
   }
 
   Widget _showPaymentMethods(AsyncSnapshot snapshot) {
-    var paymentMethodSelectionEmpty = PaymentMethod(id: '0', name: 'Seleccione el método de pago...', active: true);
-    List<PaymentMethod> paymentMethods = _paymentMethodBloc.buildPaymentMethods(snapshot.data.documents);
+    var paymentMethodSelectionEmpty = PaymentMethod(
+      id: '0',
+      name: 'Seleccione el método de pago...',
+      active: true,
+    );
+    List<PaymentMethod> paymentMethods = _paymentMethodBloc.buildPaymentMethods(
+      snapshot.data.documents,
+    );
     paymentMethods.add(paymentMethodSelectionEmpty);
-    if (_selectedPaymentMethod != null && _selectedPaymentMethod.name.isEmpty) {
+    if (_selectedPaymentMethod.name.isEmpty) {
       _selectedPaymentMethod = paymentMethodSelectionEmpty;
     }
-    _dropdownMenuItemsPayments = _builtDropdownMenuItemsPaymentMethods(paymentMethods);
+    _dropdownMenuItemsPayments = _builtDropdownMenuItemsPaymentMethods(
+      paymentMethods,
+    );
     return DropdownButton(
       isExpanded: true,
       items: _dropdownMenuItemsPayments,
       value: _selectedPaymentMethod,
       onChanged: onChangeDropDawnPaymentMethods,
-      hint: Text(
-        "Seleccione el método de pago...",
-      ),
-      icon: Icon(
-        Icons.keyboard_arrow_down,
-        color: Theme.of(context).cardColor,
-      ),
+      hint: Text("Seleccione el método de pago..."),
+      icon: Icon(Icons.keyboard_arrow_down, color: Theme.of(context).cardColor),
       iconSize: 24,
       elevation: 16,
       style: TextStyle(
@@ -236,10 +224,7 @@ class _FilterFieldsWidget extends State<FilterFieldsWidget> {
         fontWeight: FontWeight.normal,
         color: Theme.of(context).cardColor,
       ),
-      underline: Container(
-        height: 1,
-        color: Theme.of(context).cursorColor,
-      ),
+      underline: Container(height: 1, color: Theme.of(context).cursorColor),
     );
   }
 
@@ -253,13 +238,8 @@ class _FilterFieldsWidget extends State<FilterFieldsWidget> {
       items: _dropdownMenuItemsProductTypes,
       value: _selectProductType,
       onChanged: onChangeDropDawnProductTypes,
-      hint: Text(
-        "Typo de Servicio..",
-      ),
-      icon: Icon(
-        Icons.keyboard_arrow_down,
-        color: Theme.of(context).cardColor,
-      ),
+      hint: Text("Typo de Servicio.."),
+      icon: Icon(Icons.keyboard_arrow_down, color: Theme.of(context).cardColor),
       iconSize: 24,
       elevation: 16,
       style: TextStyle(
@@ -267,20 +247,16 @@ class _FilterFieldsWidget extends State<FilterFieldsWidget> {
         fontWeight: FontWeight.normal,
         color: Theme.of(context).cardColor,
       ),
-      underline: Container(
-        height: 1,
-        color: Theme.of(context).cursorColor,
-      ),
+      underline: Container(height: 1, color: Theme.of(context).cursorColor),
     );
   }
-
 
   ///Functions
 
   onChangeDropDawn(User selectedOperator) {
     setState(() {
       if (selectedOperator.uid == '0') {
-        widget.selectOperator(User(name:'', uid: '', email: ''));
+        widget.selectOperator(User(name: '', uid: '', email: ''));
       } else {
         widget.selectOperator(selectedOperator);
       }
@@ -292,12 +268,7 @@ class _FilterFieldsWidget extends State<FilterFieldsWidget> {
     List<DropdownMenuItem<User>> listItems = List();
     for (User documentLoc in users) {
       listItems.add(
-        DropdownMenuItem(
-          value: documentLoc,
-          child: Text(
-            documentLoc.name,
-          ),
-        ),
+        DropdownMenuItem(value: documentLoc, child: Text(documentLoc.name)),
       );
     }
     return listItems;
@@ -306,7 +277,7 @@ class _FilterFieldsWidget extends State<FilterFieldsWidget> {
   onChangeDropDawnPaymentMethods(PaymentMethod selectedPaymentMethod) {
     setState(() {
       if (selectedPaymentMethod.id == '0') {
-        widget.selectPaymentMethod(PaymentMethod(name:'', id: ''));
+        widget.selectPaymentMethod(PaymentMethod(name: '', id: ''));
       } else {
         widget.selectPaymentMethod(selectedPaymentMethod);
       }
@@ -314,16 +285,13 @@ class _FilterFieldsWidget extends State<FilterFieldsWidget> {
     });
   }
 
-  List<DropdownMenuItem<PaymentMethod>> _builtDropdownMenuItemsPaymentMethods(List paymentMethods) {
+  List<DropdownMenuItem<PaymentMethod>> _builtDropdownMenuItemsPaymentMethods(
+    List paymentMethods,
+  ) {
     List<DropdownMenuItem<PaymentMethod>> listItems = List();
     for (PaymentMethod documentLoc in paymentMethods) {
       listItems.add(
-        DropdownMenuItem(
-          value: documentLoc,
-          child: Text(
-            documentLoc.name,
-          ),
-        ),
+        DropdownMenuItem(value: documentLoc, child: Text(documentLoc.name)),
       );
     }
     return listItems;
@@ -340,25 +308,21 @@ class _FilterFieldsWidget extends State<FilterFieldsWidget> {
     List<DropdownMenuItem<String>> listItems = List();
     for (String documentLoc in _productsTypeList) {
       listItems.add(
-        DropdownMenuItem(
-          value: documentLoc,
-          child: Text(
-            documentLoc,
-          ),
-        ),
+        DropdownMenuItem(value: documentLoc, child: Text(documentLoc)),
       );
     }
     return listItems;
   }
 
   Future<Null> _datePickerFrom() async {
-    final DateTime picked = await showDatePicker(context: context,
-        initialDate: _dateTimeInit,
-        firstDate: DateTime(1970),
-        lastDate: DateTime(2100),
+    final DateTime picked = await showDatePicker(
+      context: context,
+      initialDate: _dateTimeInit,
+      firstDate: DateTime(1970),
+      lastDate: DateTime(2100),
     );
 
-    if (picked != null && picked != _dateTimeInit) {
+    if (picked != _dateTimeInit) {
       setState(() {
         _dateTimeInit = picked;
         _textDateInit.text = formatter.format(_dateTimeInit);
@@ -368,13 +332,14 @@ class _FilterFieldsWidget extends State<FilterFieldsWidget> {
   }
 
   Future<Null> _datePickerFinal() async {
-    final DateTime picked = await showDatePicker(context: context,
+    final DateTime picked = await showDatePicker(
+      context: context,
       initialDate: _dateTimeFinal,
       firstDate: DateTime(1970),
       lastDate: DateTime(2100),
     );
 
-    if (picked != null && picked != _dateTimeFinal) {
+    if (picked != _dateTimeFinal) {
       setState(() {
         _dateTimeFinal = picked;
         _textDateFinal.text = formatter.format(_dateTimeFinal);
@@ -382,5 +347,4 @@ class _FilterFieldsWidget extends State<FilterFieldsWidget> {
       });
     }
   }
-
 }

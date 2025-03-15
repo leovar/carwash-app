@@ -1,5 +1,4 @@
 import 'package:car_wash_app/reports/model/earnings_card_detail.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -38,7 +37,7 @@ class _ItemEarningCard extends State<ItemEarningCard> {
                   child: Text(
                     widget.cardDetail.locationName,
                     style: TextStyle(
-                      color: Theme.of(context).accentColor,
+                      color: Theme.of(context).colorScheme.secondary,
                       fontFamily: "Lato",
                       fontWeight: FontWeight.bold,
                       fontSize: 17,

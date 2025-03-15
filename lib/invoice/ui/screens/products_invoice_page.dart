@@ -64,7 +64,7 @@ class _ProductsInvoicePage extends State<ProductsInvoicePage> {
   }
 
   Widget getProducts() {
-    if (widget.invoice != null && widget.invoice.invoiceClosed) {
+    if (widget.invoice.invoiceClosed) {
       List<Product> productsList = [];
       widget.productListCallback.forEach((prod) {
         Product prodSelected = Product.copyProductInvoiceWith(
@@ -101,18 +101,14 @@ class _ProductsInvoicePage extends State<ProductsInvoicePage> {
       Product proFindSelect = widget.productListCallback.firstWhere(
           (d) => d.id == prod.id && d.isSelected,
           orElse: () => null);
-      if (proFindSelect == null) {
-        productGet.add(prod);
-      } else {
-        Product prodSelected = Product.copyProductInvoiceWith(
-          origin: prod,
-          isSelected: true,
-          price: proFindSelect.price,
-          ivaPercent: proFindSelect.ivaPercent,
-        );
-        productGet.add(prodSelected);
-      }
-    });
+      Product prodSelected = Product.copyProductInvoiceWith(
+        origin: prod,
+        isSelected: true,
+        price: proFindSelect.price,
+        ivaPercent: proFindSelect.ivaPercent,
+      );
+      productGet.add(prodSelected);
+        });
     widget.productListCallback = productGet;
 
     return _showListProducts();

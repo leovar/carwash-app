@@ -84,7 +84,7 @@ class _FieldsProducts extends State<FieldsProducts> {
                   color: Colors.white,
                   size: 30,
                 ),
-                backgroundColor: Theme.of(context).accentColor,
+                backgroundColor: Theme.of(context).colorScheme.secondary,
                 onPressed: (widget.enableForm || !widget.editForm)
                     ? () {
                         Navigator.push(

@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_facebook_login/flutter_facebook_login.dart';
+import 'package:flutter_login_facebook/flutter_login_facebook.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class FirebaseAuthApi {
@@ -43,7 +43,7 @@ class FirebaseAuthApi {
             Permissions: ${accessToken.permissions}
             Declined permissions: ${accessToken.declinedPermissions}""");
         AuthResult authResult = await _authApi.signInWithCredential(
-            FacebookAuthProvider.getCredential(accessToken: accessToken.token),
+          FacebookAuthProvider.getCredential(accessToken: accessToken.token),
         );
         FirebaseUser user = authResult.user;
         return user;
@@ -65,12 +65,11 @@ class FirebaseAuthApi {
   //Authentication Email
   Future<FirebaseUser> emailAndPasswordSignIn(
       String email, String password) async {
+    AuthResult authResult = await _authApi.signInWithEmailAndPassword(
+        email: email, password: password);
 
-      AuthResult authResult = await _authApi.signInWithEmailAndPassword(
-          email: email, password: password);
-
-      FirebaseUser user = authResult.user;
-      return user;
+    FirebaseUser user = authResult.user;
+    return user;
   }
 
   Future<String> registerEmailUser(String email, String password) async {
@@ -78,14 +77,13 @@ class FirebaseAuthApi {
         googleAppID: 'carwash-app-9a2c2',
         apiKey: 'AIzaSyCZZfdnJ3eEZ9RIMuQtQYDABArHjTSjFxY',
         databaseURL: 'https://carwash-app-9a2c2.firebaseio.com',
-        projectID: 'carwash-app-9a2c2'
-    );
+        projectID: 'carwash-app-9a2c2');
 
-    final Future<FirebaseApp> newApp = FirebaseApp.configure(name: 'secondApp', options: options);
-    final FirebaseAuth secondInstance = FirebaseAuth.fromApp(
-        await newApp
-    );
-    AuthResult  auth = await secondInstance.createUserWithEmailAndPassword(email: email, password: password);
+    final Future<FirebaseApp> newApp =
+        FirebaseApp.configure(name: 'secondApp', options: options);
+    final FirebaseAuth secondInstance = FirebaseAuth.fromApp(await newApp);
+    AuthResult auth = await secondInstance.createUserWithEmailAndPassword(
+        email: email, password: password);
 
     String userUid = auth.user.uid;
     secondInstance.signOut();
@@ -93,7 +91,7 @@ class FirebaseAuthApi {
   }
 
   void resetEmailPassword(String email) async {
-    _authApi.sendPasswordResetEmail (email: email);
+    _authApi.sendPasswordResetEmail(email: email);
   }
 
   singOut() async {

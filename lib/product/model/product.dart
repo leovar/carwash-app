@@ -1,5 +1,3 @@
-import 'package:car_wash_app/location/model/location.dart';
-import 'package:car_wash_app/vehicle_type/model/vehicleType.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
@@ -49,7 +47,7 @@ class Product extends Equatable {
   factory Product.fromJson(Map<String, dynamic> json, {String id}) {
     List<DocumentReference> locationsListDb = <DocumentReference>[];
     List locationsList = json['locations'];
-    locationsList?.forEach((drLocation) {
+    locationsList.forEach((drLocation) {
       locationsListDb.add(drLocation);
     });
 
@@ -72,7 +70,7 @@ class Product extends Equatable {
   factory Product.fromJsonTemporal(Map<String, dynamic> json) {
     List<DocumentReference> locationsListDb = <DocumentReference>[];
     List locationsList = json['locations'];
-    locationsList?.forEach((drLocation) {
+    locationsList.forEach((drLocation) {
       locationsListDb.add(drLocation);
     });
     bool additional = json['isAdditional'];
@@ -101,7 +99,7 @@ class Product extends Equatable {
   factory Product.fromJsonProInvoice(Map<String, dynamic> json, {String id}) {
     List<DocumentReference> locationsListDb = <DocumentReference>[];
     List locationsList = json['locations'];
-    locationsList?.forEach((drLocation) {
+    locationsList.forEach((drLocation) {
       locationsListDb.add(drLocation);
     });
 
@@ -124,7 +122,12 @@ class Product extends Equatable {
   }
 
   factory Product.fromJsonProductIntoInvoice(
-      Map<dynamic, dynamic> json, int uidVehicleType, Timestamp addDate, int countOperators, int consecutive) {
+    Map<dynamic, dynamic> json,
+    int uidVehicleType,
+    Timestamp addDate,
+    int countOperators,
+    int consecutive,
+  ) {
     return Product(
       id: json['Id'],
       productName: json['productName'],
@@ -138,7 +141,7 @@ class Product extends Equatable {
       serviceTime: json['serviceTime'],
       productCommission: json['productCommission'],
       countOperatorsInvoice: countOperators,
-      invoiceConsecutive : consecutive,
+      invoiceConsecutive: consecutive,
     );
   }
 
@@ -174,7 +177,7 @@ class Product extends Equatable {
       'Id': productId,
       'productType': productType,
       'serviceTime': serviceTime,
-      'productCommission' : commission,
+      'productCommission': commission,
     };
   }
 
@@ -231,18 +234,18 @@ class Product extends Equatable {
 
   @override
   List<Object> get props => [
-        id,
-        productName,
-        price,
-        ivaPercent,
-        vehicleType,
-        locations,
-        productActive,
-        vehicleTypeUid,
-        isSelected,
-        productType,
-        productInvoiceId,
-        serviceTime,
-        productCommission,
-      ];
+    id,
+    productName,
+    price,
+    ivaPercent,
+    vehicleType,
+    locations,
+    productActive,
+    vehicleTypeUid,
+    isSelected,
+    productType,
+    productInvoiceId,
+    serviceTime,
+    productCommission,
+  ];
 }

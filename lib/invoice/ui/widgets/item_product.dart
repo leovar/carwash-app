@@ -86,7 +86,7 @@ class _ItemProduct extends State<ItemProduct> {
                         '\$${formatter.format(_itemProduct.price)}',
                         style: TextStyle(
                           fontFamily: "Lato",
-                          color: Theme.of(context).accentColor,
+                          color: Theme.of(context).colorScheme.secondary,
                           fontWeight: FontWeight.bold,
                           fontSize: 18,
                         ),

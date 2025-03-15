@@ -1,6 +1,4 @@
-import 'dart:async';
 import 'package:car_wash_app/user/bloc/bloc_user.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -38,36 +36,32 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: 'Carwash Movil App',
         theme: ThemeData(
-          primarySwatch: Colors.blue,
           secondaryHeaderColor: Color(0xFF27AEBB),
           primaryColor: Color(0xFF27AEBB),
-          accentColor: Color(0xFF59B258),
           cardColor: Color(0xFF787A71),
-          cursorColor: Color(0xFFAEAEAE),
           dividerColor: Color(0xFFF1F1F1),
-          errorColor: Color(0xFFAF5048),
           textTheme: TextTheme(
-            button: TextStyle(
+            labelLarge: TextStyle(
               fontFamily: "Lato",
               decoration: TextDecoration.none,
               fontWeight: FontWeight.bold,
               color: Colors.white,
               fontSize: 19,
             ),
-            display1: TextStyle(
+            headlineMedium: TextStyle(
               fontFamily: "Lato",
               decoration: TextDecoration.none,
               fontWeight: FontWeight.bold,
               color: Colors.black,
               fontSize: 19,
             ),
-            display2: TextStyle(
+            displaySmall: TextStyle(
               fontFamily: "Lato",
               decoration: TextDecoration.none,
               color: Colors.black,
               fontSize: 17,
             )
-          ),
+          ), textSelectionTheme: TextSelectionThemeData(cursorColor: Color(0xFFAEAEAE)), colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue).copyWith(secondary: Color(0xFF59B258)).copyWith(error: Color(0xFFAF5048)),
         ),
         home: LoginPage(),
         //HomePage(),//LoginPage(),

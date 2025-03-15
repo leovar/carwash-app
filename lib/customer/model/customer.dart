@@ -31,7 +31,7 @@ class Customer extends Equatable {
   factory Customer.fromJson(Map<String, dynamic> json, {String id}) {
     List<DocumentReference> vehiclesListDb = <DocumentReference>[];
     List vehiclesList = json['vehicles'];
-    vehiclesList?.forEach((drLocation) {
+    vehiclesList.forEach((drLocation) {
       vehiclesListDb.add(drLocation);
     });
 
@@ -90,15 +90,15 @@ class Customer extends Equatable {
 
   @override
   List<Object> get props => [
-        id,
-        name,
-        address,
-        phoneNumber,
-        email,
-        creationDate,
-        vehicles,
-        birthDate,
-        neighborhood,
-        typeSex,
-      ];
+    id,
+    name,
+    address,
+    phoneNumber,
+    email,
+    creationDate,
+    vehicles,
+    birthDate,
+    neighborhood,
+    typeSex,
+  ];
 }
