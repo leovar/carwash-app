@@ -46,7 +46,8 @@ dependencies:
   google_sign_in:
   firebase_storage: ^12.4.4
   cloud_firestore: ^5.6.5
-  flutter_login_facebook: ^2.0.1
+  flutter_facebook_auth: ^7.1.1
+  #flutter_login_facebook: ^2.0.1  #deplecated //TODO esta libreria hay que eliminarla si no se usa en otro lugar
   firebase_core:
 
   #nemu

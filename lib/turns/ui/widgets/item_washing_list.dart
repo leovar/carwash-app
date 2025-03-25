@@ -8,15 +8,15 @@ class ItemWashingList extends StatefulWidget {
   final int index;
   final Function(Invoice) endWash;
 
-  ItemWashingList({Key key, this.listInvoices, this.index, this.endWash});
+  ItemWashingList({Key? key, required this.listInvoices, required this.index, required this.endWash});
 
   @override
   State<StatefulWidget> createState() => _ItemWashingList();
 }
 
 class _ItemWashingList extends State<ItemWashingList> {
-  double _imageWith;
-  String _iconVehicle;
+  late double _imageWith;
+  late String _iconVehicle;
   var _remainingPercentDuration = 0;
   var _invoiceDuration = 0;
   var formatter = new DateFormat('dd-MM-yyyy hh:mm a');
@@ -49,15 +49,13 @@ class _ItemWashingList extends State<ItemWashingList> {
   Widget build(BuildContext context) {
     final formatter = NumberFormat("#,###");
     Invoice _invoiceList = widget.listInvoices[widget.index];
-    DateTime dateStart = _invoiceList.dateStartWashing.toDate();
+    DateTime dateStart = _invoiceList.dateStartWashing!.toDate();
     DateTime dateCurrent = DateTime.now();
     Duration diff = dateCurrent.difference(dateStart);
     int washCurrentDuration = diff.inMinutes;
-    _invoiceDuration = _invoiceList.washingServicesTime == null
-        ? 0
-        : _invoiceList.washingServicesTime;
-    if (_invoiceList.countWashingWorkers > 1) {
-      _invoiceDuration = (_invoiceDuration / _invoiceList.countWashingWorkers).round();
+    _invoiceDuration = _invoiceList.washingServicesTime??0;
+    if ((_invoiceList.countWashingWorkers??0) > 1) {
+      _invoiceDuration = (_invoiceDuration / (_invoiceList.countWashingWorkers??0)).round();
     }
     int remainingDuration = _invoiceDuration - washCurrentDuration;
     var calculateRemainingPercent = _invoiceDuration == 0
@@ -131,7 +129,7 @@ class _ItemWashingList extends State<ItemWashingList> {
                           SizedBox(height: 5),
                           Flexible(
                             child: Text(
-                              'Celda: ' + _invoiceList.washingCell,
+                              'Celda: ' + (_invoiceList.washingCell??''),
                               style: TextStyle(
                                 color: Theme.of(context).cardColor,
                                 fontFamily: "Lato",
@@ -144,7 +142,7 @@ class _ItemWashingList extends State<ItemWashingList> {
                             child: Text(
                               'Inicio: ' +
                                   formatterHour.format(
-                                      _invoiceList.dateStartWashing.toDate()),
+                                      _invoiceList.dateStartWashing!.toDate()),
                               style: TextStyle(
                                 color: Theme.of(context).cardColor,
                                 fontFamily: "Lato",
@@ -190,7 +188,7 @@ class _ItemWashingList extends State<ItemWashingList> {
                                 ),
                               ),
                               linearStrokeCap: LinearStrokeCap.roundAll,
-                              backgroundColor: Theme.of(context).cursorColor,
+                              backgroundColor: Theme.of(context).textSelectionTheme.cursorColor,
                               progressColor: Colors.blue,
                             ),
                           ),
@@ -208,15 +206,17 @@ class _ItemWashingList extends State<ItemWashingList> {
                 margin: EdgeInsets.only(right: 2),
                 child: ButtonTheme(
                   minWidth: 90,
-                  child: RaisedButton(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: new BorderRadius.circular(18.0),
-                        side: BorderSide(color: Theme.of(context).colorScheme.secondary)),
-                    color: Theme.of(context).colorScheme.secondary,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.secondary,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: new BorderRadius.circular(18.0),
+                          side: BorderSide(color: Theme.of(context).colorScheme.secondary)),
+                    ),
                     onPressed: () {
                       widget.endWash(_invoiceList);
                     },
-                    textColor: Colors.white,
                     child: Text(
                       'Terminar'.toUpperCase(),
                       style: TextStyle(fontSize: 11),

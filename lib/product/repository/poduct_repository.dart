@@ -3,7 +3,7 @@ import 'package:car_wash_app/widgets/firestore_collections.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ProductRepository {
-  final Firestore _db = Firestore.instance;
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   Stream<QuerySnapshot> getListProductsStream() {
     final querySnapshot = this
@@ -17,7 +17,7 @@ class ProductRepository {
   List<Product> buildProducts(List<DocumentSnapshot> productListSnapshot) {
     List<Product> productList = <Product>[];
     productListSnapshot.forEach((p) {
-      Product loc = Product.fromJson(p.data, id: p.documentID);
+      Product loc = Product.fromJson(p.data as Map<String, dynamic>, id: p.id);
       productList.add(loc);
     });
     return productList;
@@ -30,7 +30,7 @@ class ProductRepository {
         .collection(FirestoreCollections.products)
         .where(FirestoreCollections.locations,
             arrayContains:
-                _db.document('${FirestoreCollections.locations}/$idLocation'))
+                _db.doc('${FirestoreCollections.locations}/$idLocation'))
         .where(FirestoreCollections.productFieldUidVehicleType,
             isEqualTo: uidVehicleType)
         .where(FirestoreCollections.productFieldProductActive, isEqualTo: true)
@@ -42,7 +42,7 @@ class ProductRepository {
       List<DocumentSnapshot> productListSnapshot) {
     List<Product> productList = <Product>[];
     productListSnapshot.forEach((p) {
-      Product loc = Product.fromJson(p.data, id: p.documentID);
+      Product loc = Product.fromJson(p.data as Map<String, dynamic>, id: p.id);
       productList.add(loc);
     });
     return productList;
@@ -50,8 +50,8 @@ class ProductRepository {
 
   void updateProduct(Product product) async {
     DocumentReference ref =
-        _db.collection(FirestoreCollections.products).document(product.id);
-    return await ref.setData(product.toJson(), merge: true);
+        _db.collection(FirestoreCollections.products).doc(product.id);
+    return await ref.set(product.toJson(), SetOptions(merge: true));
   }
 
   /// Get Vehicle Reference
@@ -59,10 +59,10 @@ class ProductRepository {
     final querySnapshot = await this
         ._db
         .collection(FirestoreCollections.products)
-        .document(productId)
+        .doc(productId)
         .get();
 
-    return Product.fromJson(querySnapshot.data, id: querySnapshot.documentID);
+    return Product.fromJson(querySnapshot.data as Map<String, dynamic>, id: querySnapshot.id);
   }
 
   Future<List<Product>> getAllProducts() async {
@@ -70,12 +70,12 @@ class ProductRepository {
     final querySnapshot = await this
         ._db
         .collection(FirestoreCollections.products)
-        .getDocuments();
+        .get();
 
-    final documents = querySnapshot.documents;
+    final documents = querySnapshot.docs;
     if (documents.length > 0) {
       documents.forEach((document) {
-        Product product = Product.fromJson(document.data, id: document.documentID);
+        Product product = Product.fromJson(document.data as Map<String, dynamic>, id: document.id);
         productList.add(product);
       });
     }

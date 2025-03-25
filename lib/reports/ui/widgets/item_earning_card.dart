@@ -6,8 +6,8 @@ class ItemEarningCard extends StatefulWidget {
   final EarningsCardDetail cardDetail;
 
   ItemEarningCard({
-    Key key,
-    this.cardDetail,
+    Key? key,
+    required this.cardDetail,
   });
 
   @override

@@ -5,14 +5,14 @@ import 'package:meta/meta.dart';
 
 @immutable
 class Vehicle extends Equatable {
-  final String id;
-  final String brand;
-  final String model;
-  final String placa;
-  final String color;
-  final String vehicleType;
-  final Timestamp creationDate;
-  final String brandReference;
+  final String? id;
+  final String? brand;
+  final String? model;
+  final String? placa;
+  final String? color;
+  final String? vehicleType;
+  final Timestamp? creationDate;
+  final String? brandReference;
 
   Vehicle({
     this.id,
@@ -25,7 +25,7 @@ class Vehicle extends Equatable {
     this.brandReference,
   });
 
-  factory Vehicle.fromJson(Map<String, dynamic> json, {String id}) {
+  factory Vehicle.fromJson(Map<String, dynamic> json, {String? id}) {
     return Vehicle(
       id: id,
       brand: json['brand'],
@@ -52,13 +52,13 @@ class Vehicle extends Equatable {
 
   @override
   List<Object> get props => [
-    id,
-    brand,
-    model,
-    placa,
-    color,
-    vehicleType,
-    creationDate,
-    brandReference
+    id!,
+    brand!,
+    model!,
+    placa!,
+    color!,
+    vehicleType!,
+    creationDate!,
+    brandReference!
   ];
 }

@@ -8,7 +8,7 @@ class InfoDetailCardProductivity extends StatelessWidget {
   final double _widthContainer = 300;
   final formatter = new DateFormat('dd-MM-yyyy');
 
-  InfoDetailCardProductivity({Key key, @required this.productivityProducts});
+  InfoDetailCardProductivity({Key? key, required this.productivityProducts});
 
   @override
   Widget build(BuildContext context) {

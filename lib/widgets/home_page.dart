@@ -7,7 +7,7 @@ import 'package:car_wash_app/reports/ui/screens/operators_report.dart';
 import 'package:car_wash_app/reports/ui/screens/reports_page.dart';
 import 'package:car_wash_app/turns/ui/screens/turns_page.dart';
 import 'package:car_wash_app/user/bloc/bloc_user.dart';
-import 'package:car_wash_app/user/model/user.dart';
+import 'package:car_wash_app/user/model/sysUser.dart';
 import 'package:car_wash_app/widgets/select_location_widget.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -34,10 +34,10 @@ class _HomePage extends State<HomePage> {
   GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey();
   final _locationBloc = BlocLocation();
   final _blocInvoice = BlocInvoice();
-  UserBloc _userBloc;
-  User _currentUser;
+  late UserBloc _userBloc;
+  late SysUser _currentUser;
   String _photoUrl = '';
-  DocumentReference _locationReference;
+  late DocumentReference _locationReference;
   String _locationName = '';
   bool _isAdministrator = false;
   bool _isCoordinator = false;
@@ -96,13 +96,13 @@ class _HomePage extends State<HomePage> {
 
   Widget _chargeHome(AsyncSnapshot snapshot) {
     if (snapshot.data.documents.length > 0) {
-      User user = _userBloc.buildUsersById(snapshot.data.documents);
+      SysUser user = _userBloc.buildUsersById(snapshot.data.documents);
       this._currentUser = user;
       this._currentUser.photoUrl = _photoUrl;
-      if (user.isAdministrator) {
+      if (user.isAdministrator ?? false) {
         _isAdministrator = true;
       }
-      if (user.isCoordinator) {
+      if (user.isCoordinator ?? false) {
         _isCoordinator = true;
       }
       return homePage();
@@ -131,7 +131,7 @@ class _HomePage extends State<HomePage> {
         key: _scaffoldKey,
         appBar: PreferredSize(
           preferredSize: Size(MediaQuery.of(context).size.width, 65),
-          child: AppBarWidget(_scaffoldKey, _currentUser.photoUrl, true),
+          child: AppBarWidget(_scaffoldKey, _currentUser.photoUrl ?? '', true),
         ),
         body: Stack(
           children: <Widget>[
@@ -355,8 +355,8 @@ class _HomePage extends State<HomePage> {
   void _serLocationPreference(Location locationSelected) async {
     SharedPreferences pref = await SharedPreferences.getInstance();
     setState(() {
-      pref.setString(Keys.idLocation, locationSelected.id);
-      pref.setString(Keys.locationName, locationSelected.locationName);
+      pref.setString(Keys.idLocation, locationSelected.id ?? '');
+      pref.setString(Keys.locationName, locationSelected.locationName ?? '');
       pref.setString(
           Keys.locationInitCount, locationSelected.initConcec.toString());
       pref.setString(
@@ -366,10 +366,10 @@ class _HomePage extends State<HomePage> {
 
   Future<void> _getPreferences() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
-    String idLocation = pref.getString(Keys.idLocation);
-    _locationReference = await _locationBloc.getLocationReference(idLocation);
-    _locationName = pref.getString(Keys.locationName);
-    _photoUrl = pref.getString(Keys.photoUserUrl);
+    String? idLocation = pref.getString(Keys.idLocation);
+    _locationReference = await _locationBloc.getLocationReference(idLocation ?? '');
+    _locationName = pref.getString(Keys.locationName) ?? '';
+    _photoUrl = pref.getString(Keys.photoUserUrl) ?? '';
     _blocInvoice.getConfigurationObject().then((value) => _config = value);
   }
 

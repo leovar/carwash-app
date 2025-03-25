@@ -100,7 +100,7 @@ class UserRepository {
   }
 
   ///Search Users By Email
-  Future<SysUser?> searchUserByEmail(String email) async {
+  Future<SysUser?> searchUserByEmail(String? email) async {
     final querySnapshot = await this
         ._db
         .collection(FirestoreCollections.users)

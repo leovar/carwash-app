@@ -12,9 +12,9 @@ class CarouselCarsWidget extends StatefulWidget {
   final Function(String) callbackDeleteImage;
 
   CarouselCarsWidget(
-      {Key key,
-      @required this.callbackDeleteImage,
-      this.imgList,
+      {Key? key,
+      required this.callbackDeleteImage,
+      required this.imgList,
       this.editForm})
       : super(key: key);
 
@@ -42,18 +42,20 @@ class _CarouselCarsWidget extends State<CarouselCarsWidget> {
 
   carouselCars() {
     return CarouselSlider(
-      height: 400,
+      options: CarouselOptions(
+        height: 400,
+        autoPlay: false,
+        enlargeCenterPage: true,
+        viewportFraction: 1.0,
+        enableInfiniteScroll: false,
+        initialPage: 0,
+        onPageChanged: (index, reason) {
+          setState(() {
+            _current = index;
+          });
+        },
+      ),
       items: rows(),
-      autoPlay: false,
-      enlargeCenterPage: true,
-      viewportFraction: 1.0,
-      enableInfiniteScroll: false,
-      initialPage: 0,
-      onPageChanged: (index) {
-        setState(() {
-          _current = index;
-        });
-      },
     );
   }
 

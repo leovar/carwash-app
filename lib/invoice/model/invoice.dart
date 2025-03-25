@@ -1,63 +1,63 @@
 import 'dart:typed_data';
 
 import 'package:car_wash_app/product/model/product.dart';
-import 'package:car_wash_app/user/model/user.dart';
+import 'package:car_wash_app/user/model/sysUser.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
 @immutable
 class Invoice extends Equatable {
-  final String id;
-  final double totalPrice;
-  final double subtotal;
-  final double iva;
-  final DocumentReference userOwner;
-  final DocumentReference userOperator;
-  final String userOperatorName;
-  final DocumentReference userCoordinator;
-  final String userCoordinatorName;
-  final DocumentReference customer;
-  final String customerName;
-  final String phoneNumber;
-  final DocumentReference vehicle;
-  final String placa;
-  final int uidVehicleType;
-  final DocumentReference location;
-  final String locationName;
-  final int consecutive;
-  final Timestamp creationDate;
-  final List<String> invoiceImages;
-  final List<Product> invoiceProducts;
-  final String productsSplit;
-  final String vehicleBrand;
-  final String brandReference;
-  final String vehicleColor;
-  final Uint8List imageFirm;
-  final bool approveDataProcessing;
-  final String timeDelivery;
-  final Timestamp closedDate;
-  final bool invoiceClosed;
-  final String observation;
-  final String incidence;
-  final bool haveSpecialService;
-  final int countProducts;
-  final int countAdditionalProducts;
-  final bool sendEmailInvoice;
-  final bool cancelledInvoice;
-  final String paymentMethod;
-  final int washingServicesTime;
-  final bool startWashing;
-  final String washingCell;
-  final Timestamp dateStartWashing;
-  final int countWashingWorkers;
-  final bool endWash;
-  final Timestamp dateEndWash;
-  final int washingTime;
-  final List<User> operatorUsers;
-  final String operatorsSplit;
-  final int countOperators;
-  final double totalCommission;
+  final String? id;
+  final double? totalPrice;
+  final double? subtotal;
+  final double? iva;
+  final DocumentReference? userOwner;
+  final DocumentReference? userOperator;
+  final String? userOperatorName;
+  final DocumentReference? userCoordinator;
+  final String? userCoordinatorName;
+  final DocumentReference? customer;
+  final String? customerName;
+  final String? phoneNumber;
+  final DocumentReference? vehicle;
+  final String? placa;
+  final int? uidVehicleType;
+  final DocumentReference? location;
+  final String? locationName;
+  final int? consecutive;
+  final Timestamp? creationDate;
+  final List<String>? invoiceImages;
+  final List<Product>? invoiceProducts;
+  final String? productsSplit;
+  final String? vehicleBrand;
+  final String? brandReference;
+  final String? vehicleColor;
+  final Uint8List? imageFirm;
+  final bool? approveDataProcessing;
+  final String? timeDelivery;
+  final Timestamp? closedDate;
+  final bool? invoiceClosed;
+  final String? observation;
+  final String? incidence;
+  final bool? haveSpecialService;
+  final int? countProducts;
+  final int? countAdditionalProducts;
+  final bool? sendEmailInvoice;
+  final bool? cancelledInvoice;
+  final String? paymentMethod;
+  final int? washingServicesTime;
+  final bool? startWashing;
+  final String? washingCell;
+  final Timestamp? dateStartWashing;
+  final int? countWashingWorkers;
+  final bool? endWash;
+  final Timestamp? dateEndWash;
+  final int? washingTime;
+  final List<SysUser>? operatorUsers;
+  final String? operatorsSplit;
+  final int? countOperators;
+  final double? totalCommission;
 
   Invoice({
     this.id,
@@ -159,10 +159,10 @@ class Invoice extends Equatable {
     };
   }
 
-  factory Invoice.fromJson(Map<String, dynamic> json, {String id}) {
+  factory Invoice.fromJson(Map<String, dynamic> json, {String? id}) {
     List<DocumentReference> locationsListDb = <DocumentReference>[];
     List<Product> listProducts = <Product>[];
-    List<User> listOperators = <User>[];
+    List<SysUser> listOperators = <SysUser>[];
     var pSplit = '';
     var oSplit = '';
     List locationsList = json['locations'];
@@ -179,7 +179,7 @@ class Invoice extends Equatable {
         json['consecutive'],
       );
       listProducts.add(productResult);
-      pSplit = pSplit + productResult.productName + ', ';
+      pSplit = pSplit + (productResult.productName??'') + ', ';
     });
     if (pSplit.length > 0) {
       pSplit = pSplit.substring(0, pSplit.length - 2);
@@ -187,7 +187,7 @@ class Invoice extends Equatable {
 
     var operators = json['operatorUsers'];
     operators?.forEach((item) {
-      User userResult = User.fromJsonOperatorIntoInvoice(item);
+      SysUser userResult = SysUser.fromJsonOperatorIntoInvoice(item);
       listOperators.add(userResult);
       oSplit = oSplit + userResult.name + ', ';
     });
@@ -247,30 +247,30 @@ class Invoice extends Equatable {
   }
 
   factory Invoice.copyWith({
-    @required Invoice origin,
-    Timestamp closedDate,
-    bool invoiceClosed,
-    List<Product> listProducts,
-    int countProducts,
-    int countAdditionalProducts,
-    DocumentReference userOperator,
-    String userOperatorName,
-    String paymentMethod,
-    String customerName,
-    String customerPhone,
-    bool cancelledInvoice,
-    bool startWashing,
-    bool endWash,
-    String washingCell,
-    Timestamp dateStartWashing,
-    Timestamp dateEndWash,
-    int countWashingWorkers,
-    int washingTime,
-    String incidence,
-    List<User> listOperators,
-    int countOperators,
-    double oppCommission,
-    double totalCommission,
+    required Invoice origin,
+    Timestamp? closedDate,
+    bool? invoiceClosed,
+    List<Product>? listProducts,
+    int? countProducts,
+    int? countAdditionalProducts,
+    DocumentReference? userOperator,
+    String? userOperatorName,
+    String? paymentMethod,
+    String? customerName,
+    String? customerPhone,
+    bool? cancelledInvoice,
+    bool? startWashing,
+    bool? endWash,
+    String? washingCell,
+    Timestamp? dateStartWashing,
+    Timestamp? dateEndWash,
+    int? countWashingWorkers,
+    int? washingTime,
+    String? incidence,
+    List<SysUser>? listOperators,
+    int? countOperators,
+    double? oppCommission,
+    double? totalCommission,
   }) {
     return Invoice(
       id: origin.id,
@@ -327,52 +327,52 @@ class Invoice extends Equatable {
 
   @override
   List<Object> get props => [
-    id,
-    totalPrice,
-    subtotal,
-    iva,
-    userOwner,
-    userOperator,
-    userOperatorName,
-    userCoordinator,
-    customer,
-    customerName,
-    phoneNumber,
-    vehicle,
-    placa,
-    uidVehicleType,
-    location,
-    locationName,
-    consecutive,
-    creationDate,
-    invoiceImages,
-    invoiceProducts,
-    approveDataProcessing,
-    vehicleBrand,
-    brandReference,
-    vehicleColor,
-    timeDelivery,
-    closedDate,
-    invoiceClosed,
-    observation,
-    incidence,
-    haveSpecialService,
-    countProducts,
-    countAdditionalProducts,
-    sendEmailInvoice,
-    cancelledInvoice,
-    paymentMethod,
-    startWashing,
-    washingCell,
-    dateStartWashing,
-    dateEndWash,
-    countWashingWorkers,
-    endWash,
-    washingServicesTime,
-    washingTime,
-    operatorUsers,
-    operatorsSplit,
-    countOperators,
-    totalCommission,
+    id!,
+    totalPrice ?? 0,
+    subtotal ?? 0,
+    iva ?? 0,
+    userOwner!,
+    userOperator!,
+    userOperatorName ?? '',
+    userCoordinator!,
+    customer!,
+    customerName!,
+    phoneNumber!,
+    vehicle!,
+    placa ?? '',
+    uidVehicleType!,
+    location!,
+    locationName!,
+    consecutive!,
+    creationDate!,
+    invoiceImages!,
+    invoiceProducts!,
+    approveDataProcessing!,
+    vehicleBrand!,
+    brandReference!,
+    vehicleColor!,
+    timeDelivery!,
+    closedDate!,
+    invoiceClosed!,
+    observation!,
+    incidence!,
+    haveSpecialService!,
+    countProducts!,
+    countAdditionalProducts!,
+    sendEmailInvoice!,
+    cancelledInvoice!,
+    paymentMethod!,
+    startWashing!,
+    washingCell!,
+    dateStartWashing!,
+    dateEndWash!,
+    countWashingWorkers!,
+    endWash!,
+    washingServicesTime!,
+    washingTime!,
+    operatorUsers!,
+    operatorsSplit!,
+    countOperators!,
+    totalCommission!,
   ];
 }

@@ -18,8 +18,8 @@ class ItemProductAdminList extends StatefulWidget {
 }
 
 class _ItemProductAdminList extends State<ItemProductAdminList> {
-  double _imageWith;
-  String _iconVehicle;
+  late double _imageWith;
+  late String _iconVehicle;
   String _vehicleTypeName = '';
 
   @override
@@ -120,7 +120,7 @@ class _ItemProductAdminList extends State<ItemProductAdminList> {
                         children: <Widget>[
                           Flexible(
                             child: Text(
-                              _itemProduct.productName,
+                              _itemProduct.productName??'',
                               style: TextStyle(
                                 fontFamily: "Lato",
                                 decoration: TextDecoration.none,
@@ -147,7 +147,7 @@ class _ItemProductAdminList extends State<ItemProductAdminList> {
               Container(
                 height: 25,
                 margin: EdgeInsets.only(right: 8.0),
-                child: _itemProduct.productActive
+                child: _itemProduct.productActive??false
                     ? Icon(
                         Icons.check,
                         color: Theme.of(context).primaryColor,

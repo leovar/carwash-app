@@ -22,12 +22,12 @@ class _CustomersReport extends State<CustomersReport> {
   BlocReports _blocReports = BlocReports();
   BlocLocation _blocLocation = BlocLocation();
   BlocCustomer _blocCustomer = BlocCustomer();
-  List<DropdownMenuItem<Location>> _dropdownMenuItems;
-  Location _selectedLocation;
+  late List<DropdownMenuItem<Location>> _dropdownMenuItems;
+  late Location _selectedLocation;
 
   final _textDateInit = TextEditingController();
   final _textDateFinal = TextEditingController();
-  DocumentReference _locationReference;
+  late DocumentReference _locationReference;
   var formatter = new DateFormat('dd-MM-yyyy');
   var _dateTimeInit = DateTime(DateTime.now().year, DateTime.now().month, 1);
   var _dateTimeFinal = DateTime.now();
@@ -46,9 +46,11 @@ class _CustomersReport extends State<CustomersReport> {
       mainAxisSize: MainAxisSize.max,
       children: <Widget>[
         _filterParamsReport(),
-        RaisedButton(
-          padding: EdgeInsets.symmetric(vertical: 15, horizontal: 10),
-          color: Theme.of(context).colorScheme.secondary,
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Theme.of(context).colorScheme.secondary,
+            padding: EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+          ),
           child: Text(
             "GENERAR EXCEL",
             style: TextStyle(
@@ -134,12 +136,12 @@ class _CustomersReport extends State<CustomersReport> {
         fontWeight: FontWeight.normal,
         color: Theme.of(context).cardColor,
       ),
-      underline: Container(height: 1, color: Theme.of(context).cursorColor),
+      underline: Container(height: 1, color: Theme.of(context).textSelectionTheme.cursorColor),
     );
   }
 
   List<DropdownMenuItem<Location>> builtDropdownMenuItems(List locations) {
-    List<DropdownMenuItem<Location>> listItems = List();
+    List<DropdownMenuItem<Location>> listItems = [];
     listItems.add(
       DropdownMenuItem(
         value: new Location(id: '', locationName: 'Todas las sedes'),
@@ -150,7 +152,7 @@ class _CustomersReport extends State<CustomersReport> {
       listItems.add(
         DropdownMenuItem(
           value: documentLoc,
-          child: Text(documentLoc.locationName),
+          child: Text(documentLoc.locationName??''),
         ),
       );
     }
@@ -158,24 +160,26 @@ class _CustomersReport extends State<CustomersReport> {
   }
 
   /// Functions
-  onChangeDropDawn(Location selectedLocation) async {
-    if (selectedLocation.id.isNotEmpty) {
+  onChangeDropDawn(Location? selectedLocation) async {
+    if (selectedLocation?.id?.isNotEmpty??false) {
       _locationReference = await _blocLocation.getLocationReference(
-        selectedLocation.id,
+        selectedLocation?.id??'',
       );
       setState(() {
-        _selectedLocation = selectedLocation;
+        if (selectedLocation !=  null) {
+          _selectedLocation = selectedLocation;
+        }
       });
     } else {
-      _locationReference = null;
+      _locationReference = DocumentReference as DocumentReference<Object?>;
       setState(() {
-        _selectedLocation = selectedLocation;
+        _selectedLocation = selectedLocation ?? new Location();
       });
     }
   }
 
   Future<Null> _datePickerFrom() async {
-    final DateTime picked = await showDatePicker(
+    final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: _dateTimeInit,
       firstDate: DateTime(1970),
@@ -184,14 +188,16 @@ class _CustomersReport extends State<CustomersReport> {
 
     if (picked != _dateTimeInit) {
       setState(() {
-        _dateTimeInit = picked;
+        if (picked != null) {
+          _dateTimeInit = picked;
+        }
         _textDateInit.text = formatter.format(_dateTimeInit);
       });
     }
   }
 
   Future<Null> _datePickerFinal() async {
-    final DateTime picked = await showDatePicker(
+    final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: _dateTimeFinal,
       firstDate: DateTime(1970),
@@ -200,7 +206,9 @@ class _CustomersReport extends State<CustomersReport> {
 
     if (picked != _dateTimeFinal) {
       setState(() {
-        _dateTimeFinal = picked;
+        if (picked != null) {
+          _dateTimeFinal = picked;
+        }
         _textDateFinal.text = formatter.format(_dateTimeFinal);
       });
     }
@@ -220,7 +228,7 @@ class _CustomersReport extends State<CustomersReport> {
       ); //await _blocCustomer.getListCustomerReportByLocation(_locationReference);
       List<Invoice> _newListInvoices = [];
       _newListInvoices = _listInvoices.toSet().toList();
-      _newListInvoices.sort((a, b) => a.customerName.compareTo(b.customerName));
+      _newListInvoices.sort((a, b) => (a.customerName??'').compareTo(b.customerName??''));
 
       var excel = Excel.createExcel();
       var sheetObject = excel["Sheet1"];
@@ -238,33 +246,38 @@ class _CustomersReport extends State<CustomersReport> {
           "Método de pago",
           "Sede",
         ];
-        sheetObject.appendRow(header);
+        sheetObject.appendRow(header.cast<CellValue?>());
         _newListInvoices.forEach((item) {
           List<String> row = [
             "${item.consecutive}",
             "${item.customerName}",
             "${item.phoneNumber}",
-            "${formatter.format(item.creationDate.toDate())}",
-            "${item.totalPrice.toInt()}",
+            item.creationDate != null
+              ? "${formatter.format(item.creationDate!.toDate())}"
+              : '',
+            "${item.totalPrice?.toInt()}",
             "${item.placa}",
             "${item.locationName}",
             "${item.productsSplit}",
             "${item.paymentMethod}",
             "${item.locationName}",
           ];
-          sheetObject.appendRow(row);
+          sheetObject.appendRow(row.cast<CellValue?>());
         });
       }
 
       excel.rename("Sheet1", "Hoja1");
 
-      String outputFile =
-          "/storage/emulated/0/Download/ReporteClientes_${_selectedLocation.locationName}.xlsx";
-      excel.encode().then((onValue) {
+      String outputFile = "/storage/emulated/0/Download/ReporteClientes_${_selectedLocation.locationName}.xlsx";
+      var encodedExcel = await excel.encode();
+      if (encodedExcel != null) {
         File(path_prov.join(outputFile))
           ..createSync(recursive: true)
-          ..writeAsBytesSync(onValue);
-      });
+          ..writeAsBytesSync(encodedExcel);
+      } else {
+        print("Error: Failed to encode Excel file.");
+      }
+
       Navigator.pop(context); //Close popUp Save
       Fluttertoast.showToast(
         msg: "Su reporte ha sido descargado en: ${outputFile}",
@@ -290,8 +303,7 @@ class _CustomersReport extends State<CustomersReport> {
         .getListCustomerReportByLocation(_locationReference);
     List<Customer> _newListCustomer = [];
     _newListCustomer = _listCustomers.toSet().toList();
-    _newListCustomer.sort((a, b) => a.name.compareTo(b.name));
-
+    _newListCustomer.sort((a, b) => (a.name??'').compareTo(b.name??''));
     var excel = Excel.createExcel();
     var sheetObject = excel["Sheet1"];
 
@@ -306,7 +318,7 @@ class _CustomersReport extends State<CustomersReport> {
         "Genero",
         "Sede",
       ];
-      sheetObject.appendRow(header);
+      sheetObject.appendRow(header.cast<CellValue?>());
       _newListCustomer.forEach((item) {
         List<String> row = [
           "${item.name}",
@@ -318,7 +330,7 @@ class _CustomersReport extends State<CustomersReport> {
           "${item.typeSex}",
           "${_selectedLocation.locationName}",
         ];
-        sheetObject.appendRow(row);
+        sheetObject.appendRow(row.cast<CellValue?>());
       });
     }
 
@@ -326,11 +338,15 @@ class _CustomersReport extends State<CustomersReport> {
 
     String outputFile =
         "/storage/emulated/0/Download/ReporteClientes_${_selectedLocation.locationName}.xlsx";
-    excel.encode().then((onValue) {
+    var encodedExcel = await excel.encode();
+    if (encodedExcel != null) {
       File(path_prov.join(outputFile))
         ..createSync(recursive: true)
-        ..writeAsBytesSync(onValue);
-    });
+        ..writeAsBytesSync(encodedExcel);
+    } else {
+      print("Error: Failed to encode Excel file.");
+    }
+
     Navigator.pop(context); //Close popUp Save
     Fluttertoast.showToast(
       msg: "Su reporte ha sido descargado en: ${outputFile}",

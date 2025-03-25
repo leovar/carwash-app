@@ -74,7 +74,7 @@ class _ItemPaymentMethodAdmin extends State<ItemPaymentMethodAdmin> {
                         children: <Widget>[
                           Flexible(
                             child: Text(
-                              _itemPaymentMethod.name,
+                              _itemPaymentMethod.name??'',
                               style: TextStyle(
                                 fontFamily: "Lato",
                                 color: Theme.of(context).primaryColor,
@@ -93,7 +93,7 @@ class _ItemPaymentMethodAdmin extends State<ItemPaymentMethodAdmin> {
             Container(
               height: 25,
               margin: EdgeInsets.only(right: 8.0),
-              child: _itemPaymentMethod.active
+              child: _itemPaymentMethod.active??false
                   ? Icon(
                 Icons.check,
                 color: Theme.of(context).primaryColor,

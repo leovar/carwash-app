@@ -3,7 +3,7 @@ import 'package:car_wash_app/widgets/firestore_collections.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CommissionRepository {
-  final Firestore _db = Firestore.instance;
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   Stream<QuerySnapshot> getListCommissionsStream() {
     final querySnapshot = this
@@ -16,7 +16,7 @@ class CommissionRepository {
   List<Commission> buildCommissions(List<DocumentSnapshot> commissionListSnapshot) {
     List<Commission> commissionList = <Commission>[];
     commissionListSnapshot.forEach((p) {
-      Commission loc = Commission.fromJson(p.data, id: p.documentID);
+      Commission loc = Commission.fromJson(p.data as Map<String, dynamic>, id: p.id);
       commissionList.add(loc);
     });
     return commissionList;
@@ -24,8 +24,8 @@ class CommissionRepository {
 
   void updateCommission(Commission commission) async {
     DocumentReference ref =
-        _db.collection(FirestoreCollections.commissions).document(commission.id);
-    return await ref.setData(commission.toJson(), merge: true);
+        _db.collection(FirestoreCollections.commissions).doc(commission.id);
+    return await ref.set(commission.toJson(), SetOptions(merge: true));
   }
 
   Future<List<Commission>> getAllCommissions() async {
@@ -33,12 +33,12 @@ class CommissionRepository {
     final querySnapshot = await this
         ._db
         .collection(FirestoreCollections.commissions)
-        .getDocuments();
+        .get();
 
-    final documents = querySnapshot.documents;
+    final documents = querySnapshot.docs;
     if (documents.length > 0) {
       documents.forEach((document) {
-        Commission commission = Commission.fromJson(document.data, id: document.documentID);
+        Commission commission = Commission.fromJson(document.data as Map<String, dynamic>, id: document.id);
         commissionList.add(commission);
       });
     }

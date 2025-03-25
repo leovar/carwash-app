@@ -21,19 +21,19 @@ class FieldsInvoice extends StatefulWidget {
   final editForm;
 
   FieldsInvoice({
-    Key key,
+    Key? key,
     this.textPlaca,
-    this.sendEmail,
-    this.cbHandlerSendEmail,
+    required this.sendEmail,
+    required this.cbHandlerSendEmail,
     this.textClient,
     this.textEmail,
     this.textPhoneNumber,
     this.textNeighborhood,
     this.textBirthDate,
     this.textTimeDelivery,
-    this.finalEditPlaca,
-    this.enableForm,
-    this.validatePlaca,
+    required this.finalEditPlaca,
+    required this.enableForm,
+    required this.validatePlaca,
     this.focusClient,
     this.autofocusPlaca,
     this.editForm,
@@ -140,11 +140,13 @@ class _FieldsInvoice extends State<FieldsInvoice> {
               value: _sendEmail,
               onChanged:
                   true //widget.enableForm
-                      ? (bool value) {
-                        setState(() {
-                          _sendEmail = value;
-                        });
-                        widget.cbHandlerSendEmail(value);
+                      ? (bool? value) {
+                        if (value != null) {
+                          setState(() {
+                            _sendEmail = value;
+                          });
+                          widget.cbHandlerSendEmail(value);
+                        }
                       }
                       : null,
               checkColor: Colors.white,
@@ -170,7 +172,7 @@ class _FieldsInvoice extends State<FieldsInvoice> {
   Future<Null> _selectDate(BuildContext context) async {
     final formatDate = DateFormat.yMd('ES');
     Locale myLocale = Localizations.localeOf(context);
-    final DateTime picked = await showDatePicker(
+    final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: _date,
       locale: myLocale,
@@ -179,20 +181,22 @@ class _FieldsInvoice extends State<FieldsInvoice> {
     );
     if (picked != _date)
       setState(() {
-        _date = picked;
-        widget.textBirthDate.value = TextEditingValue(
-          text: formatDate.format(picked),
-        );
+        if (picked != null) {
+          _date = picked;
+          widget.textBirthDate.value = TextEditingValue(
+            text: formatDate.format(picked),
+          );
+        }
       });
   }
 
   Future<Null> _selectTime(BuildContext context) async {
     String text12Hour = '';
-    final TimeOfDay picked = await showTimePicker(
+    final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.now(),
     );
-    if (picked != _time)
+    if (picked != null && picked != _time)
       setState(() {
         _time = picked;
         TimeOfDay _hour12Format = picked.replacing(hour: picked.hourOfPeriod);
@@ -203,11 +207,7 @@ class _FieldsInvoice extends State<FieldsInvoice> {
           hour24 = int.parse(_time.format(context).substring(0, 1));
         }
 
-        if (hour24 <= 12) {
-          text12Hour = '${_hour12Format.format(context)} A.M';
-        } else {
-          text12Hour = '${_hour12Format.format(context)} P.M';
-        }
+        text12Hour = hour24 <= 12 ? '${_hour12Format.format(context)} A.M' : '${_hour12Format.format(context)} P.M';
         widget.textTimeDelivery.value = TextEditingValue(text: text12Hour);
       });
   }

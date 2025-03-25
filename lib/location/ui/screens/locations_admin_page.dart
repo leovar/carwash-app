@@ -12,7 +12,7 @@ class LocationsAdminPage extends StatefulWidget{
 }
 
 class _LocationsAdminPage extends State<LocationsAdminPage> {
-  BlocLocation _locationsBloc;
+  late BlocLocation _locationsBloc;
   List<Location> _locationList = <Location>[];
 
   @override
@@ -91,9 +91,11 @@ class _LocationsAdminPage extends State<LocationsAdminPage> {
       margin: EdgeInsets.only(top: 8,),
       child: Align(
         alignment: Alignment.bottomCenter,
-        child: RaisedButton(
-          padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
-          color: Color(0xFF59B258),
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
+            backgroundColor: Color(0xFF59B258),
+          ),
           child: Text(
             "Nueva Sede",
             style: TextStyle(

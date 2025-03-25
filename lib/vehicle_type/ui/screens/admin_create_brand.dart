@@ -13,13 +13,13 @@ class AdminCreateBrand extends StatefulWidget {
 }
 
 class _AdminCreateBrand extends State<AdminCreateBrand> {
-  VehicleTypeBloc _vehicleTypeBloc;
+  late VehicleTypeBloc _vehicleTypeBloc;
   BlocInvoice _blocInvoice = BlocInvoice();
   final _textReferenceName = TextEditingController();
   bool _validateReference = false;
   List<Brand> _listBrands = <Brand>[];
-  Brand _brandToEdit;
-  FocusNode myFocusNode;
+  late Brand _brandToEdit;
+  late FocusNode myFocusNode;
   bool _typeCar = false;
   bool _typeSuperBike = false;
   bool _typeBike = false;
@@ -100,7 +100,7 @@ class _AdminCreateBrand extends State<AdminCreateBrand> {
                 children: <Widget>[
                   Checkbox(
                     value: _typeCar,
-                    onChanged: (bool value) {
+                    onChanged: (bool? value) {
                       _onChangeRol(1, value);
                     },
                     checkColor: Colors.white,
@@ -124,7 +124,7 @@ class _AdminCreateBrand extends State<AdminCreateBrand> {
                 children: <Widget>[
                   Checkbox(
                     value: _typeSuperBike,
-                    onChanged: (bool value) {
+                    onChanged: (bool? value) {
                       _onChangeRol(3, value);
                     },
                     checkColor: Colors.white,
@@ -148,7 +148,7 @@ class _AdminCreateBrand extends State<AdminCreateBrand> {
                 children: <Widget>[
                   Checkbox(
                     value: _typeBike,
-                    onChanged: (bool value) {
+                    onChanged: (bool? value) {
                       _onChangeRol(4, value);
                     },
                     checkColor: Colors.white,
@@ -179,9 +179,11 @@ class _AdminCreateBrand extends State<AdminCreateBrand> {
       height: 100,
       child: Align(
         alignment: Alignment.center,
-        child: RaisedButton(
-          padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
-          color: Color(0xFF59B258),
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
+            backgroundColor: Color(0xFF59B258),
+          ),
           child: Text(
             "Guardar",
             style: TextStyle(
@@ -221,7 +223,7 @@ class _AdminCreateBrand extends State<AdminCreateBrand> {
 
   Widget _chargeListBrand(AsyncSnapshot snapshot) {
     _listBrands = _blocInvoice.buildBrands(snapshot.data.documents);
-    _listBrands.sort((a, b) => a.brand.toLowerCase().compareTo(b.brand.toLowerCase()));
+    _listBrands.sort((a, b) => (a.brand??'').toLowerCase().compareTo((b.brand??'').toLowerCase()));
     myFocusNode.requestFocus();
     return ListView.builder(
       itemCount: _listBrands.length,
@@ -248,7 +250,7 @@ class _AdminCreateBrand extends State<AdminCreateBrand> {
         selectType = 4;
 
       Brand ref;
-      List<Brand> findBrand = _listBrands.where((elm) => elm.brand.toLowerCase() == (_textReferenceName.text.toLowerCase().trim())).toList();
+      List<Brand> findBrand = _listBrands.where((elm) => (elm.brand??'').toLowerCase() == ((_textReferenceName.text??'').toLowerCase().trim())).toList();
 
       if (findBrand.length > 0) {
         MessagesUtils.showAlert(
@@ -281,37 +283,37 @@ class _AdminCreateBrand extends State<AdminCreateBrand> {
   }
 
   void _clearData() {
-    _brandToEdit = null;
+    _brandToEdit = new Brand();
     _textReferenceName.text = '';
     _typeCar = false;
     _typeSuperBike = false;
     _typeBike = false;
   }
 
-  void _editBrand(Brand selectBrand) {
-    _brandToEdit = selectBrand;
-    _textReferenceName.text = selectBrand.brand;
-    _onChangeRol(selectBrand.vehicleType, true);
+  void _editBrand(Brand? selectBrand) {
+    _brandToEdit = selectBrand ?? new Brand();
+    _textReferenceName.text = selectBrand?.brand ?? '';
+    _onChangeRol(selectBrand?.vehicleType, true);
   }
 
   //1. administrator, 2. coordinator, 3. Operator
-  void _onChangeRol(int rol, bool value) {
+  void _onChangeRol(int? rol, bool? value) {
     setState(() {
       switch (rol) {
         case 1:
-          _typeCar = value;
+          _typeCar = value ?? false;
           _typeSuperBike = false;
           _typeBike = false;
           break;
         case 3:
           _typeCar = false;
-          _typeSuperBike = value;
+          _typeSuperBike = value ?? false;
           _typeBike = false;
           break;
         case 4:
           _typeCar = false;
           _typeSuperBike = false;
-          _typeBike = value;
+          _typeBike = value ?? false;
           break;
       }
     });

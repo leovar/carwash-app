@@ -3,20 +3,20 @@ import 'package:car_wash_app/widgets/firestore_collections.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class LocationRepository {
-  final Firestore _db = Firestore.instance;
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   Future<DocumentReference> updateLocationDataRepository(Location location) async {
-    DocumentReference ref = _db.collection(FirestoreCollections.locations).document(location.id);
-    ref.setData(location.toJson(), merge: true);
+    DocumentReference ref = _db.collection(FirestoreCollections.locations).doc(location.id);
+    ref.set(location.toJson(), SetOptions(merge: true));
     return ref;
   }
 
   DocumentReference getDocumentReferenceLocationById(String idLocation) {
-    return _db.document('${FirestoreCollections.locations}/$idLocation');
+    return _db.doc('${FirestoreCollections.locations}/$idLocation');
   }
 
   Future<DocumentReference> getLocationReference(String locationId) async {
-    return _db.collection(FirestoreCollections.locations).document(locationId);
+    return _db.collection(FirestoreCollections.locations).doc(locationId);
   }
 
   Stream<QuerySnapshot> getLocationsStream() {
@@ -28,9 +28,9 @@ class LocationRepository {
   }
 
   List<Location> buildLocations(List<DocumentSnapshot> placesListSnapshot){
-    List<Location> locationsList = List<Location>();
+    List<Location> locationsList = [];
     placesListSnapshot.forEach((p) {
-      Location loc = Location.fromJson(p.data, id: p.documentID);
+      Location loc = Location.fromJson(p.data as Map<String, dynamic>, id: p.id);
       locationsList.add(loc);
     });
     return locationsList;
@@ -42,10 +42,10 @@ class LocationRepository {
     final querySnapshot = await this
         ._db
         .collection(FirestoreCollections.locations)
-        .document(locationId)
+        .doc(locationId)
         .get();
 
-    return Location.fromJson(querySnapshot.data, id: querySnapshot.documentID);
+    return Location.fromJson(querySnapshot.data as Map<String, dynamic>, id: querySnapshot.id);
   }
 
   Stream<QuerySnapshot> getAllLocationsStream() {
@@ -58,7 +58,7 @@ class LocationRepository {
   List<Location> buildGetAllLocations(List<DocumentSnapshot> locationsListSnapshot) {
     List<Location> locationsList = <Location>[];
     locationsListSnapshot.forEach((p) {
-      Location loc = Location.fromJson(p.data, id: p.documentID);
+      Location loc = Location.fromJson(p.data as Map<String, dynamic>, id: p.id);
       locationsList.add(loc);
     });
     return locationsList;
@@ -71,10 +71,10 @@ class LocationRepository {
     final result = await this
       ._db
       .collection(FirestoreCollections.locations)
-      .getDocuments();
+      .get();
 
-    result.documents.forEach((f) {
-      Location loc = Location.fromJson(f.data, id: f.documentID);
+    result.docs.forEach((f) {
+      Location loc = Location.fromJson(f.data as Map<String, dynamic>, id: f.id);
       locList.add(loc);
     });
     return locList;

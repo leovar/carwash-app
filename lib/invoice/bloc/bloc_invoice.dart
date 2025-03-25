@@ -7,7 +7,7 @@ import 'package:car_wash_app/invoice/model/invoice.dart';
 import 'package:car_wash_app/payment_methods/model/payment_methods.dart';
 import 'package:car_wash_app/invoice/repository/invoice_repository.dart';
 import 'package:car_wash_app/product/model/product.dart';
-import 'package:car_wash_app/user/model/user.dart';
+import 'package:car_wash_app/user/model/sysUser.dart';
 import 'package:car_wash_app/vehicle/repository/vehicle_repository.dart';
 import 'package:car_wash_app/vehicle_type/model/brand.dart';
 import 'package:car_wash_app/widgets/messages_utils.dart';
@@ -32,24 +32,25 @@ class BlocInvoice implements Bloc {
   /// Save Invoice and products
   Future<DocumentReference> saveInvoice(Invoice invoice) async {
     DocumentReference ref = await _invoiceRepository.updateInvoiceData(invoice);
-    String invoiceId = ref.documentID;
+    String invoiceId = ref.id;
     _saveImages(invoice, invoiceId);
     return ref;
   }
 
   void _saveImages(Invoice invoice, String invoiceId) async {
     try{
-      if (invoice.invoiceImages.length > 0) {
-        for (String imageFilePath in invoice.invoiceImages) {
+      if ((invoice.invoiceImages?.length??0) > 0) {
+        final storage = FirebaseStorage.instance;
+
+        for (String imageFilePath in invoice.invoiceImages??[]) {
           if (!imageFilePath.contains('https://firebasestorage.')) {
             File imageFile = File(imageFilePath);
             final pathImage = imageFilePath.contains('imageFirm')
                 ? '$invoiceId/before/firm'
                 : '$invoiceId/before/${basename(imageFilePath)}';
-            StorageTaskSnapshot storageTaskSnapshot =
-            await _invoiceRepository.uploadImageInvoice(pathImage, imageFile);
+            final storageTaskSnapshot = await _invoiceRepository.uploadImageInvoice(pathImage, imageFile);
             String imageUrl = await storageTaskSnapshot.ref.getDownloadURL();
-            String imagePath = await storageTaskSnapshot.ref.getPath();
+            String imagePath = await storageTaskSnapshot.ref.fullPath;
             await _invoiceRepository.updateInvoiceImages(invoiceId, imageUrl, imagePath);
           }
         }
@@ -73,7 +74,7 @@ class BlocInvoice implements Bloc {
   Stream<QuerySnapshot> operatorsByLocationStream(String idLocation) =>
       _invoiceRepository.getListOperatorsByLocationStream(idLocation);
 
-  List<User> buildOperators(List<DocumentSnapshot> operatorsListSnapshot) =>
+  List<SysUser> buildOperators(List<DocumentSnapshot> operatorsListSnapshot) =>
       _invoiceRepository.buildOperators(operatorsListSnapshot);
 
   /*Future<List<User>> getOperatorsUsers() {
@@ -87,7 +88,7 @@ class BlocInvoice implements Bloc {
   Stream<QuerySnapshot> coordinatorsByLocationStream(String idLocation) =>
       _invoiceRepository.getListCoordinatorByLocationStream(idLocation);
 
-  List<User> buildCoordinators(
+  List<SysUser> buildCoordinators(
           List<DocumentSnapshot> coordinatorListSnapshot) =>
       _invoiceRepository.buildCoordinator(coordinatorListSnapshot);
 
@@ -114,7 +115,7 @@ class BlocInvoice implements Bloc {
   List<Brand> buildBrands(List<DocumentSnapshot> brandsListSnapshot) {
     List<Brand> brands = _invoiceRepository.buildBrands(brandsListSnapshot);
     brands
-        .sort((a, b) => a.brand.toLowerCase().compareTo(b.brand.toLowerCase()));
+        .sort((a, b) => (a.brand??'').toLowerCase().compareTo((b.brand??'').toLowerCase()));
     return brands;
   }
 

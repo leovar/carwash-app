@@ -9,7 +9,7 @@ class ItemOperatorProductivityDetail extends StatelessWidget {
   final Configuration configuration;
 
   ItemOperatorProductivityDetail(
-      {Key key, @required this.cardReport, this.configuration});
+      {Key? key, required this.cardReport, required this.configuration});
 
   @override
   Widget build(BuildContext context) {
@@ -108,7 +108,7 @@ class ItemOperatorProductivityDetail extends StatelessWidget {
                           ),
                         ),
                         linearStrokeCap: LinearStrokeCap.roundAll,
-                        backgroundColor: Theme.of(context).cursorColor,
+                        backgroundColor: Theme.of(context).textSelectionTheme.cursorColor,
                         progressColor: _colorBarDay,
                       ),
                     ),
@@ -154,7 +154,7 @@ class ItemOperatorProductivityDetail extends StatelessWidget {
                           ),
                         ),
                         linearStrokeCap: LinearStrokeCap.roundAll,
-                        backgroundColor: Theme.of(context).cursorColor,
+                        backgroundColor: Theme.of(context).textSelectionTheme.cursorColor,
                         progressColor: _colorBarMonth,
                       ),
                     ),

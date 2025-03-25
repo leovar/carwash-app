@@ -9,7 +9,7 @@ class TurnsPage extends StatefulWidget {
   final user;
   final locationReference;
 
-  TurnsPage({Key key, this.user, this.locationReference});
+  TurnsPage({Key? key, this.user, this.locationReference});
 
   @override
   State<StatefulWidget> createState() => _TurnsPage();

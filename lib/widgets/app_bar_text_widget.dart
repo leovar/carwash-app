@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 
 class AppBarTextWidget extends StatelessWidget {
-  final String textAppBar;
+  final String? textAppBar;
 
-  AppBarTextWidget({Key key, this.textAppBar});
+  AppBarTextWidget({Key? key, this.textAppBar});
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +15,7 @@ class AppBarTextWidget extends StatelessWidget {
         onPressed: () => Navigator.pop(context),
       ),
       title: Text(
-        textAppBar,
+        textAppBar ?? '',
         style: TextStyle(
           fontFamily: "Lato",
           decoration: TextDecoration.none,

@@ -4,7 +4,7 @@ import 'package:car_wash_app/customer/bloc/bloc_customer.dart';
 import 'package:car_wash_app/customer/model/customer.dart';
 import 'package:car_wash_app/invoice/ui/widgets/text_field_input.dart';
 import 'package:car_wash_app/user/bloc/bloc_user.dart';
-import 'package:car_wash_app/user/model/user.dart';
+import 'package:car_wash_app/user/model/sysUser.dart';
 import 'package:car_wash_app/widgets/keys.dart';
 import 'package:car_wash_app/widgets/messages_utils.dart';
 import 'package:flutter/material.dart';
@@ -36,7 +36,7 @@ class _UserProfilePage extends State<UserProfilePage> {
   final _textBirthDate = TextEditingController();
   final double _heightTextField = 60;
   String _imageUrl = '';
-  late User _currentUser;
+  late SysUser _currentUser;
   Customer _currentCustomer = Customer();
   bool _obscureText = true;
   DateTime _date = new DateTime.now();
@@ -477,10 +477,10 @@ class _UserProfilePage extends State<UserProfilePage> {
 
   void _getUser() {
     _userBloc.getCurrentUser().then((user) {
-      _currentUser = user;
+      _currentUser = user?? new SysUser(uid: '', name: '', email: '');
       _updatePreference();
       this._selectUserList();
-      _customerBloc.getCustomerFilter('', user.email).then((customer) {
+      _customerBloc.getCustomerFilter('', user?.email ?? '').then((customer) {
         if (customer.length > 0) {
           _currentCustomer = customer[0];
           this._selectUserList();
@@ -519,7 +519,7 @@ class _UserProfilePage extends State<UserProfilePage> {
 
   void _updatePreference() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
-    pref.setString(Keys.photoUserUrl, _currentUser.photoUrl);
+    pref.setString(Keys.photoUserUrl, _currentUser.photoUrl ?? '');
     pref.setString(Keys.userName, _currentUser.name);
     pref.setString(Keys.userEmail, _currentUser.email);
   }
@@ -543,7 +543,7 @@ class _UserProfilePage extends State<UserProfilePage> {
         }
 
         // Update user db Info
-        final user = User.copyWith(
+        final user = SysUser.copyWith(
           origin: _currentUser,
           name: _textUserName.text.trim(),
           email: _textEmail.text.trim(),

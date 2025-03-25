@@ -1,8 +1,6 @@
 import 'dart:io';
 
 import 'package:car_wash_app/user/repository/auth_repository.dart';
-import 'package:car_wash_app/location/model/location.dart';
-import 'package:car_wash_app/location/repository/location_repository.dart';
 import 'package:car_wash_app/user/model/sysUser.dart';
 import 'package:car_wash_app/user/repository/user_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -26,15 +24,15 @@ class UserBloc implements Bloc {
   Stream<User?> streamFirebase = FirebaseAuth.instance.authStateChanges();
   Stream<User?> get authStatus => streamFirebase;
 
-  Future<User> signInGoogle() {
+  Future<User?> signInGoogle() {
     return _auth_repository.signInFirebase();
   }
 
-  Future<User> signInFacebook() {
+  Future<User?> signInFacebook() {
     return _auth_repository.signInFacebook();
   }
 
-  Future<User> signInEmail(String email, String password) {
+  Future<User?> signInEmail(String email, String password) {
     return _auth_repository.signInEmail(email, password);
   }
 
@@ -101,7 +99,7 @@ class UserBloc implements Bloc {
   List<SysUser> buildAllUsers(List<DocumentSnapshot> usersListSnapshot) =>
       _userRepository.buildGetAllUsers(usersListSnapshot);
 
-  Future<SysUser?> searchUserByEmail(String email) async {
+  Future<SysUser?> searchUserByEmail(String? email) async {
     return await _userRepository.searchUserByEmail(email);
   }
 

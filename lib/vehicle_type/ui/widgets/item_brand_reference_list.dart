@@ -3,25 +3,25 @@ import 'package:car_wash_app/vehicle_type/model/brand_reference.dart';
 import 'package:flutter/material.dart';
 
 class ItemBrandReferenceList extends StatefulWidget {
-  final Brand selectedBrand;
-  final BrandReference brandReference;
-  final Function(Brand, BrandReference) editBrandReference;
+  final Brand? selectedBrand;
+  final BrandReference? brandReference;
+  final Function(Brand?, BrandReference?) editBrandReference;
 
-  ItemBrandReferenceList({Key key, this.selectedBrand, this.brandReference, this.editBrandReference});
+  ItemBrandReferenceList({Key? key, this.selectedBrand, this.brandReference, required this.editBrandReference});
 
   @override
   State<StatefulWidget> createState() => _ItemBrandReferenceList();
 }
 
 class _ItemBrandReferenceList extends State<ItemBrandReferenceList> {
-  double _imageWith;
-  String _iconVehicle;
+  late double _imageWith;
+  late String _iconVehicle;
   String _vehicleTypeName = '';
 
   @override
   void initState() {
     super.initState();
-    switch (widget.selectedBrand.vehicleType) {
+    switch (widget.selectedBrand?.vehicleType) {
       case 1:
         _imageWith = 38;
         _iconVehicle = "assets/images/icon_car_admin.png";
@@ -105,7 +105,7 @@ class _ItemBrandReferenceList extends State<ItemBrandReferenceList> {
                     children: <Widget>[
                       Flexible(
                         child: Text(
-                          widget.selectedBrand.brand,
+                          widget.selectedBrand?.brand ?? '',
                           style: TextStyle(
                             fontFamily: "Lato",
                             decoration: TextDecoration.none,
@@ -115,7 +115,7 @@ class _ItemBrandReferenceList extends State<ItemBrandReferenceList> {
                       ),
                       Flexible(
                         child: Text(
-                          widget.brandReference.reference,
+                          widget.brandReference?.reference ?? '',
                           style: TextStyle(
                             color: Theme.of(context).primaryColor,
                             fontFamily: "Lato",
@@ -132,7 +132,7 @@ class _ItemBrandReferenceList extends State<ItemBrandReferenceList> {
           Container(
             height: 25,
             margin: EdgeInsets.only(right: 8.0),
-            child: widget.brandReference.active
+            child: widget.brandReference?.active ?? false
                 ? Icon(
               Icons.check,
               color: Theme.of(context).primaryColor,

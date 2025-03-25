@@ -8,9 +8,9 @@ class ItemProductivityReportList extends StatefulWidget {
   final Function(String, List<Invoice>) servicesDetail;
 
   ItemProductivityReportList(
-      {Key key,
-      this.cardReport,
-      this.servicesDetail});
+      {Key? key,
+      required this.cardReport,
+      required this.servicesDetail});
 
   @override
   State<StatefulWidget> createState() => _ItemProductivityReportList();

@@ -14,7 +14,7 @@ class ItemProductivityReportDetail extends StatefulWidget {
 
 class _ItemProductivityReportDetail
     extends State<ItemProductivityReportDetail> {
-  ProductsCardDetail _serviceDetail;
+  late ProductsCardDetail _serviceDetail;
 
   @override
   void initState() {

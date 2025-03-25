@@ -7,7 +7,7 @@ class InfoLastServicesByVehicle extends StatelessWidget {
   final double _widthContainer = 300;
   final formatter = new DateFormat('dd-MM-yyyy');
 
-  InfoLastServicesByVehicle({Key key, @required this.listHistoryInvoices});
+  InfoLastServicesByVehicle({Key? key, required this.listHistoryInvoices});
 
   @override
   Widget build(BuildContext context) {

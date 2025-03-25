@@ -7,7 +7,7 @@ import 'package:car_wash_app/payment_methods/ui/screens/payment_method_admin_pag
 import 'package:car_wash_app/product/bloc/product_bloc.dart';
 import 'package:car_wash_app/product/ui/screens/product_list_admin_page.dart';
 import 'package:car_wash_app/user/bloc/bloc_user.dart';
-import 'package:car_wash_app/user/model/user.dart';
+import 'package:car_wash_app/user/model/sysUser.dart';
 import 'package:car_wash_app/user/ui/screens/user_profile_page.dart';
 import 'package:car_wash_app/user/ui/screens/users_admin_page.dart';
 import 'package:car_wash_app/vehicle_type/bloc/vehicle_type_bloc.dart';
@@ -24,11 +24,11 @@ class DrawerPage extends StatefulWidget {
 }
 
 class _DrawerPage extends State<DrawerPage> {
-  UserBloc userBloc;
+  late UserBloc userBloc;
   String _photoUser = '';
   String _userName = '';
   String _userEmail = '';
-  User _currentUser;
+  late SysUser _currentUser;
   bool _showInfoAdministrator = false;
 
   @override
@@ -80,11 +80,9 @@ class _DrawerPage extends State<DrawerPage> {
                     image: DecorationImage(
                       fit: BoxFit.cover,
                       image:
-                          (_photoUser.isEmpty)
-                              ? AssetImage(
-                                'assets/images/profile_placeholder.png',
-                              )
-                              : NetworkImage(_photoUser),
+                          (_photoUser.isEmpty ?? true)
+                              ? AssetImage('assets/images/profile_placeholder.png') as ImageProvider
+                              : NetworkImage(_photoUser) as ImageProvider,
                     ),
                   ),
                 ),
@@ -402,12 +400,12 @@ class _DrawerPage extends State<DrawerPage> {
 
   void _getPreferences() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
-    String userId = pref.getString(Keys.userId);
+    String? userId = pref.getString(Keys.userId);
     setState(() {
-      _photoUser = pref.getString(Keys.photoUserUrl);
-      _userName = pref.getString(Keys.userName);
-      _userEmail = pref.getString(Keys.userEmail);
-      _showInfoAdministrator = pref.getBool(Keys.isAdministrator);
+      _photoUser = pref.getString(Keys.photoUserUrl) ?? '';
+      _userName = pref.getString(Keys.userName) ?? '';
+      _userEmail = pref.getString(Keys.userEmail) ?? '';
+      _showInfoAdministrator = pref.getBool(Keys.isAdministrator) ?? false;
     });
   }
 

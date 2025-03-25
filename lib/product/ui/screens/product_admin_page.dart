@@ -10,20 +10,21 @@ import 'package:car_wash_app/vehicle_type/model/vehicleType.dart';
 import 'package:car_wash_app/widgets/messages_utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 
 class ProductAdminPage extends StatefulWidget {
 
-  final Product currentProduct;
+  final Product? currentProduct;
 
-  ProductAdminPage({Key key, this.currentProduct});
+  ProductAdminPage({Key? key, this.currentProduct});
 
   @override
   State<StatefulWidget> createState() => _ProductAdminPage();
 }
 
 class _ProductAdminPage extends State<ProductAdminPage> {
-  ProductBloc _productBloc;
+  late ProductBloc _productBloc;
   BlocLocation _blocLocation = BlocLocation();
   VehicleTypeBloc _vehicleTypeBloc = VehicleTypeBloc();
 
@@ -38,18 +39,18 @@ class _ProductAdminPage extends State<ProductAdminPage> {
   List<Product> _productList = <Product>[];
   List<Location> _listLocation = <Location>[];
   List<VehicleType> _lisVehicleType = <VehicleType>[];
-  List<DropdownMenuItem<VehicleType>> _dropdownVehicleTypes;
-  VehicleType _selectedVehicleType;
+  late List<DropdownMenuItem<VehicleType>> _dropdownVehicleTypes;
+  late VehicleType _selectedVehicleType;
   bool _productActive = true;
   bool _productTypeSpecial = false;
   bool _productTypeSimple = false;
-  Product _productSelected;
+  late Product _productSelected;
 
   @override
   void initState() {
     super.initState();
     //_textIvaPercent.text = _initialIvaPercent;
-    _productSelected = widget.currentProduct;
+    _productSelected = widget.currentProduct ?? new Product();
     _selectProductList();
     }
 
@@ -102,7 +103,7 @@ class _ProductAdminPage extends State<ProductAdminPage> {
                   validate: _validateName,
                   textValidate: 'Escriba el nombre del producto',
                   inputType: TextInputType.multiline,
-                  maxLines: null,
+                  maxLines: 10,
                 ),
               ),
             ),
@@ -117,7 +118,7 @@ class _ProductAdminPage extends State<ProductAdminPage> {
                 textValidate: 'Escriba el valor del producto',
                 inputType: TextInputType.number,
                 textInputFormatter: [
-                  WhitelistingTextInputFormatter(RegExp("^[0-9.]*"))
+                  FilteringTextInputFormatter.allow(RegExp("^[0-9.]*")),
                 ],
               ),
             ),
@@ -130,7 +131,7 @@ class _ProductAdminPage extends State<ProductAdminPage> {
                 textValidate: 'Escriba el % de iva del producto',
                 inputType: TextInputType.number,
                 textInputFormatter: [
-                  WhitelistingTextInputFormatter(RegExp("^[0-9.]*"))
+                  FilteringTextInputFormatter.allow(RegExp("^[0-9.]*")),
                 ],
               ),
             ),
@@ -143,7 +144,7 @@ class _ProductAdminPage extends State<ProductAdminPage> {
                 textValidate: 'Escriba la duración del servicio en minutos',
                 inputType: TextInputType.number,
                 textInputFormatter: [
-                  WhitelistingTextInputFormatter(RegExp("^[0-9.]*"))
+                  FilteringTextInputFormatter.allow(RegExp("^[0-9.]*")),
                 ],
               ),
             ),
@@ -159,7 +160,7 @@ class _ProductAdminPage extends State<ProductAdminPage> {
                 children: <Widget>[
                   Checkbox(
                     value: _productTypeSpecial,
-                    onChanged: (bool value) {
+                    onChanged: (bool? value) {
                       _onChangeRol(1, value);
                     },
                     checkColor: Colors.white,
@@ -183,7 +184,7 @@ class _ProductAdminPage extends State<ProductAdminPage> {
                 children: <Widget>[
                   Checkbox(
                     value: _productTypeSimple,
-                    onChanged: (bool value) {
+                    onChanged: (bool? value) {
                       _onChangeRol(2, value);
                     },
                     checkColor: Colors.white,
@@ -207,9 +208,11 @@ class _ProductAdminPage extends State<ProductAdminPage> {
                 children: <Widget>[
                   Checkbox(
                     value: _productActive,
-                    onChanged: (bool value) {
+                    onChanged: (bool? value) {
                       setState(() {
-                        _productActive = value;
+                        if (value != null) {
+                          _productActive = value;
+                        }
                       });
                     },
                     checkColor: Colors.white,
@@ -266,7 +269,7 @@ class _ProductAdminPage extends State<ProductAdminPage> {
             Container(
               padding: EdgeInsets.only(left: 10),
               child: Text(
-                '${_listLocation.where((f) => f.isSelected).toList().length} sedes agregadas',
+                '${_listLocation.where((f) => (f.isSelected??false)).toList().length} sedes agregadas',
                 style: TextStyle(
                   fontFamily: "Lato",
                   decoration: TextDecoration.none,
@@ -361,9 +364,11 @@ class _ProductAdminPage extends State<ProductAdminPage> {
       height: 100,
       child: Align(
         alignment: Alignment.center,
-        child: RaisedButton(
-          padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
-          color: Color(0xFF59B258),
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
+            backgroundColor: Color(0xFF59B258),
+          ),
           child: Text(
             "Guardar",
             style: TextStyle(
@@ -388,20 +393,18 @@ class _ProductAdminPage extends State<ProductAdminPage> {
   void _selectProductList() {
     _validateName = false;
     _validatePrice = false;
-    _textProductName.text = _productSelected.productName;
-    _textIvaPercent.text = _productSelected.ivaPercent.toStringAsFixed(0);
-    _textPrice.text = _productSelected.price.toStringAsFixed(2);
-    _textServiceTime.text = _productSelected.serviceTime == null ? '0' : _productSelected.serviceTime.toStringAsFixed(0);
+    _textProductName.text = _productSelected.productName??'';
+    _textIvaPercent.text = (_productSelected.ivaPercent ?? 0).toStringAsFixed(0);
+    _textPrice.text = (_productSelected.price ?? 0).toStringAsFixed(2);
+    _textServiceTime.text = _productSelected.serviceTime == null ? '0' : (_productSelected.serviceTime ?? 0).toStringAsFixed(0);
     _productActive = _productSelected.productActive ?? true;
     _productTypeSimple = _productSelected.productType == 'Sencillo' ? true : false;
     _productTypeSpecial = _productSelected.productType == 'Especial' ? true : false;
-    _selectedVehicleType = _lisVehicleType.length > 0
-        ? _lisVehicleType.firstWhere((f) => f.id == _productSelected.vehicleType.documentID)
-        : null;
+    _selectedVehicleType = (_lisVehicleType.length > 0
+        ? _lisVehicleType.firstWhere((f) => f.id == _productSelected.vehicleType?.id)
+        : null)!;
     _listLocation.forEach((Location loc) {
-      List<DocumentReference> dr = _productSelected.locations
-          .where((e) => e.documentID == loc.id)
-          .toList();
+      List<DocumentReference> dr = (_productSelected.locations??[]).where((e) => e.id == loc.id).toList();
       if (dr.length > 0) {
         _listLocation[_listLocation.indexOf(loc)].isSelected = true;
       } else {
@@ -420,13 +423,13 @@ class _ProductAdminPage extends State<ProductAdminPage> {
   ///Functions VehicleType
   List<DropdownMenuItem<VehicleType>> _buildDropdownVehicleTypes(
       List vehicleTypes) {
-    List<DropdownMenuItem<VehicleType>> listItems = List();
+    List<DropdownMenuItem<VehicleType>> listItems = [];
     for (VehicleType documentLoc in vehicleTypes) {
       listItems.add(
         DropdownMenuItem(
           value: documentLoc,
           child: Text(
-            documentLoc.vehicleType,
+            documentLoc.vehicleType??'',
           ),
         ),
       );
@@ -434,9 +437,11 @@ class _ProductAdminPage extends State<ProductAdminPage> {
     return listItems;
   }
 
-  onChangeDropDawn(VehicleType selectedVehicleType) {
+  onChangeDropDawn(VehicleType? selectedVehicleType) {
     setState(() {
-      _selectedVehicleType = selectedVehicleType;
+      if (selectedVehicleType != null) {
+        _selectedVehicleType = selectedVehicleType;
+      }
     });
   }
 
@@ -466,7 +471,7 @@ class _ProductAdminPage extends State<ProductAdminPage> {
     } else
       _validatePrice = false;
 
-    if (_listLocation.where((f) => f.isSelected).toList().length == 0) {
+    if (_listLocation.where((f) => f.isSelected??false).toList().length == 0) {
       listSedesEmpty = true;
       canSave = false;
     }
@@ -492,8 +497,8 @@ class _ProductAdminPage extends State<ProductAdminPage> {
     _textIvaPercent.text = _initialIvaPercent;
     _textPrice.text = '';
     _textServiceTime.text = '';
-    _selectedVehicleType = null;
-    _productSelected = null;
+    _selectedVehicleType = new VehicleType();
+    _productSelected = new Product();
     _productActive = true;
     _productTypeSpecial = false;
     _productTypeSimple = false;
@@ -510,36 +515,35 @@ class _ProductAdminPage extends State<ProductAdminPage> {
           .show();
 
       //Add new locations at product exist
-      _listLocation.where((l) => l.isSelected).toList().forEach((f) {
-        List<DocumentReference> listFind = _productSelected.locations
-            .where((e) => e.documentID == f.id)
+      _listLocation.where((l) => l.isSelected??false).toList().forEach((f) {
+        List<DocumentReference> listFind = (_productSelected.locations??[])
+            .where((e) => e.id == f.id)
             .toList();
         if (listFind.length <= 0) {
-          _productSelected.locations
-              .add(_blocLocation.getDocumentReferenceLocationById(f.id));
+          _productSelected.locations?.add(_blocLocation.getDocumentReferenceLocationById(f.id??''));
         }
       });
     
       //Delete locations at product exist
       List<DocumentReference> locListDeleted = <DocumentReference>[];
-      _productSelected.locations.forEach((item) {
+      _productSelected.locations?.forEach((item) {
         locListDeleted.add(item);
       });
-      _productSelected.locations.forEach((DocumentReference locRefDelete) {
-        List<Location> lotionsFind = _listLocation.where((f) => f.id == locRefDelete.documentID && f.isSelected).toList();
+      _productSelected.locations?.forEach((DocumentReference locRefDelete) {
+        List<Location> lotionsFind = _listLocation.where((f) => f.id == locRefDelete.id && (f.isSelected??false)).toList();
         if (lotionsFind.length == 0) {
-          locListDeleted.removeAt(_productSelected.locations.indexOf(locRefDelete));
+          locListDeleted.removeAt((_productSelected.locations??[]).indexOf(locRefDelete));
         }
       });
-      _productSelected.locations.clear();
+      _productSelected.locations?.clear();
       locListDeleted.forEach((d) {
-        _productSelected.locations.add(d);
+        _productSelected.locations?.add(d);
       });
     
       List<DocumentReference> _newListLocationsReferences = <DocumentReference>[];
-      _listLocation.where((d) => d.isSelected).toList().forEach((f) {
+      _listLocation.where((d) => d.isSelected??false).toList().forEach((f) {
         _newListLocationsReferences
-            .add(_blocLocation.getDocumentReferenceLocationById(f.id));
+            .add(_blocLocation.getDocumentReferenceLocationById(f.id??''));
       });
 
       final product = Product(
@@ -548,7 +552,7 @@ class _ProductAdminPage extends State<ProductAdminPage> {
           price: double.tryParse(_textPrice.text.trim()) ?? 0.0,
           ivaPercent: double.tryParse(_textIvaPercent.text.trim()) ?? 0.0,
           vehicleType: _vehicleTypeBloc
-              .getVehicleTypeReferenceById(_selectedVehicleType.id),
+              .getVehicleTypeReferenceById(_selectedVehicleType.id??''),
           locations: _productSelected != null
               ? _productSelected.locations
               : _newListLocationsReferences,
@@ -568,16 +572,16 @@ class _ProductAdminPage extends State<ProductAdminPage> {
   }
 
   //1. product Special, 2. product simple
-  void _onChangeRol(int productType, bool value) {
+  void _onChangeRol(int productType, bool? value) {
     setState(() {
       switch (productType) {
         case 1:
-          _productTypeSpecial = value;
+          _productTypeSpecial = value ?? false;
           _productTypeSimple = false;
           break;
         case 2:
           _productTypeSpecial = false;
-          _productTypeSimple = value;
+          _productTypeSimple = value ?? false;
           break;
       }
     });

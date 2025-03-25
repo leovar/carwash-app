@@ -10,7 +10,7 @@ import 'package:car_wash_app/invoices_list/ui/widgets/total_filter_invoices_widg
 import 'package:car_wash_app/location/bloc/bloc_location.dart';
 import 'package:car_wash_app/location/model/location.dart';
 import 'package:car_wash_app/user/bloc/bloc_user.dart';
-import 'package:car_wash_app/user/model/user.dart';
+import 'package:car_wash_app/user/model/sysUser.dart';
 import 'package:car_wash_app/widgets/gradient_back.dart';
 import 'package:car_wash_app/widgets/info_header_container.dart';
 import 'package:car_wash_app/widgets/keys.dart';
@@ -30,34 +30,34 @@ import 'package:url_launcher/url_launcher.dart';
 class FormInvoicesList extends StatefulWidget {
   final locationReference;
 
-  FormInvoicesList({Key key, this.locationReference});
+  FormInvoicesList({Key? key, this.locationReference});
 
   @override
   State<StatefulWidget> createState() => _FormInvoicesList();
 }
 
 class _FormInvoicesList extends State<FormInvoicesList> {
-  BlocInvoice _blocInvoice;
+  late BlocInvoice _blocInvoice;
   final _locationBloc = BlocLocation();
   UserBloc _blocUser = UserBloc();
   BlocPaymentMethod _paymentMethodBloc = BlocPaymentMethod();
   List<Invoice> _listInvoices = <Invoice>[];
   List<InvoiceListModel> _listModel = <InvoiceListModel>[];
-  User _currentUser;
+  late SysUser _currentUser;
   bool _showInfoAmounts = false;
   double _totalDay = 0.0;
   double _totalMonth = 0.0;
   String _idLocation = '';
-  Location _location;
+  late Location _location;
   PaymentMethod _selectedPaymentMethod = PaymentMethod(name: '');
-  Invoice _invoiceSelected;
+  late Invoice _invoiceSelected;
 
   ///Filter Keys
   final _textPlaca = TextEditingController();
   final _textConsecutive = TextEditingController();
   var _dateFilterInit = DateTime(DateTime.now().year, DateTime.now().month, 1);
   var _dateFilterFinal = DateTime.now();
-  User _operatorFilter = User(name: '', uid: '', email: '');
+  SysUser _operatorFilter = SysUser(name: '', uid: '', email: '');
   double _totalPriceFilters = 0.0;
   String _productTypeSelected = '';
   PaymentMethod _paymentMethodFilter = PaymentMethod(id: '', name: '');
@@ -65,12 +65,14 @@ class _FormInvoicesList extends State<FormInvoicesList> {
   @override
   void initState() {
     super.initState();
-    _blocUser.getCurrentUser().then((User user) {
-      _currentUser = user;
-      if (user.isAdministrator) {
-        setState(() {
-          _showInfoAmounts = true;
-        });
+    _blocUser.getCurrentUser().then((SysUser? user) {
+      if (user != null) {
+        _currentUser = user;
+        if (user.isAdministrator??false) {
+          setState(() {
+            _showInfoAmounts = true;
+          });
+        }
       }
     });
   }
@@ -130,7 +132,7 @@ class _FormInvoicesList extends State<FormInvoicesList> {
         _listInvoices = _blocInvoice.buildInvoicesListByMonth(
           snapshot.data.documents,
         );
-        _listInvoices.sort((a, b) => b.consecutive.compareTo(a.consecutive));
+        _listInvoices.sort((a, b) => (b.consecutive??0).compareTo(a.consecutive??0));
         _countAmountPerDayMonth();
     }
 
@@ -281,9 +283,9 @@ class _FormInvoicesList extends State<FormInvoicesList> {
   /// Functions
   void _getPreferences() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
-    String userId = pref.getString(Keys.userId);
+    String? userId = pref.getString(Keys.userId);
     if (_idLocation.isEmpty) {
-      _idLocation = pref.getString(Keys.idLocation);
+      _idLocation = pref.getString(Keys.idLocation)??'';
       _locationBloc.getLocationById(_idLocation).then((loc) => _location = loc);
     }
   }
@@ -304,28 +306,28 @@ class _FormInvoicesList extends State<FormInvoicesList> {
           DateTime.now().day,
         );
         DateTime dateMonthInvoice = DateTime(
-          invoice.creationDate.toDate().year,
-          invoice.creationDate.toDate().month,
+          invoice.creationDate!.toDate().year,
+          invoice.creationDate!.toDate().month,
         );
         DateTime dateDayInvoice = DateTime(
-          invoice.creationDate.toDate().year,
-          invoice.creationDate.toDate().month,
-          invoice.creationDate.toDate().day,
+          invoice.creationDate!.toDate().year,
+          invoice.creationDate!.toDate().month,
+          invoice.creationDate!.toDate().day,
         );
 
         if (dateDayInvoice.compareTo(nowDay) == 0) {
           _totalDay =
-              _totalDay + (invoice.cancelledInvoice ? 0 : invoice.totalPrice);
+              _totalDay + ((invoice.cancelledInvoice??false) ? 0 : (invoice.totalPrice??0));
         }
 
         if (nowMonth.compareTo(dateMonthInvoice) == 0) {
           _totalMonth =
-              _totalMonth + (invoice.cancelledInvoice ? 0 : invoice.totalPrice);
+              _totalMonth + ((invoice.cancelledInvoice??false) ? 0 : (invoice.totalPrice??0));
         }
 
         _totalPriceFilters =
             _totalPriceFilters +
-            (invoice.cancelledInvoice ? 0 : invoice.totalPrice);
+            ((invoice.cancelledInvoice??false) ? 0 : (invoice.totalPrice??0));
       });
     }
   }
@@ -362,7 +364,7 @@ class _FormInvoicesList extends State<FormInvoicesList> {
     ).show();
   }
 
-  void _callBackSelectOperatorFilter(User operatorSelected) {
+  void _callBackSelectOperatorFilter(SysUser operatorSelected) {
     _operatorFilter = operatorSelected;
   }
 
@@ -387,7 +389,7 @@ class _FormInvoicesList extends State<FormInvoicesList> {
 
   void _closeInvoiceCallback(Invoice _invoiceClose) async {
     _invoiceSelected = _invoiceClose;
-    if (_invoiceSelected.countOperators > 0) {
+    if ((_invoiceSelected.countOperators??0) > 0) {
       _closeInvoiceMessage();
     }
   }
@@ -398,7 +400,7 @@ class _FormInvoicesList extends State<FormInvoicesList> {
           ((_invoiceSelected.paymentMethod ?? '') == '')
               ? new PaymentMethod(name: '')
               : await _paymentMethodBloc.getPaymentMethodByName(
-                _invoiceSelected.paymentMethod,
+                _invoiceSelected.paymentMethod??'',
               );
       Alert(
         context: context,
@@ -456,10 +458,10 @@ class _FormInvoicesList extends State<FormInvoicesList> {
         builder:
             (context) => OperatorsInvoicePage(
               callbackSetOperatorsList: _saveOperators,
-              usersListCallback: _invoiceToFinish.operatorUsers,
+              usersListCallback: _invoiceToFinish.operatorUsers??[],
               editForm: false,
               idLocation: _idLocation,
-              closedInvoice: _invoiceToFinish.invoiceClosed,
+              closedInvoice: _invoiceToFinish.invoiceClosed??false,
               fromCompleteInvoice: true,
               callbackFinishInvoice: _finishInvoice,
             ),
@@ -468,14 +470,13 @@ class _FormInvoicesList extends State<FormInvoicesList> {
   }
 
   void _finishInvoice() async {
-    if (_invoiceSelected.countOperators > 0) {
+    if ((_invoiceSelected.countOperators??0) > 0) {
       bool endWashValue = false;
       Timestamp endWashData;
       int washingTimeValue;
-      if (_invoiceSelected.startWashing && !_invoiceSelected.endWash ??
-          false) {
+      if ((_invoiceSelected.startWashing??false) && !(_invoiceSelected.endWash??false)) {
         //Finaliza la factura con final de lavado
-        DateTime dateStart = _invoiceSelected.dateStartWashing.toDate();
+        DateTime dateStart = _invoiceSelected.dateStartWashing!.toDate();
         DateTime dateCurrent = DateTime.now();
         Duration diff = dateCurrent.difference(dateStart);
         int washCurrentDuration = diff.inMinutes;
@@ -509,14 +510,14 @@ class _FormInvoicesList extends State<FormInvoicesList> {
     _selectedPaymentMethod = payment;
   }
 
-  void _saveOperators(List<User> userList) async {
+  void _saveOperators(List<SysUser> userList) async {
     int _countOperators = 0;
-    List<User> _operatorsToSave = [];
-    List<User> _selectedOperators =
-        userList.where((u) => u.isSelected).toList();
+    List<SysUser> _operatorsToSave = [];
+    List<SysUser> _selectedOperators =
+        userList.where((u) => (u.isSelected??false)).toList();
     if (_selectedOperators.length > 0) {
       _selectedOperators.forEach((user) {
-        var operatorSave = User.copyUserOperatorToSaveInvoice(
+        var operatorSave = SysUser.copyUserOperatorToSaveInvoice(
           id: user.id,
           name: user.name,
           operatorCommission:
@@ -545,7 +546,7 @@ class _FormInvoicesList extends State<FormInvoicesList> {
     ).show();
     Invoice invoice;
     if (withPayment) {
-      if (_selectedPaymentMethod.name.isNotEmpty) {
+      if (_selectedPaymentMethod.name?.isNotEmpty??false) {
         invoice = Invoice.copyWith(
           origin: _invoiceSelected,
           paymentMethod: _selectedPaymentMethod.name,
@@ -561,23 +562,23 @@ class _FormInvoicesList extends State<FormInvoicesList> {
   }
 
   void _validateSendCustomerNotification(Invoice invoiceToClose) {
-    if (invoiceToClose.phoneNumber.isNotEmpty) {
+    if (invoiceToClose.phoneNumber?.isNotEmpty??false) {
       String message =
           "Spa CarWash Movil -- Estimado cliente. Le informamos que el servicio de lavado de su vehículo de placa ${invoiceToClose.placa}, ha finalizado y está listo para ser entregado ☑️. "
           "Cómo estamos comprometidos con tu satisfacción 😃, por favor ayúdanos con tu opinion en cortas respuestas en el siguinte link ➡️"
           "https://docs.google.com/forms/d/1gdq9rSR8pMqlukEalGLxF_m5954m7_Hpm5k5HYX89yU/edit";
-      List<String> recipents = [invoiceToClose.phoneNumber];
+      List<String> recipents = [invoiceToClose.phoneNumber??''];
       if (_location.sendMessageSms ?? false) {
         _sendSMS(message, recipents);
       } else if (_location.sendMessageWp ?? false) {
-        _sendWhatsAppMessage(message, invoiceToClose.phoneNumber);
+        _sendWhatsAppMessage(message, invoiceToClose.phoneNumber??'');
       }
         }
   }
 
-  void _sendSMS(String message, List<String> recipents) async {
+  Future<void> _sendSMS(String message, List<String> recipents) async {
     try {
-      String _result = await FlutterSms.sendSMS(
+      String _result = await sendSMS(
         message: message,
         recipients: recipents,
       ).catchError((onError) {

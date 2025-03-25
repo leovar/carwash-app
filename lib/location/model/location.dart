@@ -4,25 +4,25 @@ import 'package:meta/meta.dart';
 
 @immutable
 class Location extends Equatable {
-  final String id;
-  final String locationName;
-  final String address;
-  final String phoneNumber;
-  final String director;
-  final String nit;
-  final String regimen;
-  final String prefix;
-  final String dianResolution;
-  final int initConcec;
-  final int finalConsec;
-  final Timestamp creationDate;
-  final bool active;
-  final bool sendMessageSms;
-  final bool sendMessageWp;
-  final bool printIva;
-  bool isSelected;
-  int activeCells;
-  final int totalCells;
+  final String? id;
+  final String? locationName;
+  final String? address;
+  final String? phoneNumber;
+  final String? director;
+  final String? nit;
+  final String? regimen;
+  final String? prefix;
+  final String? dianResolution;
+  final int? initConcec;
+  final int? finalConsec;
+  final Timestamp? creationDate;
+  final bool? active;
+  final bool? sendMessageSms;
+  final bool? sendMessageWp;
+  final bool? printIva;
+  bool? isSelected;
+  int? activeCells;
+  final int? totalCells;
 
   Location({
     this.id,
@@ -46,7 +46,7 @@ class Location extends Equatable {
     this.totalCells,
   });
 
-  factory Location.fromJson(Map<String, dynamic> json, {String id}) {
+  factory Location.fromJson(Map<String, dynamic> json, {String? id}) {
     return Location(
         id: id,
         locationName: json['locationName'],
@@ -93,8 +93,8 @@ class Location extends Equatable {
   }
 
   factory Location.copyWith({
-    @required Location origin,
-    int activeCells
+    required Location origin,
+    int? activeCells
   }) {
     return Location(
       id: origin.id,
@@ -122,23 +122,23 @@ class Location extends Equatable {
 
   @override
   List<Object> get props => [
-        id,
-        locationName,
-        address,
-        phoneNumber,
-        director,
-        nit,
-        regimen,
-        prefix,
-        dianResolution,
-        initConcec,
-        finalConsec,
-        creationDate,
-        active,
-        sendMessageSms,
-        sendMessageWp,
-        printIva,
-        activeCells,
-        totalCells,
+        id!,
+        locationName!,
+        address!,
+        phoneNumber!,
+        director!,
+        nit!,
+        regimen!,
+        prefix!,
+        dianResolution!,
+        initConcec!,
+        finalConsec!,
+        creationDate!,
+        active!,
+        sendMessageSms!,
+        sendMessageWp!,
+        printIva!,
+        activeCells!,
+        totalCells!,
       ];
 }

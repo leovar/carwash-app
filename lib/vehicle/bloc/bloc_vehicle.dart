@@ -6,11 +6,11 @@ import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 class BlocVehicle extends Bloc {
   final _vehicleRepository = VehicleRepository();
 
-  Future<Vehicle> getVehicleByPlaca(String placa) async {
+  Future<Vehicle?> getVehicleByPlaca(String placa) async {
     return await _vehicleRepository.getVehicleByPlaca(placa);
   }
 
-  Future<DocumentReference> getVehicleReferenceByPlaca(String placa) async {
+  Future<DocumentReference?> getVehicleReferenceByPlaca(String placa) async {
     return await _vehicleRepository.getVehicleReferenceByPlaca(placa);
   }
 

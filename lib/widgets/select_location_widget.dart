@@ -6,7 +6,7 @@ class SelectLocationWidget extends StatefulWidget {
   final Function(Location) selectLocation;
   final Location locationSelected;
 
-  SelectLocationWidget({Key key, this.locationSelected, this.selectLocation});
+  SelectLocationWidget({Key? key, required this.locationSelected, required this.selectLocation});
 
   @override
   State<StatefulWidget> createState() => _SelectLocationWidget();
@@ -14,8 +14,8 @@ class SelectLocationWidget extends StatefulWidget {
 
 class _SelectLocationWidget extends State<SelectLocationWidget> {
   BlocLocation _blocLocation = BlocLocation();
-  List<DropdownMenuItem<Location>> _dropdownMenuItems;
-  Location _selectedLocation;
+  late List<DropdownMenuItem<Location>> _dropdownMenuItems;
+  late Location _selectedLocation;
 
   @override
   void initState() {
@@ -72,19 +72,19 @@ class _SelectLocationWidget extends State<SelectLocationWidget> {
       ),
       underline: Container(
         height: 1,
-        color: Theme.of(context).cursorColor,
+        color: Theme.of(context).colorScheme.primary,
       ),
     );
   }
 
   List<DropdownMenuItem<Location>> builtDropdownMenuItems(List locations) {
-    List<DropdownMenuItem<Location>> listItems = List();
+    List<DropdownMenuItem<Location>> listItems = [];
     for (Location documentLoc in locations) {
       listItems.add(
         DropdownMenuItem(
           value: documentLoc,
           child: Text(
-            documentLoc.locationName,
+            documentLoc.locationName ?? '',
           ),
         ),
       );
@@ -92,10 +92,10 @@ class _SelectLocationWidget extends State<SelectLocationWidget> {
     return listItems;
   }
 
-  onChangeDropDawn(Location selectedLocation) {
+  onChangeDropDawn(Location? selectedLocation) {
     setState(() {
-      widget.selectLocation(selectedLocation);
-      _selectedLocation = selectedLocation;
+      widget.selectLocation(selectedLocation ?? new Location());
+      _selectedLocation = selectedLocation ?? new Location();
     });
   }
 }

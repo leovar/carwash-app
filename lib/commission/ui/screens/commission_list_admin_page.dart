@@ -10,7 +10,7 @@ class CommissionListAdminPage extends StatefulWidget {
 }
 
 class _CommissionListAdminPage extends State<CommissionListAdminPage> {
-  BlocCommission _blocCommission;
+  late BlocCommission _blocCommission;
   List<Commission> _commissionList = <Commission>[];
 
   @override
@@ -61,7 +61,7 @@ class _CommissionListAdminPage extends State<CommissionListAdminPage> {
 
   Widget _getDataListCommissions(AsyncSnapshot snapshot) {
     _commissionList = _blocCommission.buildAllCommissions(snapshot.data.documents);
-    _commissionList.sort((a,b)=> a.uidVehicleType.compareTo(b.uidVehicleType));
+    _commissionList.sort((a,b)=> (a.uidVehicleType??0).compareTo(b.uidVehicleType??0));
 
     return ListView.builder(
       itemCount: _commissionList.length,

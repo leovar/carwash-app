@@ -8,16 +8,16 @@ import 'package:flutter/services.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 
 class CreateLocationAdminPage extends StatefulWidget {
-  final Location currentLocation;
+  final Location? currentLocation;
 
-  CreateLocationAdminPage({Key key, this.currentLocation});
+  CreateLocationAdminPage({Key? key, this.currentLocation});
 
   @override
   State<StatefulWidget> createState() => _CreateLocationAdminPage();
 }
 
 class _CreateLocationAdminPage extends State<CreateLocationAdminPage> {
-  BlocLocation _blocLocation;
+  late BlocLocation _blocLocation;
 
   GlobalKey btnChangeImageProfile = GlobalKey();
   bool _validateName = false;
@@ -44,12 +44,12 @@ class _CreateLocationAdminPage extends State<CreateLocationAdminPage> {
   bool _sendSms = true;
   bool _sendWp = false;
   bool _printIva = true;
-  Location _locationSelected;
+  late Location _locationSelected;
 
   @override
   void initState() {
     super.initState();
-    _locationSelected = widget.currentLocation;
+    _locationSelected = widget.currentLocation?? new Location();
     _selectLocationList();
     }
 
@@ -113,7 +113,6 @@ class _CreateLocationAdminPage extends State<CreateLocationAdminPage> {
                 validate: _validateAddress,
                 textValidate: 'Escriba un dirección',
                 inputType: TextInputType.multiline,
-                maxLines: null,
               ),
             ),
             SizedBox(height: 9),
@@ -126,7 +125,7 @@ class _CreateLocationAdminPage extends State<CreateLocationAdminPage> {
                 textValidate: 'Escriba un valor',
                 inputType: TextInputType.number,
                 textInputFormatter: [
-                  WhitelistingTextInputFormatter(RegExp("^[0-9.]*")),
+                  FilteringTextInputFormatter.allow(RegExp("^[0-9.]*")),
                   LengthLimitingTextInputFormatter(11),
                 ],
               ),
@@ -171,7 +170,7 @@ class _CreateLocationAdminPage extends State<CreateLocationAdminPage> {
                 textValidate: 'Escriba un valor',
                 inputType: TextInputType.number,
                 textInputFormatter: [
-                  WhitelistingTextInputFormatter(RegExp("^[0-9.]*"))
+                  FilteringTextInputFormatter.allow(RegExp("^[0-9.]*")),
                 ],
               ),
             ),
@@ -185,7 +184,7 @@ class _CreateLocationAdminPage extends State<CreateLocationAdminPage> {
                 textValidate: 'Escriba un valor',
                 inputType: TextInputType.number,
                 textInputFormatter: [
-                  WhitelistingTextInputFormatter(RegExp("^[0-9.]*"))
+                  FilteringTextInputFormatter.allow(RegExp("^[0-9.]*")),
                 ],
               ),
             ),
@@ -219,9 +218,11 @@ class _CreateLocationAdminPage extends State<CreateLocationAdminPage> {
                 children: <Widget>[
                   Checkbox(
                     value: _locationActive,
-                    onChanged: (bool value) {
+                    onChanged: (bool? value) {
                       setState(() {
-                        _locationActive = value;
+                        if (value != null) {
+                          _locationActive = value;
+                        }
                       });
                     },
                     checkColor: Colors.white,
@@ -245,7 +246,7 @@ class _CreateLocationAdminPage extends State<CreateLocationAdminPage> {
                 children: <Widget>[
                   Checkbox(
                     value: _sendSms,
-                    onChanged: (bool value) {
+                    onChanged: (bool? value) {
                       _onChangeSendNotification(1, value);
                     },
                     checkColor: Colors.white,
@@ -269,7 +270,7 @@ class _CreateLocationAdminPage extends State<CreateLocationAdminPage> {
                 children: <Widget>[
                   Checkbox(
                     value: _sendWp,
-                    onChanged: (bool value) {
+                    onChanged: (bool? value) {
                       _onChangeSendNotification(2, value);
                     },
                     checkColor: Colors.white,
@@ -293,9 +294,11 @@ class _CreateLocationAdminPage extends State<CreateLocationAdminPage> {
                 children: <Widget>[
                   Checkbox(
                     value: _printIva,
-                    onChanged: (bool value) {
+                    onChanged: (bool? value) {
                       setState(() {
-                        _printIva = value;
+                        if (value != null) {
+                          _printIva = value;
+                        }
                       });
                     },
                     checkColor: Colors.white,
@@ -329,9 +332,11 @@ class _CreateLocationAdminPage extends State<CreateLocationAdminPage> {
       height: 100,
       child: Align(
         alignment: Alignment.center,
-        child: RaisedButton(
-          padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
-          color: Color(0xFF59B258),
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
+            backgroundColor: Color(0xFF59B258),
+          ),
           child: Text(
             "Guardar",
             style: TextStyle(
@@ -362,19 +367,19 @@ class _CreateLocationAdminPage extends State<CreateLocationAdminPage> {
     _validatePrefix = false;
     _validatePhone = false;
     _validateRegimen = false;
-    _textLocationName.text = _locationSelected.locationName;
-    _textAddress.text = _locationSelected.address;
-    _textDianResolution.text = _locationSelected.dianResolution;
-    _textNit.text = _locationSelected.nit;
+    _textLocationName.text = _locationSelected.locationName??'';
+    _textAddress.text = _locationSelected.address??'';
+    _textDianResolution.text = _locationSelected.dianResolution??'';
+    _textNit.text = _locationSelected.nit??'';
     _textInitConsec.text = _locationSelected.initConcec.toString();
     _textFinalConsec.text = _locationSelected.finalConsec.toString();
-    _textPrefix.text = _locationSelected.prefix;
-    _locationActive = _locationSelected.active;
+    _textPrefix.text = _locationSelected.prefix??'';
+    _locationActive = _locationSelected.active??false;
     _sendSms = _locationSelected.sendMessageSms?? false;
     _sendWp = _locationSelected.sendMessageWp?? false;
-    _printIva = _locationSelected.printIva;
-    _textRegimen.text = _locationSelected.regimen;
-    _textPhone.text = _locationSelected.phoneNumber;
+    _printIva = _locationSelected.printIva??false;
+    _textRegimen.text = _locationSelected.regimen??'';
+    _textPhone.text = _locationSelected.phoneNumber??'';
     _textTotalCells.text = _locationSelected.totalCells == null ? '0' : _locationSelected.totalCells.toString();
   }
 
@@ -426,16 +431,16 @@ class _CreateLocationAdminPage extends State<CreateLocationAdminPage> {
   }
 
   //1. send Sms, 2. send WhatsApp
-  void _onChangeSendNotification(int notificationType, bool value) {
+  void _onChangeSendNotification(int notificationType, bool? value) {
     setState(() {
       switch (notificationType) {
         case 1:
-          _sendSms = value;
+          _sendSms = value ?? false;
           _sendWp = false;
           break;
         case 2:
           _sendSms = false;
-          _sendWp = value;
+          _sendWp = value ?? false;
           break;
       }
     });
@@ -459,8 +464,8 @@ class _CreateLocationAdminPage extends State<CreateLocationAdminPage> {
         address: _textAddress.text.trim(),
         nit: _textNit.text.trim(),
         dianResolution: _textDianResolution.text.trim(),
-        initConcec: int.tryParse(_textInitConsec.text.trim()) ?? 0.0,
-        finalConsec: int.tryParse(_textFinalConsec.text.trim()) ?? 0.0,
+        initConcec: int.tryParse(_textInitConsec.text.trim()) ?? 0,
+        finalConsec: int.tryParse(_textFinalConsec.text.trim()) ?? 0,
         prefix: _textPrefix.text.trim(),
         active: _locationActive,
         creationDate: _locationSelected != null ? _locationSelected.creationDate : Timestamp.now(),

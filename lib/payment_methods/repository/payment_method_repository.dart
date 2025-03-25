@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 
 class PaymentMethodRepository {
-  final Firestore _db = Firestore.instance;
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   ///Get Payment Methods
   Stream<QuerySnapshot> getListPaymentMethodsStream() {
@@ -28,7 +28,7 @@ class PaymentMethodRepository {
       List<DocumentSnapshot> paymentListSnapshot) {
     List<PaymentMethod> paymentsList = <PaymentMethod>[];
     paymentListSnapshot.forEach((p) {
-      PaymentMethod loc = PaymentMethod.fromJson(p.data, id: p.documentID);
+      PaymentMethod loc = PaymentMethod.fromJson(p.data as Map<String, dynamic>, id: p.id);
       paymentsList.add(loc);
     });
     return paymentsList;
@@ -39,27 +39,27 @@ class PaymentMethodRepository {
         ._db
         .collection(FirestoreCollections.paymentMethods)
         .where(FirestoreCollections.paymentName, isEqualTo: name)
-        .getDocuments();
+        .get();
 
     PaymentMethod pm = new PaymentMethod();
-    if (querySnapshot.documents.length > 0) {
-      pm = PaymentMethod.fromJson(querySnapshot.documents[0].data,
-          id: querySnapshot.documents[0].documentID);
+    if (querySnapshot.docs.length > 0) {
+      pm = PaymentMethod.fromJson(querySnapshot.docs[0].data as Map<String, dynamic>,
+          id: querySnapshot.docs[0].id);
     }
     return pm;
   }
 
   DocumentReference getDocumentReferencePaymentsById(String idPMethod) {
-    return _db.document('${FirestoreCollections.paymentMethods}/$idPMethod');
+    return _db.doc('${FirestoreCollections.paymentMethods}/$idPMethod');
   }
 
   Future<DocumentReference> getPaymentMethodReference(String idPMethod) async {
-    return _db.collection(FirestoreCollections.paymentMethods).document(idPMethod);
+    return _db.collection(FirestoreCollections.paymentMethods).doc(idPMethod);
   }
 
   Future<DocumentReference> updatePaymentMethodDataRepository(PaymentMethod paymentMethod) async {
-    DocumentReference ref = _db.collection(FirestoreCollections.paymentMethods).document(paymentMethod.id);
-    ref.setData(paymentMethod.toJson(), merge: true);
+    DocumentReference ref = _db.collection(FirestoreCollections.paymentMethods).doc(paymentMethod.id);
+    await ref.set(paymentMethod.toJson(), SetOptions(merge: true));
     return ref;
   }
 
@@ -69,9 +69,9 @@ class PaymentMethodRepository {
     final querySnapshot = await this
         ._db
         .collection(FirestoreCollections.paymentMethods)
-        .document(idPMethod)
+        .doc(idPMethod)
         .get();
 
-    return PaymentMethod.fromJson(querySnapshot.data, id: querySnapshot.documentID);
+    return PaymentMethod.fromJson(querySnapshot.data as Map<String, dynamic>, id: querySnapshot.id);
   }
 }

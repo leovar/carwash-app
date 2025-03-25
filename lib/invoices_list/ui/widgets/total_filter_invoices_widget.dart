@@ -5,7 +5,7 @@ class TotalFilterInvoicesWidget extends StatefulWidget {
   final List<Invoice> listInvoices;
   final VoidCallback openFilters;
 
-  TotalFilterInvoicesWidget({Key key, this.listInvoices, this.openFilters});
+  TotalFilterInvoicesWidget({Key? key, required this.listInvoices, required this.openFilters});
 
   @override
   State<StatefulWidget> createState() => _TotalFilterInvoicesWidget();

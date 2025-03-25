@@ -8,15 +8,15 @@ import 'package:intl/intl.dart';
 class ProductivityUserDetailPage extends StatefulWidget {
   final List<ProductsCardDetail> productsList;
 
-  ProductivityUserDetailPage({Key key, this.productsList});
+  ProductivityUserDetailPage({Key? key, required this.productsList});
 
   @override
   State<StatefulWidget> createState() => _ProductivityUserDetailPage();
 }
 
 class _ProductivityUserDetailPage extends State<ProductivityUserDetailPage> {
-  BlocReports _blocReports;
-  List<ProductsCardDetail> _productsCard;
+  late BlocReports _blocReports;
+  late List<ProductsCardDetail> _productsCard;
 
   @override
   void initState() {

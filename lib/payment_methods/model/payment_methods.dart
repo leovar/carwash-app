@@ -4,9 +4,9 @@ import 'package:meta/meta.dart';
 
 @immutable
 class PaymentMethod extends Equatable {
-  final String id;
-  final String name;
-  final bool active;
+  final String? id;
+  final String? name;
+  final bool? active;
 
   PaymentMethod({
     this.id,
@@ -14,7 +14,7 @@ class PaymentMethod extends Equatable {
     this.active,
   });
 
-  factory PaymentMethod.fromJson(Map<String, dynamic> json, {String id}) {
+  factory PaymentMethod.fromJson(Map<String, dynamic> json, {String? id}) {
     return PaymentMethod(
       id: id,
       name: json['name'],
@@ -31,8 +31,8 @@ class PaymentMethod extends Equatable {
 
   @override
   List<Object> get props => [
-    id,
-    name,
-    active,
+    id!,
+    name!,
+    active!,
   ];
 }

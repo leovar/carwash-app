@@ -41,12 +41,12 @@ class PrintInvoicePage extends StatefulWidget {
   final Configuration configuration;
 
   PrintInvoicePage({
-    Key key,
-    this.currentInvoice,
-    this.selectedProducts,
-    this.additionalProducts,
-    this.customerEmail,
-    this.configuration,
+    Key? key,
+    required this.currentInvoice,
+    required this.selectedProducts,
+    required this.additionalProducts,
+    required this.customerEmail,
+    required this.configuration,
   });
 
   @override
@@ -57,7 +57,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
   GlobalKey<OverRepaintBoundaryState> globalKeyBoundary = GlobalKey();
   final _locationBloc = BlocLocation();
   final _customerBloc = BlocCustomer();
-  Uint8List imageInMemory;
+  late Uint8List imageInMemory;
   bool inside = false;
   Location _location = Location();
   Customer _customer = Customer();
@@ -78,11 +78,8 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
   void initState() {
     super.initState();
     _getPreferences();
-    _getCustomer(widget.currentInvoice.customer.documentID);
-    PermissionHandler().requestPermissions(<PermissionGroup>[
-      PermissionGroup.storage,
-      PermissionGroup.photos,
-    ]);
+    _getCustomer(widget.currentInvoice.customer?.id??'');
+    _requestPermissions();
   }
 
   @override
@@ -291,7 +288,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
           ),
           SizedBox(height: _spaceInfoInvoice),
           Text(
-            formatter.format(widget.currentInvoice.creationDate.toDate()),
+            formatter.format(widget.currentInvoice.creationDate!.toDate()),
             style: TextStyle(
               fontFamily: "Lato",
               decoration: TextDecoration.none,
@@ -347,7 +344,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                 ),
               ),
               Text(
-                widget.currentInvoice.placa,
+                widget.currentInvoice.placa??'',
                 textAlign: TextAlign.right,
                 style: TextStyle(
                   fontFamily: "Lato",
@@ -375,7 +372,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                 ),
               ),
               Text(
-                widget.currentInvoice.vehicleBrand,
+                widget.currentInvoice.vehicleBrand??'',
                 textAlign: TextAlign.right,
                 style: TextStyle(
                   fontFamily: "Lato",
@@ -462,7 +459,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
               ),
               Flexible(
                 child: Text(
-                  widget.currentInvoice.userCoordinatorName,
+                  widget.currentInvoice.userCoordinatorName??'',
                   textAlign: TextAlign.right,
                   style: TextStyle(
                     fontFamily: "Lato",
@@ -513,7 +510,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                 children: <Widget>[
                   Flexible(
                     child: Text(
-                      product.productName,
+                      product.productName??'',
                       style: TextStyle(
                         fontFamily: "Lato",
                         decoration: TextDecoration.none,
@@ -705,9 +702,11 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
         height: 80,
         child: Align(
           alignment: Alignment.bottomCenter,
-          child: RaisedButton(
-            padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
-            color: Theme.of(context).colorScheme.secondary,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
+              backgroundColor: Theme.of(context).colorScheme.secondary,
+            ),
             child: Text(
               "IMPRIMIR",
               style: TextStyle(
@@ -736,12 +735,19 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
 
       print('inside');
       inside = true;
-      RenderRepaintBoundary boundary =
-          globalKeyBoundary.currentContext.findRenderObject();
+      RenderRepaintBoundary? boundary = globalKeyBoundary.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+      if (boundary == null) {
+        throw Exception("No render boundary found");
+      }
+
       ui.Image image = await boundary.toImage(pixelRatio: 2.5);
-      ByteData byteData = await image.toByteData(
+      ByteData? byteData = await image.toByteData(
         format: ui.ImageByteFormat.png,
       );
+      if (byteData == null) {
+        throw Exception("Failed to convert image to bytes");
+      }
+
       Uint8List pngBytes = byteData.buffer.asUint8List();
 
       //Save Image
@@ -801,9 +807,9 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
       (attachments ?? []).map((a) => ml.FileAttachment(File(a)));
 
   void _sendMail(String imagePath) async {
-    String username = widget.configuration.emailFrom;
-    String password = widget.configuration.passFrom;
-    String domainSmtp = widget.configuration.smtpFrom;
+    String username = widget.configuration.emailFrom??'';
+    String password = widget.configuration.passFrom??'';
+    String domainSmtp = widget.configuration.smtpFrom??'';
 
     if (widget.customerEmail.isNotEmpty) {
       final emailSplit = widget.customerEmail.split(',');
@@ -844,7 +850,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
 
   void _getPreferences() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
-    String idLocation = pref.getString(Keys.idLocation);
+    String idLocation = pref.getString(Keys.idLocation)??'';
     _location = await _locationBloc.getLocationById(idLocation);
     setState(() {});
   }
@@ -852,6 +858,10 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
   void _getCustomer(String customerId) async {
     _customer = await _customerBloc.getCustomerByIdCustomer(customerId);
     setState(() {});
+  }
+
+  Future<void> _requestPermissions() async {
+    await [Permission.storage, Permission.photos].request();
   }
 }
 
@@ -895,7 +905,7 @@ class UiImagePainter extends CustomPainter {
 class UiImageDrawer extends StatelessWidget {
   final ui.Image image;
 
-  const UiImageDrawer({Key key, this.image}) : super(key: key);
+  const UiImageDrawer({Key? key, required this.image}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -906,7 +916,7 @@ class UiImageDrawer extends StatelessWidget {
 class OverRepaintBoundary extends StatefulWidget {
   final Widget child;
 
-  const OverRepaintBoundary({Key key, this.child}) : super(key: key);
+  const OverRepaintBoundary({Key? key, required this.child}) : super(key: key);
 
   @override
   OverRepaintBoundaryState createState() => OverRepaintBoundaryState();

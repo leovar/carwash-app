@@ -12,12 +12,12 @@ class SelectTurnCellWidget extends StatefulWidget {
   final List<Invoice> listCurrentWashing;
 
   SelectTurnCellWidget({
-    Key key,
-    this.selectCell,
-    this.workersController,
-    this.cellSelected,
-    this.locationData,
-    this.listCurrentWashing,
+    Key? key,
+    required this.selectCell,
+    required this.workersController,
+    required this.cellSelected,
+    required this.locationData,
+    required this.listCurrentWashing,
   });
 
   @override
@@ -25,8 +25,8 @@ class SelectTurnCellWidget extends StatefulWidget {
 }
 
 class _SelectTurnCellWidget extends State<SelectTurnCellWidget> {
-  List<DropdownMenuItem<CellsModel>> _dropdownMenuItems;
-  CellsModel _selectedCell;
+  late List<DropdownMenuItem<CellsModel>> _dropdownMenuItems;
+  late CellsModel _selectedCell;
 
   @override
   void initState() {
@@ -43,7 +43,7 @@ class _SelectTurnCellWidget extends State<SelectTurnCellWidget> {
   }
 
   Widget _getCellsList() {
-    List<CellsModel> listCells = getCellsList(widget.locationData.activeCells);
+    List<CellsModel> listCells = getCellsList(widget.locationData.activeCells??0);
     widget.listCurrentWashing.forEach((item) {
       var cell = item.washingCell;
       listCells.removeWhere((item) => item.value == cell);
@@ -67,7 +67,7 @@ class _SelectTurnCellWidget extends State<SelectTurnCellWidget> {
             fontWeight: FontWeight.normal,
             color: Theme.of(context).cardColor,
           ),
-          underline: Container(height: 1, color: Theme.of(context).cursorColor),
+          underline: Container(height: 1, color: Theme.of(context).textSelectionTheme.cursorColor),
         ),
         TextField(
           controller: widget.workersController,
@@ -92,7 +92,7 @@ class _SelectTurnCellWidget extends State<SelectTurnCellWidget> {
   List<DropdownMenuItem<CellsModel>> builtDropdownMenuItems(
     List<CellsModel> listCellItems,
   ) {
-    List<DropdownMenuItem<CellsModel>> listItems = List();
+    List<DropdownMenuItem<CellsModel>> listItems = [];
     for (CellsModel cellItem in listCellItems) {
       listItems.add(
         DropdownMenuItem(value: cellItem, child: Text(cellItem.text)),
@@ -102,17 +102,17 @@ class _SelectTurnCellWidget extends State<SelectTurnCellWidget> {
   }
 
   List<CellsModel> getCellsList(int cellsData) {
-    List<CellsModel> listCellItems = new List<CellsModel>();
+    List<CellsModel> listCellItems = [];
     for (int i = 0; i < cellsData; i++) {
       listCellItems.add(CellsModel((i + 1).toString(), (i + 1).toString()));
     }
     return listCellItems;
   }
 
-  onChangeDropDawnCell(CellsModel selectedCell) {
+  onChangeDropDawnCell(CellsModel? selectedCell) {
     setState(() {
-      widget.selectCell(selectedCell);
-      _selectedCell = selectedCell;
+      widget.selectCell(selectedCell?? new CellsModel('', ''));
+      _selectedCell = selectedCell ?? new CellsModel('', '');
     });
   }
 }

@@ -12,7 +12,7 @@ class OperatorsReport extends StatefulWidget {
   final DocumentReference locationReference;
   final Configuration configuration;
 
-  OperatorsReport({Key key, this.locationReference, this.configuration});
+  OperatorsReport({Key? key, required this.locationReference, required this.configuration});
 
   @override
   State<StatefulWidget> createState() => _OperatorsReport();
@@ -87,7 +87,7 @@ class _OperatorsReport extends State<OperatorsReport> {
         _listInvoices =
             _blocReports.buildProductivityReportList(snapshot.data.documents);
         _listCardReport = _processInvoicesOperator(_listInvoices
-            .where((f) => !f.cancelledInvoice && f.invoiceClosed)
+            .where((f) => !(f.cancelledInvoice??false) && (f.invoiceClosed??false))
             .toList());
         _listCardReport.sort((a, b) => a.operatorName.compareTo(b.operatorName));
     }
@@ -122,35 +122,36 @@ class _OperatorsReport extends State<OperatorsReport> {
     List<OperatorProductivityCard> _cardList = [];
     try {
       _listInvoices.forEach((itemInvoice) {
-        itemInvoice.operatorUsers.forEach((item) {
+        itemInvoice.operatorUsers?.forEach((item) {
           List<Invoice> invoicesPerUser = [];
-          double _totalPrice = itemInvoice.totalPrice / itemInvoice.countOperators;
-          OperatorProductivityCard cardInfo = _cardList.length > 0
+          double _totalPrice = (itemInvoice.totalPrice??0) / (itemInvoice.countOperators??0);
+          OperatorProductivityCard? cardInfo = _cardList.length > 0
               ? _cardList.firstWhere(
                   (x) =>
                       x.operatorName == item.name,
-                  orElse: () => null,
+                  orElse: () => new OperatorProductivityCard('','','',0,0,0,0,0,0,[],0),
                 )
               : null;
 
-          cardInfo.countServices = cardInfo.countServices +
+          cardInfo?.countServices = cardInfo.countServices +
               (itemInvoice.countOperators == 1
-                  ? (itemInvoice.countProducts +
-                  itemInvoice.countAdditionalProducts)
+                  ? ((itemInvoice.countProducts??0) + (itemInvoice.countAdditionalProducts??0))
                   : 0);
-          cardInfo.countSharedServices = cardInfo.countSharedServices +
-              (itemInvoice.countOperators > 1
-                  ? (itemInvoice.countProducts +
-                  itemInvoice.countAdditionalProducts)
+          cardInfo?.countSharedServices = cardInfo.countSharedServices +
+              ((itemInvoice.countOperators??0) > 1
+                  ? ((itemInvoice.countProducts??0) +
+                  (itemInvoice.countAdditionalProducts??0))
                   : 0);
-          cardInfo.totalPrice = cardInfo.totalPrice + _totalPrice;
-          List<Invoice> listGet = cardInfo.invoicesList;
+          cardInfo?.totalPrice = cardInfo.totalPrice + _totalPrice;
+          List<Invoice> listGet = cardInfo?.invoicesList?? [];
           listGet.add(itemInvoice);
-          int indexData = _cardList.indexOf(cardInfo);
-          _cardList[indexData] = cardInfo;
-          cardInfo.totalCommissionDay = cardInfo.totalCommissionDay + (itemInvoice.creationDate.toDate().day == DateTime.now().day ? item.operatorCommission : 0);
-          cardInfo.totalCommissionMonth = cardInfo.totalCommissionMonth + item.operatorCommission;
-          cardInfo.invoicesPerDay = cardInfo.invoicesPerDay + (itemInvoice.creationDate.toDate().day == DateTime.now().day ? 1 : 0);
+          if (cardInfo != null) {
+            int indexData = _cardList.indexOf(cardInfo);
+            _cardList[indexData] = cardInfo;
+          }
+          cardInfo?.totalCommissionDay = (cardInfo.totalCommissionDay??0) + (itemInvoice.creationDate!.toDate().day == DateTime.now().day ? item.operatorCommission??0 : 0);
+          cardInfo?.totalCommissionMonth = (cardInfo.totalCommissionMonth??0) + (item.operatorCommission??0);
+          cardInfo?.invoicesPerDay = cardInfo.invoicesPerDay + (itemInvoice.creationDate!.toDate().day == DateTime.now().day ? 1 : 0);
                 });
             });
       return _cardList;

@@ -6,7 +6,7 @@ import 'package:car_wash_app/invoice/repository/invoice_repository.dart';
 import 'package:car_wash_app/product/bloc/product_bloc.dart';
 import 'package:car_wash_app/reports/model/earnings_card_detail.dart';
 import 'package:car_wash_app/reports/repository/reports_repository.dart';
-import 'package:car_wash_app/user/model/user.dart';
+import 'package:car_wash_app/user/model/sysUser.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
@@ -50,16 +50,18 @@ class BlocReports implements Bloc {
     List<EarningsCardDetail> _cardList = [];
     try {
       _invoices.forEach((item) {
-        EarningsCardDetail detailInfo = _cardList.length > 0
-            ? _cardList.firstWhere((x) => x.locationName == item.locationName, orElse: () => null)
+        EarningsCardDetail? detailInfo = _cardList.length > 0
+            ? _cardList.firstWhere((x) => x.locationName == item.locationName, orElse: () => new EarningsCardDetail('',0,0,[]))
             : null;
-        detailInfo.countServices = detailInfo.countServices + (item.countProducts + item.countAdditionalProducts);
-        detailInfo.totalPrice = detailInfo.totalPrice + item.totalPrice;
-        List<Invoice> listGet = detailInfo.invoicesList;
+        detailInfo?.countServices = detailInfo.countServices + ((item.countProducts??0) + (item.countAdditionalProducts??0));
+        detailInfo?.totalPrice = detailInfo.totalPrice + (item.totalPrice??0);
+        List<Invoice> listGet = detailInfo?.invoicesList?? [];
         listGet.add(item);
-        int indexData = _cardList.indexOf(detailInfo);
-        _cardList[indexData] = detailInfo;
-            });
+        if (detailInfo != null) {
+          int indexData = _cardList.indexOf(detailInfo);
+          _cardList[indexData] = detailInfo;
+        }
+      });
       return _cardList;
     } catch(_error) {
       print(_error);
@@ -72,7 +74,7 @@ class BlocReports implements Bloc {
 
   //TODO metodo temporal para pasar el operador de la factura a una lista de operadores dentro de la factura
   void updateInfoOperatorsInvoices(List<Invoice> invoices) async {
-    try {
+    /*try {
       invoices.forEach((item) async {
         if (item.userOperatorName.isNotEmpty) {
           //valido que el operador unico no este creado en la lista
@@ -84,9 +86,9 @@ class BlocReports implements Bloc {
             }
           }
           if (!exist) {
-            List<User> _operatorsExist = item.operatorUsers;
-            var oppInsert = User.copyUserOperatorToSaveInvoice(
-              id: item.userOperator.documentID,
+            List<SysUser> _operatorsExist = item.operatorUsers;
+            var oppInsert = SysUser.copyUserOperatorToSaveInvoice(
+              id: item.userOperator.id,
               name: item.userOperatorName,
             );
             _operatorsExist.add(oppInsert);
@@ -103,7 +105,7 @@ class BlocReports implements Bloc {
     } catch(_error) {
       print(_error);
       Fluttertoast.showToast(msg: "Error corrigiendo operadores: $_error", toastLength: Toast.LENGTH_LONG);
-    }
+    }*/
   }
 
   Future<List<Invoice>> getListCustomerInvoicesByLocation(DocumentReference locationReference, DateTime dateInit, DateTime dateFinal) async {
@@ -111,8 +113,8 @@ class BlocReports implements Bloc {
   }
 
   //TODO metodo temporal para solucionar error con los id de los servicios dentro de las facturas
-  Future<int> updateInfoProductsInvoice(List<Invoice> invoices) async {
-    /*var countData = 0;
+  /*Future<int> updateInfoProductsInvoice(List<Invoice> invoices) async {
+    var countData = 0;
     invoices.forEach((item) async {
       final listInvoiceProducts = await _invoiceRepository.getProductsByIdInvoice(item.id);
       listInvoiceProducts.forEach((invProduct) async {
@@ -132,8 +134,8 @@ class BlocReports implements Bloc {
         }
       });
     });
-    return countData;*/
-  }
+    return countData;
+  }*/
 
   //TODO metodo temporal para solucionar error con los id de los servicios dentro de las facturas
   void addIdToProductInvoiceTemp(List<Invoice> invoices) async {

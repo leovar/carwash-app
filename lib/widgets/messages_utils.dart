@@ -41,8 +41,8 @@ class MessagesUtils {
   );
 
   static Alert showAlert({
-    @required BuildContext context,
-    @required String title,
+    required BuildContext context,
+    required String title,
     AlertType alertType = AlertType.info,
   }) {
     return Alert(
@@ -64,8 +64,8 @@ class MessagesUtils {
   }
 
   static Alert showAlertWithLoading({
-    @required BuildContext context,
-    @required String title,
+    required BuildContext context,
+    required String title,
   }) {
     return Alert(
       context: context,

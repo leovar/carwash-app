@@ -18,17 +18,17 @@ class FieldsProducts extends StatefulWidget {
   final Invoice invoice;
 
   FieldsProducts({
-    Key key,
-    this.callbackProductsList,
-    this.productListCallback,
-    this.callbackAdditionalProdList,
-    this.additionalProductListCb,
-    this.vehicleTypeSelect,
-    this.enableForm,
-    this.selectedProductsCount,
-    this.idLocation,
-    this.editForm,
-    this.invoice,
+    Key? key,
+    required this.callbackProductsList,
+    required this.productListCallback,
+    required this.callbackAdditionalProdList,
+    required this.additionalProductListCb,
+    required this.vehicleTypeSelect,
+    required this.enableForm,
+    required this.selectedProductsCount,
+    required this.idLocation,
+    required this.editForm,
+    required this.invoice,
   });
 
   @override

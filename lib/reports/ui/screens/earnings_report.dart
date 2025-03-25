@@ -4,7 +4,7 @@ import 'package:car_wash_app/reports/bloc/bloc_reports.dart';
 import 'package:car_wash_app/reports/model/earnings_card_detail.dart';
 import 'package:car_wash_app/reports/ui/widgets/item_earning_card.dart';
 import 'package:car_wash_app/widgets/messages_utils.dart';
-import 'package:excel/excel.dart';
+import 'package:excel/excel.dart' as excel_lib;
 import 'package:path/path.dart' as path_prov;
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -165,7 +165,9 @@ class _EarningsReport extends State<EarningsReport> {
       height: 30,
       margin: EdgeInsets.only(top: 8),
       decoration: BoxDecoration(
-        border: Border(top: BorderSide(color: Color(0xFFD8D8D8), width: 1.0)),
+        border: Border(
+            top: BorderSide(color: Color(0xFFD8D8D8), width: 1.0),
+        )
       ),
       child: Column(
         mainAxisSize: MainAxisSize.max,
@@ -231,7 +233,7 @@ class _EarningsReport extends State<EarningsReport> {
 
   /// Functions
   Future<Null> _datePickerFrom() async {
-    final DateTime picked = await showDatePicker(
+    final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: _dateTimeInit,
       firstDate: DateTime(1970),
@@ -240,14 +242,16 @@ class _EarningsReport extends State<EarningsReport> {
 
     if (picked != _dateTimeInit) {
       setState(() {
-        _dateTimeInit = picked;
+        if (picked != null) {
+          _dateTimeInit = picked;
+        }
         _textDateInit.text = formatter.format(_dateTimeInit);
       });
     }
   }
 
   Future<Null> _datePickerFinal() async {
-    final DateTime picked = await showDatePicker(
+    final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: _dateTimeFinal,
       firstDate: DateTime(1970),
@@ -256,7 +260,9 @@ class _EarningsReport extends State<EarningsReport> {
 
     if (picked != _dateTimeFinal) {
       setState(() {
-        _dateTimeFinal = picked;
+        if (picked != null) {
+          _dateTimeInit = picked;
+        }
         _textDateFinal.text = formatter.format(_dateTimeFinal);
       });
     }
@@ -267,7 +273,7 @@ class _EarningsReport extends State<EarningsReport> {
     try {
       List<Invoice> _listInvoicesReport =
           _listInvoices
-              .where((f) => !f.cancelledInvoice && f.invoiceClosed)
+              .where((f) => !(f.cancelledInvoice??false) && (f.invoiceClosed??false))
               .toList();
       if (_listInvoicesReport.length > 0) {
         MessagesUtils.showAlertWithLoading(
@@ -278,10 +284,10 @@ class _EarningsReport extends State<EarningsReport> {
         int _maxCountOperators = 0;
         _listInvoicesReport.forEach((itemInvoice) {
           if ((itemInvoice.countOperators ?? 0) > _maxCountOperators)
-            _maxCountOperators = itemInvoice.countOperators;
+            _maxCountOperators = itemInvoice.countOperators??0;
         });
 
-        var excel = Excel.createExcel();
+        var excel = excel_lib.Excel.createExcel();
         var sheetObject = excel["Sheet1"];
 
         List<String> header = [
@@ -297,34 +303,35 @@ class _EarningsReport extends State<EarningsReport> {
         for (var i = 1; i <= _maxCountOperators; i++) {
           header.add("Operador " + i.toString());
         }
-        sheetObject.appendRow(header);
+        sheetObject.appendRow(header.cast<excel_lib.CellValue?>());
         _listInvoicesReport.forEach((item) {
           count++;
           List<String> row = [
-            "${formatter.format(item.creationDate.toDate())}",
+            "${formatter.format(item.creationDate!.toDate())}",
             "${item.locationName}",
             "${item.consecutive}",
-            "${item.totalPrice.toInt()}",
+            "${(item.totalPrice??0).toInt()}",
             "${item.totalCommission}",
             "${item.countOperators}",
-            "${((item.totalCommission ?? 0) / item.countOperators)}",
+            "${((item.totalCommission ?? 0) / (item.countOperators??0))}",
             "${item.operatorsSplit}",
           ];
-          item.operatorUsers.forEach((itemOpp) {
+          item.operatorUsers?.forEach((itemOpp) {
             row.add("${itemOpp.name}");
           });
-          sheetObject.appendRow(row);
+          sheetObject.appendRow(row.cast<excel_lib.CellValue?>());
         });
 
         excel.rename("Sheet1", "Hoja1");
 
         String outputFile =
             "/storage/emulated/0/Download/ReporteGanancias.xlsx";
-        excel.encode().then((onValue) {
+        var encodedExcel = await excel.encode();
+        if (encodedExcel != null) {
           File(path_prov.join(outputFile))
             ..createSync(recursive: true)
-            ..writeAsBytesSync(onValue);
-        });
+            ..writeAsBytesSync(encodedExcel);
+        }
 
         Navigator.pop(context); //Close popUp Save
         Fluttertoast.showToast(

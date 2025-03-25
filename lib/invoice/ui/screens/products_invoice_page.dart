@@ -18,15 +18,15 @@ class ProductsInvoicePage extends StatefulWidget {
   final Invoice invoice;
 
   ProductsInvoicePage({
-    Key key,
-    this.callbackSetProductsList,
-    this.productListCallback,
-    this.cbAdditionalProducts,
-    this.additionalProductListCb,
-    this.vehicleTypeSelect,
-    this.idLocation,
-    this.editForm,
-    this.invoice,
+    Key? key,
+    required this.callbackSetProductsList,
+    required this.productListCallback,
+    required this.cbAdditionalProducts,
+    required this.additionalProductListCb,
+    required this.vehicleTypeSelect,
+    required this.idLocation,
+    required this.editForm,
+    required this.invoice,
   });
 
   @override
@@ -64,7 +64,7 @@ class _ProductsInvoicePage extends State<ProductsInvoicePage> {
   }
 
   Widget getProducts() {
-    if (widget.invoice.invoiceClosed) {
+    if (widget.invoice.invoiceClosed??false) {
       List<Product> productsList = [];
       widget.productListCallback.forEach((prod) {
         Product prodSelected = Product.copyProductInvoiceWith(
@@ -99,8 +99,8 @@ class _ProductsInvoicePage extends State<ProductsInvoicePage> {
     List<Product> productGet = <Product>[];
     productsList.forEach((prod) {
       Product proFindSelect = widget.productListCallback.firstWhere(
-          (d) => d.id == prod.id && d.isSelected,
-          orElse: () => null);
+          (d) => d.id == prod.id && (d.isSelected??false),
+          orElse: () => new Product());
       Product prodSelected = Product.copyProductInvoiceWith(
         origin: prod,
         isSelected: true,
@@ -166,9 +166,11 @@ class _ProductsInvoicePage extends State<ProductsInvoicePage> {
                 height: 100,
                 child: Align(
                   alignment: Alignment.center,
-                  child: RaisedButton(
-                    padding: EdgeInsets.symmetric(vertical: 15, horizontal: 25),
-                    color: Color(0xFF59B258),
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(vertical: 15, horizontal: 25),
+                      backgroundColor: Color(0xFF59B258),
+                    ),
                     child: Text(
                       "Otros Servicios",
                       style: TextStyle(
@@ -203,9 +205,11 @@ class _ProductsInvoicePage extends State<ProductsInvoicePage> {
                 height: 100,
                 child: Align(
                   alignment: Alignment.center,
-                  child: RaisedButton(
-                    padding: EdgeInsets.symmetric(vertical: 15, horizontal: 25),
-                    color: Color(0xFF59B258),
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(vertical: 15, horizontal: 25),
+                      backgroundColor: Color(0xFF59B258),
+                    ),
                     child: Text(
                       "Aceptar",
                       style: TextStyle(

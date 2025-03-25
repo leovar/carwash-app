@@ -7,9 +7,9 @@ class LocationsSelectListPage extends StatefulWidget {
   List<Location> locationsList;
 
   LocationsSelectListPage({
-    Key key,
-    this.callbackSetLocationsList,
-    this.locationsList,
+    Key? key,
+    required this.callbackSetLocationsList,
+    required this.locationsList,
   });
 
   @override
@@ -55,7 +55,7 @@ class _LocationsSelectListPage extends State<LocationsSelectListPage> {
   Widget listLocations() {
     if (widget.locationsList.length > 0) {
       widget.locationsList.forEach((f) {
-        if (f.isSelected) {
+        if (f.isSelected??false) {
           locationGet[locationGet.indexWhere((p) => p.id == f.id)].isSelected =
               true;
         }
@@ -80,9 +80,11 @@ class _LocationsSelectListPage extends State<LocationsSelectListPage> {
           height: 100,
           child: Align(
             alignment: Alignment.center,
-            child: RaisedButton(
-              padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
-              color: Color(0xFF59B258),
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
+                backgroundColor: Color(0xFF59B258),
+              ),
               child: Text(
                 "Aceptar",
                 style: TextStyle(

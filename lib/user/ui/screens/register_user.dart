@@ -15,7 +15,7 @@ class RegisterUser extends StatefulWidget {
 }
 
 class _RegisterUser extends State<RegisterUser> {
-  UserBloc _userBloc;
+  late UserBloc _userBloc;
 
   final _textEmail = TextEditingController();
   final _textPassword = TextEditingController();
@@ -60,7 +60,7 @@ class _RegisterUser extends State<RegisterUser> {
         child: Center(
           child: Form(
             key: _formKey,
-            autovalidate: _autoValidate,
+            autovalidateMode: _autoValidate ? AutovalidateMode.always : AutovalidateMode.disabled,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
@@ -89,6 +89,7 @@ class _RegisterUser extends State<RegisterUser> {
                   autofocus: false,
                   colorText: Colors.white,
                   validateType: 1,
+                  onFinalEditText: (){},
                 ),
                 SizedBox(height: 16),
                 this._inputTextPassword(),
@@ -173,7 +174,6 @@ class _RegisterUser extends State<RegisterUser> {
       cursorColor: Colors.white,
       style: TextStyle(
         fontFamily: "Lato",
-        decoration: TextDecoration.none,
         color: Colors.white,
         fontSize: 18,
       ),
@@ -206,8 +206,8 @@ class _RegisterUser extends State<RegisterUser> {
           ),
         ),
       ),
-      validator: (String args) {
-        if (args.isEmpty)
+      validator: (String? args) {
+        if (args == null || args.isEmpty)
           return 'El campo no puede estar vacio';
         else
           return null;
@@ -252,7 +252,7 @@ class _RegisterUser extends State<RegisterUser> {
   void _onChangeTextBirthDate() {
     var text = _textBirthDate.text;
     var val = _textBirthDate.text.split('/');
-    var val1 = int.tryParse(val[0] ?? 0);
+    var val1 = int.tryParse(val.isNotEmpty ? val[0] : '0');
     var val2 = int.tryParse(val.length > 1 ? val[1] : '0');
     var val3 = int.tryParse(val.length > 2 ? val[2] : '0');
 
@@ -279,7 +279,7 @@ class _RegisterUser extends State<RegisterUser> {
         );
       }
 
-      if (val1 > 31 && val1.toString().length == 2) {
+      if (val1! > 31 && val1.toString().length == 2) {
         MessagesUtils.showAlert(
           context: context,
           title: 'El dia no puede ser superior a 31',
@@ -287,7 +287,7 @@ class _RegisterUser extends State<RegisterUser> {
         ).show();
       }
 
-      if (val2 > 12 && val2.toString().length == 2) {
+      if (val2! > 12 && val2.toString().length == 2) {
         MessagesUtils.showAlert(
           context: context,
           title: 'El mes no puede ser superior a 12',
@@ -295,7 +295,7 @@ class _RegisterUser extends State<RegisterUser> {
         ).show();
       }
 
-      if (val3 > 0 &&
+      if (val3! > 0 &&
           val3.toString().length == 4 &&
           (val3 < 1900 || val3 >= DateTime.now().year)) {
         MessagesUtils.showAlert(
@@ -328,7 +328,7 @@ class _RegisterUser extends State<RegisterUser> {
   Future<Null> _selectDate(BuildContext context) async {
     final formatDate = DateFormat.yMd('ES');
     Locale myLocale = Localizations.localeOf(context);
-    final DateTime picked = await showDatePicker(
+    final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: _date,
       locale: myLocale,
@@ -337,7 +337,7 @@ class _RegisterUser extends State<RegisterUser> {
     );
     if (picked != _date)
       setState(() {
-        _date = picked;
+        _date = picked!;
         _textBirthDate.value = TextEditingValue(
           text: formatDate.format(picked),
         );
@@ -366,7 +366,7 @@ class _RegisterUser extends State<RegisterUser> {
   }
 
   Future<void> _registerUser() async {
-    if (_formKey.currentState.validate()) {
+    if (_formKey.currentState?.validate() ?? false) {
       if (_validations()) {
         if (_textEmail.text.isNotEmpty && _textPassword.text.isNotEmpty) {
           try {
@@ -384,7 +384,7 @@ class _RegisterUser extends State<RegisterUser> {
                   ).show();
                 });
 
-            _formKey.currentState.save();
+            _formKey.currentState?.save();
           } on PlatformException catch (e) {
             if (e.message ==
                 'The email address is already in use by another account.') {

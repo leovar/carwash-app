@@ -22,9 +22,9 @@ class _ReportsPage extends State<ReportsPage> {
     ];
 
     final _tabItems = <BottomNavigationBarItem>[
-      BottomNavigationBarItem(icon: Icon(Icons.supervisor_account), label: Text('productividad')),
-      BottomNavigationBarItem(icon: Icon(Icons.trending_up), label: Text('ganancias')),
-      BottomNavigationBarItem(icon: Icon(Icons.contacts), label: Text('clientes')),
+      BottomNavigationBarItem(icon: Icon(Icons.supervisor_account), label: 'productividad'),
+      BottomNavigationBarItem(icon: Icon(Icons.trending_up), label: 'ganancias'),
+      BottomNavigationBarItem(icon: Icon(Icons.contacts), label: 'clientes'),
     ];
     assert(_tabPages.length == _tabItems.length);
     final bottomNavBar = BottomNavigationBar(

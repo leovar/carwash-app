@@ -4,7 +4,7 @@ class InfoHeaderContainer extends StatelessWidget {
   final String image;
   final String textInfo;
 
-  InfoHeaderContainer({Key key, this.image, this.textInfo = ''});
+  InfoHeaderContainer({Key? key, required this.image, required this.textInfo});
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +22,7 @@ class InfoHeaderContainer extends StatelessWidget {
             ),
           ),
           textInfo.isEmpty
-              ? null
+              ? const SizedBox.shrink()
               : Text(
                   textInfo, //- No. 1017
                   style: TextStyle(

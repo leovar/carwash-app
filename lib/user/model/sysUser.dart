@@ -116,10 +116,10 @@ class SysUser extends Equatable {
     );
   }
 
-  Map<String, dynamic> toJsonInvoiceOperator(
-    String userId,
+  static Map<String, dynamic> toJsonInvoiceOperator(
+    String? userId,
     String name,
-    double operatorCommission,
+    double? operatorCommission,
   ) {
     return {
       'id': userId,
@@ -134,14 +134,14 @@ class SysUser extends Equatable {
     uid,
     name,
     email,
-    photoUrl!,
+    photoUrl ?? '',
     lastSignIn!,
-    active!,
+    active ?? false,
     locations!,
-    isAdministrator!,
-    isCoordinator!,
-    isOperator!,
-    isSelected!,
-    operatorCommission!,
+    isAdministrator ?? false,
+    isCoordinator ?? false,
+    isOperator ?? false,
+    isSelected ?? false,
+    operatorCommission ?? 0,
   ];
 }

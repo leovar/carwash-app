@@ -4,6 +4,7 @@ import 'package:car_wash_app/invoice/ui/widgets/text_field_input.dart';
 import 'package:car_wash_app/vehicle_type/bloc/vehicle_type_bloc.dart';
 import 'package:car_wash_app/widgets/messages_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 
 class CommissionAdminPage extends StatefulWidget {
@@ -12,16 +13,16 @@ class CommissionAdminPage extends StatefulWidget {
   final String vehicleType;
 
   CommissionAdminPage(
-      {Key key, this.currentCommission, this.iconVehicle, this.vehicleType});
+      {Key? key, required this.currentCommission, required this.iconVehicle, required this.vehicleType});
 
   @override
   State<StatefulWidget> createState() => _CommissionAdminPage();
 }
 
 class _CommissionAdminPage extends State<CommissionAdminPage> {
-  BlocCommission _blocCommission;
+  late BlocCommission _blocCommission;
   VehicleTypeBloc _vehicleTypeBloc = VehicleTypeBloc();
-  Commission _commissionSelected;
+  late Commission _commissionSelected;
 
   bool _validateValue = false;
   bool _isPercentage = false;
@@ -100,7 +101,6 @@ class _CommissionAdminPage extends State<CommissionAdminPage> {
                 textController: _productType,
                 enable: false,
                 inputType: TextInputType.multiline,
-                maxLines: null,
               ),
             ),
             SizedBox(height: 18),
@@ -112,7 +112,7 @@ class _CommissionAdminPage extends State<CommissionAdminPage> {
                 textValidate: 'Escriba el valor de comisión',
                 inputType: TextInputType.number,
                 textInputFormatter: [
-                  WhitelistingTextInputFormatter(RegExp("^[0-9.]*"))
+                  FilteringTextInputFormatter.allow(RegExp("^[0-9.]*")),
                 ],
               ),
             ),
@@ -129,7 +129,7 @@ class _CommissionAdminPage extends State<CommissionAdminPage> {
                         'Escriba el valor del umbral de precio si aplica',
                     inputType: TextInputType.number,
                     textInputFormatter: [
-                      WhitelistingTextInputFormatter(RegExp("^[0-9.]*"))
+                      FilteringTextInputFormatter.allow(RegExp("^[0-9.]*")),
                     ],
                   ),
                 ),
@@ -155,7 +155,7 @@ class _CommissionAdminPage extends State<CommissionAdminPage> {
                     textValidate: 'Escriba el valor de comisión',
                     inputType: TextInputType.number,
                     textInputFormatter: [
-                      WhitelistingTextInputFormatter(RegExp("^[0-9.]*"))
+                      FilteringTextInputFormatter.allow(RegExp("^[0-9.]*")),
                     ],
                   ),
                 ),
@@ -177,7 +177,7 @@ class _CommissionAdminPage extends State<CommissionAdminPage> {
                 children: <Widget>[
                   Checkbox(
                     value: _isPercentage,
-                    onChanged: (bool value) {
+                    onChanged: (bool? value) {
                       _onChangeValueType(1, value);
                     },
                     checkColor: Colors.white,
@@ -201,7 +201,7 @@ class _CommissionAdminPage extends State<CommissionAdminPage> {
                 children: <Widget>[
                   Checkbox(
                     value: _isValue,
-                    onChanged: (bool value) {
+                    onChanged: (bool? value) {
                       _onChangeValueType(2, value);
                     },
                     checkColor: Colors.white,
@@ -225,9 +225,11 @@ class _CommissionAdminPage extends State<CommissionAdminPage> {
                 children: <Widget>[
                   Checkbox(
                     value: _isCalculatedPerCount,
-                    onChanged: (bool value) {
+                    onChanged: (bool? value) {
                       setState(() {
-                        _isCalculatedPerCount = value;
+                        if (value != null) {
+                          _isCalculatedPerCount = value;
+                        }
                       });
                     },
                     checkColor: Colors.white,
@@ -260,9 +262,11 @@ class _CommissionAdminPage extends State<CommissionAdminPage> {
       height: 100,
       child: Align(
         alignment: Alignment.center,
-        child: RaisedButton(
-          padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
-          color: Color(0xFF59B258),
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
+            backgroundColor: Color(0xFF59B258),
+          ),
           child: Text(
             "Guardar",
             style: TextStyle(
@@ -282,26 +286,26 @@ class _CommissionAdminPage extends State<CommissionAdminPage> {
   }
 
   void _selectCommissionList() {
-    _value.text = _commissionSelected.value.toStringAsFixed(2);
-    _productType.text = _commissionSelected.productType;
-    _isPercentage = _commissionSelected.isPercentage;
-    _isValue = _commissionSelected.isValue;
-    _isCalculatedPerCount = _commissionSelected.calculatePerCount;
-    _valueCommissionThreshold.text = _commissionSelected.commissionThreshold.toStringAsFixed(2);
-    _valueBeforeThreshold.text = _commissionSelected.valueBeforeThreshold.toStringAsFixed(2);
+    _value.text = _commissionSelected.value?.toStringAsFixed(2)??'';
+    _productType.text = _commissionSelected.productType??'';
+    _isPercentage = _commissionSelected.isPercentage??false;
+    _isValue = _commissionSelected.isValue??false;
+    _isCalculatedPerCount = _commissionSelected.calculatePerCount??false;
+    _valueCommissionThreshold.text = _commissionSelected.commissionThreshold?.toStringAsFixed(2)??'0';
+    _valueBeforeThreshold.text = _commissionSelected.valueBeforeThreshold?.toStringAsFixed(2)??'0';
   }
 
   //1. por porcentaje, 2. por valor
-  void _onChangeValueType(int productType, bool value) {
+  void _onChangeValueType(int productType, bool? value) {
     setState(() {
       switch (productType) {
         case 1:
-          _isPercentage = value;
+          _isPercentage = value??false;
           _isValue = false;
           break;
         case 2:
           _isPercentage = false;
-          _isValue = value;
+          _isValue = value??false;
           break;
       }
     });

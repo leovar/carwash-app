@@ -11,18 +11,18 @@ class TextFieldInputValidate extends StatefulWidget {
   final bool enable;
   final int validateType;
   final bool autofocus;
-  final int maxLength;
+  final int? maxLength;
   final int maxLines;
   final bool isPassword;
   final Color colorText;
 
   TextFieldInputValidate({
-    Key key,
-    this.labelText,
-    this.textController,
-    this.onFinalEditText,
+    Key? key,
+    required this.labelText,
+    required this.textController,
+    required this.onFinalEditText,
     this.focusNode = null,
-    this.inputType = null,
+    required this.inputType,
     this.textInputFormatter = null,
     this.isUpperCase = false,
     this.enable = true,
@@ -30,8 +30,8 @@ class TextFieldInputValidate extends StatefulWidget {
     this.maxLength,
     this.maxLines = 1,
     this.isPassword = false,
-    this.colorText,
-    this.validateType,
+    required this.colorText,
+    required this.validateType,
   });
 
   @override
@@ -59,7 +59,7 @@ class _TextFieldInputColorValidate extends State<TextFieldInputValidate> {
       onChanged: (value) {
         widget.onFinalEditText();
       },
-      validator: (String args) {
+      validator: (String? args) {
         return this._validateField(args);
       },
       enabled: widget.enable ?? true,
@@ -105,37 +105,37 @@ class _TextFieldInputColorValidate extends State<TextFieldInputValidate> {
     );
   }
 
-  String _validateField(String args) {
+  String _validateField(String? args) {
     switch (widget.validateType ?? 0) {
       case 1:
         {
           //Email validation
           bool emailValid = RegExp(
                   r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
-              .hasMatch(args);
+              .hasMatch(args ?? '');
           if (!emailValid)
             return 'El correo no es valido';
           else
-            return null;
+            return '';
         }
         break;
 
       case 2:
         {
-          if (args.isEmpty)
+          if (args == null || args.isEmpty)
             return 'El nombre no puede estar vacio';
           else
-            return null;
+            return '';
         }
         break;
 
       case 3:
         {
-          if (args.isEmpty)
+          if (args == null || args.isEmpty)
             return 'El telefono no puede estar vacio';
           else if (args.length < 10)
             return 'El telefono debe contener 10 caracteres';
-          return null;
+          return '';
         }
         break;
     }

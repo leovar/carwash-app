@@ -6,9 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 
 class CreatePaymentMethodAdminPage extends StatefulWidget {
-  final PaymentMethod currentPaymentMethod;
+  final PaymentMethod? currentPaymentMethod;
 
-  CreatePaymentMethodAdminPage({Key key, this.currentPaymentMethod});
+  CreatePaymentMethodAdminPage({Key? key, this.currentPaymentMethod});
 
   @override
   State<StatefulWidget> createState() => _CreatePaymentMethodAdminPage();
@@ -16,17 +16,17 @@ class CreatePaymentMethodAdminPage extends StatefulWidget {
 
 class _CreatePaymentMethodAdminPage
     extends State<CreatePaymentMethodAdminPage> {
-  BlocPaymentMethod _paymentMethodBloc;
+  late BlocPaymentMethod _paymentMethodBloc;
   bool _validateName = false;
   final _textName = TextEditingController();
   bool _registerActive = true;
 
-  PaymentMethod _paymentMethodSelected;
+  late PaymentMethod _paymentMethodSelected;
 
   @override
   void initState() {
     super.initState();
-    _paymentMethodSelected = widget.currentPaymentMethod;
+    _paymentMethodSelected = widget.currentPaymentMethod?? new PaymentMethod();
     _selectLocationList();
     }
 
@@ -87,9 +87,11 @@ class _CreatePaymentMethodAdminPage
                 children: <Widget>[
                   Checkbox(
                     value: _registerActive,
-                    onChanged: (bool value) {
+                    onChanged: (bool? value) {
                       setState(() {
-                        _registerActive = value;
+                        if (value != null) {
+                          _registerActive = value;
+                        }
                       });
                     },
                     checkColor: Colors.white,
@@ -123,9 +125,11 @@ class _CreatePaymentMethodAdminPage
       height: 100,
       child: Align(
         alignment: Alignment.center,
-        child: RaisedButton(
-          padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
-          color: Color(0xFF59B258),
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
+            backgroundColor: Color(0xFF59B258),
+          ),
           child: Text(
             "Guardar",
             style: TextStyle(
@@ -148,8 +152,8 @@ class _CreatePaymentMethodAdminPage
 
   void _selectLocationList() {
     _validateName = false;
-    _textName.text = _paymentMethodSelected.name;
-    _registerActive = _paymentMethodSelected.active;
+    _textName.text = _paymentMethodSelected.name??'';
+    _registerActive = _paymentMethodSelected.active??false;
   }
 
   bool _validateInputs() {

@@ -16,9 +16,9 @@ class ItemCommissionAdminList extends StatefulWidget {
 }
 
 class _ItemCommissionAdminList extends State<ItemCommissionAdminList> {
-  double _imageWith;
-  String _iconVehicle;
-  String _vehicleTypeName = '';
+  late double _imageWith;
+  late String _iconVehicle;
+  late String _vehicleTypeName = '';
 
   @override
   void initState() {
@@ -114,7 +114,7 @@ class _ItemCommissionAdminList extends State<ItemCommissionAdminList> {
                         children: <Widget>[
                           Flexible(
                             child: Text(
-                              _itemCommission.productType,
+                              _itemCommission.productType??'',
                               style: TextStyle(
                                 fontFamily: "Lato",
                                 decoration: TextDecoration.none,
@@ -123,7 +123,7 @@ class _ItemCommissionAdminList extends State<ItemCommissionAdminList> {
                             ),
                           ),
                           Visibility(
-                            visible: _itemCommission.isValue,
+                            visible: _itemCommission.isValue??false,
                             child: Flexible(
                               child: Text(
                                 '\$${formatter.format(_itemCommission.value)}',
@@ -136,7 +136,7 @@ class _ItemCommissionAdminList extends State<ItemCommissionAdminList> {
                             ),
                           ),
                           Visibility(
-                            visible: _itemCommission.isPercentage,
+                            visible: _itemCommission.isPercentage??false,
                             child: Flexible(
                               child: Text(
                                 formatter.format(_itemCommission.value) + ' %',

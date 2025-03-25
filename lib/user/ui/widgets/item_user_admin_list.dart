@@ -1,11 +1,11 @@
 import 'package:car_wash_app/user/bloc/bloc_user.dart';
-import 'package:car_wash_app/user/model/user.dart';
+import 'package:car_wash_app/user/model/sysUser.dart';
 import 'package:car_wash_app/user/ui/screens/create_user_admin_page.dart';
 import 'package:flutter/material.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 
 class ItemUserAdminList extends StatefulWidget {
-  final List<User> userList;
+  final List<SysUser> userList;
   final int index;
 
   ItemUserAdminList(this.userList, this.index);
@@ -43,13 +43,13 @@ class _ItemUserAdminList extends State<ItemUserAdminList> {
     );
   }
 
-  Widget itemDecoration(User _itemUser) {
+  Widget itemDecoration(SysUser _itemUser) {
     String _userType = '';
-    if (_itemUser.isAdministrator)
+    if (_itemUser.isAdministrator ?? false)
       _userType = 'Administrador';
-    else if (_itemUser.isCoordinator)
+    else if (_itemUser.isCoordinator ?? false)
       _userType = 'Coordinador';
-    else if (_itemUser.isOperator)
+    else if (_itemUser.isOperator ?? false)
       _userType = 'Operator';
     else
       _userType = 'Usuario';
@@ -87,9 +87,9 @@ class _ItemUserAdminList extends State<ItemUserAdminList> {
                       shape: BoxShape.circle,
                       image: DecorationImage(
                         fit: BoxFit.cover,
-                        image: (_itemUser.photoUrl.isEmpty)
-                            ? AssetImage('assets/images/profile_placeholder.png')
-                            : NetworkImage(_itemUser.photoUrl),
+                        image: _itemUser.photoUrl?.isEmpty ?? true
+                            ? AssetImage('assets/images/profile_placeholder.png') as ImageProvider
+                            : NetworkImage(_itemUser.photoUrl ?? '') as ImageProvider ,
                       ),
                     ),
                   ),
@@ -139,7 +139,7 @@ class _ItemUserAdminList extends State<ItemUserAdminList> {
             Container(
               height: 25,
               margin: EdgeInsets.only(right: 8.0),
-              child: _itemUser.active
+              child: _itemUser.active ?? false
                   ? Icon(
                       Icons.check,
                       color: Theme.of(context).primaryColor,

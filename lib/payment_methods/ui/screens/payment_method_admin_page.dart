@@ -12,7 +12,7 @@ class PaymentMethodAdminPage extends StatefulWidget{
 }
 
 class _PaymentMethodAdminPage extends State<PaymentMethodAdminPage> {
-  BlocPaymentMethod _paymentMethodBloc;
+  late BlocPaymentMethod _paymentMethodBloc;
   List<PaymentMethod> _paymentMethodsList = [];
 
   @override
@@ -73,7 +73,7 @@ class _PaymentMethodAdminPage extends State<PaymentMethodAdminPage> {
 
   Widget _getDataPaymentMethodsList(AsyncSnapshot snapshot) {
     _paymentMethodsList = _paymentMethodBloc.buildPaymentMethods(snapshot.data.documents);
-    _paymentMethodsList.sort((a, b) => a.name.compareTo(b.name));
+    _paymentMethodsList.sort((a, b) => (a.name??'').compareTo(b.name??''));
     return Flexible(
       child: ListView.builder(
         itemCount: _paymentMethodsList.length,
@@ -92,9 +92,11 @@ class _PaymentMethodAdminPage extends State<PaymentMethodAdminPage> {
       margin: EdgeInsets.only(top: 8,),
       child: Align(
         alignment: Alignment.bottomCenter,
-        child: RaisedButton(
-          padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
-          color: Color(0xFF59B258),
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
+            backgroundColor: Color(0xFF59B258),
+          ),
           child: Text(
             "Nuevo método de pago",
             style: TextStyle(
@@ -122,5 +124,4 @@ class _PaymentMethodAdminPage extends State<PaymentMethodAdminPage> {
       ),
     );
   }
-
 }

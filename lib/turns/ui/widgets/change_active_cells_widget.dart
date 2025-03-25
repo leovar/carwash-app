@@ -6,15 +6,15 @@ class ChangeActiveCellsWidget extends StatefulWidget {
   final Function(int) selectActiveCells;
   final Location locationData;
 
-  ChangeActiveCellsWidget({Key key, this.selectActiveCells, this.locationData});
+  ChangeActiveCellsWidget({Key? key, required this.selectActiveCells, required this.locationData});
 
   @override
   State<StatefulWidget> createState() => _ChangeActiveCellsWidget();
 }
 
 class _ChangeActiveCellsWidget extends State<ChangeActiveCellsWidget> {
-  List<DropdownMenuItem<CellsModel>> _dropdownMenuItems;
-  CellsModel _selectedActiveCells;
+  late List<DropdownMenuItem<CellsModel>> _dropdownMenuItems;
+  late CellsModel _selectedActiveCells;
 
   @override
   void initState() {
@@ -27,7 +27,7 @@ class _ChangeActiveCellsWidget extends State<ChangeActiveCellsWidget> {
   }
 
   Widget _getCellsList() {
-    List<CellsModel> listCells = getCellsList(widget.locationData.totalCells);
+    List<CellsModel> listCells = getCellsList(widget.locationData.totalCells??0);
     return Column(
       children: [
         DropdownButton(
@@ -47,7 +47,7 @@ class _ChangeActiveCellsWidget extends State<ChangeActiveCellsWidget> {
             fontWeight: FontWeight.normal,
             color: Theme.of(context).cardColor,
           ),
-          underline: Container(height: 1, color: Theme.of(context).cursorColor),
+          underline: Container(height: 1, color: Theme.of(context).textSelectionTheme.cursorColor),
         ),
       ],
     );
@@ -56,7 +56,7 @@ class _ChangeActiveCellsWidget extends State<ChangeActiveCellsWidget> {
   List<DropdownMenuItem<CellsModel>> builtDropdownMenuItems(
     List<CellsModel> listCellItems,
   ) {
-    List<DropdownMenuItem<CellsModel>> listItems = List();
+    List<DropdownMenuItem<CellsModel>> listItems = [];
     for (CellsModel cellItem in listCellItems) {
       listItems.add(
         DropdownMenuItem(value: cellItem, child: Text(cellItem.text)),
@@ -66,17 +66,17 @@ class _ChangeActiveCellsWidget extends State<ChangeActiveCellsWidget> {
   }
 
   List<CellsModel> getCellsList(int cellsData) {
-    List<CellsModel> listCellItems = new List<CellsModel>();
+    List<CellsModel> listCellItems = [];
     for (int i = 0; i < cellsData; i++) {
       listCellItems.add(CellsModel((i + 1).toString(), (i + 1).toString()));
     }
     return listCellItems;
   }
 
-  onChangeDropDawnCell(CellsModel selectedCells) {
+  onChangeDropDawnCell(CellsModel? selectedCells) {
     setState(() {
-      widget.selectActiveCells(int.parse(selectedCells.value));
-      _selectedActiveCells = selectedCells;
+      widget.selectActiveCells(int.parse(selectedCells?.value??'0'));
+      _selectedActiveCells = selectedCells?? new CellsModel('', '');
     });
   }
 }

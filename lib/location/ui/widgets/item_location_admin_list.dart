@@ -74,7 +74,7 @@ class _ItemLocationAdminList extends State<ItemLocationAdminList> {
                         children: <Widget>[
                           Flexible(
                             child: Text(
-                              _itemLocation.locationName,
+                              _itemLocation.locationName??'',
                               style: TextStyle(
                                 fontFamily: "Lato",
                                 color: Theme.of(context).primaryColor,
@@ -85,7 +85,7 @@ class _ItemLocationAdminList extends State<ItemLocationAdminList> {
                           ),
                           Flexible(
                             child: Text(
-                              _itemLocation.nit,
+                              _itemLocation.nit??'',
                               style: TextStyle(
                                 fontFamily: "Lato",
                                 fontSize: 16,
@@ -102,7 +102,7 @@ class _ItemLocationAdminList extends State<ItemLocationAdminList> {
             Container(
               height: 25,
               margin: EdgeInsets.only(right: 8.0),
-              child: _itemLocation.active
+              child: _itemLocation.active??false
                   ? Icon(
                       Icons.check,
                       color: Theme.of(context).primaryColor,

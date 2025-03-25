@@ -11,7 +11,7 @@ import 'package:car_wash_app/reports/model/card_report.dart';
 import 'package:car_wash_app/reports/model/products_card_detail.dart';
 import 'package:car_wash_app/reports/ui/screens/productivity_user_detail_page.dart';
 import 'package:car_wash_app/reports/ui/widgets/item_productivity_report_list.dart';
-import 'package:car_wash_app/user/model/user.dart';
+import 'package:car_wash_app/user/model/sysUser.dart';
 import 'package:car_wash_app/widgets/messages_utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:excel/excel.dart';
@@ -32,8 +32,8 @@ class _ProductivityReport extends State<ProductivityReport> {
   BlocLocation _blocLocation = BlocLocation();
   BlocInvoice _blocInvoice = BlocInvoice();
   BlocCommission _blocCommission = BlocCommission();
-  List<DropdownMenuItem<Location>> _dropdownMenuItems;
-  Location _selectedLocation;
+  late List<DropdownMenuItem<Location>> _dropdownMenuItems;
+  late Location _selectedLocation;
   List<CardReport> _listCardReport = [];
   List<Invoice> _listInvoices = [];
 
@@ -41,7 +41,7 @@ class _ProductivityReport extends State<ProductivityReport> {
   final _textDateFinal = TextEditingController();
   var _dateTimeInit = DateTime(DateTime.now().year, DateTime.now().month, 1);
   var _dateTimeFinal = DateTime.now();
-  DocumentReference _locationReference;
+  late DocumentReference _locationReference;
   var formatter = new DateFormat('dd-MM-yyyy');
 
   @override
@@ -146,7 +146,7 @@ class _ProductivityReport extends State<ProductivityReport> {
         //_updateInvoices(_listInvoices); //TODO esta llamada se debe comentar o eliminar cuando se actualizce al app en los celulares que la usan
         _listCardReport = _processInvoicesOperator(
           _listInvoices
-              .where((f) => !f.cancelledInvoice && f.invoiceClosed)
+              .where((f) => !(f.cancelledInvoice??false) && (f.invoiceClosed??false))
               .toList(),
         );
         _listCardReport.sort(
@@ -205,17 +205,17 @@ class _ProductivityReport extends State<ProductivityReport> {
         fontWeight: FontWeight.normal,
         color: Theme.of(context).cardColor,
       ),
-      underline: Container(height: 1, color: Theme.of(context).cursorColor),
+      underline: Container(height: 1, color: Theme.of(context).textSelectionTheme.cursorColor),
     );
   }
 
   List<DropdownMenuItem<Location>> builtDropdownMenuItems(List locations) {
-    List<DropdownMenuItem<Location>> listItems = List();
+    List<DropdownMenuItem<Location>> listItems = [];
     for (Location documentLoc in locations) {
       listItems.add(
         DropdownMenuItem(
           value: documentLoc,
-          child: Text(documentLoc.locationName),
+          child: Text(documentLoc.locationName??''),
         ),
       );
     }
@@ -223,17 +223,19 @@ class _ProductivityReport extends State<ProductivityReport> {
   }
 
   /// Functions
-  onChangeDropDawn(Location selectedLocation) async {
+  onChangeDropDawn(Location? selectedLocation) async {
     _locationReference = await _blocLocation.getLocationReference(
-      selectedLocation.id,
+      selectedLocation?.id??'',
     );
     setState(() {
-      _selectedLocation = selectedLocation;
+      if (selectedLocation != null) {
+        _selectedLocation = selectedLocation;
+      }
     });
   }
 
   Future<Null> _datePickerFrom() async {
-    final DateTime picked = await showDatePicker(
+    final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: _dateTimeInit,
       firstDate: DateTime(1970),
@@ -242,14 +244,16 @@ class _ProductivityReport extends State<ProductivityReport> {
 
     if (picked != _dateTimeInit) {
       setState(() {
-        _dateTimeInit = picked;
-        _textDateInit.text = formatter.format(_dateTimeInit);
+        if (picked != null) {
+          _dateTimeInit = picked;
+          _textDateInit.text = formatter.format(_dateTimeInit);
+        }
       });
     }
   }
 
   Future<Null> _datePickerFinal() async {
-    final DateTime picked = await showDatePicker(
+    final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: _dateTimeFinal,
       firstDate: DateTime(1970),
@@ -258,8 +262,10 @@ class _ProductivityReport extends State<ProductivityReport> {
 
     if (picked != _dateTimeFinal) {
       setState(() {
-        _dateTimeFinal = picked;
-        _textDateFinal.text = formatter.format(_dateTimeFinal);
+        if (picked != null) {
+          _dateTimeFinal = picked;
+          _textDateFinal.text = formatter.format(_dateTimeFinal);
+        }
       });
     }
   }
@@ -268,36 +274,38 @@ class _ProductivityReport extends State<ProductivityReport> {
     List<CardReport> _cardList = [];
     try {
       _listInvoices.forEach((itemInvoice) {
-        itemInvoice.operatorUsers.forEach((item) {
+        itemInvoice.operatorUsers?.forEach((item) {
           List<Invoice> invoicesPerUser = [];
           double _totalPrice =
-              itemInvoice.totalPrice / itemInvoice.countOperators;
-          CardReport cardInfo =
+              (itemInvoice.totalPrice??0) / (itemInvoice.countOperators??0);
+          CardReport? cardInfo =
               _cardList.length > 0
                   ? _cardList.firstWhere(
                     (x) =>
                         x.operatorName == item.name &&
                         x.locationName == itemInvoice.locationName,
-                    orElse: () => null,
+                    orElse: () => new CardReport('', '', '', 0, 0, 0, []),
                   )
                   : null;
-          cardInfo.countServices =
-              cardInfo.countServices +
+          cardInfo?.countServices =
+              (cardInfo.countServices??0) +
               (itemInvoice.countOperators == 1
-                  ? (itemInvoice.countProducts +
-                      itemInvoice.countAdditionalProducts)
+                  ? ((itemInvoice.countProducts??0) +
+                  (itemInvoice.countAdditionalProducts??0))
                   : 0);
-          cardInfo.countSharedServices =
+          cardInfo?.countSharedServices =
               cardInfo.countSharedServices +
-              (itemInvoice.countOperators > 1
-                  ? (itemInvoice.countProducts +
-                      itemInvoice.countAdditionalProducts)
+              ((itemInvoice.countOperators??0) > 1
+                  ? ((itemInvoice.countProducts??0) +
+                  (itemInvoice.countAdditionalProducts??0))
                   : 0);
-          cardInfo.totalPrice = cardInfo.totalPrice + _totalPrice;
-          List<Invoice> listGet = cardInfo.invoicesList;
+          cardInfo?.totalPrice = cardInfo.totalPrice + _totalPrice;
+          List<Invoice> listGet = cardInfo?.invoicesList??[];
           listGet.add(itemInvoice);
-          int indexData = _cardList.indexOf(cardInfo);
-          _cardList[indexData] = cardInfo;
+          if (cardInfo != null) {
+            int indexData = _cardList.indexOf(cardInfo);
+            _cardList[indexData] = cardInfo;
+          }
                 });
             });
       return _cardList;
@@ -328,11 +336,13 @@ class _ProductivityReport extends State<ProductivityReport> {
 
     List<Product> dataProducts = [];
     _invoiceOperatorList.forEach((element) {
-      dataProducts.addAll(element.invoiceProducts);
+      if (element.invoiceProducts != null) {
+        dataProducts.addAll(element.invoiceProducts??[]);
+      }
     });
 
     dataProducts.forEach((e) {
-      var createdDate = e.dateAdded.toDate();
+      var createdDate = e.dateAdded!.toDate();
       final DateFormat formatter = DateFormat('dd-MM-yyyy');
       final String dateFormatted = formatter.format(createdDate);
       if (_productList.length == 0) {
@@ -344,7 +354,7 @@ class _ProductivityReport extends State<ProductivityReport> {
       } else {
         ProductsCardDetail _productInfo = _productList.firstWhere(
           (x) => x.dateServices == dateFormatted,
-          orElse: () => null,
+          orElse: () => new ProductsCardDetail(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ''),
         );
         _productInfo = _commissionProcess(commissionsList, e, _productInfo);
             }
@@ -373,7 +383,7 @@ class _ProductivityReport extends State<ProductivityReport> {
   ) {
     double countService = 0;
     _currentProd.totalPrice =
-        _currentProd.totalPrice + (prod.price / prod.countOperatorsInvoice);
+        _currentProd.totalPrice + ((prod.price??0) / (prod.countOperatorsInvoice??0));
     if (prod.countOperatorsInvoice == 1) {
       switch (prod.vehicleTypeUid) {
         case 1:
@@ -383,7 +393,7 @@ class _ProductivityReport extends State<ProductivityReport> {
               countService = (_currentProd.countSimpleAuto + 1).toDouble();
               _currentProd.countSimpleAuto = countService.toInt();
               _currentProd.totalSimpleAuto =
-                  _currentProd.totalSimpleAuto + prod.price;
+                  _currentProd.totalSimpleAuto + (prod.price??0);
               _currentProd.commissionSimpleAuto =
                   _currentProd.commissionSimpleAuto +
                   (prod.productCommission ?? 0);
@@ -391,7 +401,7 @@ class _ProductivityReport extends State<ProductivityReport> {
               countService = (_currentProd.countSpecialAuto + 1).toDouble();
               _currentProd.countSpecialAuto = countService.toInt();
               _currentProd.totalSpecialAuto =
-                  _currentProd.totalSpecialAuto + prod.price;
+                  _currentProd.totalSpecialAuto + (prod.price??0);
               _currentProd.commissionSpecialAuto =
                   _currentProd.commissionSpecialAuto +
                   (prod.productCommission ?? 0);
@@ -405,7 +415,7 @@ class _ProductivityReport extends State<ProductivityReport> {
               countService = (_currentProd.countSimpleVan + 1).toDouble();
               _currentProd.countSimpleVan = countService.toInt();
               _currentProd.totalSimpleVan =
-                  _currentProd.totalSimpleVan + prod.price;
+                  _currentProd.totalSimpleVan + (prod.price??0);
               _currentProd.commissionSimpleVan =
                   _currentProd.commissionSimpleVan +
                   (prod.productCommission ?? 0);
@@ -413,7 +423,7 @@ class _ProductivityReport extends State<ProductivityReport> {
               countService = (_currentProd.countSpecialVan + 1).toDouble();
               _currentProd.countSpecialVan = countService.toInt();
               _currentProd.totalSpecialVal =
-                  _currentProd.totalSpecialVal + prod.price;
+                  _currentProd.totalSpecialVal + (prod.price??0);
               _currentProd.commissionSpecialVan =
                   _currentProd.commissionSpecialVan +
                   (prod.productCommission ?? 0);
@@ -427,7 +437,7 @@ class _ProductivityReport extends State<ProductivityReport> {
               countService = (_currentProd.countSimpleMoto + 1).toDouble();
               _currentProd.countSimpleMoto = countService.toInt();
               _currentProd.totalSimpleMoto =
-                  _currentProd.totalSimpleMoto + prod.price;
+                  _currentProd.totalSimpleMoto + (prod.price??0);
               _currentProd.commissionSimpleMoto =
                   _currentProd.commissionSimpleMoto +
                   (prod.productCommission ?? 0);
@@ -435,7 +445,7 @@ class _ProductivityReport extends State<ProductivityReport> {
               countService = (_currentProd.countSpecialMoto + 1).toDouble();
               _currentProd.countSpecialMoto = countService.toInt();
               _currentProd.totalSpecialMoto =
-                  _currentProd.totalSpecialMoto + prod.price;
+                  _currentProd.totalSpecialMoto + (prod.price??0);
               _currentProd.commissionSpecialMoto =
                   _currentProd.commissionSpecialMoto +
                   (prod.productCommission ?? 0);
@@ -449,7 +459,7 @@ class _ProductivityReport extends State<ProductivityReport> {
               countService = (_currentProd.countSimpleBicycle + 1).toDouble();
               _currentProd.countSimpleBicycle = countService.toInt();
               _currentProd.totalSimpleBicycle =
-                  _currentProd.totalSimpleBicycle + prod.price;
+                  _currentProd.totalSimpleBicycle + (prod.price??0);
               _currentProd.commissionSimpleBicycle =
                   _currentProd.commissionSimpleBicycle +
                   (prod.productCommission ?? 0);
@@ -457,7 +467,7 @@ class _ProductivityReport extends State<ProductivityReport> {
               countService = (_currentProd.countSpecialBicycle + 1).toDouble();
               _currentProd.countSpecialBicycle = countService.toInt();
               _currentProd.totalSpecialBicycle =
-                  _currentProd.totalSpecialBicycle + prod.price;
+                  _currentProd.totalSpecialBicycle + (prod.price??0);
               _currentProd.commissionSpecialBicycle =
                   _currentProd.commissionSpecialBicycle +
                   (prod.productCommission ?? 0);
@@ -466,14 +476,14 @@ class _ProductivityReport extends State<ProductivityReport> {
           break;
       }
     } else {
-      countService = (1 / prod.countOperatorsInvoice);
+      countService = (1 / (prod.countOperatorsInvoice??0));
       _currentProd.countSharedServices = _currentProd.countSharedServices + 1;
       _currentProd.totalSharedValue =
           _currentProd.totalSharedValue +
-          (prod.price / prod.countOperatorsInvoice);
+          ((prod.price??0) / (prod.countOperatorsInvoice??0));
       _currentProd.commissionSharedServices =
           _currentProd.commissionSharedServices +
-          (prod.productCommission / prod.countOperatorsInvoice);
+          ((prod.productCommission??0) / (prod.countOperatorsInvoice??0));
     }
 
     _currentProd.totalCommission =
@@ -491,12 +501,12 @@ class _ProductivityReport extends State<ProductivityReport> {
       if (prod.productType == 'Sencillo') {
         _currentProd.countSimpleServices = _currentProd.countSimpleServices + 1;
         _currentProd.totalSimpleValue =
-            _currentProd.totalSimpleValue + prod.price;
+            _currentProd.totalSimpleValue + (prod.price??0);
       } else {
         _currentProd.countSpecialServices =
             _currentProd.countSpecialServices + 1;
         _currentProd.totalSpecialValue =
-            _currentProd.totalSpecialValue + prod.price;
+            _currentProd.totalSpecialValue + (prod.price??0);
       }
     }
     return _currentProd;
@@ -513,13 +523,13 @@ class _ProductivityReport extends State<ProductivityReport> {
       (c) =>
           c.productType == prod.productType &&
           c.uidVehicleType == prod.vehicleTypeUid,
-      orElse: () => null,
+      orElse: () => new Commission(),
     );
     double countService = 0;
     double _calculateComm = 0;
     double totalCalculateComm = 0;
     _currentProd.totalPrice =
-        _currentProd.totalPrice + (prod.price / prod.countOperatorsInvoice);
+        _currentProd.totalPrice + ((prod.price??0) / (prod.countOperatorsInvoice??0));
     if (prod.countOperatorsInvoice == 1) {
       switch (prod.vehicleTypeUid) {
         case 1:
@@ -529,14 +539,14 @@ class _ProductivityReport extends State<ProductivityReport> {
               countService = (_currentProd.countSimpleAuto + 1).toDouble();
               _currentProd.countSimpleAuto = countService.toInt();
               _currentProd.totalSimpleAuto =
-                  _currentProd.totalSimpleAuto + prod.price;
+                  _currentProd.totalSimpleAuto + (prod.price??0);
               _calculateComm = _calculateCommissionValue(
                 commissionProd,
                 prod,
                 countService,
               );
               totalCalculateComm =
-                  commissionProd.calculatePerCount
+                  commissionProd.calculatePerCount??false
                       ? _calculateComm
                       : _currentProd.commissionSimpleAuto + _calculateComm;
               _currentProd.commissionSimpleAuto = totalCalculateComm;
@@ -544,14 +554,14 @@ class _ProductivityReport extends State<ProductivityReport> {
               countService = (_currentProd.countSpecialAuto + 1).toDouble();
               _currentProd.countSpecialAuto = countService.toInt();
               _currentProd.totalSpecialAuto =
-                  _currentProd.totalSpecialAuto + prod.price;
+                  _currentProd.totalSpecialAuto + (prod.price??0);
               _calculateComm = _calculateCommissionValue(
                 commissionProd,
                 prod,
                 countService,
               );
               totalCalculateComm =
-                  commissionProd.calculatePerCount
+                  commissionProd.calculatePerCount??false
                       ? _calculateComm
                       : _currentProd.commissionSpecialAuto + _calculateComm;
               _currentProd.commissionSpecialAuto = totalCalculateComm;
@@ -565,14 +575,14 @@ class _ProductivityReport extends State<ProductivityReport> {
               countService = (_currentProd.countSimpleVan + 1).toDouble();
               _currentProd.countSimpleVan = countService.toInt();
               _currentProd.totalSimpleVan =
-                  _currentProd.totalSimpleVan + prod.price;
+                  _currentProd.totalSimpleVan + (prod.price??0);
               _calculateComm = _calculateCommissionValue(
                 commissionProd,
                 prod,
                 countService,
               );
               totalCalculateComm =
-                  commissionProd.calculatePerCount
+                  commissionProd.calculatePerCount??false
                       ? _calculateComm
                       : _currentProd.commissionSimpleVan + _calculateComm;
               _currentProd.commissionSimpleVan = totalCalculateComm;
@@ -580,14 +590,14 @@ class _ProductivityReport extends State<ProductivityReport> {
               countService = (_currentProd.countSpecialVan + 1).toDouble();
               _currentProd.countSpecialVan = countService.toInt();
               _currentProd.totalSpecialVal =
-                  _currentProd.totalSpecialVal + prod.price;
+                  _currentProd.totalSpecialVal + (prod.price??0);
               _calculateComm = _calculateCommissionValue(
                 commissionProd,
                 prod,
                 countService,
               );
               totalCalculateComm =
-                  commissionProd.calculatePerCount
+                  commissionProd.calculatePerCount??false
                       ? _calculateComm
                       : _currentProd.commissionSpecialVan + _calculateComm;
               _currentProd.commissionSpecialVan = totalCalculateComm;
@@ -601,14 +611,14 @@ class _ProductivityReport extends State<ProductivityReport> {
               countService = (_currentProd.countSimpleMoto + 1).toDouble();
               _currentProd.countSimpleMoto = countService.toInt();
               _currentProd.totalSimpleMoto =
-                  _currentProd.totalSimpleMoto + prod.price;
+                  _currentProd.totalSimpleMoto + (prod.price??0);
               _calculateComm = _calculateCommissionValue(
                 commissionProd,
                 prod,
                 countService,
               );
               totalCalculateComm =
-                  commissionProd.calculatePerCount
+                  commissionProd.calculatePerCount??false
                       ? _calculateComm
                       : _currentProd.commissionSimpleMoto + _calculateComm;
               _currentProd.commissionSimpleMoto = totalCalculateComm;
@@ -616,14 +626,14 @@ class _ProductivityReport extends State<ProductivityReport> {
               countService = (_currentProd.countSpecialMoto + 1).toDouble();
               _currentProd.countSpecialMoto = countService.toInt();
               _currentProd.totalSpecialMoto =
-                  _currentProd.totalSpecialMoto + prod.price;
+                  _currentProd.totalSpecialMoto + (prod.price??0);
               _calculateComm = _calculateCommissionValue(
                 commissionProd,
                 prod,
                 countService,
               );
               totalCalculateComm =
-                  commissionProd.calculatePerCount
+                  commissionProd.calculatePerCount??false
                       ? _calculateComm
                       : _currentProd.commissionSpecialMoto + _calculateComm;
               _currentProd.commissionSpecialMoto = totalCalculateComm;
@@ -637,14 +647,14 @@ class _ProductivityReport extends State<ProductivityReport> {
               countService = (_currentProd.countSimpleBicycle + 1).toDouble();
               _currentProd.countSimpleBicycle = countService.toInt();
               _currentProd.totalSimpleBicycle =
-                  _currentProd.totalSimpleBicycle + prod.price;
+                  _currentProd.totalSimpleBicycle + (prod.price??0);
               _calculateComm = _calculateCommissionValue(
                 commissionProd,
                 prod,
                 countService,
               );
               totalCalculateComm =
-                  commissionProd.calculatePerCount
+                  commissionProd.calculatePerCount??false
                       ? _calculateComm
                       : _currentProd.commissionSimpleBicycle + _calculateComm;
               _currentProd.commissionSimpleBicycle = totalCalculateComm;
@@ -652,14 +662,14 @@ class _ProductivityReport extends State<ProductivityReport> {
               countService = (_currentProd.countSpecialBicycle + 1).toDouble();
               _currentProd.countSpecialBicycle = countService.toInt();
               _currentProd.totalSpecialBicycle =
-                  _currentProd.totalSpecialBicycle + prod.price;
+                  _currentProd.totalSpecialBicycle + (prod.price??0);
               _calculateComm = _calculateCommissionValue(
                 commissionProd,
                 prod,
                 countService,
               );
               totalCalculateComm =
-                  commissionProd.calculatePerCount
+                  commissionProd.calculatePerCount??false
                       ? _calculateComm
                       : _currentProd.commissionSpecialBicycle + _calculateComm;
               _currentProd.commissionSpecialBicycle = totalCalculateComm;
@@ -668,18 +678,18 @@ class _ProductivityReport extends State<ProductivityReport> {
           break;
       }
     } else {
-      countService = (1 / prod.countOperatorsInvoice);
+      countService = (1 / (prod.countOperatorsInvoice??0));
       _currentProd.countSharedServices = _currentProd.countSharedServices + 1;
       _currentProd.totalSharedValue =
           _currentProd.totalSharedValue +
-          (prod.price / prod.countOperatorsInvoice);
+          ((prod.price??0) / (prod.countOperatorsInvoice??0));
       _calculateComm = _calculateCommissionValue(
         commissionProd,
         prod,
         countService,
       );
       _currentProd.commissionSharedServices =
-          commissionProd.calculatePerCount
+          commissionProd.calculatePerCount??false
               ? _calculateComm
               : _currentProd.commissionSharedServices + _calculateComm;
     }
@@ -699,12 +709,12 @@ class _ProductivityReport extends State<ProductivityReport> {
       if (prod.productType == 'Sencillo') {
         _currentProd.countSimpleServices = _currentProd.countSimpleServices + 1;
         _currentProd.totalSimpleValue =
-            _currentProd.totalSimpleValue + prod.price;
+            _currentProd.totalSimpleValue + (prod.price??0);
       } else {
         _currentProd.countSpecialServices =
             _currentProd.countSpecialServices + 1;
         _currentProd.totalSpecialValue =
-            _currentProd.totalSpecialValue + prod.price;
+            _currentProd.totalSpecialValue + (prod.price??0);
       }
     }
     return _currentProd;
@@ -718,19 +728,19 @@ class _ProductivityReport extends State<ProductivityReport> {
   ) {
     bool isNormal = false;
     double calculateComm = 0;
-    if (commissionProd.commissionThreshold > 0) {
-      if (prod.price <= commissionProd.commissionThreshold) {
-        if (commissionProd.calculatePerCount) {
+    if ((commissionProd.commissionThreshold??0) > 0) {
+      if ((prod.price??0) <= (commissionProd.commissionThreshold??0)) {
+        if (commissionProd.calculatePerCount??false) {
           calculateComm =
-              commissionProd.isValue
-                  ? countService * commissionProd.valueBeforeThreshold
-                  : (countService * commissionProd.valueBeforeThreshold) /
+              commissionProd.isValue??false
+                  ? countService * (commissionProd.valueBeforeThreshold??0)
+                  : (countService * (commissionProd.valueBeforeThreshold??0)) /
                       100;
         } else {
           calculateComm =
-              commissionProd.isValue
-                  ? prod.price * commissionProd.valueBeforeThreshold
-                  : (prod.price * commissionProd.valueBeforeThreshold) / 100;
+              commissionProd.isValue??false
+                  ? (prod.price??0) * (commissionProd.valueBeforeThreshold??0)
+                  : ((prod.price??0) * (commissionProd.valueBeforeThreshold??0)) / 100;
         }
       } else {
         isNormal = true;
@@ -739,23 +749,23 @@ class _ProductivityReport extends State<ProductivityReport> {
       isNormal = true;
     }
     if (isNormal) {
-      if (commissionProd.calculatePerCount) {
+      if (commissionProd.calculatePerCount??false) {
         calculateComm =
-            commissionProd.isValue
-                ? countService * commissionProd.value
-                : (countService * commissionProd.value) / 100;
+            commissionProd.isValue??false
+                ? countService * (commissionProd.value??0)
+                : (countService * (commissionProd.value??0)) / 100;
       } else {
         calculateComm =
-            commissionProd.isValue
-                ? prod.price * commissionProd.value
-                : (prod.price * commissionProd.value) / 100;
+            commissionProd.isValue??false
+                ? (prod.price??0) * (commissionProd.value??0)
+                : ((prod.price??0) * (commissionProd.value??0)) / 100;
       }
     }
       return calculateComm;
   }
 
   ProductsCardDetail _startCardDetail(Product prod) {
-    var createdDate = prod.dateAdded.toDate();
+    var createdDate = prod.dateAdded!.toDate();
     final DateFormat formatter = DateFormat('dd-MM-yyyy');
     final String dateFormatted = formatter.format(createdDate);
     ProductsCardDetail productDetail = ProductsCardDetail(
@@ -802,7 +812,7 @@ class _ProductivityReport extends State<ProductivityReport> {
     try {
       List<Invoice> _listInvoicesReport =
           _listInvoices
-              .where((f) => !f.cancelledInvoice && f.invoiceClosed)
+              .where((f) => !(f.cancelledInvoice??false) && (f.invoiceClosed??false))
               .toList();
       if (_listInvoicesReport.length > 0) {
         MessagesUtils.showAlertWithLoading(
@@ -813,7 +823,7 @@ class _ProductivityReport extends State<ProductivityReport> {
         int _maxCountOperators = 0;
         _listInvoicesReport.forEach((itemInvoice) {
           if ((itemInvoice.countOperators ?? 0) > _maxCountOperators)
-            _maxCountOperators = itemInvoice.countOperators;
+            _maxCountOperators = itemInvoice.countOperators??0;
         });
 
         var excel = Excel.createExcel();
@@ -832,34 +842,35 @@ class _ProductivityReport extends State<ProductivityReport> {
         for (var i = 1; i <= _maxCountOperators; i++) {
           header.add("Operador " + i.toString());
         }
-        sheetObject.appendRow(header);
+        sheetObject.appendRow(header.cast<CellValue?>());
         _listInvoicesReport.forEach((item) {
           count++;
           List<String> row = [
-            "${formatter.format(item.creationDate.toDate())}",
+            "${formatter.format(item.creationDate!.toDate())}",
             "${item.locationName}",
             "${item.consecutive}",
-            "${item.totalPrice.toInt()}",
+            "${(item.totalPrice??0).toInt()}",
             "${item.totalCommission}",
             "${item.countOperators}",
-            "${((item.totalCommission ?? 0) / item.countOperators)}",
+            "${((item.totalCommission ?? 0) / (item.countOperators??0))}",
             "${item.operatorsSplit}",
           ];
-          item.operatorUsers.forEach((itemOpp) {
+          item.operatorUsers?.forEach((itemOpp) {
             row.add("${itemOpp.name}");
           });
-          sheetObject.appendRow(row);
+          sheetObject.appendRow(row.cast<CellValue?>());
         });
 
         excel.rename("Sheet1", "Hoja1");
 
         String outputFile =
             "/storage/emulated/0/Download/ReporteProductividad_${_selectedLocation.locationName}.xlsx";
-        excel.encode().then((onValue) {
+        var encodedExcel = await excel.encode();
+        if (encodedExcel != null) {
           File(path_prov.join(outputFile))
             ..createSync(recursive: true)
-            ..writeAsBytesSync(onValue);
-        });
+            ..writeAsBytesSync(encodedExcel);
+        }
 
         Navigator.pop(context); //Close popUp Save
         Fluttertoast.showToast(
@@ -890,34 +901,33 @@ class _ProductivityReport extends State<ProductivityReport> {
     List<Commission> commissionsList =
         await _blocCommission.getAllCommissions();
     _invoice.forEach((invo) async {
-      if (invo.invoiceProducts.length > 0) {
+      if ((invo.invoiceProducts?.length??0) > 0) {
         List<Product> _productsInvoice = [];
-        List<User> _operatorsToSave = [];
+        List<SysUser> _operatorsToSave = [];
         double _totalCommission = 0;
-        invo.invoiceProducts.forEach((prod) {
+        invo.invoiceProducts?.forEach((prod) {
           if ((prod.productCommission ?? 0) == 0) {
             var commissionProd = commissionsList.firstWhere(
               (c) =>
                   c.productType == prod.productType &&
                   c.uidVehicleType == invo.uidVehicleType,
-              orElse: () => null,
+              orElse: () => new Commission(),
             );
             print(commissionProd);
             bool isNormal = false;
             double calculateComm = 0;
-            if (commissionProd.commissionThreshold > 0) {
-              if (prod.price <= commissionProd.commissionThreshold) {
-                if (commissionProd.calculatePerCount) {
+            if ((commissionProd.commissionThreshold??0) > 0) {
+              if ((prod.price??0) <= (commissionProd.commissionThreshold??0)) {
+                if (commissionProd.calculatePerCount??false) {
                   calculateComm =
-                      commissionProd.isValue
-                          ? commissionProd.valueBeforeThreshold
-                          : (commissionProd.valueBeforeThreshold) / 100;
+                      commissionProd.isValue??false
+                          ? (commissionProd.valueBeforeThreshold??0)
+                          : (commissionProd.valueBeforeThreshold??0) / 100;
                 } else {
                   calculateComm =
-                      commissionProd.isValue
-                          ? prod.price * commissionProd.valueBeforeThreshold
-                          : (prod.price *
-                                  commissionProd.valueBeforeThreshold) /
+                      commissionProd.isValue??false
+                          ? (prod.price??0) * (commissionProd.valueBeforeThreshold??0)
+                          : ((prod.price??0) * (commissionProd.valueBeforeThreshold??0)) /
                               100;
                 }
               } else {
@@ -927,16 +937,16 @@ class _ProductivityReport extends State<ProductivityReport> {
               isNormal = true;
             }
             if (isNormal) {
-              if (commissionProd.calculatePerCount) {
+              if (commissionProd.calculatePerCount??false) {
                 calculateComm =
-                    commissionProd.isValue
-                        ? commissionProd.value
-                        : (commissionProd.value) / 100;
+                    commissionProd.isValue??false
+                        ? (commissionProd.value??0)
+                        : (commissionProd.value??0) / 100;
               } else {
                 calculateComm =
-                    commissionProd.isValue
-                        ? prod.price * commissionProd.value
-                        : (prod.price * commissionProd.value) / 100;
+                    commissionProd.isValue??false
+                        ? (prod.price??0) * (commissionProd.value??0)
+                        : ((prod.price??0) * (commissionProd.value??0)) / 100;
               }
             }
                       Product copyProd = Product.copyProductInvoiceWith(
@@ -949,11 +959,11 @@ class _ProductivityReport extends State<ProductivityReport> {
         });
 
         if (_totalCommission > 0) {
-          invo.operatorUsers.forEach((operator) {
-            var operatorSave = User.copyUserOperatorToSaveInvoice(
+          invo.operatorUsers?.forEach((operator) {
+            var operatorSave = SysUser.copyUserOperatorToSaveInvoice(
               id: operator.id,
               name: operator.name,
-              operatorCommission: _totalCommission / invo.countOperators,
+              operatorCommission: _totalCommission / (invo.countOperators??0),
             );
             _operatorsToSave.add(operatorSave);
           });

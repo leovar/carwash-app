@@ -25,7 +25,7 @@ class HeaderMenuPage extends StatelessWidget {
               color: showDrawerIcon ? Color(0xFF59B258) : Colors.white,
             ),
             onPressed: () {
-              _scaffoldKey.currentState.openDrawer();
+              _scaffoldKey.currentState?.openDrawer();
             },
           ),
           Container(
@@ -50,9 +50,9 @@ class HeaderMenuPage extends StatelessWidget {
               image: DecorationImage(
                 fit: BoxFit.cover,
                 image:
-                    (_userPhotoUrl.isEmpty)
-                        ? AssetImage('assets/images/profile_placeholder.png')
-                        : NetworkImage(_userPhotoUrl),
+                    _userPhotoUrl.isEmpty ?? true
+                        ? AssetImage('assets/images/profile_placeholder.png') as ImageProvider
+                        : NetworkImage(_userPhotoUrl) as ImageProvider,
               ),
             ),
           ),

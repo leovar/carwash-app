@@ -3,15 +3,15 @@ import 'package:meta/meta.dart';
 
 @immutable
 class Commission extends Equatable {
-  final String id;
-  final int uidVehicleType;
-  final String productType;
-  final bool isPercentage;
-  final bool isValue;
-  final double value;
-  final bool calculatePerCount;
-  final double commissionThreshold;
-  final double valueBeforeThreshold;
+  final String? id;
+  final int? uidVehicleType;
+  final String? productType;
+  final bool? isPercentage;
+  final bool? isValue;
+  final double? value;
+  final bool? calculatePerCount;
+  final double? commissionThreshold;
+  final double? valueBeforeThreshold;
 
   Commission({
     this.id,
@@ -25,7 +25,7 @@ class Commission extends Equatable {
     this.valueBeforeThreshold,
   });
 
-  factory Commission.fromJson(Map<String, dynamic> json, {String id}) {
+  factory Commission.fromJson(Map<String, dynamic> json, {String? id}) {
     return Commission(
       id: id,
       uidVehicleType: json['uidVehicleType'],
@@ -54,14 +54,14 @@ class Commission extends Equatable {
 
   @override
   List<Object> get props => [
-        id,
-        uidVehicleType,
-        productType,
-        isPercentage,
-        isValue,
-        value,
-        calculatePerCount,
-        commissionThreshold,
-        valueBeforeThreshold,
+        id!,
+        uidVehicleType!,
+        productType!,
+        isPercentage!,
+        isValue!,
+        value!,
+        calculatePerCount!,
+        commissionThreshold!,
+        valueBeforeThreshold!,
       ];
 }

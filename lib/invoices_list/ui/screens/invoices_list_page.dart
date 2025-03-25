@@ -9,7 +9,7 @@ class InvoicesListPage extends StatefulWidget {
   final user;
   final locationReference;
 
-  InvoicesListPage({Key key, this.user, this.locationReference});
+  InvoicesListPage({Key? key, this.user, this.locationReference});
 
   @override
   State<StatefulWidget> createState() => _InvoicesListPage();

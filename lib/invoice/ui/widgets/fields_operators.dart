@@ -1,11 +1,11 @@
 import 'package:car_wash_app/invoice/model/invoice.dart';
 import 'package:car_wash_app/invoice/ui/screens/operators_invoice_page.dart';
-import 'package:car_wash_app/user/model/user.dart';
+import 'package:car_wash_app/user/model/sysUser.dart';
 import 'package:flutter/material.dart';
 
 class FieldsOperators extends StatefulWidget {
-  final Function(List<User>) callbackOperatorsList;
-  final List<User> operatorsListCallback;
+  final Function(List<SysUser>) callbackOperatorsList;
+  final List<SysUser> operatorsListCallback;
   final bool enableForm;
   final int selectedOperatorsCount;
   final bool editForm;
@@ -14,15 +14,15 @@ class FieldsOperators extends StatefulWidget {
   final Invoice invoice;
 
   FieldsOperators({
-    Key key,
-    this.callbackOperatorsList,
-    this.operatorsListCallback,
-    this.enableForm,
-    this.selectedOperatorsCount,
-    this.editForm,
-    this.closedInvoice,
-    this.idLocation,
-    this.invoice,
+    Key? key,
+    required this.callbackOperatorsList,
+    required this.operatorsListCallback,
+    required this.enableForm,
+    required this.selectedOperatorsCount,
+    required this.editForm,
+    required this.closedInvoice,
+    required this.idLocation,
+    required this.invoice,
   });
 
   @override
@@ -30,7 +30,7 @@ class FieldsOperators extends StatefulWidget {
 }
 
 class _FieldsOperators extends State<FieldsOperators> {
-  List<User> listUsers = <User>[];
+  List<SysUser> listUsers = <SysUser>[];
 
   @override
   Widget build(BuildContext context) {
@@ -67,14 +67,17 @@ class _FieldsOperators extends State<FieldsOperators> {
                   margin: EdgeInsets.only(right: 4),
                   child: ButtonTheme(
                     minWidth: 84,
-                    child: RaisedButton(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(18.0),
-                        side: BorderSide(
-                          color: Theme.of(context).colorScheme.secondary,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(18.0),
+                          side: BorderSide(
+                            color: Theme.of(context).colorScheme.secondary,
+                          ),
                         ),
+                        backgroundColor: Theme.of(context).colorScheme.secondary,
+                        foregroundColor: Colors.white,
                       ),
-                      color: Theme.of(context).colorScheme.secondary,
                       onPressed: (widget.enableForm || !widget.editForm) ? () {
                         Navigator.push(
                             context,
@@ -87,11 +90,11 @@ class _FieldsOperators extends State<FieldsOperators> {
                                   closedInvoice: widget.closedInvoice,
                                   fromCompleteInvoice: false,
                                   invoice: widget.invoice,
+                                  callbackFinishInvoice: () {  },
                               ),
                             ),
                         );
                       } : null,
-                      textColor: Colors.white,
                       child: Text(
                         'ver'.toUpperCase(),
                         style: TextStyle(fontSize: 12),

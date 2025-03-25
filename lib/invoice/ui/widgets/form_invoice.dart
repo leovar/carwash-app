@@ -19,7 +19,7 @@ import 'package:car_wash_app/invoice/ui/widgets/text_field_input.dart';
 import 'package:car_wash_app/location/bloc/bloc_location.dart';
 import 'package:car_wash_app/product/model/product.dart';
 import 'package:car_wash_app/user/bloc/bloc_user.dart';
-import 'package:car_wash_app/user/model/user.dart';
+import 'package:car_wash_app/user/model/sysUser.dart';
 import 'package:car_wash_app/vehicle/bloc/bloc_vehicle.dart';
 import 'package:car_wash_app/widgets/gradient_back.dart';
 import 'package:car_wash_app/widgets/info_header_container.dart';
@@ -49,20 +49,20 @@ import 'fields_operators.dart';
 class FormInvoice extends StatefulWidget {
   final Invoice editInvoice;
 
-  FormInvoice(this.editInvoice);
+  FormInvoice( this.editInvoice);
 
   @override
   State<StatefulWidget> createState() => _FormInvoice();
 }
 
 class _FormInvoice extends State<FormInvoice> {
-  BlocInvoice _blocInvoice;
+  late BlocInvoice _blocInvoice;
   final _customerBloc = BlocCustomer();
   final _blocVehicle = BlocVehicle();
   final _userBloc = UserBloc();
   final _locationBloc = BlocLocation();
   BlocCommission _blocCommission = BlocCommission();
-  bool _enableForm;
+  late bool _enableForm;
   bool _editForm = true;
   bool _enablePerIncidence = false;
   bool _closedInvoice = false;
@@ -76,21 +76,21 @@ class _FormInvoice extends State<FormInvoice> {
   String _tagSimpleService = 'Sencillo';
   bool _sendEmail = false;
   bool _approveDataProcessing = false;
-  Uint8List _imageFirmInMemory;
+  late Uint8List _imageFirmInMemory;
   String _placa = '';
-  List<HeaderServices> vehicleTypeList = new List<HeaderServices>();
-  HeaderServices vehicleTypeSelected;
+  List<HeaderServices> vehicleTypeList = [];
+  late HeaderServices vehicleTypeSelected;
   final String cameraTag = "Camara";
   final String galleryTag = "Galeria";
   String _selectSourceImagePicker = "Camara";
   final picker = ImagePicker();
-  File _imageSelect;
-  FocusNode _clientFocusNode;
-  DocumentReference _locationReference;
-  String _locationName;
-  String _idLocation;
-  String _initConsecLocation;
-  String _finalConsecLocation;
+  late File _imageSelect;
+  late FocusNode _clientFocusNode;
+  late DocumentReference _locationReference;
+  late String _locationName;
+  late String _idLocation;
+  late String _initConsecLocation;
+  late String _finalConsecLocation;
   String _selectBrand = '';
   String _selectedBrandReference = '';
   String _selectColor = '';
@@ -110,19 +110,19 @@ class _FormInvoice extends State<FormInvoice> {
   List<Product> _listProduct = <Product>[];
   List<AdditionalProduct> _listAdditionalProducts = <AdditionalProduct>[];
   bool _validatePlaca = false;
-  Customer _customer;
-  DocumentReference _vehicleReference;
+  late Customer _customer;
+  late DocumentReference _vehicleReference;
   int _countOperators = 0;
   int _listCoordinatorsCount = 0;
   int _countBrands = 0;
   int _countBrandReferences = 0;
   int _countPaymentMethods = 0;
   int _countColors = 0;
-  User _currentUser;
+  late SysUser _currentUser;
   bool _isUserAdmin = false;
   bool _canceledInvoice = false;
   Configuration _config = Configuration();
-  List<User> _listOperators = <User>[];
+  List<SysUser> _listOperators = <SysUser>[];
 
   @override
   void initState() {
@@ -178,9 +178,9 @@ class _FormInvoice extends State<FormInvoice> {
     vehicleTypeSelected = vehicleTypeList[0];
     _editInvoice(widget.editInvoice);
     _editForm = false;
-      _userBloc.getCurrentUser().then((User user) {
-      _currentUser = user;
-      if (user.isAdministrator) {
+      _userBloc.getCurrentUser().then((SysUser? user) {
+      _currentUser = user!;
+      if (user.isAdministrator??false) {
         setState(() {
           _isUserAdmin = true;
         });
@@ -198,7 +198,6 @@ class _FormInvoice extends State<FormInvoice> {
   @override
   Widget build(BuildContext context) {
     this._blocInvoice = BlocProvider.of<BlocInvoice>(context);
-    PopupMenu.context = context;
     getPreferences();
 
     if (_imageSelect.path.contains('imageFirm')) {
@@ -214,7 +213,9 @@ class _FormInvoice extends State<FormInvoice> {
         imageList.add(_imageSelect.path);
       }
     }
-    _imageSelect = null;
+
+    //TODO Validar si es necesario asignarle un valor null a esta variable o funciona bien sin asignarle un null
+    //_imageSelect = null;
 
     return WillPopScope(
       child: Stack(children: <Widget>[GradientBack(), bodyContainer()]),
@@ -276,7 +277,7 @@ class _FormInvoice extends State<FormInvoice> {
                       vehicleTypeSelected = vehicleTypeList[index];
                       _listAdditionalProducts = <AdditionalProduct>[];
                       _listProduct = <Product>[];
-                      _listOperators = <User>[];
+                      _listOperators = <SysUser>[];
                     });
                   }
                 : null,
@@ -354,7 +355,6 @@ class _FormInvoice extends State<FormInvoice> {
                 textController: _textObservation,
                 labelText: 'Observaciones',
                 inputType: TextInputType.multiline,
-                maxLines: null,
                 enable: _enableForm,
               ),
               Visibility(
@@ -365,7 +365,6 @@ class _FormInvoice extends State<FormInvoice> {
                     textController: _textIncidence,
                     labelText: 'Incidentes',
                     inputType: TextInputType.multiline,
-                    maxLines: null,
                     enable: _enablePerIncidence,
                   ),
                 ),
@@ -376,7 +375,7 @@ class _FormInvoice extends State<FormInvoice> {
                 operatorsListCallback: _listOperators,
                 enableForm: _enableForm,
                 selectedOperatorsCount:
-                    _listOperators.where((f) => f.isSelected).toList().length,
+                    _listOperators.where((f) => (f.isSelected??false)).toList().length,
                 editForm: _editForm,
                 closedInvoice: _closedInvoice,
                 idLocation: _idLocation,
@@ -392,7 +391,7 @@ class _FormInvoice extends State<FormInvoice> {
                 enableForm: _enableForm,
                 idLocation: _idLocation,
                 selectedProductsCount:
-                    _listProduct.where((f) => f.isSelected).toList().length +
+                    _listProduct.where((f) => (f.isSelected??false)).toList().length +
                         _listAdditionalProducts.length,
                 editForm: _editForm,
                 invoice: widget.editInvoice,
@@ -444,9 +443,11 @@ class _FormInvoice extends State<FormInvoice> {
         child: ButtonTheme(
           minWidth: 230.0,
           height: 50,
-          child: RaisedButton(
-            padding: EdgeInsets.symmetric(vertical: 15, horizontal: 10),
-            color: Color(0xFF59B258),
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              padding: EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+              backgroundColor: Color(0xFF59B258),
+            ),
             child: Text(
               "FIRMAR",
               style: TextStyle(
@@ -635,6 +636,7 @@ class _FormInvoice extends State<FormInvoice> {
   ///Image Functions
   void _menuSourceAddImage() {
     PopupMenu menu = PopupMenu(
+      context: context,
       backgroundColor: Theme.of(context).colorScheme.secondary,
       lineColor: Theme.of(context).colorScheme.secondary,
       maxColumn: 1,
@@ -845,13 +847,13 @@ class _FormInvoice extends State<FormInvoice> {
   }
 
   ///Functions Operator Users List
-  void _setOperatorsDb(List<User> operatorsListSelected) async {
+  void _setOperatorsDb(List<SysUser> operatorsListSelected) async {
     int _countOperators = 0;
-    List<User> _operatorsToSave = [];
-    List<User> _selectedOperators =
-        operatorsListSelected.where((u) => u.isSelected).toList();
+    List<SysUser> _operatorsToSave = [];
+    List<SysUser> _selectedOperators =
+        operatorsListSelected.where((u) => (u.isSelected??false)).toList();
     _selectedOperators.forEach((user) {
-      var operatorSave = User.copyUserOperatorToSaveInvoice(
+      var operatorSave = SysUser.copyUserOperatorToSaveInvoice(
         id: user.id,
         name: user.name,
         operatorCommission: ((widget.editInvoice.totalCommission ?? 0) /
@@ -951,11 +953,11 @@ class _FormInvoice extends State<FormInvoice> {
   void getPreferences() async {
     //Get preferences with location and get location reference
     SharedPreferences pref = await SharedPreferences.getInstance();
-    _locationName = pref.getString(Keys.locationName);
-    _locationName = pref.getString(Keys.locationName);
-    _initConsecLocation = pref.getString(Keys.locationInitCount);
-    _finalConsecLocation = pref.getString(Keys.locationFinalCount);
-    _idLocation = pref.getString(Keys.idLocation);
+    _locationName = pref.getString(Keys.locationName) ?? '';
+    _locationName = pref.getString(Keys.locationName) ?? '';
+    _initConsecLocation = pref.getString(Keys.locationInitCount) ?? '';
+    _finalConsecLocation = pref.getString(Keys.locationFinalCount) ?? '';
+    _idLocation = pref.getString(Keys.idLocation) ?? '';
     _locationReference = await _locationBloc.getLocationReference(_idLocation);
     _blocInvoice.getConfigurationObject().then((value) => _config = value);
   }
@@ -969,12 +971,12 @@ class _FormInvoice extends State<FormInvoice> {
         final dataList = listInvoicesByVehicle
             .map(
               (vehicleInvoice) => InvoiceHistoryList(
-                vehicleInvoice.creationDate,
-                vehicleInvoice.consecutive.toString(),
-                vehicleInvoice.invoiceProducts.length > 0
-                    ? vehicleInvoice.invoiceProducts[0].productName
+                vehicleInvoice.creationDate!,
+                vehicleInvoice.consecutive?.toString() ?? '',
+                (vehicleInvoice.invoiceProducts?.isNotEmpty ?? false)
+                    ? vehicleInvoice.invoiceProducts!.first.productName ?? ''
                     : '',
-                vehicleInvoice.totalPrice,
+                vehicleInvoice.totalPrice ?? 0,
               ),
             )
             .toList();
@@ -1010,20 +1012,20 @@ class _FormInvoice extends State<FormInvoice> {
   ) {
     final commissionProd = commissionsList.firstWhere(
       (c) => c.productType == prodType && c.uidVehicleType == vehicleType,
-      orElse: () => null,
+      orElse: () => new Commission(),
     );
     bool isNormal = false;
     double calculateComm = 0;
-    if (commissionProd.commissionThreshold > 0) {
-      if (prodPrice <= commissionProd.commissionThreshold) {
-        if (commissionProd.calculatePerCount) {
-          calculateComm = commissionProd.isValue
-              ? commissionProd.valueBeforeThreshold
-              : (commissionProd.valueBeforeThreshold) / 100;
+    if ((commissionProd.commissionThreshold??0) > 0) {
+      if (prodPrice <= (commissionProd.commissionThreshold??0)) {
+        if (commissionProd.calculatePerCount??false) {
+          calculateComm = commissionProd.isValue??false
+              ? commissionProd.valueBeforeThreshold??0
+              : (commissionProd.valueBeforeThreshold??0) / 100;
         } else {
-          calculateComm = commissionProd.isValue
-              ? prodPrice * commissionProd.valueBeforeThreshold
-              : (prodPrice * commissionProd.valueBeforeThreshold) / 100;
+          calculateComm = commissionProd.isValue??false
+              ? prodPrice * (commissionProd.valueBeforeThreshold??0)
+              : (prodPrice * (commissionProd.valueBeforeThreshold??0)) / 100;
         }
       } else {
         isNormal = true;
@@ -1032,14 +1034,14 @@ class _FormInvoice extends State<FormInvoice> {
       isNormal = true;
     }
     if (isNormal) {
-      if (commissionProd.calculatePerCount) {
-        calculateComm = commissionProd.isValue
-            ? commissionProd.value
-            : (commissionProd.value) / 100;
+      if (commissionProd.calculatePerCount??false) {
+        calculateComm = (commissionProd.isValue??false)
+            ? commissionProd.value??0
+            : (commissionProd.value??0) / 100;
       } else {
-        calculateComm = commissionProd.isValue
-            ? prodPrice * commissionProd.value
-            : (prodPrice * commissionProd.value) / 100;
+        calculateComm = commissionProd.isValue??false
+            ? prodPrice * (commissionProd.value??0)
+            : (prodPrice * (commissionProd.value??0)) / 100;
       }
     }
       return calculateComm;
@@ -1096,8 +1098,8 @@ class _FormInvoice extends State<FormInvoice> {
         }
 
         //Get Customer reference or create customer or update customer
-        if (!_customer.vehicles.contains(_vehicleReference)) {
-          _customer.vehicles.add(_vehicleReference);
+        if (!(_customer.vehicles?.contains(_vehicleReference)??false)) {
+          _customer.vehicles?.add(_vehicleReference);
         }
 
         Customer customerUpdate = Customer.copyWith(
@@ -1120,15 +1122,15 @@ class _FormInvoice extends State<FormInvoice> {
             _haveServiceSpecial = true;
 
           // Get pricing information
-          if (product.isSelected) {
+          if (product.isSelected??false) {
             int _subT =
-                ((product.price * 100) / (100 + product.ivaPercent)).round();
-            int _ivaProd = ((_subT * product.ivaPercent) / 100).round();
+                (((product.price??0) * 100) / (100 + (product.ivaPercent??0))).round();
+            int _ivaProd = ((_subT * (product.ivaPercent??0)) / 100).round();
             // se comenta por que por los decimales la suma de subtotal e iva no siempre da el total, por lo cual se seguira guardando el subtotal como una resta del total menos el iva
-            _subTotal = _subTotal + (product.price - _ivaProd); //_subT
+            _subTotal = _subTotal + ((product.price??0) - _ivaProd); //_subT
             _iva = _iva + _ivaProd;
-            _total = _total + product.price;
-            _servicesWashingTime = _servicesWashingTime + product.serviceTime;
+            _total = _total + (product.price??0);
+            _servicesWashingTime = _servicesWashingTime + (product.serviceTime??0);
           }
         });
         _listAdditionalProducts.forEach((addProduct) {
@@ -1148,7 +1150,7 @@ class _FormInvoice extends State<FormInvoice> {
         List<Commission> commissionsList =
             await _blocCommission.getAllCommissions();
         List<Product> _selectedProducts =
-            _listProduct.where((f) => f.isSelected).toList();
+            _listProduct.where((f) => (f.isSelected??false)).toList();
         List<Product> _productToSave = [];
         if (_selectedProducts.length > 0) {
           _selectedProducts.forEach((product) {
@@ -1156,8 +1158,8 @@ class _FormInvoice extends State<FormInvoice> {
               // TODO calcular comisión por producto en este punto antes de guardarlo
               double commission = _calculateCommissionProduct(
                 commissionsList,
-                product.productType,
-                product.price,
+                product.productType??'',
+                product.price??0,
                 vehicleTypeSelected.uid,
               );
               var prodSave = Product.copyProductToSaveInvoice(
@@ -1199,12 +1201,12 @@ class _FormInvoice extends State<FormInvoice> {
         }
 
         //Save user operators
-        List<User> _operatorsToSave = [];
-        List<User> _selectedOperators =
-            _listOperators.where((u) => u.isSelected).toList();
+        List<SysUser> _operatorsToSave = [];
+        List<SysUser> _selectedOperators =
+            _listOperators.where((u) => (u.isSelected??false)).toList();
         if (_selectedOperators.length > 0) {
           _selectedOperators.forEach((user) {
-            var operatorSave = User.copyUserOperatorToSaveInvoice(
+            var operatorSave = SysUser.copyUserOperatorToSaveInvoice(
               id: user.id,
               name: user.name,
               operatorCommission:
@@ -1216,11 +1218,11 @@ class _FormInvoice extends State<FormInvoice> {
 
         //Get count operators
         _countOperators =
-            _listOperators.where((u) => u.isSelected).toList().length;
+            _listOperators.where((u) => (u.isSelected??false)).toList().length;
 
         //Get count products
         _countProducts =
-            _listProduct.where((f) => f.isSelected).toList().length;
+            _listProduct.where((f) => (f.isSelected??false)).toList().length;
         _countAdditionalProducts = _listAdditionalProducts.length;
 
         //Get Consecutive
@@ -1305,9 +1307,7 @@ class _FormInvoice extends State<FormInvoice> {
           washingTime: widget.editInvoice != null
               ? widget.editInvoice.washingTime
               : null,
-          washingCell: widget.editInvoice != null
-              ? widget.editInvoice.washingCell
-              : null,
+          washingCell: widget.editInvoice.washingCell,
           countWashingWorkers: widget.editInvoice != null
               ? widget.editInvoice.countWashingWorkers
               : null,
@@ -1321,7 +1321,7 @@ class _FormInvoice extends State<FormInvoice> {
         DocumentReference invoiceReference = await _blocInvoice.saveInvoice(
           _invoice,
         );
-        String invoiceId = invoiceReference.documentID;
+        String invoiceId = invoiceReference.id;
         Invoice _currentInvoiceSaved = await _blocInvoice.getInvoiceById(
           invoiceId,
         );
@@ -1359,7 +1359,7 @@ class _FormInvoice extends State<FormInvoice> {
     }
     //Validate products
     List<Product> _selectedProducts =
-        _listProduct.where((f) => f.isSelected).toList();
+        _listProduct.where((f) => (f.isSelected??false)).toList();
     if (_selectedProducts.length <= 0 && _listAdditionalProducts.length <= 0) {
       return 'Debe agregar servicios';
     }
@@ -1387,72 +1387,75 @@ class _FormInvoice extends State<FormInvoice> {
   }
 
   ///Set Fields Invoice to Edit
-  void _editInvoice(Invoice invoiceToEdit) async {
-    _textPlaca.text = invoiceToEdit.placa;
-    _selectCoordinator = invoiceToEdit.userCoordinatorName;
-    _selectBrand = invoiceToEdit.vehicleBrand ?? '';
-    _selectedBrandReference = invoiceToEdit.brandReference ?? '';
-    _selectColor = invoiceToEdit.vehicleColor ?? '';
-    _approveDataProcessing = invoiceToEdit.approveDataProcessing;
-    _textTimeDelivery.text = invoiceToEdit.timeDelivery;
-    _textObservation.text = invoiceToEdit.observation;
-    _textIncidence.text = invoiceToEdit.incidence;
-    _selectedPaymentMethod = invoiceToEdit.paymentMethod;
-    _closedInvoice = invoiceToEdit.invoiceClosed;
-    _sendEmail = invoiceToEdit.sendEmailInvoice;
-    _canceledInvoice = invoiceToEdit.cancelledInvoice;
+  void _editInvoice(Invoice? invoiceToEdit) async {
+    if (invoiceToEdit != null) {
+      _textPlaca.text = invoiceToEdit.placa??'';
+      _selectCoordinator = invoiceToEdit.userCoordinatorName??'';
+      _selectBrand = invoiceToEdit.vehicleBrand ?? '';
+      _selectedBrandReference = invoiceToEdit.brandReference ?? '';
+      _selectColor = invoiceToEdit.vehicleColor ?? '';
+      _approveDataProcessing = invoiceToEdit.approveDataProcessing ?? false;
+      _textTimeDelivery.text = invoiceToEdit.timeDelivery ?? '';
+      _textObservation.text = invoiceToEdit.observation ?? '';
+      _textIncidence.text = invoiceToEdit.incidence ?? '';
+      _selectedPaymentMethod = invoiceToEdit.paymentMethod ?? '';
+      _closedInvoice = invoiceToEdit.invoiceClosed ?? false;
+      _sendEmail = invoiceToEdit.sendEmailInvoice ?? false;
+      _canceledInvoice = invoiceToEdit.cancelledInvoice ?? false;
 
-    //get vehicle reference
-    _vehicleReference = await _blocVehicle.getVehicleReferenceByPlaca(
-      invoiceToEdit.placa,
-    );
-
-    //get customer information
-    _customer = await _customerBloc.getCustomerByIdCustomer(
-      invoiceToEdit.customer.documentID,
-    );
-    _textClient.text = _customer.name;
-    _textEmail.text = _customer.email;
-    _textPhoneNumber.text = _customer.phoneNumber;
-    _textBirthDate.text = _customer.birthDate;
-    _textNeighborhood.text = _customer.neighborhood;
-    _selectTypeSex = _customer.typeSex;
-    vehicleTypeList.forEach((element) => element.isSelected = false);
-    vehicleTypeSelected = vehicleTypeList.firstWhere(
-      (f) => f.uid == invoiceToEdit.uidVehicleType,
-    );
-    setState(() {
-      vehicleTypeList[vehicleTypeList.indexOf(vehicleTypeSelected)].isSelected =
-          true;
-    });
-    List<Product> listProducts = invoiceToEdit.invoiceProducts;
-    List<Product> productEditList = <Product>[];
-    listProducts.forEach((prodSelected) {
-      if (!prodSelected.isAdditional) {
-        prodSelected.newProduct = false;
-        productEditList.add(prodSelected);
-      } else {
-        AdditionalProduct addProd = AdditionalProduct(
-          prodSelected.productName,
-          prodSelected.price.toString(),
-          prodSelected.ivaPercent,
-          false,
-          prodSelected.productType,
-          prodSelected.serviceTime,
-        );
-        _listAdditionalProducts.add(addProd);
+      //get vehicle reference
+      DocumentReference? _vehicleRef = await _blocVehicle.getVehicleReferenceByPlaca(invoiceToEdit.placa??'');
+      if (_vehicleRef != null) {
+        _vehicleReference = _vehicleRef;
       }
-    });
-    setState(() {
-      _listProduct = productEditList;
-      _listOperators = invoiceToEdit.operatorUsers;
-    });
-    List<String> imagesList = await _blocInvoice.getInvoiceImages(
-      invoiceToEdit.id,
-    );
-    setState(() {
-      imageList = imagesList;
-    });
+      //get customer information
+      _customer = await _customerBloc.getCustomerByIdCustomer(
+        invoiceToEdit.customer?.id??'',
+      );
+
+      _textClient.text = _customer.name ?? '';
+      _textEmail.text = _customer.email ?? '';
+      _textPhoneNumber.text = _customer.phoneNumber ?? '';
+      _textBirthDate.text = _customer.birthDate ?? '';
+      _textNeighborhood.text = _customer.neighborhood ?? '';
+      _selectTypeSex = _customer.typeSex ?? '';
+      vehicleTypeList.forEach((element) => element.isSelected = false);
+      vehicleTypeSelected = vehicleTypeList.firstWhere(
+            (f) => f.uid == invoiceToEdit.uidVehicleType,
+      );
+      setState(() {
+        vehicleTypeList[vehicleTypeList.indexOf(vehicleTypeSelected)].isSelected =
+        true;
+      });
+      List<Product> listProducts = invoiceToEdit.invoiceProducts ?? [];
+      List<Product> productEditList = <Product>[];
+      listProducts.forEach((prodSelected) {
+        if (!(prodSelected.isAdditional??false)) {
+          prodSelected.newProduct = false;
+          productEditList.add(prodSelected);
+        } else {
+          AdditionalProduct addProd = AdditionalProduct(
+            prodSelected.productName ?? '',
+            prodSelected.price.toString(),
+            prodSelected.ivaPercent ?? 0,
+            false,
+            prodSelected.productType ?? '',
+            prodSelected.serviceTime ?? 0,
+          );
+          _listAdditionalProducts.add(addProd);
+        }
+      });
+      setState(() {
+        _listProduct = productEditList;
+        _listOperators = invoiceToEdit.operatorUsers ?? [];
+      });
+      List<String> imagesList = await _blocInvoice.getInvoiceImages(
+        invoiceToEdit.id??'',
+      );
+      setState(() {
+        imageList = imagesList;
+      });
+    }
   }
 
   void _cancelInvoiceFunction() async {
@@ -1493,8 +1496,8 @@ class _FormInvoice extends State<FormInvoice> {
     //valido que la factura no tenga mas de 3 dias para permitir agregar un incidente
     String _incidence = widget.editInvoice.incidence ?? '';
     var dateInvoice = widget.editInvoice.creationDate;
-    var daysAfterInvoice = dateInvoice.toDate().add(Duration(days: 3));
-    int _validDate = DateTime.now().compareTo(daysAfterInvoice);
+    var daysAfterInvoice = dateInvoice?.toDate().add(Duration(days: 3));
+    int _validDate = DateTime.now().compareTo(daysAfterInvoice!);
     if (_incidence.isEmpty && _validDate < 0) {
       _enablePerIncidence = true;
     }

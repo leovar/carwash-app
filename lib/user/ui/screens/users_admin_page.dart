@@ -1,5 +1,5 @@
 import 'package:car_wash_app/user/bloc/bloc_user.dart';
-import 'package:car_wash_app/user/model/user.dart';
+import 'package:car_wash_app/user/model/sysUser.dart';
 import 'package:car_wash_app/user/ui/screens/create_user_admin_page.dart';
 import 'package:car_wash_app/user/ui/widgets/item_user_admin_list.dart';
 import 'package:flutter/material.dart';
@@ -14,7 +14,7 @@ class _UsersAdminPage extends State<UsersAdminPage>
     with SingleTickerProviderStateMixin {
   late UserBloc _userBloc;
   late TabController _tabController;
-  List<User> _userList = <User>[];
+  List<SysUser> _userList = <SysUser>[];
 
   @override
   void initState() {
@@ -72,8 +72,8 @@ class _UsersAdminPage extends State<UsersAdminPage>
 
   Widget _listUsersContainer(AsyncSnapshot snapshot) {
     _userList = _userBloc.buildAllUsers(snapshot.data.documents);
-    List<User> _activeUsers = _userList.where((x) => x.active == true).toList();
-    List<User> _inactiveUsers = _userList.where((x) => x.active == false).toList();
+    List<SysUser> _activeUsers = _userList.where((x) => x.active == true).toList();
+    List<SysUser> _inactiveUsers = _userList.where((x) => x.active == false).toList();
     return Container(
       padding: EdgeInsets.only(bottom: 17),
       color: Colors.white,
@@ -128,8 +128,8 @@ class _UsersAdminPage extends State<UsersAdminPage>
 
   Widget _getDataUsersList(AsyncSnapshot snapshot) {
     _userList = _userBloc.buildAllUsers(snapshot.data.documents);
-    List<User> _activeUsers = _userList.where((x) => x.active == true).toList();
-    List<User> _inactiveUsers =
+    List<SysUser> _activeUsers = _userList.where((x) => x.active == true).toList();
+    List<SysUser> _inactiveUsers =
         _userList.where((x) => x.active == false).toList();
     return Column(
       mainAxisSize: MainAxisSize.max,
@@ -164,7 +164,7 @@ class _UsersAdminPage extends State<UsersAdminPage>
     );
   }
 
-  Widget _showActiveUsers(List<User> activeUsers) {
+  Widget _showActiveUsers(List<SysUser> activeUsers) {
     return ListView.builder(
       itemCount: activeUsers.length,
       scrollDirection: Axis.vertical,
@@ -175,7 +175,7 @@ class _UsersAdminPage extends State<UsersAdminPage>
     );
   }
 
-  Widget _showInactiveUsers(List<User> inactiveUsers) {
+  Widget _showInactiveUsers(List<SysUser> inactiveUsers) {
     return ListView.builder(
       itemCount: inactiveUsers.length,
       scrollDirection: Axis.vertical,
@@ -194,9 +194,11 @@ class _UsersAdminPage extends State<UsersAdminPage>
       ),
       child: Align(
         alignment: Alignment.bottomCenter,
-        child: RaisedButton(
-          padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
-          color: Color(0xFF59B258),
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
+            backgroundColor: Color(0xFF59B258),
+          ),
           child: Text(
             "Nuevo Usuario",
             style: TextStyle(

@@ -10,10 +10,10 @@ class SelectOperatorWidget extends StatefulWidget {
   final Invoice currentInvoice;
 
   SelectOperatorWidget({
-    Key key,
-    this.paymentMethodSelected,
-    this.selectPaymentMethod,
-    this.currentInvoice,
+    Key? key,
+    required this.paymentMethodSelected,
+    required this.selectPaymentMethod,
+    required this.currentInvoice,
   });
 
   @override
@@ -23,8 +23,8 @@ class SelectOperatorWidget extends StatefulWidget {
 class _SelectOperatorWidget extends State<SelectOperatorWidget> {
   BlocInvoice _blocInvoice = BlocInvoice();
   BlocPaymentMethod _paymentMethodBloc = BlocPaymentMethod();
-  List<DropdownMenuItem<PaymentMethod>> _listPaymentMethods;
-  PaymentMethod _selectedPaymentMethod;
+  late List<DropdownMenuItem<PaymentMethod>> _listPaymentMethods;
+  late PaymentMethod _selectedPaymentMethod;
 
   @override
   void initState() {
@@ -83,7 +83,7 @@ class _SelectOperatorWidget extends State<SelectOperatorWidget> {
           ),
           underline: Container(
             height: 1,
-            color: Theme.of(context).cursorColor,
+            color: Theme.of(context).textSelectionTheme.cursorColor,
           ),
         ),
       ],
@@ -91,13 +91,13 @@ class _SelectOperatorWidget extends State<SelectOperatorWidget> {
   }
 
   List<DropdownMenuItem<PaymentMethod>> builtDropdownPaymentMethod(List payments) {
-    List<DropdownMenuItem<PaymentMethod>> listItems = List();
+    List<DropdownMenuItem<PaymentMethod>> listItems = [];
     for (PaymentMethod documentPm in payments) {
       listItems.add(
         DropdownMenuItem(
           value: documentPm,
           child: Text(
-            documentPm.name,
+            documentPm.name ?? '',
           ),
         ),
       );
@@ -105,10 +105,10 @@ class _SelectOperatorWidget extends State<SelectOperatorWidget> {
     return listItems;
   }
 
-  onChangeDropDawPayment(PaymentMethod payment) {
+  onChangeDropDawPayment(PaymentMethod? payment) {
     setState(() {
-      widget.selectPaymentMethod(payment);
-      _selectedPaymentMethod = payment;
+      widget.selectPaymentMethod(payment ?? new PaymentMethod());
+      _selectedPaymentMethod = payment ?? new PaymentMethod();
     });
   }
 }

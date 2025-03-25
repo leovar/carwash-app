@@ -10,7 +10,7 @@ import 'package:car_wash_app/turns/ui/widgets/item_waiting_list.dart';
 import 'package:car_wash_app/turns/ui/widgets/item_washing_list.dart';
 import 'package:car_wash_app/turns/ui/widgets/select_turn_cell_widget.dart';
 import 'package:car_wash_app/user/bloc/bloc_user.dart';
-import 'package:car_wash_app/user/model/user.dart';
+import 'package:car_wash_app/user/model/sysUser.dart';
 import 'package:car_wash_app/widgets/keys.dart';
 import 'package:car_wash_app/widgets/messages_utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -26,31 +26,31 @@ class FormTurns extends StatefulWidget {
 }
 
 class _FormTurns extends State<FormTurns> with SingleTickerProviderStateMixin {
-  BlocInvoice _blocInvoice;
+  late BlocInvoice _blocInvoice;
   final _locationBloc = BlocLocation();
   UserBloc _blocUser = UserBloc();
 
   var _estimatedWaitingTime = Duration(minutes: 0);
   List<Invoice> _listInvoicesWaiting = <Invoice>[];
   List<Invoice> _listInvoicesWashing = <Invoice>[];
-  String _locationName;
-  String _idLocation;
-  DocumentReference _locationReference;
+  late String _locationName;
+  late String _idLocation;
+  late DocumentReference _locationReference;
   Location _locationData = new Location();
   CellsModel _cellSelected = CellsModel('', '');
   int _activeCellsSelected = 0;
-  User _currentUser;
-  TabController _tabController;
+  late SysUser _currentUser;
+  late TabController _tabController;
   final _textWorkers = TextEditingController();
 
   Configuration _config = Configuration();
-  Timer _everyMinute;
+  late Timer _everyMinute;
 
   @override
   void initState() {
     super.initState();
-    _blocUser.getCurrentUser().then((User user) {
-      _currentUser = user;
+    _blocUser.getCurrentUser().then((SysUser? user) {
+      _currentUser = user?? new SysUser(uid: '', name: '', email: '');
     });
     _tabController = new TabController(length: 2, vsync: this);
     this._getPreferences();
@@ -288,7 +288,7 @@ class _FormTurns extends State<FormTurns> with SingleTickerProviderStateMixin {
           snapshot.data.documents,
         );
         _listInvoicesWaiting.sort(
-          (b, a) => b.consecutive.compareTo(a.consecutive),
+          (b, a) => (b.consecutive??0).compareTo(a.consecutive??0),
         );
         _countEstimateWashTime();
     }
@@ -328,7 +328,7 @@ class _FormTurns extends State<FormTurns> with SingleTickerProviderStateMixin {
           snapshot.data.documents,
         );
         _listInvoicesWashing.sort(
-          (a, b) => b.consecutive.compareTo(a.consecutive),
+          (a, b) => (b.consecutive??0).compareTo(a.consecutive??0),
         );
         _countEstimateWashTime();
     }
@@ -351,9 +351,9 @@ class _FormTurns extends State<FormTurns> with SingleTickerProviderStateMixin {
 
   void _getPreferences() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
-    _locationName = pref.getString(Keys.locationName);
+    _locationName = pref.getString(Keys.locationName) ?? '';
     if (_idLocation.isEmpty ?? true) {
-      _idLocation = pref.getString(Keys.idLocation);
+      _idLocation = pref.getString(Keys.idLocation) ?? '';
       _locationBloc.getLocationReference(_idLocation).then((value) {
         setState(() {
           _locationReference = value;
@@ -369,9 +369,9 @@ class _FormTurns extends State<FormTurns> with SingleTickerProviderStateMixin {
 
   void _assignTurnCallback(Invoice _invoiceClose) {
     _cellSelected =
-        (_invoiceClose.washingCell.isEmpty ?? true)
+        (_invoiceClose.washingCell?.isEmpty ?? true)
             ? new CellsModel('', '')
-            : CellsModel(_invoiceClose.washingCell, _invoiceClose.washingCell);
+            : CellsModel(_invoiceClose.washingCell??'', _invoiceClose.washingCell??'');
     Alert(
       context: context,
       title: 'Seleccione la celda de lavado',
@@ -445,8 +445,8 @@ class _FormTurns extends State<FormTurns> with SingleTickerProviderStateMixin {
     bool endWashValue = false;
     Timestamp endWashData;
     int washingTimeValue;
-    if (_invoiceToEnd.startWashing && !_invoiceToEnd.endWash ?? false) {
-      DateTime dateStart = _invoiceToEnd.dateStartWashing.toDate();
+    if (_invoiceToEnd.startWashing != null && !(_invoiceToEnd.endWash ?? false)) {
+      DateTime dateStart = _invoiceToEnd.dateStartWashing!.toDate();
       DateTime dateCurrent = DateTime.now();
       Duration diff = dateCurrent.difference(dateStart);
       int washCurrentDuration = diff.inMinutes;
@@ -467,20 +467,19 @@ class _FormTurns extends State<FormTurns> with SingleTickerProviderStateMixin {
   }
 
   void _countEstimateWashTime() {
-    List<QueueModel> _queueActiveCellsList = List<QueueModel>();
-    List<QueueModel> _queueWashingCellsList = List<QueueModel>();
-    if (_locationData.activeCells > 0) {
+    List<QueueModel> _queueActiveCellsList = [];
+    List<QueueModel> _queueWashingCellsList = [];
+    if ((_locationData.activeCells??0) > 0) {
       if (_listInvoicesWashing.length > 0) {
         _listInvoicesWashing.forEach((item) {
-          DateTime dateStartWash = item.dateStartWashing.toDate();
+          DateTime dateStartWash = item.dateStartWashing!.toDate();
           DateTime dateCurrent = DateTime.now();
           Duration diff = dateCurrent.difference(dateStartWash);
           int washCurrentDuration = diff.inMinutes;
-          int invoiceDuration =
-              item.washingServicesTime == null ? 0 : item.washingServicesTime;
-          if (item.countWashingWorkers > 1) {
+          int invoiceDuration = item.washingServicesTime == null ? 0 : item.washingServicesTime??0;
+          if ((item.countWashingWorkers??0) > 1) {
             invoiceDuration =
-                (invoiceDuration / item.countWashingWorkers).round();
+                (invoiceDuration / item.countWashingWorkers!).round();
           }
           int remainingDuration = invoiceDuration - washCurrentDuration;
           if (_queueWashingCellsList
@@ -488,7 +487,7 @@ class _FormTurns extends State<FormTurns> with SingleTickerProviderStateMixin {
                   .length ==
               0) {
             QueueModel newItem = new QueueModel(
-              item.washingCell,
+              item.washingCell!,
               remainingDuration,
             );
             _queueWashingCellsList.add(newItem);
@@ -503,7 +502,7 @@ class _FormTurns extends State<FormTurns> with SingleTickerProviderStateMixin {
         });
       }
 
-      for (int i = 0; i < _locationData.activeCells; i++) {
+      for (int i = 0; i < (_locationData.activeCells??0); i++) {
         _queueActiveCellsList.add(QueueModel((i + 1).toString(), 0));
       }
 
@@ -531,7 +530,7 @@ class _FormTurns extends State<FormTurns> with SingleTickerProviderStateMixin {
 
       if (_listInvoicesWaiting.length > 0) {
         _listInvoicesWaiting.sort(
-          (a, b) => a.washingServicesTime.compareTo(b.washingServicesTime),
+          (a, b) => (a.washingServicesTime??0).compareTo(b.washingServicesTime??0),
         );
         _listInvoicesWaiting.forEach((item) {
           var min = _queueActiveCellsList.first;
@@ -544,7 +543,7 @@ class _FormTurns extends State<FormTurns> with SingleTickerProviderStateMixin {
           );
           queueTime.time =
               queueTime.time +
-              (item.washingServicesTime == null ? 0 : item.washingServicesTime);
+              (item.washingServicesTime == null ? 0 : item.washingServicesTime??0);
         });
       }
       var minTime = _queueActiveCellsList.first;

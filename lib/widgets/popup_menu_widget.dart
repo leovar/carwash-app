@@ -9,13 +9,13 @@ class PopUpMenuWidget extends StatefulWidget {
   final bool editForm;
 
   PopUpMenuWidget({
-    Key key,
-    this.popUpName,
-    this.selectValue,
-    this.listString,
-    this.valueSelect,
-    this.enableForm,
-    this.editForm,
+    Key? key,
+    required this.popUpName,
+    required this.selectValue,
+    required this.listString,
+    required this.valueSelect,
+    required this.enableForm,
+    required this.editForm,
   });
 
   @override

@@ -4,24 +4,24 @@ import 'package:meta/meta.dart';
 
 @immutable
 class Product extends Equatable {
-  final String id;
-  final String productName;
-  final double price;
-  final double ivaPercent;
-  final DocumentReference vehicleType;
-  final List<DocumentReference> locations;
-  final bool productActive;
-  final int vehicleTypeUid;
-  bool isSelected;
-  final bool isAdditional;
-  bool newProduct;
-  final String productType;
-  final String productInvoiceId;
-  final Timestamp dateAdded;
-  final int serviceTime;
-  final double productCommission;
-  int countOperatorsInvoice;
-  int invoiceConsecutive;
+  final String? id;
+  final String? productName;
+  final double? price;
+  final double? ivaPercent;
+  final DocumentReference? vehicleType;
+  final List<DocumentReference>? locations;
+  final bool? productActive;
+  final int? vehicleTypeUid;
+  bool? isSelected;
+  final bool? isAdditional;
+  bool? newProduct;
+  final String? productType;
+  final String? productInvoiceId;
+  final Timestamp? dateAdded;
+  final int? serviceTime;
+  final double? productCommission;
+  int? countOperatorsInvoice;
+  int? invoiceConsecutive;
 
   Product({
     this.id,
@@ -44,7 +44,7 @@ class Product extends Equatable {
     this.invoiceConsecutive,
   });
 
-  factory Product.fromJson(Map<String, dynamic> json, {String id}) {
+  factory Product.fromJson(Map<String, dynamic> json, {String? id}) {
     List<DocumentReference> locationsListDb = <DocumentReference>[];
     List locationsList = json['locations'];
     locationsList.forEach((drLocation) {
@@ -96,7 +96,7 @@ class Product extends Equatable {
     );
   }
 
-  factory Product.fromJsonProInvoice(Map<String, dynamic> json, {String id}) {
+  factory Product.fromJsonProInvoice(Map<String, dynamic> json, {String? id}) {
     List<DocumentReference> locationsListDb = <DocumentReference>[];
     List locationsList = json['locations'];
     locationsList.forEach((drLocation) {
@@ -182,14 +182,14 @@ class Product extends Equatable {
   }
 
   factory Product.copyProductInvoiceWith({
-    @required Product origin,
-    String id,
-    bool isSelected,
-    double price,
-    double ivaPercent,
-    String productType,
-    String productInvoiceId,
-    double commission,
+    required Product origin,
+    String? id,
+    bool? isSelected,
+    double? price,
+    double? ivaPercent,
+    String? productType,
+    String? productInvoiceId,
+    double? commission,
   }) {
     return Product(
       id: id ?? origin.id,
@@ -211,14 +211,14 @@ class Product extends Equatable {
 
   //Copy Product to add product in new invoice at save
   factory Product.copyProductToSaveInvoice({
-    String id,
-    String productName,
-    double price,
-    double ivaPercent,
-    bool isAdditional,
-    String productType,
-    int serviceTime,
-    double commission,
+    String? id,
+    String? productName,
+    double? price,
+    double? ivaPercent,
+    bool? isAdditional,
+    String? productType,
+    int? serviceTime,
+    double? commission,
   }) {
     return Product(
       id: id,
@@ -234,18 +234,18 @@ class Product extends Equatable {
 
   @override
   List<Object> get props => [
-    id,
-    productName,
-    price,
-    ivaPercent,
-    vehicleType,
-    locations,
-    productActive,
-    vehicleTypeUid,
-    isSelected,
-    productType,
-    productInvoiceId,
-    serviceTime,
-    productCommission,
+    id!,
+    productName ?? '',
+    price ?? 0,
+    ivaPercent ?? 0,
+    vehicleType!,
+    locations!,
+    productActive ?? false,
+    vehicleTypeUid!,
+    isSelected ?? false,
+    productType!,
+    productInvoiceId!,
+    serviceTime!,
+    productCommission ?? 0,
   ];
 }

@@ -3,7 +3,7 @@ import 'dart:core';
 import 'package:car_wash_app/location/bloc/bloc_location.dart';
 import 'package:car_wash_app/location/model/location.dart';
 import 'package:car_wash_app/user/bloc/bloc_user.dart';
-import 'package:car_wash_app/user/model/user.dart';
+import 'package:car_wash_app/user/model/sysUser.dart';
 import 'package:car_wash_app/user/ui/screens/register_user.dart';
 import 'package:car_wash_app/widgets/select_location_widget.dart';
 import 'package:car_wash_app/widgets/home_page.dart';
@@ -19,6 +19,8 @@ import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../../firebase_options.dart';
 
 import '../../../widgets/gradient_back.dart';
 
@@ -48,7 +50,9 @@ class _LoginPage extends State<LoginPage> {
 
   Future _init() async {
     await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-    FirebaseFirestore.instance.settings = const Settings(
+    FirebaseFirestore firestoreInst = FirebaseFirestore.instance;
+    firestoreInst = FirebaseFirestore.instanceFor(app: Firebase.app());
+    firestoreInst.settings = const Settings(
       persistenceEnabled: true,
     );
   }
@@ -258,10 +262,15 @@ class _LoginPage extends State<LoginPage> {
   Widget _buttonGo() {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 49),
-      child: OutlineButton(
-        color: Colors.white,
-        padding: EdgeInsets.symmetric(vertical: 15, horizontal: 58),
-        borderSide: BorderSide(width: 1, color: Colors.white),
+      child: OutlinedButton(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: Colors.white,
+          side: BorderSide(width: 1, color: Colors.white),
+          padding: EdgeInsets.symmetric(vertical: 15, horizontal: 58),
+          /*shape: RoundedRectangleBorder(  //TODO validar como se ve el boton para definir si estas lineas son necesarias
+            borderRadius: BorderRadius.circular(10), // Rounded corners
+          ),*/
+        ),
         child: Text(
           "INGRESAR",
           style: TextStyle(
@@ -361,7 +370,7 @@ class _LoginPage extends State<LoginPage> {
 
   olvidoContrasena() => Container(
     padding: EdgeInsets.only(top: 11),
-    child: FlatButton(
+    child: TextButton(
       onPressed: () {
         this._reloadPasswordPressed(_textUser.text.trim());
       },
@@ -379,7 +388,7 @@ class _LoginPage extends State<LoginPage> {
 
   Widget registrese() {
     return Container(
-      child: FlatButton(
+      child: TextButton(
         onPressed: () {
           Navigator.push(
             context,
@@ -414,30 +423,30 @@ class _LoginPage extends State<LoginPage> {
     return true;
   }
 
-  Future<void> _registerLogin(FirebaseUser user) async {
+  Future<void> _registerLogin(User user) async {
     String _imageUserProfile = '';
     String _userName = '';
-    User currentUser = await _userBloc.searchUserByEmail(user.email);
+    SysUser? currentUser = await _userBloc.searchUserByEmail(user.email);
 
     // Select photoUrl
     if (currentUser != null && (currentUser.photoUrl ?? '').isNotEmpty)
-      _imageUserProfile = currentUser.photoUrl;
+      _imageUserProfile = currentUser.photoUrl ?? '';
     else
-      _imageUserProfile = user.photoUrl ?? '';
+      _imageUserProfile = user.photoURL ?? '';
 
     // Select userName
     if (currentUser != null && (currentUser.name ?? '').isNotEmpty)
       _userName = currentUser.name;
     else
-      _userName = user.displayName;
+      _userName = user.displayName ?? '';
 
     if (currentUser == null) {
       _userBloc.updateUserData(
-        User(
+        SysUser(
           uid: user.uid,
           name: user.displayName ?? '',
-          email: user.email,
-          photoUrl: user.photoUrl ?? '',
+          email: user.email ?? '',
+          photoUrl: user.photoURL ?? '',
           lastSignIn: Timestamp.now(),
           active: true,
           isAdministrator: false,
@@ -447,11 +456,11 @@ class _LoginPage extends State<LoginPage> {
       );
     } else {
       _userBloc.updateUserData(
-        User(
+        SysUser(
           id: currentUser.id,
           uid: currentUser.uid,
           name: _userName,
-          email: user.email,
+          email: user.email ?? '',
           photoUrl: _imageUserProfile,
           lastSignIn: Timestamp.now(),
           active: currentUser.active,
@@ -474,11 +483,11 @@ class _LoginPage extends State<LoginPage> {
   }
 
   Future<void> _setLocationInPreferences(
-    FirebaseUser user,
+    User user,
     String imageUserProfile,
     String userName,
   ) async {
-    User userDatabase = await _userBloc.getCurrentUser();
+    SysUser? userDatabase = await _userBloc.getCurrentUser();
     if (userDatabase != null) {
       SharedPreferences pref = await SharedPreferences.getInstance();
       pref.setString(Keys.idLocation, '');
@@ -494,21 +503,21 @@ class _LoginPage extends State<LoginPage> {
   }
 
   List<DropdownMenuItem<Location>> builDropdownMenuItems(List locations) {
-    List<DropdownMenuItem<Location>> listItems = List();
+    List<DropdownMenuItem<Location>> listItems = [];
     for (Location documentLoc in locations) {
       listItems.add(
         DropdownMenuItem(
           value: documentLoc,
-          child: Text(documentLoc.locationName),
+          child: Text(documentLoc.locationName??''),
         ),
       );
     }
     return listItems;
   }
 
-  onChangeDropDawn(Location selectedLocation) {
+  onChangeDropDawn(Location? selectedLocation) {
     setState(() {
-      _selectedLocation = selectedLocation;
+      _selectedLocation = selectedLocation ?? new Location();
     });
   }
 
@@ -521,7 +530,7 @@ class _LoginPage extends State<LoginPage> {
     if (_validations('google')) {
       try {
         _userBloc.singOut();
-        FirebaseUser user = await _userBloc.signInGoogle();
+        User? user = await _userBloc.signInGoogle();
         if (user != null) {
           this._registerLogin(user);
           _clearTextLogin();
@@ -539,7 +548,7 @@ class _LoginPage extends State<LoginPage> {
   void _facebookLogin() async {
     if (_validations('facebook')) {
       try {
-        FirebaseUser user = await _userBloc.signInFacebook();
+        User? user = await _userBloc.signInFacebook();
         if (user != null) {
           this._registerLogin(user);
           _clearTextLogin();
@@ -558,7 +567,7 @@ class _LoginPage extends State<LoginPage> {
     if (_validations('email')) {
       if (_textUser.text.isNotEmpty && _textPassword.text.isNotEmpty) {
         try {
-          FirebaseUser user = await _userBloc.signInEmail(
+          User? user = await _userBloc.signInEmail(
             _textUser.text.trim(),
             _textPassword.text.trim(),
           );
@@ -574,7 +583,7 @@ class _LoginPage extends State<LoginPage> {
             alertType: AlertType.warning,
           ).show();
         } catch (error) {
-          print(error.message);
+          print(error);
         }
       }
     }
@@ -613,8 +622,8 @@ class _LoginPage extends State<LoginPage> {
 
   void _serLocationPreference(Location locationSelected) async {
     SharedPreferences pref = await SharedPreferences.getInstance();
-    pref.setString(Keys.idLocation, locationSelected.id);
-    pref.setString(Keys.locationName, locationSelected.locationName);
+    pref.setString(Keys.idLocation, locationSelected.id??'');
+    pref.setString(Keys.locationName, locationSelected.locationName??'');
     pref.setString(
       Keys.locationInitCount,
       locationSelected.initConcec.toString(),
@@ -648,7 +657,7 @@ class _LoginPage extends State<LoginPage> {
             child: Text('CANCELAR', style: Theme.of(context).textTheme.labelLarge),
             onPressed: () {
               Navigator.of(context).pop();
-              return false;
+              return;
             },
           ),
         ],
