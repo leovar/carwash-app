@@ -88,19 +88,22 @@ class _OperatorsInvoicePage extends State<OperatorsInvoicePage> {
   }
 
   Widget showOperatorsWidget(AsyncSnapshot snapshot) {
-    List<SysUser> _listUsersOperators =
-        _blocInvoice.buildOperators(snapshot.data.documents);
+    List<SysUser> _listUsersOperators = _blocInvoice.buildOperators(snapshot.data.docs);
     List<SysUser> _userGet = <SysUser>[];
     _listUsersOperators.forEach((item) {
       SysUser userFind = widget.usersListCallback.firstWhere(
           (element) => element.id == item.id && (element.isSelected??false),
           orElse: () => new SysUser(uid: '', name: '', email: ''));
-      SysUser userSelected = SysUser.copyWith(
-        origin: item,
-        isSelected: true,
-      );
-      _userGet.add(userSelected);
-        });
+      if (userFind.uid.isEmpty) {
+        _userGet.add(item);
+      } else {
+        SysUser userSelected = SysUser.copyWith(
+          origin: item,
+          isSelected: true,
+        );
+        _userGet.add(userSelected);
+      }
+    });
     _userGet.sort((a, b) => a.name.compareTo(b.name));
     widget.usersListCallback = _userGet;
 
