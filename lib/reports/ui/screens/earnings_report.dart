@@ -120,13 +120,9 @@ class _EarningsReport extends State<EarningsReport> {
       case ConnectionState.waiting:
         return Center(child: CircularProgressIndicator());
       default:
-        _listInvoices = _blocReports.buildEarningsReportList(
-          snapshot.data.documents,
-        );
+        _listInvoices = _blocReports.buildEarningsReportList(snapshot.data.docs);
         _listCardReport = _blocReports.buildEarningCards(_listInvoices);
-        _listCardReport.sort(
-          (a, b) => a.locationName.compareTo(b.locationName),
-        );
+        _listCardReport.sort((a, b) => a.locationName.compareTo(b.locationName));
 
         if (_listInvoices.length > 0) {
           return Container(
@@ -137,8 +133,9 @@ class _EarningsReport extends State<EarningsReport> {
               children: [_listCards(), _quantitySummary()],
             ),
           );
-        } else
+        } else {
           return _emptyLocation();
+        }
     }
   }
 
@@ -162,63 +159,46 @@ class _EarningsReport extends State<EarningsReport> {
     });
 
     return Container(
-      height: 30,
       margin: EdgeInsets.only(top: 8),
+      padding: EdgeInsets.symmetric(vertical: 8), // add vertical padding instead of height
       decoration: BoxDecoration(
         border: Border(
-            top: BorderSide(color: Color(0xFFD8D8D8), width: 1.0),
-        )
+          top: BorderSide(color: Color(0xFFD8D8D8), width: 1.0),
+        ),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.max,
+      child: Row(
         children: [
-          Row(
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              Flexible(
-                flex: 4,
-                child: Row(
-                  children: [
-                    Flexible(
-                      child: Container(
-                        padding: EdgeInsets.only(left: 8, top: 8),
-                        alignment: Alignment.topLeft,
-                        child: Text(
-                          'Venta global empresa',
-                          style: TextStyle(
-                            fontFamily: "Lato",
-                            decoration: TextDecoration.none,
-                            fontSize: 17.0,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+          Expanded(
+            flex: 4,
+            child: Padding(
+              padding: EdgeInsets.only(left: 8),
+              child: Text(
+                'Venta global empresa',
+                style: TextStyle(
+                  fontFamily: "Lato",
+                  decoration: TextDecoration.none,
+                  fontSize: 17.0,
                 ),
               ),
-              Flexible(
-                flex: 2,
-                child: Row(
-                  children: [
-                    Flexible(
-                      child: Container(
-                        alignment: Alignment.centerRight,
-                        padding: EdgeInsets.only(right: 8, top: 8),
-                        child: Text(
-                          '\$${formatterPrice.format(_totalValue)}',
-                          style: TextStyle(
-                            fontFamily: "Lato",
-                            fontWeight: FontWeight.w600,
-                            fontSize: 17.0,
-                            color: Color(0xFF59B258),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: Padding(
+              padding: EdgeInsets.only(right: 8),
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  '\$${formatterPrice.format(_totalValue)}',
+                  style: TextStyle(
+                    fontFamily: "Lato",
+                    fontWeight: FontWeight.w600,
+                    fontSize: 17.0,
+                    color: Color(0xFF59B258),
+                  ),
                 ),
               ),
-            ],
+            ),
           ),
         ],
       ),

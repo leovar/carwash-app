@@ -23,11 +23,11 @@ class _CustomersReport extends State<CustomersReport> {
   BlocLocation _blocLocation = BlocLocation();
   BlocCustomer _blocCustomer = BlocCustomer();
   late List<DropdownMenuItem<Location>> _dropdownMenuItems;
-  late Location _selectedLocation;
+  Location _selectedLocation = new Location();
 
   final _textDateInit = TextEditingController();
   final _textDateFinal = TextEditingController();
-  late DocumentReference _locationReference;
+  DocumentReference _locationReference = FirebaseFirestore.instance.collection('locations').doc('defaultDocId');
   var formatter = new DateFormat('dd-MM-yyyy');
   var _dateTimeInit = DateTime(DateTime.now().year, DateTime.now().month, 1);
   var _dateTimeFinal = DateTime.now();
@@ -118,7 +118,7 @@ class _CustomersReport extends State<CustomersReport> {
 
   Widget _chargeDropLocations(AsyncSnapshot snapshot) {
     List<Location> locationList = _blocLocation.buildLocations(
-      snapshot.data.documents,
+      snapshot.data.docs,
     );
     _dropdownMenuItems = builtDropdownMenuItems(locationList);
 
@@ -142,12 +142,21 @@ class _CustomersReport extends State<CustomersReport> {
 
   List<DropdownMenuItem<Location>> builtDropdownMenuItems(List locations) {
     List<DropdownMenuItem<Location>> listItems = [];
-    listItems.add(
-      DropdownMenuItem(
-        value: new Location(id: '', locationName: 'Todas las sedes'),
-        child: Text('Todas las sedes'),
-      ),
-    );
+    if (_selectedLocation.id == null) {
+      listItems.add(
+        DropdownMenuItem(
+          value: _selectedLocation,
+          child: Text('Todas las sedes'),
+        ),
+      );
+    } else {
+      listItems.add(
+        DropdownMenuItem(
+          value: new Location(),
+          child: Text('Todas las sedes'),
+        ),
+      );
+    }
     for (Location documentLoc in locations) {
       listItems.add(
         DropdownMenuItem(
@@ -171,7 +180,7 @@ class _CustomersReport extends State<CustomersReport> {
         }
       });
     } else {
-      _locationReference = DocumentReference as DocumentReference<Object?>;
+      _locationReference = FirebaseFirestore.instance.collection('locations').doc('defaultDocId');
       setState(() {
         _selectedLocation = selectedLocation ?? new Location();
       });
@@ -220,69 +229,78 @@ class _CustomersReport extends State<CustomersReport> {
         context: context,
         title: 'Generando reporte',
       ).show();
-      List<Invoice>
-      _listInvoices = await _blocReports.getListCustomerInvoicesByLocation(
+      List<Invoice> _listInvoices = await _blocReports.getListCustomerInvoicesByLocation(
         _locationReference,
         _dateTimeInit,
         _dateTimeFinal,
-      ); //await _blocCustomer.getListCustomerReportByLocation(_locationReference);
-      List<Invoice> _newListInvoices = [];
-      _newListInvoices = _listInvoices.toSet().toList();
-      _newListInvoices.sort((a, b) => (a.customerName??'').compareTo(b.customerName??''));
-
-      var excel = Excel.createExcel();
-      var sheetObject = excel["Sheet1"];
-
-      if (_newListInvoices.length > 0) {
-        List<String> header = [
-          "Número de factura",
-          "Nombre",
-          "Teléfono",
-          "Fecha del servicio",
-          "Valor",
-          "Placa",
-          "Sede",
-          "Servicios",
-          "Método de pago",
-          "Sede",
-        ];
-        sheetObject.appendRow(header.cast<CellValue?>());
-        _newListInvoices.forEach((item) {
-          List<String> row = [
-            "${item.consecutive}",
-            "${item.customerName}",
-            "${item.phoneNumber}",
-            item.creationDate != null
-              ? "${formatter.format(item.creationDate!.toDate())}"
-              : '',
-            "${item.totalPrice?.toInt()}",
-            "${item.placa}",
-            "${item.locationName}",
-            "${item.productsSplit}",
-            "${item.paymentMethod}",
-            "${item.locationName}",
-          ];
-          sheetObject.appendRow(row.cast<CellValue?>());
-        });
-      }
-
-      excel.rename("Sheet1", "Hoja1");
-
-      String outputFile = "/storage/emulated/0/Download/ReporteClientes_${_selectedLocation.locationName}.xlsx";
-      var encodedExcel = await excel.encode();
-      if (encodedExcel != null) {
-        File(path_prov.join(outputFile))
-          ..createSync(recursive: true)
-          ..writeAsBytesSync(encodedExcel);
-      } else {
-        print("Error: Failed to encode Excel file.");
-      }
-
-      Navigator.pop(context); //Close popUp Save
-      Fluttertoast.showToast(
-        msg: "Su reporte ha sido descargado en: ${outputFile}",
-        toastLength: Toast.LENGTH_LONG,
       );
+
+      if (_listInvoices.isNotEmpty) {
+        List<Invoice> _newListInvoices = [];
+        _newListInvoices = _listInvoices.toSet().toList();
+        _newListInvoices.sort((a, b) => (a.customerName??'').compareTo(b.customerName??''));
+
+        var excel = Excel.createExcel();
+        var sheetObject = excel["Sheet1"];
+
+        if (_newListInvoices.length > 0) {
+          List<String> header = [
+            "Número de factura",
+            "Nombre",
+            "Teléfono",
+            "Fecha del servicio",
+            "Valor",
+            "Placa",
+            "Sede",
+            "Servicios",
+            "Método de pago",
+            "Sede",
+          ];
+          sheetObject.appendRow(header.map((e) => TextCellValue(e)).toList());
+          _newListInvoices.forEach((item) {
+            List<CellValue> row = [
+              TextCellValue(item.consecutive?.toString()??''),
+              TextCellValue(item.customerName ?? ''),
+              TextCellValue(item.phoneNumber ?? ''),
+              TextCellValue(
+                item.creationDate != null
+                    ? formatter.format(item.creationDate!.toDate())
+                    : '',
+              ),
+              IntCellValue(item.totalPrice?.toInt() ?? 0),
+              TextCellValue(item.placa ?? ''),
+              TextCellValue(item.locationName ?? ''),
+              TextCellValue(item.productsSplit ?? ''),
+              TextCellValue(item.paymentMethod ?? ''),
+              TextCellValue(item.locationName ?? ''),
+            ];
+            sheetObject.appendRow(row.cast<CellValue?>());
+          });
+        }
+
+        excel.rename("Sheet1", "Hoja1");
+
+        String outputFile = "/storage/emulated/0/Download/ReporteClientes_${_selectedLocation.locationName == null ? 'Todas las sedes' : _selectedLocation.locationName}.xlsx";
+        var encodedExcel = await excel.encode();
+        if (encodedExcel != null) {
+          File(path_prov.join(outputFile))
+            ..createSync(recursive: true)
+            ..writeAsBytesSync(encodedExcel);
+        } else {
+          print("Error: Failed to encode Excel file.");
+        }
+
+        Navigator.pop(context); //Close popUp Save
+        Fluttertoast.showToast(
+          msg: "Su reporte ha sido descargado en: ${outputFile}",
+          toastLength: Toast.LENGTH_LONG,
+        );
+      } else {
+        MessagesUtils.showAlert(
+          context: context,
+          title: 'No hay datos para mostrar',
+        );
+      }
     } catch (error) {
       print('$error');
       Navigator.pop(context);

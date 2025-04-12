@@ -26,7 +26,7 @@ class UserRepository {
           .get();
       if (querySnapshot.docs.length > 0) {
         return SysUser.fromJson(
-            querySnapshot.docs.first.data as Map<String, dynamic>,
+            querySnapshot.docs.first.data(),
             id: querySnapshot.docs.first.id);
       } else {
         return Future.value(null);
@@ -52,7 +52,7 @@ class UserRepository {
     final querySnapshot =
         await this._db.collection(FirestoreCollections.users).doc(userId).get();
 
-    return SysUser.fromJson(querySnapshot.data as Map<String, dynamic>,
+    return SysUser.fromJson(querySnapshot.data() as Map<String, dynamic>,
         id: querySnapshot.id);
   }
 
@@ -72,19 +72,21 @@ class UserRepository {
     return querySnapshot;
   }
 
-  List<SysUser> buildGetAllUsers(
-      List<DocumentSnapshot> usersListSnapshot) {
+  List<SysUser> buildGetAllUsers(List<DocumentSnapshot> usersListSnapshot) {
     List<SysUser> usersList = <SysUser>[];
+
     usersListSnapshot.forEach((p) {
-      SysUser loc =
-          SysUser.fromJson(p.data as Map<String, dynamic>, id: p.id);
-      usersList.add(loc);
+      var data = p.data();
+      if (data != null) {
+        SysUser loc = SysUser.fromJson(p.data() as Map<String, dynamic>, id: p.id);
+        usersList.add(loc);
+      }
     });
     return usersList;
   }
 
   ///Get Users By Id
-  Stream<QuerySnapshot> getUsersByIdStream(String uid) {
+  Stream<QuerySnapshot<Map<String, dynamic>>> getUsersByIdStream(String uid) {
     final querySnapshot = this
         ._db
         .collection(FirestoreCollections.users)
@@ -95,7 +97,7 @@ class UserRepository {
 
   SysUser buildGetUsersById(List<DocumentSnapshot> usersListSnapshot) {
     return SysUser.fromJson(
-        usersListSnapshot.first.data as Map<String, dynamic>,
+        usersListSnapshot.first.data() as Map<String, dynamic>,
         id: usersListSnapshot.first.id);
   }
 
@@ -107,9 +109,9 @@ class UserRepository {
         .where(FirestoreCollections.usersFieldEmail, isEqualTo: email)
         .get();
 
-    if (querySnapshot.docs.length > 0) {
+    if (querySnapshot.docs.isNotEmpty) {
       return SysUser.fromJson(
-          querySnapshot.docs.first.data as Map<String, dynamic>,
+          querySnapshot.docs.first.data(),
           id: querySnapshot.docs.first.id);
     }
     return Future.value(null);

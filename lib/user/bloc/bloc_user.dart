@@ -87,7 +87,7 @@ class UserBloc implements Bloc {
     return _userRepository.getUserReferenceByUserName(userName);
   }
 
-  Stream<QuerySnapshot> getUsersByIdStream(String uid) {
+  Stream<QuerySnapshot<Map<String, dynamic>>> getUsersByIdStream(String uid) {
     return _userRepository.getUsersByIdStream(uid);
   }
 

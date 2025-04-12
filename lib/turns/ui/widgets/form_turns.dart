@@ -34,8 +34,8 @@ class _FormTurns extends State<FormTurns> with SingleTickerProviderStateMixin {
   List<Invoice> _listInvoicesWaiting = <Invoice>[];
   List<Invoice> _listInvoicesWashing = <Invoice>[];
   late String _locationName;
-  late String _idLocation;
-  late DocumentReference _locationReference;
+  String _idLocation = '';
+  DocumentReference? _locationReference;
   Location _locationData = new Location();
   CellsModel _cellSelected = CellsModel('', '');
   int _activeCellsSelected = 0;
@@ -53,11 +53,16 @@ class _FormTurns extends State<FormTurns> with SingleTickerProviderStateMixin {
       _currentUser = user?? new SysUser(uid: '', name: '', email: '');
     });
     _tabController = new TabController(length: 2, vsync: this);
-    this._getPreferences();
     _everyMinute = Timer.periodic(Duration(minutes: 1), (Timer t) {
       setState(() {});
     });
-    _getInitLists();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    this._blocInvoice = BlocProvider.of<BlocInvoice>(context);
+    this._getPreferences();
   }
 
   @override
@@ -71,7 +76,6 @@ class _FormTurns extends State<FormTurns> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    this._blocInvoice = BlocProvider.of<BlocInvoice>(context);
     _countEstimateWashTime();
     return Column(
       children: <Widget>[
@@ -247,35 +251,43 @@ class _FormTurns extends State<FormTurns> with SingleTickerProviderStateMixin {
   }
 
   List<Widget> _bodyContainer() {
-    return <Widget>[
-      Material(
-        color: Colors.white,
-        child: TabBar(
-          controller: _tabController,
-          indicatorSize: TabBarIndicatorSize.tab,
-          unselectedLabelColor: Theme.of(context).primaryColor,
-          labelColor: Theme.of(context).colorScheme.secondary,
-          tabs: [Tab(text: 'En Lavado'), Tab(text: 'En Espera')],
+    if (_locationReference == null) {
+      return <Widget> [
+        CircularProgressIndicator(),
+      ];
+    } else {
+      return <Widget>[
+        Material(
+          color: Colors.white,
+          child: TabBar(
+            controller: _tabController,
+            indicatorSize: TabBarIndicatorSize.tab,
+            unselectedLabelColor: Theme.of(context).primaryColor,
+            labelColor: Theme.of(context).colorScheme.secondary,
+            tabs: [Tab(text: 'En Lavado'), Tab(text: 'En Espera')],
+          ),
         ),
-      ),
-      Expanded(
-        child: TabBarView(
-          children: [_washingList(), _waitingList()],
-          controller: _tabController,
+        Expanded(
+          child: TabBarView(
+            children: [_washingList(), _waitingList()],
+            controller: _tabController,
+          ),
         ),
-      ),
-    ];
+      ];
+    }
   }
 
   Widget _waitingList() {
-    return StreamBuilder(
-      stream: _blocInvoice.invoicesListPendingWashingStream(
-        this._locationReference,
-      ),
-      builder: (BuildContext context, AsyncSnapshot snapshot) {
-        return _containerWaitingList(snapshot);
-      },
-    );
+    if (this._locationReference == null) {
+      return CircularProgressIndicator();
+    } else {
+      return StreamBuilder(
+        stream: _blocInvoice.invoicesListPendingWashingStream(this._locationReference),
+        builder: (BuildContext context, AsyncSnapshot snapshot) {
+          return _containerWaitingList(snapshot);
+        },
+      );
+    }
   }
 
   Widget _containerWaitingList(AsyncSnapshot snapshot) {
@@ -285,7 +297,7 @@ class _FormTurns extends State<FormTurns> with SingleTickerProviderStateMixin {
         break;
       default:
         _listInvoicesWaiting = _blocInvoice.buildInvoicesListPendingWashing(
-          snapshot.data.documents,
+          snapshot.data.docs,
         );
         _listInvoicesWaiting.sort(
           (b, a) => (b.consecutive??0).compareTo(a.consecutive??0),
@@ -310,12 +322,16 @@ class _FormTurns extends State<FormTurns> with SingleTickerProviderStateMixin {
   }
 
   Widget _washingList() {
-    return StreamBuilder(
-      stream: _blocInvoice.invoicesListWashingStream(this._locationReference),
-      builder: (BuildContext context, AsyncSnapshot snapshot) {
-        return _containerWashingList(snapshot);
-      },
-    );
+    if (this._locationReference == null) {
+       return CircularProgressIndicator();
+    } else {
+      return StreamBuilder(
+        stream: _blocInvoice.invoicesListWashingStream(this._locationReference),
+        builder: (BuildContext context, AsyncSnapshot snapshot) {
+          return _containerWashingList(snapshot);
+        },
+      );
+    }
   }
 
   Widget _containerWashingList(AsyncSnapshot snapshot) {
@@ -325,7 +341,7 @@ class _FormTurns extends State<FormTurns> with SingleTickerProviderStateMixin {
         break;
       default:
         _listInvoicesWashing = _blocInvoice.buildInvoicesListWashing(
-          snapshot.data.documents,
+          snapshot.data.docs,
         );
         _listInvoicesWashing.sort(
           (a, b) => (b.consecutive??0).compareTo(a.consecutive??0),
@@ -560,9 +576,7 @@ class _FormTurns extends State<FormTurns> with SingleTickerProviderStateMixin {
 
   void _getInitLists() async {
     List<Invoice> pendingWash = <Invoice>[];
-    _blocInvoice.getListPendingWashList(this._locationReference).then((
-      value,
-    ) {
+    _blocInvoice.getListPendingWashList(this._locationReference).then((value) {
       pendingWash = value;
       _blocInvoice.invoicesWashingList(this._locationReference).then((items) {
         setState(() {
@@ -571,7 +585,7 @@ class _FormTurns extends State<FormTurns> with SingleTickerProviderStateMixin {
         });
       });
     });
-    }
+  }
 
   void _changeActiveCellsValue() {
     Alert(

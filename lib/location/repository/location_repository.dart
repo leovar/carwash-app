@@ -30,8 +30,11 @@ class LocationRepository {
   List<Location> buildLocations(List<DocumentSnapshot> placesListSnapshot){
     List<Location> locationsList = [];
     placesListSnapshot.forEach((p) {
-      Location loc = Location.fromJson(p.data as Map<String, dynamic>, id: p.id);
-      locationsList.add(loc);
+      var data = p.data();
+      if (data != null) {
+        Location loc = Location.fromJson(data as Map<String, dynamic>, id: p.id);
+        locationsList.add(loc);
+      }
     });
     return locationsList;
   }
@@ -45,7 +48,7 @@ class LocationRepository {
         .doc(locationId)
         .get();
 
-    return Location.fromJson(querySnapshot.data as Map<String, dynamic>, id: querySnapshot.id);
+    return Location.fromJson(querySnapshot.data() as Map<String, dynamic>, id: querySnapshot.id);
   }
 
   Stream<QuerySnapshot> getAllLocationsStream() {
@@ -58,7 +61,7 @@ class LocationRepository {
   List<Location> buildGetAllLocations(List<DocumentSnapshot> locationsListSnapshot) {
     List<Location> locationsList = <Location>[];
     locationsListSnapshot.forEach((p) {
-      Location loc = Location.fromJson(p.data as Map<String, dynamic>, id: p.id);
+      Location loc = Location.fromJson(p.data() as Map<String, dynamic>, id: p.id);
       locationsList.add(loc);
     });
     return locationsList;
@@ -74,7 +77,7 @@ class LocationRepository {
       .get();
 
     result.docs.forEach((f) {
-      Location loc = Location.fromJson(f.data as Map<String, dynamic>, id: f.id);
+      Location loc = Location.fromJson(f.data(), id: f.id);
       locList.add(loc);
     });
     return locList;

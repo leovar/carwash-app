@@ -242,8 +242,12 @@ class _ItemInvoicesList extends State<ItemInvoicesList> {
                                     onPressed: () {
                                       widget.closeInvoice(invoiceList);
                                     },
-                                    child: Text(
-                                      'Completar'.toUpperCase(),
+                                    child: FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      child: Text(
+                                        'Completar'.toUpperCase(),
+                                        style: TextStyle(fontSize: 12),
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -267,8 +271,11 @@ class _ItemInvoicesList extends State<ItemInvoicesList> {
                                     onPressed: () {
                                       widget.finishInvoice(invoiceList);
                                     },
-                                    child: Text(
-                                      'Terminar'.toUpperCase(),
+                                    child: FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      child: Text(
+                                        'Terminar'.toUpperCase(),
+                                      ),
                                     ),
                                   ),
                                 ),

@@ -217,9 +217,11 @@ class _ItemWashingList extends State<ItemWashingList> {
                     onPressed: () {
                       widget.endWash(_invoiceList);
                     },
-                    child: Text(
-                      'Terminar'.toUpperCase(),
-                      style: TextStyle(fontSize: 11),
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        'Terminar'.toUpperCase(),
+                      ),
                     ),
                   ),
                 ),

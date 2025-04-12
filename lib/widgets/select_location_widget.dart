@@ -1,5 +1,6 @@
 import 'package:car_wash_app/location/bloc/bloc_location.dart';
 import 'package:car_wash_app/location/model/location.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class SelectLocationWidget extends StatefulWidget {
@@ -21,7 +22,7 @@ class _SelectLocationWidget extends State<SelectLocationWidget> {
   void initState() {
     super.initState();
     _selectedLocation = widget.locationSelected;
-    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,22 +34,30 @@ class _SelectLocationWidget extends State<SelectLocationWidget> {
   }
 
   Widget _getLocationsList() {
-    return StreamBuilder(
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
       stream: _blocLocation.locationsStream,
       builder: (context, snapshot) {
-        switch (snapshot.connectionState) {
-          case ConnectionState.waiting:
-            return CircularProgressIndicator();
-          default:
-            return _chargeDropLocations(snapshot);
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return CircularProgressIndicator(); // Show loading indicator
         }
+        if (snapshot.hasError) {
+          return Center(child: Text("Error loading locations"));
+        }
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return Center(child: Text("No locations found"));
+        }
+        return _chargeDropLocations(snapshot);
       },
     );
   }
 
   Widget _chargeDropLocations(AsyncSnapshot snapshot) {
+    if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+      return Center(child: Text("No locations available"));
+    }
+
     List<Location> locationList =
-        _blocLocation.buildLocations(snapshot.data.documents);
+        _blocLocation.buildLocations(snapshot.data!.docs);
     _dropdownMenuItems = builtDropdownMenuItems(locationList);
 
     return DropdownButton(
@@ -85,6 +94,16 @@ class _SelectLocationWidget extends State<SelectLocationWidget> {
           value: documentLoc,
           child: Text(
             documentLoc.locationName ?? '',
+          ),
+        ),
+      );
+    }
+    if (widget.locationSelected.id == null) {
+      listItems.add(
+        DropdownMenuItem(
+          value: widget.locationSelected,
+          child: Text(
+            widget.locationSelected.locationName ?? '',
           ),
         ),
       );

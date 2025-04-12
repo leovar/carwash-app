@@ -70,6 +70,7 @@ class _FieldsInvoice extends State<FieldsInvoice> {
           isUpperCase: true,
           textInputFormatter: [
             FilteringTextInputFormatter.allow(RegExp("^[a-zA-Z0-9]*")),
+            UpperCaseTextFormatter(),
           ],
           onFinalEditText: widget.finalEditPlaca,
           validate: widget.validatePlaca,
@@ -199,16 +200,26 @@ class _FieldsInvoice extends State<FieldsInvoice> {
     if (picked != null && picked != _time)
       setState(() {
         _time = picked;
-        TimeOfDay _hour12Format = picked.replacing(hour: picked.hourOfPeriod);
-        int hour24;
-        if (_time.format(context).length > 4) {
-          hour24 = int.parse(_time.format(context).substring(0, 2));
-        } else {
-          hour24 = int.parse(_time.format(context).substring(0, 1));
-        }
 
-        text12Hour = hour24 <= 12 ? '${_hour12Format.format(context)} A.M' : '${_hour12Format.format(context)} P.M';
+        final hour = picked.hourOfPeriod == 0 ? 12 : picked.hourOfPeriod;
+        final minute = picked.minute.toString().padLeft(2, '0');
+        final period = picked.period == DayPeriod.am ? 'A.M' : 'P.M';
+
+        text12Hour = '$hour:$minute $period';
         widget.textTimeDelivery.value = TextEditingValue(text: text12Hour);
       });
+  }
+}
+
+// Custom Formatter to force uppercase input
+class UpperCaseTextFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue,
+      TextEditingValue newValue,
+      ) {
+    return newValue.copyWith(
+      text: newValue.text.toUpperCase(),
+    );
   }
 }

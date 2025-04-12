@@ -61,7 +61,7 @@ class _OperatorsInvoicePage extends State<OperatorsInvoicePage> {
   }
 
   Widget listUsers() {
-    if (widget.invoice?.invoiceClosed??false) {
+    if (widget.invoice != null && (widget.invoice?.invoiceClosed??false)) {
       List<SysUser> operatorsList = [];
       widget.usersListCallback.forEach((item) {
         SysUser userSelected = SysUser.copyWith(
@@ -94,7 +94,7 @@ class _OperatorsInvoicePage extends State<OperatorsInvoicePage> {
       SysUser userFind = widget.usersListCallback.firstWhere(
           (element) => element.id == item.id && (element.isSelected??false),
           orElse: () => new SysUser(uid: '', name: '', email: ''));
-      if (userFind.uid.isEmpty) {
+      if (userFind.name.isEmpty) {
         _userGet.add(item);
       } else {
         SysUser userSelected = SysUser.copyWith(

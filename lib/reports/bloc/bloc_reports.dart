@@ -53,11 +53,21 @@ class BlocReports implements Bloc {
         EarningsCardDetail? detailInfo = _cardList.length > 0
             ? _cardList.firstWhere((x) => x.locationName == item.locationName, orElse: () => new EarningsCardDetail('',0,0,[]))
             : null;
-        detailInfo?.countServices = detailInfo.countServices + ((item.countProducts??0) + (item.countAdditionalProducts??0));
-        detailInfo?.totalPrice = detailInfo.totalPrice + (item.totalPrice??0);
-        List<Invoice> listGet = detailInfo?.invoicesList?? [];
-        listGet.add(item);
-        if (detailInfo != null) {
+        if (detailInfo == null || detailInfo.locationName == '') {
+          List<Invoice> invoicesPerLocation = [];
+          invoicesPerLocation.add(item);
+          final cardData = EarningsCardDetail(
+            item.locationName ?? '',
+            (item.countProducts??0) + (item.countAdditionalProducts??0),
+            item.totalPrice??0,
+            invoicesPerLocation,
+          );
+          _cardList.add(cardData);
+        } else {
+          detailInfo.countServices = detailInfo.countServices + ((item.countProducts??0) + (item.countAdditionalProducts??0));
+          detailInfo.totalPrice = detailInfo.totalPrice + (item.totalPrice??0);
+          List<Invoice> listGet = detailInfo.invoicesList;
+          listGet.add(item);
           int indexData = _cardList.indexOf(detailInfo);
           _cardList[indexData] = detailInfo;
         }

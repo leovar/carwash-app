@@ -15,7 +15,7 @@ class FieldsProducts extends StatefulWidget {
   final int selectedProductsCount;
   final String idLocation;
   final bool editForm;
-  final Invoice invoice;
+  final Invoice? invoice;
 
   FieldsProducts({
     Key? key,

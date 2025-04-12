@@ -59,19 +59,23 @@ class _UsersAdminPage extends State<UsersAdminPage>
   Widget _bodyContainer() {
     return StreamBuilder(
       stream: _userBloc.allUsersStream,
-      builder: (context, snapshot) {
-        switch (snapshot.connectionState) {
-          case ConnectionState.waiting:
-            return CircularProgressIndicator();
-          default:
-            return _listUsersContainer(snapshot);
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return CircularProgressIndicator();
         }
+        if (snapshot.hasError) {
+          return Center(child: Text("Error loading user data"));
+        }
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return Center(child: Text("Users not found"));
+        }
+        return _listUsersContainer(snapshot);
       },
     );
   }
 
   Widget _listUsersContainer(AsyncSnapshot snapshot) {
-    _userList = _userBloc.buildAllUsers(snapshot.data.documents);
+    _userList = _userBloc.buildAllUsers(snapshot.data.docs);
     List<SysUser> _activeUsers = _userList.where((x) => x.active == true).toList();
     List<SysUser> _inactiveUsers = _userList.where((x) => x.active == false).toList();
     return Container(
@@ -127,7 +131,7 @@ class _UsersAdminPage extends State<UsersAdminPage>
   }
 
   Widget _getDataUsersList(AsyncSnapshot snapshot) {
-    _userList = _userBloc.buildAllUsers(snapshot.data.documents);
+    _userList = _userBloc.buildAllUsers(snapshot.data.docs);
     List<SysUser> _activeUsers = _userList.where((x) => x.active == true).toList();
     List<SysUser> _inactiveUsers =
         _userList.where((x) => x.active == false).toList();

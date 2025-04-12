@@ -52,13 +52,13 @@ class Vehicle extends Equatable {
 
   @override
   List<Object> get props => [
-    id!,
-    brand!,
-    model!,
-    placa!,
-    color!,
-    vehicleType!,
-    creationDate!,
-    brandReference!
+    id ?? '',
+    brand ?? '',
+    model ?? '',
+    placa ?? '',
+    color ?? '',
+    vehicleType ?? '',
+    creationDate ?? new DateTime.timestamp(),
+    brandReference ?? ''
   ];
 }

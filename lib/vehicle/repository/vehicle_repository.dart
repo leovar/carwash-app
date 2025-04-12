@@ -18,7 +18,7 @@ class VehicleRepository {
     if (documents.length > 0) {
       final documentSnapshot = documents.first;
       return Vehicle.fromJson(
-        documentSnapshot.data as Map<String, dynamic>,
+        documentSnapshot.data(),
         id: documentSnapshot.id,
       );
     }
@@ -46,7 +46,7 @@ class VehicleRepository {
         .doc(idVehicle)
         .get();
     return Vehicle.fromJson(
-      querySnapshot.data as Map<String, dynamic>,
+      querySnapshot.data() as Map<String, dynamic>,
       id: querySnapshot.id,
     );
   }

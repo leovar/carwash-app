@@ -85,7 +85,7 @@ class _OperatorsReport extends State<OperatorsReport> {
         );
       default:
         _listInvoices =
-            _blocReports.buildProductivityReportList(snapshot.data.documents);
+            _blocReports.buildProductivityReportList(snapshot.data.docs);
         _listCardReport = _processInvoicesOperator(_listInvoices
             .where((f) => !(f.cancelledInvoice??false) && (f.invoiceClosed??false))
             .toList());
@@ -122,38 +122,61 @@ class _OperatorsReport extends State<OperatorsReport> {
     List<OperatorProductivityCard> _cardList = [];
     try {
       _listInvoices.forEach((itemInvoice) {
-        itemInvoice.operatorUsers?.forEach((item) {
-          List<Invoice> invoicesPerUser = [];
-          double _totalPrice = (itemInvoice.totalPrice??0) / (itemInvoice.countOperators??0);
-          OperatorProductivityCard? cardInfo = _cardList.length > 0
-              ? _cardList.firstWhere(
+        if (itemInvoice.operatorUsers != null) {
+          itemInvoice.operatorUsers?.forEach((item) {
+            List<Invoice> invoicesPerUser = [];
+            double _totalPrice = (itemInvoice.totalPrice??0) / (itemInvoice.countOperators??0);
+            OperatorProductivityCard? cardInfo = _cardList.length > 0
+                ? _cardList.firstWhere(
                   (x) =>
-                      x.operatorName == item.name,
-                  orElse: () => new OperatorProductivityCard('','','',0,0,0,0,0,0,[],0),
-                )
-              : null;
-
-          cardInfo?.countServices = cardInfo.countServices +
-              (itemInvoice.countOperators == 1
-                  ? ((itemInvoice.countProducts??0) + (itemInvoice.countAdditionalProducts??0))
-                  : 0);
-          cardInfo?.countSharedServices = cardInfo.countSharedServices +
-              ((itemInvoice.countOperators??0) > 1
-                  ? ((itemInvoice.countProducts??0) +
-                  (itemInvoice.countAdditionalProducts??0))
-                  : 0);
-          cardInfo?.totalPrice = cardInfo.totalPrice + _totalPrice;
-          List<Invoice> listGet = cardInfo?.invoicesList?? [];
-          listGet.add(itemInvoice);
-          if (cardInfo != null) {
-            int indexData = _cardList.indexOf(cardInfo);
-            _cardList[indexData] = cardInfo;
-          }
-          cardInfo?.totalCommissionDay = (cardInfo.totalCommissionDay??0) + (itemInvoice.creationDate!.toDate().day == DateTime.now().day ? item.operatorCommission??0 : 0);
-          cardInfo?.totalCommissionMonth = (cardInfo.totalCommissionMonth??0) + (item.operatorCommission??0);
-          cardInfo?.invoicesPerDay = cardInfo.invoicesPerDay + (itemInvoice.creationDate!.toDate().day == DateTime.now().day ? 1 : 0);
-                });
-            });
+              x.operatorName == item.name,
+              orElse: () => new OperatorProductivityCard('','','',0,0,0,0,0,0,[],0),
+            )
+                : null;
+            if (cardInfo == null || cardInfo.operatorName == '') {
+              invoicesPerUser.add(itemInvoice);
+              final newOperatorCard = OperatorProductivityCard(
+                item.name,
+                item.id ?? '',
+                itemInvoice.locationName ?? '',
+                (itemInvoice.creationDate??Timestamp.now()).toDate().day,
+                itemInvoice.countOperators == 1
+                    ? (itemInvoice.countProducts??0) +
+                    (itemInvoice.countAdditionalProducts??0)
+                    : 0,
+                (itemInvoice.countOperators??0) > 1
+                    ? (itemInvoice.countProducts??0) +
+                    (itemInvoice.countAdditionalProducts??0)
+                    : 0,
+                _totalPrice,
+                item.operatorCommission??0,
+                ((itemInvoice.creationDate??Timestamp.now()).toDate().day == DateTime.now().day ? (item.operatorCommission??0) : 0),
+                invoicesPerUser,
+                ((itemInvoice.creationDate??Timestamp.now()).toDate().day == DateTime.now().day ? 1 : 0),
+              );
+              _cardList.add(newOperatorCard);
+            } else {
+              cardInfo.countServices = cardInfo.countServices +
+                  (itemInvoice.countOperators == 1
+                      ? ((itemInvoice.countProducts??0) + (itemInvoice.countAdditionalProducts??0))
+                      : 0);
+              cardInfo.countSharedServices = cardInfo.countSharedServices +
+                  ((itemInvoice.countOperators??0) > 1
+                      ? ((itemInvoice.countProducts??0) +
+                      (itemInvoice.countAdditionalProducts??0))
+                      : 0);
+              cardInfo.totalPrice = cardInfo.totalPrice + _totalPrice;
+              List<Invoice> listGet = cardInfo.invoicesList?? [];
+              listGet.add(itemInvoice);
+              int indexData = _cardList.indexOf(cardInfo);
+              _cardList[indexData] = cardInfo;
+              cardInfo.totalCommissionDay = (cardInfo.totalCommissionDay??0) + (itemInvoice.creationDate!.toDate().day == DateTime.now().day ? item.operatorCommission??0 : 0);
+              cardInfo.totalCommissionMonth = (cardInfo.totalCommissionMonth??0) + (item.operatorCommission??0);
+              cardInfo.invoicesPerDay = cardInfo.invoicesPerDay + (itemInvoice.creationDate!.toDate().day == DateTime.now().day ? 1 : 0);
+            }
+          });
+        }
+      });
       return _cardList;
     } catch (_error) {
       print(_error);

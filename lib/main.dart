@@ -1,17 +1,23 @@
+import 'package:car_wash_app/firebase_options.dart';
 import 'package:car_wash_app/user/bloc/bloc_user.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'user/ui/screens/login_page.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp( // Initialize Firebase
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   SystemChrome.setSystemUIOverlayStyle(
     SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
         statusBarBrightness: Brightness.light),
   );
-  WidgetsFlutterBinding.ensureInitialized();
   runApp(MyApp());
 }
 

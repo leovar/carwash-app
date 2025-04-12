@@ -161,9 +161,14 @@ class _ItemWaitingList extends State<ItemWaitingList> {
                     onPressed: () {
                       widget.assignTurn(invoiceList);
                     },
-                    child: Text(
-                      'Lavar'.toUpperCase(),
-                      style: TextStyle(fontSize: 12),
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          'Lavar'.toUpperCase(),
+                        ),
+                      ),
                     ),
                   ),
                 ),

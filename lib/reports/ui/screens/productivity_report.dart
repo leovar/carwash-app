@@ -33,7 +33,7 @@ class _ProductivityReport extends State<ProductivityReport> {
   BlocInvoice _blocInvoice = BlocInvoice();
   BlocCommission _blocCommission = BlocCommission();
   late List<DropdownMenuItem<Location>> _dropdownMenuItems;
-  late Location _selectedLocation;
+  Location _selectedLocation = new Location();
   List<CardReport> _listCardReport = [];
   List<Invoice> _listInvoices = [];
 
@@ -41,7 +41,7 @@ class _ProductivityReport extends State<ProductivityReport> {
   final _textDateFinal = TextEditingController();
   var _dateTimeInit = DateTime(DateTime.now().year, DateTime.now().month, 1);
   var _dateTimeFinal = DateTime.now();
-  late DocumentReference _locationReference;
+  DocumentReference _locationReference = FirebaseFirestore.instance.collection('locations').doc('defaultDocId');
   var formatter = new DateFormat('dd-MM-yyyy');
 
   @override
@@ -117,17 +117,21 @@ class _ProductivityReport extends State<ProductivityReport> {
   }
 
   Widget _getDataReport() {
-    return StreamBuilder(
-      stream: _blocReports.productivityReportListStream(
-        _locationReference,
-        _dateTimeInit,
-        _dateTimeFinal,
-      ),
-      builder: (BuildContext context, AsyncSnapshot snapshot) {
-        return _containerList(snapshot);
-      },
-    );
+    if (_locationReference.id == 'defaultDocId' || _selectedLocation.id == null) {
+      return _emptyLocation();
+    } else {
+      return StreamBuilder(
+        stream: _blocReports.productivityReportListStream(
+          _locationReference,
+          _dateTimeInit,
+          _dateTimeFinal,
+        ),
+        builder: (BuildContext context, AsyncSnapshot snapshot) {
+          return _containerList(snapshot);
+        },
+      );
     }
+  }
 
   Widget _emptyLocation() {
     return Container(
@@ -141,7 +145,7 @@ class _ProductivityReport extends State<ProductivityReport> {
         return Center(child: CircularProgressIndicator());
       default:
         _listInvoices = _blocReports.buildProductivityReportList(
-          snapshot.data.documents,
+          snapshot.data.docs,
         );
         //_updateInvoices(_listInvoices); //TODO esta llamada se debe comentar o eliminar cuando se actualizce al app en los celulares que la usan
         _listCardReport = _processInvoicesOperator(
@@ -187,7 +191,7 @@ class _ProductivityReport extends State<ProductivityReport> {
 
   Widget _chargeDropLocations(AsyncSnapshot snapshot) {
     List<Location> locationList = _blocLocation.buildLocations(
-      snapshot.data.documents,
+      snapshot.data.docs,
     );
     _dropdownMenuItems = builtDropdownMenuItems(locationList);
 
@@ -211,6 +215,22 @@ class _ProductivityReport extends State<ProductivityReport> {
 
   List<DropdownMenuItem<Location>> builtDropdownMenuItems(List locations) {
     List<DropdownMenuItem<Location>> listItems = [];
+    if (_selectedLocation.id == null) {
+      listItems.add(
+        DropdownMenuItem(
+          value: _selectedLocation,
+          child: Text('Seleccione una sede ...'),
+        ),
+      );
+    } else {
+      var locationList = new Location();
+      listItems.add(
+        DropdownMenuItem(
+          value: locationList,
+          child: Text('Seleccione una sede ...'),
+        ),
+      );
+    }
     for (Location documentLoc in locations) {
       listItems.add(
         DropdownMenuItem(
@@ -219,19 +239,28 @@ class _ProductivityReport extends State<ProductivityReport> {
         ),
       );
     }
+
     return listItems;
   }
 
   /// Functions
   onChangeDropDawn(Location? selectedLocation) async {
-    _locationReference = await _blocLocation.getLocationReference(
-      selectedLocation?.id??'',
-    );
-    setState(() {
-      if (selectedLocation != null) {
-        _selectedLocation = selectedLocation;
-      }
-    });
+    if ((selectedLocation?.id??'') == '') {
+      setState(() {
+        if (selectedLocation != null) {
+          _selectedLocation = selectedLocation;
+        }
+      });
+    } else {
+      _locationReference = await _blocLocation.getLocationReference(
+        selectedLocation?.id??'',
+      );
+      setState(() {
+        if (selectedLocation != null) {
+          _selectedLocation = selectedLocation;
+        }
+      });
+    }
   }
 
   Future<Null> _datePickerFrom() async {
@@ -274,40 +303,61 @@ class _ProductivityReport extends State<ProductivityReport> {
     List<CardReport> _cardList = [];
     try {
       _listInvoices.forEach((itemInvoice) {
-        itemInvoice.operatorUsers?.forEach((item) {
-          List<Invoice> invoicesPerUser = [];
-          double _totalPrice =
-              (itemInvoice.totalPrice??0) / (itemInvoice.countOperators??0);
-          CardReport? cardInfo =
-              _cardList.length > 0
-                  ? _cardList.firstWhere(
-                    (x) =>
-                        x.operatorName == item.name &&
-                        x.locationName == itemInvoice.locationName,
-                    orElse: () => new CardReport('', '', '', 0, 0, 0, []),
-                  )
-                  : null;
-          cardInfo?.countServices =
-              (cardInfo.countServices??0) +
-              (itemInvoice.countOperators == 1
-                  ? ((itemInvoice.countProducts??0) +
-                  (itemInvoice.countAdditionalProducts??0))
-                  : 0);
-          cardInfo?.countSharedServices =
-              cardInfo.countSharedServices +
-              ((itemInvoice.countOperators??0) > 1
-                  ? ((itemInvoice.countProducts??0) +
-                  (itemInvoice.countAdditionalProducts??0))
-                  : 0);
-          cardInfo?.totalPrice = cardInfo.totalPrice + _totalPrice;
-          List<Invoice> listGet = cardInfo?.invoicesList??[];
-          listGet.add(itemInvoice);
-          if (cardInfo != null) {
-            int indexData = _cardList.indexOf(cardInfo);
-            _cardList[indexData] = cardInfo;
-          }
-                });
-            });
+        if (itemInvoice.operatorUsers != null) {
+          itemInvoice.operatorUsers?.forEach((item) {
+            List<Invoice> invoicesPerUser = [];
+            double _totalPrice = (itemInvoice.totalPrice??0) / (itemInvoice.countOperators??0);
+            CardReport? cardInfo =
+            _cardList.length > 0
+                ? _cardList.firstWhere(
+                  (x) =>
+              x.operatorName == item.name &&
+                  x.locationName == itemInvoice.locationName,
+              orElse: () => new CardReport('', '', '', 0, 0, 0, []),
+            )
+                : null;
+            if (cardInfo == null || cardInfo.operatorName == '') {
+              invoicesPerUser.add(itemInvoice);
+              final newOperatorCard = CardReport(
+                  item.name,
+                  item.id ?? '',
+                  itemInvoice.locationName ?? '',
+                  itemInvoice.countOperators == 1
+                      ? (itemInvoice.countProducts??0) +
+                      (itemInvoice.countAdditionalProducts??0)
+                      : 0,
+                  (itemInvoice.countOperators??0) > 1
+                      ? (itemInvoice.countProducts??0) +
+                      (itemInvoice.countAdditionalProducts??0)
+                      : 0,
+                  _totalPrice,
+                  invoicesPerUser);
+              _cardList.add(newOperatorCard);
+            } else {
+              cardInfo.countServices = cardInfo.countServices +
+                  (itemInvoice.countOperators == 1
+                      ? ((itemInvoice.countProducts??0) +
+                      (itemInvoice.countAdditionalProducts??0))
+                      : 0);
+              cardInfo.countSharedServices = cardInfo.countSharedServices +
+                  ((itemInvoice.countOperators??0) > 1
+                      ? ((itemInvoice.countProducts??0) +
+                      (itemInvoice.countAdditionalProducts??0))
+                      : 0);
+              cardInfo.totalPrice = cardInfo.totalPrice + _totalPrice;
+              List<Invoice> listGet = cardInfo.invoicesList;
+              listGet.add(itemInvoice);
+              int indexData = _cardList.indexOf(cardInfo);
+              if (indexData != -1) {
+                _cardList[indexData] = cardInfo;
+              } else {
+                print(_cardList);
+                print(cardInfo);
+              }
+            }
+          });
+        }
+      });
       return _cardList;
     } catch (_error) {
       print(_error);
@@ -324,8 +374,7 @@ class _ProductivityReport extends State<ProductivityReport> {
     List<Invoice> _invoiceOperatorList,
   ) async {
     List<ProductsCardDetail> _productList = [];
-    List<Commission> commissionsList =
-        await _blocCommission.getAllCommissions();
+    List<Commission> commissionsList = await _blocCommission.getAllCommissions();
     Alert(
       context: context,
       title: '',
@@ -356,8 +405,14 @@ class _ProductivityReport extends State<ProductivityReport> {
           (x) => x.dateServices == dateFormatted,
           orElse: () => new ProductsCardDetail(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ''),
         );
-        _productInfo = _commissionProcess(commissionsList, e, _productInfo);
-            }
+        if (_productInfo.dateServices == '') {
+          ProductsCardDetail _productDetail = _startCardDetail(e); //_getProductCardToAdd(e, commissionsList);
+          _productDetail = _commissionProcess(commissionsList, e, _productDetail);
+          _productList.add(_productDetail);
+        } else {
+          _productInfo = _commissionProcess(commissionsList, e, _productInfo);
+        }
+      }
     });
 
     if (dataProducts.length > 0) {
@@ -842,21 +897,25 @@ class _ProductivityReport extends State<ProductivityReport> {
         for (var i = 1; i <= _maxCountOperators; i++) {
           header.add("Operador " + i.toString());
         }
-        sheetObject.appendRow(header.cast<CellValue?>());
+        sheetObject.appendRow(header.map((e) => TextCellValue(e)).toList());
         _listInvoicesReport.forEach((item) {
           count++;
-          List<String> row = [
-            "${formatter.format(item.creationDate!.toDate())}",
-            "${item.locationName}",
-            "${item.consecutive}",
-            "${(item.totalPrice??0).toInt()}",
-            "${item.totalCommission}",
-            "${item.countOperators}",
-            "${((item.totalCommission ?? 0) / (item.countOperators??0))}",
-            "${item.operatorsSplit}",
+          List<CellValue> row = [
+            TextCellValue(
+              item.creationDate != null
+                  ? formatter.format(item.creationDate!.toDate())
+                  : '',
+            ),
+            TextCellValue(item.locationName ?? ''),
+            TextCellValue(item.consecutive?.toString()??''),
+            IntCellValue((item.totalPrice??0).toInt()),
+            DoubleCellValue(item.totalCommission ?? 0),
+            IntCellValue(item.countOperators ?? 0),
+            DoubleCellValue(((item.totalCommission ?? 0) / (item.countOperators??0))),
+            TextCellValue(item.operatorsSplit ?? ''),
           ];
           item.operatorUsers?.forEach((itemOpp) {
-            row.add("${itemOpp.name}");
+            row.add(TextCellValue(itemOpp.name));
           });
           sheetObject.appendRow(row.cast<CellValue?>());
         });

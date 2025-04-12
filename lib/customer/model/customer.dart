@@ -90,15 +90,15 @@ class Customer extends Equatable {
 
   @override
   List<Object> get props => [
-    id!,
-    name!,
-    address!,
-    phoneNumber!,
-    email!,
-    creationDate!,
-    vehicles!,
-    birthDate!,
-    neighborhood!,
-    typeSex!,
+    id ?? '',
+    name ?? '',
+    address ?? '',
+    phoneNumber ?? '',
+    email ?? '',
+    creationDate ?? Timestamp.now(),
+    vehicles ?? DocumentReference as DocumentReference,
+    birthDate ?? '',
+    neighborhood ?? '',
+    typeSex ?? '',
   ];
 }

@@ -11,7 +11,7 @@ description: Car Wash Flutter application.
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.6.1+34
+version: 1.2.0+38
 
 
 environment:
@@ -32,7 +32,7 @@ dependencies:
   shared_preferences: ^2.5.2
   flutter_multiselect: ^1.0.2
   datetime_picker_formfield: ^2.0.1
-  flutter_sms: ^2.3.3
+  ##flutter_sms: ^2.3.3   // esta libreria presenta conflictos, una vez compile el proyecto, validar de nuevo como usarla o reemplazarla
   #flutter_open_whatsapp: ^1.0.3 // esta libreria ya no se usa por que se usa un join del numero con la url de whatsapp
   url_launcher: ^6.3.1
   permission_handler: ^11.4.0
@@ -47,7 +47,6 @@ dependencies:
   firebase_storage: ^12.4.4
   cloud_firestore: ^5.6.5
   flutter_facebook_auth: ^7.1.1
-  #flutter_login_facebook: ^2.0.1  #deplecated //TODO esta libreria hay que eliminarla si no se usa en otro lugar
   firebase_core:
 
   #nemu
@@ -59,12 +58,11 @@ dependencies:
   image_cropper: ^9.0.0
   image_picker: ^1.1.2
   image: ^4.1.1
-  archive: ^3.6.1   #Image 4.5.3 con archive 4.0.2   / ecxel 4.0.6 con archive 3.6.1
-  #image_picker_saver: ^0.3.0   # buscar reeplazo
+  archive: ^3.6.1
   screenshot: ^3.0.0
   path_provider: ^2.1.5
   photo_view: ^0.15.0
-  image_gallery_saver: ^2.0.3
+  device_info_plus: ^10.0.1
 
   #charts
   syncfusion_flutter_charts: ^28.2.11
@@ -80,6 +78,9 @@ dependencies:
 
   #email
   mailer: ^6.4.1
+
+  #Upgrade version y Play Store or App Store
+  upgrader: ^11.3.1
 
   flutter_localizations:
     sdk: flutter

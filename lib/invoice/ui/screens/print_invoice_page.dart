@@ -14,6 +14,8 @@ import 'package:car_wash_app/location/model/location.dart';
 import 'package:car_wash_app/product/model/product.dart';
 import 'package:car_wash_app/widgets/keys.dart';
 import 'package:car_wash_app/widgets/messages_utils.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:file_utils/file_utils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -21,20 +23,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
-import 'package:image_gallery_saver/image_gallery_saver.dart';
 //import 'package:image_picker_saver/image_picker_saver.dart';
 import 'package:intl/intl.dart';
 import 'package:image/image.dart' as im;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:permission_handler/permission_handler.dart';
+import 'package:flutter/services.dart';
 import 'package:mailer/mailer.dart' as ml;
 import 'package:mailer/smtp_server.dart';
 import 'package:mailer/smtp_server/gmail.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class PrintInvoicePage extends StatefulWidget {
-  final Invoice currentInvoice;
+  final Invoice? currentInvoice;
   final List<Product> selectedProducts;
   final List<AdditionalProduct> additionalProducts;
   final String customerEmail;
@@ -42,7 +44,7 @@ class PrintInvoicePage extends StatefulWidget {
 
   PrintInvoicePage({
     Key? key,
-    required this.currentInvoice,
+    this.currentInvoice,
     required this.selectedProducts,
     required this.additionalProducts,
     required this.customerEmail,
@@ -78,7 +80,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
   void initState() {
     super.initState();
     _getPreferences();
-    _getCustomer(widget.currentInvoice.customer?.id??'');
+    _getCustomer(widget.currentInvoice?.customer?.id??'');
     _requestPermissions();
   }
 
@@ -268,7 +270,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
   }
 
   Widget _infoInvoice() {
-    var _timeDelivery = widget.currentInvoice.timeDelivery ?? '';
+    var _timeDelivery = widget.currentInvoice?.timeDelivery ?? '';
     return Container(
       color: Colors.white,
       padding: EdgeInsets.symmetric(horizontal: 20),
@@ -277,7 +279,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Text(
-            'Factura # ${widget.currentInvoice.consecutive}',
+            'Factura # ${widget.currentInvoice?.consecutive}',
             style: TextStyle(
               fontFamily: "Lato",
               decoration: TextDecoration.none,
@@ -288,7 +290,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
           ),
           SizedBox(height: _spaceInfoInvoice),
           Text(
-            formatter.format(widget.currentInvoice.creationDate!.toDate()),
+            formatter.format((widget.currentInvoice?.creationDate??Timestamp.now()).toDate()),
             style: TextStyle(
               fontFamily: "Lato",
               decoration: TextDecoration.none,
@@ -315,7 +317,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                   ),
                 ),
                 Text(
-                  widget.currentInvoice.timeDelivery ?? '',
+                  widget.currentInvoice?.timeDelivery ?? '',
                   textAlign: TextAlign.right,
                   style: TextStyle(
                     fontFamily: "Lato",
@@ -344,7 +346,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                 ),
               ),
               Text(
-                widget.currentInvoice.placa??'',
+                widget.currentInvoice?.placa??'',
                 textAlign: TextAlign.right,
                 style: TextStyle(
                   fontFamily: "Lato",
@@ -372,7 +374,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                 ),
               ),
               Text(
-                widget.currentInvoice.vehicleBrand??'',
+                widget.currentInvoice?.vehicleBrand??'',
                 textAlign: TextAlign.right,
                 style: TextStyle(
                   fontFamily: "Lato",
@@ -459,7 +461,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
               ),
               Flexible(
                 child: Text(
-                  widget.currentInvoice.userCoordinatorName??'',
+                  widget.currentInvoice?.userCoordinatorName??'',
                   textAlign: TextAlign.right,
                   style: TextStyle(
                     fontFamily: "Lato",
@@ -618,7 +620,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                   ),
                 ),
                 Text(
-                  '\$${numberFormatter.format(widget.currentInvoice.subtotal)}',
+                  '\$${numberFormatter.format(widget.currentInvoice?.subtotal)}',
                   textAlign: TextAlign.right,
                   style: TextStyle(
                     fontFamily: "Lato",
@@ -649,7 +651,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                   ),
                 ),
                 Text(
-                  '\$${numberFormatter.format(widget.currentInvoice.iva)}',
+                  '\$${numberFormatter.format(widget.currentInvoice?.iva)}',
                   textAlign: TextAlign.right,
                   style: TextStyle(
                     fontFamily: "Lato",
@@ -678,7 +680,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                 ),
               ),
               Text(
-                '\$${numberFormatter.format(widget.currentInvoice.totalPrice)}',
+                '\$${numberFormatter.format(widget.currentInvoice?.totalPrice)}',
                 textAlign: TextAlign.right,
                 style: TextStyle(
                   fontFamily: "Lato",
@@ -733,14 +735,13 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
         title: 'Imprimiendo Factura',
       ).show();
 
-      print('inside');
       inside = true;
       RenderRepaintBoundary? boundary = globalKeyBoundary.currentContext?.findRenderObject() as RenderRepaintBoundary?;
       if (boundary == null) {
         throw Exception("No render boundary found");
       }
 
-      ui.Image image = await boundary.toImage(pixelRatio: 2.5);
+      final image = await boundary.toImage(pixelRatio: 2.5);
       ByteData? byteData = await image.toByteData(
         format: ui.ImageByteFormat.png,
       );
@@ -750,42 +751,65 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
 
       Uint8List pngBytes = byteData.buffer.asUint8List();
 
-      //Save Image
+      // Redimensionar imagen
+      final imageDecoded = im.decodePng(pngBytes)!;
+      final resized = im.copyResize(imageDecoded, width: 560);
+      final resizedBytes = im.encodePng(resized);
 
-      //TODO :Cambiar libreria para guardar imagenes
-      /*
-      var filePath = await ImagePickerSaver.saveFile(
-        fileData: pngBytes,
-        title: 'Factura#${widget.currentInvoice.consecutive.toString()}',
-        description: 'Factura Carwash',
-      );
-
-      if (filePath.isEmpty) {
-        final Map<dynamic,dynamic> filePathGet = await ImageGallerySaver.saveImage(pngBytes);
-        //Fluttertoast.showToast(msg: "$filePathGet", toastLength: Toast.LENGTH_LONG);
-        filePath = filePathGet['filePath'].substring(filePathGet['filePath'].indexOf('storage') - 1, filePathGet['filePath'].length);
+      final androidInfo = await DeviceInfoPlugin().androidInfo;
+      final sdkInt = androidInfo.version.sdkInt ?? 0;
+      if (Platform.isAndroid) {
+        if (sdkInt >= 33) {
+          final photosStatus = await Permission.photos.request();
+          if (!photosStatus.isGranted) {
+            throw Exception("Permiso para imágenes denegado");
+          }
+        } else {
+          final storageStatus = await Permission.storage.request();
+          if (!storageStatus.isGranted) {
+            throw Exception("Permiso de almacenamiento denegado");
+          }
+        }
       }
 
-      //Save resized image
-      im.Image imageDecode = im.decodePng(pngBytes);
-      im.Image thumbnail = im.copyResize(imageDecode, width: 560);
-      File(filePath).writeAsBytesSync(im.encodePng(thumbnail));
+      var filePath;
+      if (sdkInt >= 29) {
+        final filename = 'Factura#${widget.currentInvoice?.consecutive ?? '000'}-${DateTime.now().millisecondsSinceEpoch}.png'; //'$fileName-$now.png';
+        filePath = await MethodChannel('com.car_wash_app.channel.media_store').invokeMethod<String>('saveImageToPictures', {
+          'filename': filename,
+          'bytes': resizedBytes,
+        });
+      } else {
+        final Directory picturesDir = (Platform.isAndroid)
+            ? Directory('/storage/emulated/0/Pictures/CarWashFacturas')
+            : await path_provider.getApplicationDocumentsDirectory(); // iOS fallback
 
-      //Set new name based in invoice number
-      final partialNewPath =
-      filePath.substring(0, filePath.lastIndexOf('/') + 1);
-      final fileExtension =
-      filePath.substring(filePath.lastIndexOf('.'), filePath.length);
-      final newPath = partialNewPath +
-          'Factura#${widget.currentInvoice.consecutive.toString()}' +
-          fileExtension;
+        if (!await picturesDir.exists()) {
+          await picturesDir.create(recursive: true);
+        }
 
-      //Rename Image
-      await File(filePath).rename(newPath);
+        final fileName = 'Factura#${widget.currentInvoice?.consecutive ?? '000'}.png';
+        filePath = '${picturesDir.path}/$fileName';
 
-      if(widget.currentInvoice.sendEmailInvoice != null && widget.currentInvoice.sendEmailInvoice) {
-        _sendMail(newPath);
-      }  */
+        final file = File(filePath);
+        await file.writeAsBytes(resizedBytes);
+
+        // Indexar imagen en Android
+        if (Platform.isAndroid) {
+          await Process.run('am', [
+            'broadcast',
+            '-a',
+            'android.intent.action.MEDIA_SCANNER_SCAN_FILE',
+            '-d',
+            'file://${filePath}'
+          ]);
+        }
+      }
+
+      // Enviar por correo si aplica
+      if(widget.currentInvoice?.sendEmailInvoice != null && (widget.currentInvoice?.sendEmailInvoice??false) && filePath != null) {
+        _sendMail(filePath);
+      }
 
       print('png done');
       setState(() {
@@ -861,7 +885,14 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
   }
 
   Future<void> _requestPermissions() async {
-    await [Permission.storage, Permission.photos].request();
+    if (Platform.isAndroid) {
+      if (await Permission.storage.isDenied) {
+        await Permission.storage.request();
+      }
+      if (await Permission.photos.isDenied) {
+        await Permission.photos.request();
+      }
+    }
   }
 }
 

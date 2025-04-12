@@ -46,7 +46,7 @@ class Product extends Equatable {
 
   factory Product.fromJson(Map<String, dynamic> json, {String? id}) {
     List<DocumentReference> locationsListDb = <DocumentReference>[];
-    List locationsList = json['locations'];
+    List locationsList = json['locations']??[];
     locationsList.forEach((drLocation) {
       locationsListDb.add(drLocation);
     });
@@ -123,16 +123,16 @@ class Product extends Equatable {
 
   factory Product.fromJsonProductIntoInvoice(
     Map<dynamic, dynamic> json,
-    int uidVehicleType,
-    Timestamp addDate,
-    int countOperators,
-    int consecutive,
+    int? uidVehicleType,
+    Timestamp? addDate,
+    int? countOperators,
+    int? consecutive,
   ) {
     return Product(
       id: json['Id'],
       productName: json['productName'],
-      price: json['price'].toDouble(),
-      ivaPercent: json['ivaPercent'].toDouble(),
+      price: (json['price']??0).toDouble(),
+      ivaPercent: (json['ivaPercent']??0).toDouble(),
       isAdditional: json['isAdditional'],
       isSelected: true,
       productType: json['productType'],
@@ -160,14 +160,14 @@ class Product extends Equatable {
   }
 
   Map<String, dynamic> toJsonInvoiceProduct(
-    String productName,
-    double price,
-    double ivaPercent,
-    bool isAdditional,
-    String productId,
-    String productType,
-    int serviceTime,
-    double commission,
+    String? productName,
+    double? price,
+    double? ivaPercent,
+    bool? isAdditional,
+    String? productId,
+    String? productType,
+    int? serviceTime,
+    double? commission,
   ) {
     return {
       'productName': productName,
@@ -234,18 +234,18 @@ class Product extends Equatable {
 
   @override
   List<Object> get props => [
-    id!,
+    id ?? '',
     productName ?? '',
     price ?? 0,
     ivaPercent ?? 0,
-    vehicleType!,
-    locations!,
+    vehicleType ?? FirebaseFirestore.instance.doc("placeholder/empty"),
+    locations ?? [],
     productActive ?? false,
-    vehicleTypeUid!,
+    vehicleTypeUid ?? 0,
     isSelected ?? false,
-    productType!,
-    productInvoiceId!,
-    serviceTime!,
+    productType ?? '',
+    productInvoiceId ?? '',
+    serviceTime ?? 0,
     productCommission ?? 0,
   ];
 }

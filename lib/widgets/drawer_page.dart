@@ -346,7 +346,7 @@ class _DrawerPage extends State<DrawerPage> {
           flex: 1,
           child: Container(
             alignment: Alignment.bottomCenter,
-            height: 35,
+            height: 40,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -355,7 +355,7 @@ class _DrawerPage extends State<DrawerPage> {
                 Flexible(
                   child: Align(
                     alignment: Alignment.bottomCenter,
-                    child: Container(child: Text('Version 1.0.7')),
+                    child: Container(child: Text('Version 1.2.0')),
                   ),
                 ),
                 Flexible(

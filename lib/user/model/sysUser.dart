@@ -37,7 +37,7 @@ class SysUser extends Equatable {
 
   factory SysUser.fromJson(Map<String, dynamic> json, {required String id}) {
     List<DocumentReference> operatorsListDb = <DocumentReference>[];
-    List operatorsList = json['locations'];
+    List operatorsList = json['locations']??[];
     operatorsList.forEach((drLocation) {
       operatorsListDb.add(drLocation);
     });
@@ -130,14 +130,14 @@ class SysUser extends Equatable {
 
   @override
   List<Object> get props => [
-    id!,
-    uid,
-    name,
-    email,
+    id ?? '',
+    uid ?? '',
+    name ?? '',
+    email ?? '',
     photoUrl ?? '',
-    lastSignIn!,
+    lastSignIn ?? DateTime.timestamp(),
     active ?? false,
-    locations!,
+    locations ?? FirebaseFirestore.instance.collection('locations').doc('defaultDocId'),
     isAdministrator ?? false,
     isCoordinator ?? false,
     isOperator ?? false,

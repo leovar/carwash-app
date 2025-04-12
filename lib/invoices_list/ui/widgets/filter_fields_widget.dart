@@ -49,7 +49,7 @@ class _FilterFieldsWidget extends State<FilterFieldsWidget> {
   late List<DropdownMenuItem<PaymentMethod>> _dropdownMenuItemsPayments;
   late List<DropdownMenuItem<String>> _dropdownMenuItemsProductTypes;
   List<String> _productsTypeList = [];
-  late SysUser _selectedOperator;
+  SysUser _selectedOperator = new SysUser(uid: '', name: '', email: '');
   late DateTime _dateTimeInit;
   late DateTime _dateTimeFinal;
   late String _selectProductType;
@@ -63,14 +63,16 @@ class _FilterFieldsWidget extends State<FilterFieldsWidget> {
     _productsTypeList.add('Sencillo');
     _productsTypeList.add('Especial');
     _productsTypeList.add(_emptySelectionProductType);
-    _selectedOperator = widget.operatorSelected;
-      _dateTimeInit = widget.dateInit;
+    _dateTimeInit = widget.dateInit;
     _dateTimeFinal = widget.dateFinal;
     _textDateInit.text = formatter.format(_dateTimeInit);
     _textDateFinal.text = formatter.format(_dateTimeFinal);
     _selectProductType = widget.productTypeSelected;
     _selectedPaymentMethod = widget.paymentMethodSelected;
+    if (widget.operatorSelected.id != null) {
+      _selectedOperator = widget.operatorSelected;
     }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -151,16 +153,9 @@ class _FilterFieldsWidget extends State<FilterFieldsWidget> {
   }
 
   Widget _showOperators(AsyncSnapshot snapshot) {
-    var userSelectionEmpty = SysUser(
-      uid: '0',
-      name: 'Seleccione el Operador...',
-      email: '',
-    );
-    List<SysUser> operators = _blocInvoice.buildOperators(snapshot.data.documents);
-    operators.add(userSelectionEmpty);
-    if (_selectedOperator.name.isEmpty) {
-      _selectedOperator = userSelectionEmpty;
-    }
+    List<SysUser> operators = _blocInvoice.buildOperators(snapshot.data.docs);
+    operators.sort((a,b) => a.name.compareTo(b.name));
+
     _dropdownMenuItems = _builtDropdownMenuItems(operators);
     return DropdownButton(
       isExpanded: true,
@@ -201,7 +196,7 @@ class _FilterFieldsWidget extends State<FilterFieldsWidget> {
       active: true,
     );
     List<PaymentMethod> paymentMethods = _paymentMethodBloc.buildPaymentMethods(
-      snapshot.data.documents,
+      snapshot.data.docs,
     );
     paymentMethods.add(paymentMethodSelectionEmpty);
     if (_selectedPaymentMethod.name!.isEmpty) {
@@ -268,6 +263,22 @@ class _FilterFieldsWidget extends State<FilterFieldsWidget> {
 
   List<DropdownMenuItem<SysUser>> _builtDropdownMenuItems(List users) {
     List<DropdownMenuItem<SysUser>> listItems = [];
+    SysUser emptyUser = SysUser(uid: '', name: '', email: '');
+    if (_selectedOperator.id == null) {
+      listItems.add(
+        DropdownMenuItem(
+            value: _selectedOperator,
+            child: Text('Seleccione el Operador...'),
+        ),
+      );
+    } else {
+      listItems.add(
+        DropdownMenuItem(
+          value: emptyUser,
+          child: Text('Seleccione el Operador...'),
+        ),
+      );
+    }
     for (SysUser documentLoc in users) {
       listItems.add(
         DropdownMenuItem(value: documentLoc, child: Text(documentLoc.name)),

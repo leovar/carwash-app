@@ -222,7 +222,7 @@ class _AdminCreateBrand extends State<AdminCreateBrand> {
   }
 
   Widget _chargeListBrand(AsyncSnapshot snapshot) {
-    _listBrands = _blocInvoice.buildBrands(snapshot.data.documents);
+    _listBrands = _blocInvoice.buildBrands(snapshot.data.docs);
     _listBrands.sort((a, b) => (a.brand??'').toLowerCase().compareTo((b.brand??'').toLowerCase()));
     myFocusNode.requestFocus();
     return ListView.builder(

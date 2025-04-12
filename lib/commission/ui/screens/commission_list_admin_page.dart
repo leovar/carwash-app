@@ -60,7 +60,7 @@ class _CommissionListAdminPage extends State<CommissionListAdminPage> {
   }
 
   Widget _getDataListCommissions(AsyncSnapshot snapshot) {
-    _commissionList = _blocCommission.buildAllCommissions(snapshot.data.documents);
+    _commissionList = _blocCommission.buildAllCommissions(snapshot.data.docs);
     _commissionList.sort((a,b)=> (a.uidVehicleType??0).compareTo(b.uidVehicleType??0));
 
     return ListView.builder(

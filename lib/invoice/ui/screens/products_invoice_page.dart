@@ -15,7 +15,7 @@ class ProductsInvoicePage extends StatefulWidget {
   final HeaderServices vehicleTypeSelect;
   final String idLocation;
   final bool editForm;
-  final Invoice invoice;
+  final Invoice? invoice;
 
   ProductsInvoicePage({
     Key? key,
@@ -26,7 +26,7 @@ class ProductsInvoicePage extends StatefulWidget {
     required this.vehicleTypeSelect,
     required this.idLocation,
     required this.editForm,
-    required this.invoice,
+    this.invoice,
   });
 
   @override
@@ -64,7 +64,7 @@ class _ProductsInvoicePage extends State<ProductsInvoicePage> {
   }
 
   Widget getProducts() {
-    if (widget.invoice.invoiceClosed??false) {
+    if (widget.invoice != null && (widget.invoice?.invoiceClosed??false)) {
       List<Product> productsList = [];
       widget.productListCallback.forEach((prod) {
         Product prodSelected = Product.copyProductInvoiceWith(
@@ -94,21 +94,24 @@ class _ProductsInvoicePage extends State<ProductsInvoicePage> {
   }
 
   Widget listProducts(AsyncSnapshot snapshot) {
-    List<Product> productsList =
-        _productBloc.buildProductByLocation(snapshot.data.documents);
+    List<Product> productsList = _productBloc.buildProductByLocation(snapshot.data.docs);
     List<Product> productGet = <Product>[];
     productsList.forEach((prod) {
       Product proFindSelect = widget.productListCallback.firstWhere(
           (d) => d.id == prod.id && (d.isSelected??false),
           orElse: () => new Product());
-      Product prodSelected = Product.copyProductInvoiceWith(
-        origin: prod,
-        isSelected: true,
-        price: proFindSelect.price,
-        ivaPercent: proFindSelect.ivaPercent,
-      );
-      productGet.add(prodSelected);
-        });
+      if (proFindSelect.id == null) {
+        productGet.add(prod);
+      } else {
+        Product prodSelected = Product.copyProductInvoiceWith(
+          origin: prod,
+          isSelected: true,
+          price: proFindSelect.price,
+          ivaPercent: proFindSelect.ivaPercent,
+        );
+        productGet.add(prodSelected);
+      }
+    });
     widget.productListCallback = productGet;
 
     return _showListProducts();

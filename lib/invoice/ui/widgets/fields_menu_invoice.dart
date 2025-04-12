@@ -129,6 +129,10 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
 
   Widget _getCoordinators() {
     if (widget.listCountCoordinators == 0) {
+      if (widget.idLocation == '') {
+        return CircularProgressIndicator();
+      }
+
       return StreamBuilder(
         stream: _blocInvoice.coordinatorsByLocationStream(widget.idLocation),
         builder: (BuildContext context, AsyncSnapshot snapshot) {
@@ -146,10 +150,8 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
   }
 
   Widget showPopUpCoordinators(AsyncSnapshot snapshot) {
-    _listUsersCoordinators =
-        _blocInvoice.buildCoordinators(snapshot.data.documents);
-    _listCoordinators =
-        _listUsersCoordinators.map((SysUser) => SysUser.name).toList();
+    _listUsersCoordinators = _blocInvoice.buildCoordinators(snapshot.data.docs);
+    _listCoordinators = _listUsersCoordinators.map((SysUser) => SysUser.name).toList();
     widget.cbHandlerCoordinator('', _listUsersCoordinators.length, 2);
     return chargeCoordinatorsWidget();
   }
@@ -196,7 +198,7 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
   }
 
   Widget _getListBrands(AsyncSnapshot snapshot) {
-    _listBrands = _blocInvoice.buildBrandsInvoice(snapshot.data.documents);
+    _listBrands = _blocInvoice.buildBrandsInvoice(snapshot.data.docs);
     widget.cbHandlerVehicleBrand('', _listBrands.length, 2);
     return _chargeListBrands();
   }
@@ -251,7 +253,7 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
   }
 
   Widget _getColorsList(AsyncSnapshot snapshot) {
-    _listColors = _blocInvoice.buildColors(snapshot.data.documents);
+    _listColors = _blocInvoice.buildColors(snapshot.data.docs);
     widget.cbHandlerVehicleColor('', _listColors.length, 2);
     return _chargeListColors();
   }
@@ -297,7 +299,7 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
   }
 
   Widget showPopUpPaymentMethods(AsyncSnapshot snapshot) {
-    _listMasterPaymentsMethods = _paymentMethodBloc.buildPaymentMethods(snapshot.data.documents);
+    _listMasterPaymentsMethods = _paymentMethodBloc.buildPaymentMethods(snapshot.data.docs);
     _listPaymentMethods = _listMasterPaymentsMethods.map((pm) => pm.name).toList().whereType<String>().toList();
     widget.cbHandlerPaymentMethod('', _listMasterPaymentsMethods.length, 2);
     return chargePaymentMethodsControl();

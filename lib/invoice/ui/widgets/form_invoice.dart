@@ -40,6 +40,7 @@ import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
+import '../../../vehicle/model/vehicle.dart';
 import '../../model/header_services.dart';
 import 'carousel_cars_widget.dart';
 import 'fields_invoice.dart';
@@ -47,7 +48,7 @@ import 'fields_menu_invoice.dart';
 import 'fields_operators.dart';
 
 class FormInvoice extends StatefulWidget {
-  final Invoice editInvoice;
+  final Invoice? editInvoice;
 
   FormInvoice( this.editInvoice);
 
@@ -76,7 +77,7 @@ class _FormInvoice extends State<FormInvoice> {
   String _tagSimpleService = 'Sencillo';
   bool _sendEmail = false;
   bool _approveDataProcessing = false;
-  late Uint8List _imageFirmInMemory;
+  Uint8List? _imageFirmInMemory;
   String _placa = '';
   List<HeaderServices> vehicleTypeList = [];
   late HeaderServices vehicleTypeSelected;
@@ -84,7 +85,7 @@ class _FormInvoice extends State<FormInvoice> {
   final String galleryTag = "Galeria";
   String _selectSourceImagePicker = "Camara";
   final picker = ImagePicker();
-  late File _imageSelect;
+  File? _imageSelect;
   late FocusNode _clientFocusNode;
   late DocumentReference _locationReference;
   late String _locationName;
@@ -110,8 +111,8 @@ class _FormInvoice extends State<FormInvoice> {
   List<Product> _listProduct = <Product>[];
   List<AdditionalProduct> _listAdditionalProducts = <AdditionalProduct>[];
   bool _validatePlaca = false;
-  late Customer _customer;
-  late DocumentReference _vehicleReference;
+  Customer _customer = new Customer();
+  DocumentReference _vehicleReference = FirebaseFirestore.instance.collection('vehicles').doc('defaultDocId') ;
   int _countOperators = 0;
   int _listCoordinatorsCount = 0;
   int _countBrands = 0;
@@ -127,12 +128,15 @@ class _FormInvoice extends State<FormInvoice> {
   @override
   void initState() {
     super.initState();
+    getPreferences();
     _enableForm = false;
     _clientFocusNode = FocusNode();
     _countOperators = 0;
     _listCoordinatorsCount = 0;
     _countBrands = 0;
     _countColors = 0;
+    _idLocation = '';
+    //_imageFirmInMemory = Uint8List(0);
     //TODO traer estos datos desde la base de datos y cargarlos en un widget aparte con un stream
     vehicleTypeList.add(
       HeaderServices(
@@ -176,9 +180,11 @@ class _FormInvoice extends State<FormInvoice> {
     );
     vehicleTypeList[0].isSelected = true;
     vehicleTypeSelected = vehicleTypeList[0];
-    _editInvoice(widget.editInvoice);
-    _editForm = false;
-      _userBloc.getCurrentUser().then((SysUser? user) {
+    if (widget.editInvoice != null) {
+      _editInvoice(widget.editInvoice);
+      _editForm = false;
+    }
+    _userBloc.getCurrentUser().then((SysUser? user) {
       _currentUser = user!;
       if (user.isAdministrator??false) {
         setState(() {
@@ -198,25 +204,25 @@ class _FormInvoice extends State<FormInvoice> {
   @override
   Widget build(BuildContext context) {
     this._blocInvoice = BlocProvider.of<BlocInvoice>(context);
-    getPreferences();
 
-    if (_imageSelect.path.contains('imageFirm')) {
-      var _imagePath = _imageSelect.path;
-      var _oldImageFirmPath =
-          imageList.where((e) => e.contains('imageFirm')).toList();
-      _deleteImageList(
-        _oldImageFirmPath.length > 0 ? _oldImageFirmPath[0].toString() : '',
-      );
-      imageList.add(_imagePath);
-    } else {
-      if (!imageList.contains(_imageSelect.path)) {
-        imageList.add(_imageSelect.path);
+    if (_imageSelect != null) {
+      if (_imageSelect!.path.contains('imageFirm')) {
+        var _imagePath = _imageSelect!.path;
+        var _oldImageFirmPath =
+        imageList.where((e) => e.contains('imageFirm')).toList();
+        _deleteImageList(
+          _oldImageFirmPath.length > 0 ? _oldImageFirmPath[0].toString() : '',
+        );
+        imageList.add(_imagePath);
+      } else {
+        if (!imageList.contains(_imageSelect!.path)) {
+          imageList.add(_imageSelect!.path);
+        }
       }
     }
 
     //TODO Validar si es necesario asignarle un valor null a esta variable o funciona bien sin asignarle un null
     //_imageSelect = null;
-
     return WillPopScope(
       child: Stack(children: <Widget>[GradientBack(), bodyContainer()]),
       onWillPop: () {
@@ -291,7 +297,7 @@ class _FormInvoice extends State<FormInvoice> {
       image: 'assets/images/icon_nueva_factura_white.png',
       textInfo: _editForm
           ? 'Nueva Factura'
-          : 'Factura Nro ${widget.editInvoice.consecutive}',
+          : 'Factura Nro ${widget.editInvoice?.consecutive??''}',
     );
   }
 
@@ -487,9 +493,11 @@ class _FormInvoice extends State<FormInvoice> {
         child: ButtonTheme(
           minWidth: 230.0,
           height: 50,
-          child: RaisedButton(
-            padding: EdgeInsets.symmetric(vertical: 15, horizontal: 10),
-            color: Theme.of(context).colorScheme.secondary,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              padding: EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+              backgroundColor: Theme.of(context).colorScheme.secondary,
+            ),
             child: Text(
               "GUARDAR",
               style: TextStyle(
@@ -515,9 +523,11 @@ class _FormInvoice extends State<FormInvoice> {
         child: ButtonTheme(
           minWidth: 230.0,
           height: 50,
-          child: RaisedButton(
-            padding: EdgeInsets.symmetric(vertical: 15, horizontal: 10),
-            color: Theme.of(context).colorScheme.secondary,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              padding: EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+              backgroundColor: Theme.of(context).colorScheme.secondary,
+            ),
             child: Text(
               "IMPRIMIR FACTURA",
               style: TextStyle(
@@ -531,7 +541,7 @@ class _FormInvoice extends State<FormInvoice> {
             onPressed: () {
               _printInvoice(
                 widget.editInvoice,
-                _listProduct.where((f) => f.isSelected).toList(),
+                _listProduct.where((f) => (f.isSelected??false)).toList(),
                 _listAdditionalProducts,
                 _textEmail.text.trim(),
               );
@@ -550,9 +560,11 @@ class _FormInvoice extends State<FormInvoice> {
         child: ButtonTheme(
           minWidth: 230.0,
           height: 45,
-          child: RaisedButton(
-            padding: EdgeInsets.symmetric(vertical: 15, horizontal: 10),
-            color: Theme.of(context).colorScheme.secondary,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              padding: EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+              backgroundColor: Theme.of(context).colorScheme.secondary,
+            ),
             child: Text(
               "CANCELAR FACTURA",
               style: TextStyle(
@@ -607,9 +619,11 @@ class _FormInvoice extends State<FormInvoice> {
       height: 80,
       child: Align(
         alignment: Alignment.center,
-        child: RaisedButton(
-          padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
-          color: Theme.of(context).colorScheme.secondary,
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
+            backgroundColor: Theme.of(context).colorScheme.secondary,
+          ),
           child: Text(
             "IMPRIMIR TEST",
             style: TextStyle(
@@ -637,9 +651,11 @@ class _FormInvoice extends State<FormInvoice> {
   void _menuSourceAddImage() {
     PopupMenu menu = PopupMenu(
       context: context,
-      backgroundColor: Theme.of(context).colorScheme.secondary,
-      lineColor: Theme.of(context).colorScheme.secondary,
-      maxColumn: 1,
+      config: MenuConfig(
+        backgroundColor: Theme.of(context).colorScheme.secondary,
+        lineColor: Theme.of(context).colorScheme.secondary,
+        maxColumn: 1,
+      ),
       items: [
         MenuItem(
           title: cameraTag,
@@ -669,8 +685,9 @@ class _FormInvoice extends State<FormInvoice> {
   }
 
   Future _addImageTour() async {
-    var imageCapture = await picker
-        .getImage(
+    final ImagePicker picker = ImagePicker();
+    XFile ?imageCapture = await picker
+        .pickImage(
           source: _selectSourceImagePicker == cameraTag
               ? ImageSource.camera
               : ImageSource.gallery,
@@ -683,7 +700,7 @@ class _FormInvoice extends State<FormInvoice> {
       final dir = await path_provider.getTemporaryDirectory();
       final targetPath = dir.absolute.path +
           "/${imageCapture.path.substring(imageCapture.path.length - 10, imageCapture.path.length)}"; //dir.absolute.path + "/temp${imageList.length}.jpg";
-      final fileCompress = await FlutterImageCompress.compressAndGetFile(
+      XFile? fileCompress = await FlutterImageCompress.compressAndGetFile(
         imageCapture.path,
         targetPath,
         quality: 50,
@@ -691,52 +708,71 @@ class _FormInvoice extends State<FormInvoice> {
         format: CompressFormat.jpeg,
       );
       setState(() {
-        _imageSelect = fileCompress;
+        _imageSelect = fileCompress != null ? File(fileCompress.path) : File(imageCapture.path);
         // el crop es comentado por que el cliente quiere que asi como se tome la foto quede.
         //_cropImage(imageCapture);
       });
     }
   }
 
-  Future<Null> _cropImage(File imageCapture) async {
-    File croppedFile = await ImageCropper.cropImage(
+  Future<void> _cropImage(File imageCapture) async {
+    CroppedFile? _croppedFile = await ImageCropper().cropImage(
       sourcePath: imageCapture.path,
-      aspectRatioPresets: Platform.isAndroid
-          ? [
-              CropAspectRatioPreset.square,
-              CropAspectRatioPreset.ratio3x2,
-              CropAspectRatioPreset.original,
-              CropAspectRatioPreset.ratio4x3,
-              CropAspectRatioPreset.ratio16x9,
-            ]
-          : [
-              CropAspectRatioPreset.original,
-              CropAspectRatioPreset.square,
-              CropAspectRatioPreset.ratio3x2,
-              CropAspectRatioPreset.ratio4x3,
-              CropAspectRatioPreset.ratio5x3,
-              CropAspectRatioPreset.ratio5x4,
-              CropAspectRatioPreset.ratio7x5,
-              CropAspectRatioPreset.ratio16x9,
-            ],
-      androidUiSettings: AndroidUiSettings(
-        toolbarTitle: 'Cropper',
-        toolbarColor: Colors.white,
-        toolbarWidgetColor: Theme.of(context).primaryColor,
-        initAspectRatio: CropAspectRatioPreset.original,
-        lockAspectRatio: false,
-      ),
-      iosUiSettings: IOSUiSettings(minimumAspectRatio: 1.0),
-    );
-    File fileCompress = await FlutterImageCompress.compressAndGetFile(
-      croppedFile.absolute.path,
-      croppedFile.path,
-      quality: 40,
+      compressFormat: ImageCompressFormat.jpg,
+      compressQuality: 40,
+      uiSettings: [
+        AndroidUiSettings(
+          toolbarTitle: 'Cropper',
+          toolbarColor: Colors.white,
+          toolbarWidgetColor: Theme.of(context).primaryColor,
+          initAspectRatio: CropAspectRatioPreset.original,
+          lockAspectRatio: false,
+          aspectRatioPresets: [
+            CropAspectRatioPreset.square,
+            CropAspectRatioPreset.ratio3x2,
+            CropAspectRatioPreset.original,
+            CropAspectRatioPreset.ratio4x3,
+            CropAspectRatioPreset.ratio16x9,
+          ],
+        ),
+        IOSUiSettings(
+          title: 'Cropper',
+          minimumAspectRatio: 1.0,
+          aspectRatioPresets: [
+            CropAspectRatioPreset.original,
+            CropAspectRatioPreset.square,
+            CropAspectRatioPreset.ratio3x2,
+            CropAspectRatioPreset.ratio4x3,
+            CropAspectRatioPreset.ratio5x3,
+            CropAspectRatioPreset.ratio5x4,
+            CropAspectRatioPreset.ratio7x5,
+            CropAspectRatioPreset.ratio16x9,
+          ],
+        ),
+        WebUiSettings(
+          context: context,
+          presentStyle: WebPresentStyle.dialog,
+          size: const CropperSize(
+            width: 520,
+            height: 520,
+          ),
+        ),
+      ],
     );
 
-    setState(() {
-      _imageSelect = fileCompress;
-    });
+    if (_croppedFile != null) {
+      XFile? compressedFile = await FlutterImageCompress.compressAndGetFile(
+        _croppedFile.path,
+        _croppedFile.path,
+        quality: 40,
+      );
+
+      File fileCompress = compressedFile != null ? File(compressedFile.path) : File(_croppedFile.path);
+
+      setState(() {
+        _imageSelect = fileCompress;
+      });
+    }
   }
 
   ///Functions Select Menu
@@ -856,7 +892,7 @@ class _FormInvoice extends State<FormInvoice> {
       var operatorSave = SysUser.copyUserOperatorToSaveInvoice(
         id: user.id,
         name: user.name,
-        operatorCommission: ((widget.editInvoice.totalCommission ?? 0) /
+        operatorCommission: ((widget.editInvoice?.totalCommission ?? 0) /
                 _selectedOperators.length)
             .ceilToDouble(),
       );
@@ -864,7 +900,7 @@ class _FormInvoice extends State<FormInvoice> {
     });
     _countOperators = _selectedOperators.length;
     Invoice invoice = Invoice.copyWith(
-      origin: widget.editInvoice,
+      origin: widget.editInvoice ?? new Invoice(),
       listOperators: _operatorsToSave,
       countOperators: _countOperators,
     );
@@ -890,46 +926,7 @@ class _FormInvoice extends State<FormInvoice> {
         _enableForm = true;
 
         //Get vehicle if exist
-        _blocVehicle.getVehicleReferenceByPlaca(_placa).then((
-          DocumentReference vehicleRef,
-        ) {
-          _vehicleReference = vehicleRef;
-
-          _blocVehicle.getVehicleById(vehicleRef.documentID).then((vehicle) {
-            _selectBrand = vehicle.brand;
-            _selectColor = vehicle.color;
-            _selectedBrandReference = vehicle.brandReference;
-            HeaderServices vehicleTypeFind = vehicleTypeList
-                .where((f) => f.text == vehicle.vehicleType)
-                .first;
-            vehicleTypeSelected = vehicleTypeFind;
-            setState(() {
-              vehicleTypeList.forEach(
-                (element) => element.isSelected = false,
-              );
-              vehicleTypeList[vehicleTypeList.indexOf(vehicleTypeSelected)]
-                  .isSelected = true;
-            });
-          });
-        
-          //Validate services from the last 2 months
-          _getInvoicesForPlaca(_placa);
-        
-          //Validate if Customer exist for this vehicle
-          _customerBloc.getCustomerByVehicle(_vehicleReference).then((
-            Customer customer,
-          ) {
-            setState(() {
-              _customer = customer;
-              _textClient.text = customer.name;
-              _textEmail.text = customer.email;
-              _textPhoneNumber.text = customer.phoneNumber;
-              _textNeighborhood.text = customer.neighborhood;
-              _textBirthDate.text = customer.birthDate;
-              _selectTypeSex = customer.typeSex;
-                        });
-          });
-                });
+        _getVehicleInfo(_placa);
       } else {
         setState(() {
           _cleanTextFields();
@@ -937,6 +934,49 @@ class _FormInvoice extends State<FormInvoice> {
           _enableForm = false;
         });
       }
+    }
+  }
+
+  Future<void> _getVehicleInfo (String _placa) async {
+    try {
+      // Get Vehicle Reference
+      DocumentReference? _vehicleRef = await _blocVehicle.getVehicleReferenceByPlaca(_placa);
+      if (_vehicleRef != null) {
+        _vehicleReference = _vehicleRef;
+
+        // Get Vehicle Data
+        var vehicle = await _blocVehicle.getVehicleById(_vehicleReference.id);
+        _selectBrand = vehicle.brand??'';
+        _selectColor = vehicle.color??'';
+        _selectedBrandReference = vehicle.brandReference??'';
+
+        HeaderServices vehicleTypeFind = vehicleTypeList.firstWhere((f) => f.text == vehicle.vehicleType);
+
+        vehicleTypeSelected = vehicleTypeFind;
+        setState(() {
+          for (var element in vehicleTypeList) {
+            element.isSelected = false;
+          }
+          vehicleTypeList[vehicleTypeList.indexOf(vehicleTypeSelected)]
+              .isSelected = true;
+        });
+        // Validate services from the last 2 months
+        _getInvoicesForPlaca(_placa);
+
+        // Validate if Customer exists for this vehicle
+        _customer = await _customerBloc.getCustomerByVehicle(_vehicleReference);
+
+        setState(() {
+          _textClient.text = _customer.name??'';
+          _textEmail.text = _customer.email??'';
+          _textPhoneNumber.text = _customer.phoneNumber??'';
+          _textNeighborhood.text = _customer.neighborhood??'';
+          _textBirthDate.text = _customer.birthDate??'';
+          _selectTypeSex = _customer.typeSex??'';
+        });
+      }
+    } catch (e) {
+      print("Error fetching vehicle and customer data: $e");
     }
   }
 
@@ -953,11 +993,13 @@ class _FormInvoice extends State<FormInvoice> {
   void getPreferences() async {
     //Get preferences with location and get location reference
     SharedPreferences pref = await SharedPreferences.getInstance();
-    _locationName = pref.getString(Keys.locationName) ?? '';
-    _locationName = pref.getString(Keys.locationName) ?? '';
-    _initConsecLocation = pref.getString(Keys.locationInitCount) ?? '';
-    _finalConsecLocation = pref.getString(Keys.locationFinalCount) ?? '';
-    _idLocation = pref.getString(Keys.idLocation) ?? '';
+    setState(() {
+      _locationName = pref.getString(Keys.locationName) ?? '';
+      _locationName = pref.getString(Keys.locationName) ?? '';
+      _initConsecLocation = pref.getString(Keys.locationInitCount) ?? '';
+      _finalConsecLocation = pref.getString(Keys.locationFinalCount) ?? '';
+      _idLocation = pref.getString(Keys.idLocation) ?? '';
+    });
     _locationReference = await _locationBloc.getLocationReference(_idLocation);
     _blocInvoice.getConfigurationObject().then((value) => _config = value);
   }
@@ -965,8 +1007,7 @@ class _FormInvoice extends State<FormInvoice> {
   // Get last invoices per vehicle
   void _getInvoicesForPlaca(String placa) async {
     try {
-      List<Invoice> listInvoicesByVehicle =
-          await _blocInvoice.getListInvoicesByVehicle(placa) ?? [];
+      List<Invoice> listInvoicesByVehicle = await _blocInvoice.getListInvoicesByVehicle(placa) ?? [];
       if (listInvoicesByVehicle.length > 0) {
         final dataList = listInvoicesByVehicle
             .map(
@@ -1052,9 +1093,9 @@ class _FormInvoice extends State<FormInvoice> {
     bool _haveServiceSpecial = false;
     //validate internet connection if have images
     if (imageList.length > 0) {
-      var connectivityResult = await (Connectivity().checkConnectivity());
-      var connectionMobile = connectivityResult == ConnectivityResult.mobile;
-      var connectionWifi = connectivityResult == ConnectivityResult.wifi;
+      List<ConnectivityResult> connectivityResult = await (Connectivity().checkConnectivity());
+      var connectionMobile = connectivityResult.contains(ConnectivityResult.mobile);
+      var connectionWifi = connectivityResult.contains(ConnectivityResult.wifi);
       if (!connectionMobile && !connectionWifi) {
         MessagesUtils.showAlert(
           context: context,
@@ -1074,10 +1115,9 @@ class _FormInvoice extends State<FormInvoice> {
       ).show();
 
       try {
-        DocumentReference
-            _vehicleTypeRef; //esta referencia debe traerse de la bd, en el momento se construye en la app
+        DocumentReference _vehicleTypeRef; //esta referencia debe traerse de la bd, en el momento se construye en la app
         DocumentReference _customerReference;
-        DocumentReference _coordinatorReference;
+        DocumentReference? _coordinatorReference;
         double _total = 0;
         double _iva = 0;
         double _subTotal = 0;
@@ -1097,23 +1137,60 @@ class _FormInvoice extends State<FormInvoice> {
           );
         }
 
-        //Get Customer reference or create customer or update customer
-        if (!(_customer.vehicles?.contains(_vehicleReference)??false)) {
-          _customer.vehicles?.add(_vehicleReference);
+        //Get Vehicle reference, save if not exist
+        if (_vehicleReference.id == 'defaultDocId' || _vehicleReference.id == '') {
+          Vehicle updateVehicle = Vehicle(
+            brand: _selectBrand,
+            model: '',
+            placa: _textPlaca.text.trim(),
+            color: _selectColor,
+            vehicleType: vehicleTypeSelected.text,
+            //_vehicleTypeRef,
+            creationDate: Timestamp.now(),
+            brandReference: _selectedBrandReference,
+          );
+          DocumentReference vehicleRef =
+          await _blocVehicle.updateVehicle(updateVehicle);
+          _vehicleReference = vehicleRef;
         }
 
-        Customer customerUpdate = Customer.copyWith(
-          origin: _customer,
-          name: _textClient.text.trim(),
-          phoneNumber: _textPhoneNumber.text.trim(),
-          email: _textEmail.text.trim(),
-          birthDate: _textBirthDate.text,
-          neighborhood: _textNeighborhood.text,
-          typeSex: _selectTypeSex,
-        );
-        _customerReference = await _customerBloc.updateCustomer(
-          customerUpdate,
-        );
+        //Get Customer reference or create customer or update customer
+        if (_customer.id == null || _customer.id == '') {
+          List<DocumentReference> listVehicles = <DocumentReference>[];
+          listVehicles.add(_vehicleReference);
+
+          Customer customer = Customer(
+            name: _textClient.text.trim(),
+            address: '',
+            phoneNumber: _textPhoneNumber.text.trim(),
+            birthDate: _textBirthDate.text,
+            neighborhood: _textNeighborhood.text,
+            typeSex: _selectTypeSex,
+            email: _textEmail.text.trim(),
+            creationDate: Timestamp.now(),
+            vehicles: listVehicles,
+          );
+          DocumentReference customerRef =
+          await _customerBloc.updateCustomer(customer);
+          _customerReference = customerRef;
+        } else {
+          if (!(_customer.vehicles?.contains(_vehicleReference)??false)) {
+            _customer.vehicles?.add(_vehicleReference);
+          }
+
+          Customer customerUpdate = Customer.copyWith(
+            origin: _customer,
+            name: _textClient.text.trim(),
+            phoneNumber: _textPhoneNumber.text.trim(),
+            email: _textEmail.text.trim(),
+            birthDate: _textBirthDate.text,
+            neighborhood: _textNeighborhood.text,
+            typeSex: _selectTypeSex,
+          );
+          _customerReference = await _customerBloc.updateCustomer(
+            customerUpdate,
+          );
+        }
       
         //Obtiene los valores de los productos para calcular el subtotal, iva y total
         _listProduct.forEach((product) {
@@ -1236,9 +1313,9 @@ class _FormInvoice extends State<FormInvoice> {
         }
 
         final _invoice = Invoice(
-          id: widget.editInvoice != null ? widget.editInvoice.id : null,
+          id: widget.editInvoice != null ? widget.editInvoice?.id : null,
           consecutive: widget.editInvoice != null
-              ? widget.editInvoice.consecutive
+              ? widget.editInvoice?.consecutive
               : _consecutive,
           customer: _customerReference,
           phoneNumber: _textPhoneNumber.text.trim(),
@@ -1246,25 +1323,25 @@ class _FormInvoice extends State<FormInvoice> {
           placa: _textPlaca.text.trim(),
           uidVehicleType: vehicleTypeSelected.uid,
           location: widget.editInvoice != null
-              ? widget.editInvoice.location
+              ? widget.editInvoice?.location
               : _locationReference,
           locationName: widget.editInvoice != null
-              ? widget.editInvoice.locationName
+              ? widget.editInvoice?.locationName
               : _locationName,
           totalPrice: widget.editInvoice != null
-              ? widget.editInvoice.totalPrice
+              ? widget.editInvoice?.totalPrice
               : _total,
           subtotal: widget.editInvoice != null
-              ? widget.editInvoice.subtotal
+              ? widget.editInvoice?.subtotal
               : _subTotal,
-          iva: widget.editInvoice != null ? widget.editInvoice.iva : _iva,
+          iva: widget.editInvoice != null ? widget.editInvoice?.iva : _iva,
           userOwner: widget.editInvoice != null
-              ? widget.editInvoice.userOwner
+              ? widget.editInvoice?.userOwner
               : _userRef,
           userCoordinator: _coordinatorReference,
           userCoordinatorName: _selectCoordinator,
           creationDate: widget.editInvoice != null
-              ? widget.editInvoice.creationDate
+              ? widget.editInvoice?.creationDate
               : Timestamp.now(),
           invoiceImages: imageList,
           imageFirm: _imageFirmInMemory,
@@ -1276,46 +1353,46 @@ class _FormInvoice extends State<FormInvoice> {
           observation: _textObservation.text.trim(),
           incidence: _textIncidence.text.trim(),
           haveSpecialService: widget.editInvoice != null
-              ? widget.editInvoice.haveSpecialService
+              ? widget.editInvoice?.haveSpecialService
               : _haveServiceSpecial,
           countProducts: _countProducts,
           countAdditionalProducts: _countAdditionalProducts,
           sendEmailInvoice: _sendEmail,
           invoiceProducts: widget.editInvoice != null
-              ? widget.editInvoice.invoiceProducts
+              ? widget.editInvoice?.invoiceProducts
               : _productToSave,
           cancelledInvoice: widget.editInvoice != null
-              ? widget.editInvoice.cancelledInvoice
+              ? widget.editInvoice?.cancelledInvoice
               : _canceledInvoice,
           paymentMethod: _selectedPaymentMethod,
           closedDate:
-              widget.editInvoice != null ? widget.editInvoice.closedDate : null,
+              widget.editInvoice != null ? widget.editInvoice?.closedDate : null,
           invoiceClosed: widget.editInvoice != null
-              ? widget.editInvoice.invoiceClosed
+              ? widget.editInvoice?.invoiceClosed
               : false,
           endWash:
-              widget.editInvoice != null ? widget.editInvoice.endWash : false,
+              widget.editInvoice != null ? widget.editInvoice?.endWash : false,
           dateEndWash: widget.editInvoice != null
-              ? widget.editInvoice.dateEndWash
+              ? widget.editInvoice?.dateEndWash
               : null,
           startWashing: widget.editInvoice != null
-              ? widget.editInvoice.startWashing
+              ? widget.editInvoice?.startWashing
               : false,
           dateStartWashing: widget.editInvoice != null
-              ? widget.editInvoice.dateStartWashing
+              ? widget.editInvoice?.dateStartWashing
               : null,
           washingTime: widget.editInvoice != null
-              ? widget.editInvoice.washingTime
+              ? widget.editInvoice?.washingTime
               : null,
-          washingCell: widget.editInvoice.washingCell,
+          washingCell: widget.editInvoice?.washingCell,
           countWashingWorkers: widget.editInvoice != null
-              ? widget.editInvoice.countWashingWorkers
+              ? widget.editInvoice?.countWashingWorkers
               : null,
           washingServicesTime: _servicesWashingTime,
           operatorUsers: _operatorsToSave,
           countOperators: _countOperators,
           totalCommission: widget.editInvoice != null
-              ? widget.editInvoice.totalCommission
+              ? widget.editInvoice?.totalCommission
               : _totalCommission,
         );
         DocumentReference invoiceReference = await _blocInvoice.saveInvoice(
@@ -1329,6 +1406,11 @@ class _FormInvoice extends State<FormInvoice> {
         //Close screen
         Navigator.pop(context); //Close popUp Save
         Navigator.pop(context);
+
+        if (widget.editInvoice == null) {
+          _printInvoice(_currentInvoiceSaved, _selectedProducts,
+              _listAdditionalProducts, _textEmail.text.trim());
+        }
       } on PlatformException catch (e) {
         print('$e');
         Navigator.pop(context);
@@ -1459,21 +1541,23 @@ class _FormInvoice extends State<FormInvoice> {
   }
 
   void _cancelInvoiceFunction() async {
-    MessagesUtils.showAlertWithLoading(
-      context: context,
-      title: 'Guardando',
-    ).show();
-    Invoice invoiceCopy = Invoice.copyWith(
-      origin: widget.editInvoice,
-      cancelledInvoice: _canceledInvoice,
-    );
-    _blocInvoice.saveInvoice(invoiceCopy);
-    Navigator.pop(context);
-    Navigator.pop(context);
+    if (widget.editInvoice != null) {
+      MessagesUtils.showAlertWithLoading(
+        context: context,
+        title: 'Guardando',
+      ).show();
+      Invoice invoiceCopy = Invoice.copyWith(
+        origin: widget.editInvoice?? new Invoice(),
+        cancelledInvoice: _canceledInvoice,
+      );
+      _blocInvoice.saveInvoice(invoiceCopy);
+      Navigator.pop(context);
+      Navigator.pop(context);
     }
+  }
 
   void _printInvoice(
-    Invoice invoicePrint,
+    Invoice? invoicePrint,
     List<Product> listProducts,
     List<AdditionalProduct> listAddProducts,
     String customerEmail,
@@ -1494,9 +1578,9 @@ class _FormInvoice extends State<FormInvoice> {
 
   bool _validateEnableSave() {
     //valido que la factura no tenga mas de 3 dias para permitir agregar un incidente
-    String _incidence = widget.editInvoice.incidence ?? '';
-    var dateInvoice = widget.editInvoice.creationDate;
-    var daysAfterInvoice = dateInvoice?.toDate().add(Duration(days: 3));
+    String _incidence = widget.editInvoice?.incidence ?? '';
+    var dateInvoice = widget.editInvoice?.creationDate ?? Timestamp.now();
+    var daysAfterInvoice = dateInvoice.toDate().add(Duration(days: 3));
     int _validDate = DateTime.now().compareTo(daysAfterInvoice!);
     if (_incidence.isEmpty && _validDate < 0) {
       _enablePerIncidence = true;
@@ -1505,8 +1589,10 @@ class _FormInvoice extends State<FormInvoice> {
     return (_editForm || _enablePerIncidence) ? true : false;
   }
 
-  Future<bool> _alertBackButton() {
-    Alert(
+  Future<bool> _alertBackButton() async {
+    bool exitConfirmed = false; // Default value
+
+    await Alert(
       context: context,
       type: AlertType.info,
       title: 'Esta seguro que desea salir de la factura !',
@@ -1516,6 +1602,7 @@ class _FormInvoice extends State<FormInvoice> {
           color: Theme.of(context).colorScheme.secondary,
           child: Text('ACEPTAR', style: Theme.of(context).textTheme.labelLarge),
           onPressed: () {
+            exitConfirmed = true;
             Navigator.of(context).pop();
             Navigator.pop(context);
           },
@@ -1524,13 +1611,14 @@ class _FormInvoice extends State<FormInvoice> {
           color: Theme.of(context).colorScheme.secondary,
           child: Text('CANCELAR', style: Theme.of(context).textTheme.labelLarge),
           onPressed: () {
+            exitConfirmed = false;
             Navigator.of(context).pop();
-            return false;
           },
         ),
       ],
     ).show();
-    //return false;
+
+    return exitConfirmed;
     //return showDialog(context: context, builder:(context) => AlertDialog(title: Text('back pressed'),));
   }
 }

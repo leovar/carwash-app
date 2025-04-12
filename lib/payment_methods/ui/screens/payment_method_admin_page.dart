@@ -72,7 +72,7 @@ class _PaymentMethodAdminPage extends State<PaymentMethodAdminPage> {
   }
 
   Widget _getDataPaymentMethodsList(AsyncSnapshot snapshot) {
-    _paymentMethodsList = _paymentMethodBloc.buildPaymentMethods(snapshot.data.documents);
+    _paymentMethodsList = _paymentMethodBloc.buildPaymentMethods(snapshot.data.docs);
     _paymentMethodsList.sort((a, b) => (a.name??'').compareTo(b.name??''));
     return Flexible(
       child: ListView.builder(

@@ -14,6 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:upgrader/upgrader.dart';
 import 'gradient_back.dart';
 import 'package:car_wash_app/widgets/button_functions.dart';
 import 'drawer_page.dart';
@@ -58,8 +59,8 @@ class _HomePage extends State<HomePage> {
         stream: _userBloc.streamFirebase,
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           switch (snapshot.connectionState) {
-            /*case ConnectionState.waiting:
-            return indicadorDeProgreso();*/
+          /*case ConnectionState.waiting:
+              return indicadorDeProgreso();*/
             default:
               return showSnapShot(snapshot);
           }
@@ -81,22 +82,30 @@ class _HomePage extends State<HomePage> {
   }
 
   Widget _getUserDb(AsyncSnapshot snapshot) {
-    return StreamBuilder(
-      stream: _userBloc.getUsersByIdStream(snapshot.data.uid),
-      builder: (BuildContext context, AsyncSnapshot snapshot) {
-        switch (snapshot.connectionState) {
-          case ConnectionState.waiting:
-            return indicadorDeProgreso();
-          default:
-            return _chargeHome(snapshot);
+    if (!snapshot.hasData) {
+      return indicadorDeProgreso();
+    }
+
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      stream: _userBloc.getUsersByIdStream(snapshot.data!.uid),
+      builder: (BuildContext context, AsyncSnapshot userSnapshot) {
+        if (userSnapshot.connectionState == ConnectionState.waiting) {
+          return indicadorDeProgreso();
         }
+        if (userSnapshot.hasError) {
+          return Center(child: Text("Error loading user data"));
+        }
+        if (!userSnapshot.hasData || userSnapshot.data!.docs.isEmpty) {
+          return Center(child: Text("User not found"));
+        }
+        return _chargeHome(userSnapshot);
       },
     );
   }
 
   Widget _chargeHome(AsyncSnapshot snapshot) {
-    if (snapshot.data.documents.length > 0) {
-      SysUser user = _userBloc.buildUsersById(snapshot.data.documents);
+    if (snapshot.hasData && !snapshot.data.docs.isEmpty) {
+      SysUser user = _userBloc.buildUsersById(snapshot.data.docs);
       this._currentUser = user;
       this._currentUser.photoUrl = _photoUrl;
       if (user.isAdministrator ?? false) {
@@ -127,21 +136,24 @@ class _HomePage extends State<HomePage> {
         ),
       );
 
-  homePage() => Scaffold(
-        key: _scaffoldKey,
-        appBar: PreferredSize(
-          preferredSize: Size(MediaQuery.of(context).size.width, 65),
-          child: AppBarWidget(_scaffoldKey, _currentUser.photoUrl ?? '', true),
-        ),
-        body: Stack(
-          children: <Widget>[
-            GradientBack(),
-            bodyContainer(),
-            locationIndicator(),
-          ],
-        ),
-        drawer: DrawerPage(),
-      );
+  homePage() => UpgradeAlert(
+    upgrader: Upgrader(durationUntilAlertAgain: Duration(days: 1)),
+    child: Scaffold(
+      key: _scaffoldKey,
+      appBar: PreferredSize(
+        preferredSize: Size(MediaQuery.of(context).size.width, 65),
+        child: AppBarWidget(_scaffoldKey, _currentUser.photoUrl ?? '', true),
+      ),
+      body: Stack(
+        children: <Widget>[
+          GradientBack(),
+          bodyContainer(),
+          locationIndicator(),
+        ],
+      ),
+      drawer: DrawerPage(),
+    ),
+  );
 
   bodyContainer() => Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -367,7 +379,9 @@ class _HomePage extends State<HomePage> {
   Future<void> _getPreferences() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
     String? idLocation = pref.getString(Keys.idLocation);
-    _locationReference = await _locationBloc.getLocationReference(idLocation ?? '');
+    if (idLocation != null) {
+      _locationReference = await _locationBloc.getLocationReference(idLocation ?? '');
+    }
     _locationName = pref.getString(Keys.locationName) ?? '';
     _photoUrl = pref.getString(Keys.photoUserUrl) ?? '';
     _blocInvoice.getConfigurationObject().then((value) => _config = value);

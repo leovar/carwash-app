@@ -260,9 +260,9 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
   }
 
   Widget _getLocationsToSelectWidget(AsyncSnapshot snapshot) {
-    if (_blocLocation.buildLocations(snapshot.data.documents).length >
+    if (_blocLocation.buildLocations(snapshot.data.docs).length >
         _listLocation.length) {
-      _listLocation = _blocLocation.buildLocations(snapshot.data.documents);
+      _listLocation = _blocLocation.buildLocations(snapshot.data.docs);
       _selectUserList();
         }
     return InkWell(

@@ -36,7 +36,7 @@ class ReportsRepository {
   List<Invoice> buildInvoiceListReport(List<DocumentSnapshot> invoicesListSnapshot) {
     List<Invoice> invoicesList = <Invoice>[];
     invoicesListSnapshot.forEach((p) {
-      Invoice invoice = Invoice.fromJson(p.data as Map<String, dynamic>, id: p.id);
+      Invoice invoice = Invoice.fromJson(p.data() as Map<String, dynamic>, id: p.id);
       invoicesList.add(invoice);
     });
     return invoicesList;
@@ -92,7 +92,7 @@ class ReportsRepository {
     final documents = querySnapshot.docs;
     if (documents.length > 0) {
       documents.forEach((document) {
-        Invoice product = Invoice.fromJson(document.data as Map<String, dynamic>, id: document.id);
+        Invoice product = Invoice.fromJson(document.data(), id: document.id);
         invoiceList.add(product);
       });
     }
@@ -113,15 +113,17 @@ class ReportsRepository {
         .where(FirestoreCollections.invoiceFieldCreationDate,
           isLessThanOrEqualTo: Timestamp.fromDate(dateFinalModify));
 
-    queryFirestore = queryFirestore.where(FirestoreCollections.invoiceFieldLocation,
-      isEqualTo: locationReference);
+    if (locationReference.id != 'defaultDocId') {
+      queryFirestore = queryFirestore.where(FirestoreCollections.invoiceFieldLocation,
+          isEqualTo: locationReference);
+    }
   
     querySnapshot = await queryFirestore.get();
     final responses = await Future.wait(
       querySnapshot.docs.map((p) async {
-        Invoice invoice = Invoice.fromJson(p.data as Map<String, dynamic>, id: p.id);
+        Invoice invoice = Invoice.fromJson(p.data() as Map<String, dynamic>, id: p.id);
         final customerResponse = await invoice.customer?.get();
-        Customer cus = Customer.fromJson(customerResponse?.data as Map<String, dynamic>, id: customerResponse?.id);
+        Customer cus = Customer.fromJson(customerResponse?.data() as Map<String, dynamic>, id: customerResponse?.id);
         Invoice newInvoice = Invoice.copyWith(origin: invoice, customerName: cus.name, customerPhone: cus.phoneNumber);
         invoicesList.add(newInvoice);
       }),

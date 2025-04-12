@@ -165,11 +165,11 @@ class Invoice extends Equatable {
     List<SysUser> listOperators = <SysUser>[];
     var pSplit = '';
     var oSplit = '';
-    List locationsList = json['locations'];
+    List locationsList = json['locations']??[];
     locationsList.forEach((drLocation) {
       locationsListDb.add(drLocation);
     });
-    var products = json['invoiceProducts'];
+    var products = json['invoiceProducts']??[];
     products?.forEach((element) {
       Product productResult = Product.fromJsonProductIntoInvoice(
         element,
@@ -185,7 +185,7 @@ class Invoice extends Equatable {
       pSplit = pSplit.substring(0, pSplit.length - 2);
     }
 
-    var operators = json['operatorUsers'];
+    var operators = json['operatorUsers']??[];
     operators?.forEach((item) {
       SysUser userResult = SysUser.fromJsonOperatorIntoInvoice(item);
       listOperators.add(userResult);
@@ -327,52 +327,52 @@ class Invoice extends Equatable {
 
   @override
   List<Object> get props => [
-    id!,
+    id ?? '',
     totalPrice ?? 0,
     subtotal ?? 0,
     iva ?? 0,
-    userOwner!,
-    userOperator!,
+    userOwner ?? FirebaseFirestore.instance.doc("placeholder/empty"),
+    userOperator ?? FirebaseFirestore.instance.doc("placeholder/empty"),
     userOperatorName ?? '',
-    userCoordinator!,
-    customer!,
-    customerName!,
-    phoneNumber!,
-    vehicle!,
+    userCoordinator ?? FirebaseFirestore.instance.doc("placeholder/empty"),
+    customer ?? FirebaseFirestore.instance.doc("placeholder/empty"),
+    customerName ?? '',
+    phoneNumber ?? '',
+    vehicle ?? FirebaseFirestore.instance.doc("placeholder/empty"),
     placa ?? '',
-    uidVehicleType!,
-    location!,
-    locationName!,
-    consecutive!,
-    creationDate!,
-    invoiceImages!,
-    invoiceProducts!,
-    approveDataProcessing!,
-    vehicleBrand!,
-    brandReference!,
-    vehicleColor!,
-    timeDelivery!,
-    closedDate!,
-    invoiceClosed!,
-    observation!,
-    incidence!,
-    haveSpecialService!,
-    countProducts!,
-    countAdditionalProducts!,
-    sendEmailInvoice!,
-    cancelledInvoice!,
-    paymentMethod!,
-    startWashing!,
-    washingCell!,
-    dateStartWashing!,
-    dateEndWash!,
-    countWashingWorkers!,
-    endWash!,
-    washingServicesTime!,
-    washingTime!,
-    operatorUsers!,
-    operatorsSplit!,
-    countOperators!,
-    totalCommission!,
+    uidVehicleType ?? 0,
+    location ?? FirebaseFirestore.instance.doc("placeholder/empty"),
+    locationName ?? '',
+    consecutive ?? 0,
+    creationDate ?? new DateTime.timestamp(),
+    invoiceImages ?? [],
+    invoiceProducts ?? [],
+    approveDataProcessing ?? false,
+    vehicleBrand ?? '',
+    brandReference ?? '',
+    vehicleColor ?? '',
+    timeDelivery ?? '',
+    closedDate ?? new DateTime.timestamp(),
+    invoiceClosed ?? false,
+    observation ?? '',
+    incidence ?? '',
+    haveSpecialService ?? false,
+    countProducts ?? 0,
+    countAdditionalProducts ?? 0,
+    sendEmailInvoice ?? false,
+    cancelledInvoice ?? false,
+    paymentMethod ?? '',
+    startWashing ?? false,
+    washingCell ?? '',
+    dateStartWashing ?? new DateTime.timestamp(),
+    dateEndWash ?? new DateTime.timestamp(),
+    countWashingWorkers ?? 0,
+    endWash ?? false,
+    washingServicesTime ?? 0,
+    washingTime ?? 0,
+    operatorUsers ?? [],
+    operatorsSplit ?? '',
+    countOperators ?? 0,
+    totalCommission ?? 0,
   ];
 }

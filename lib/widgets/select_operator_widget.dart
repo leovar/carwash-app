@@ -24,13 +24,13 @@ class _SelectOperatorWidget extends State<SelectOperatorWidget> {
   BlocInvoice _blocInvoice = BlocInvoice();
   BlocPaymentMethod _paymentMethodBloc = BlocPaymentMethod();
   late List<DropdownMenuItem<PaymentMethod>> _listPaymentMethods;
-  late PaymentMethod _selectedPaymentMethod;
+  PaymentMethod _selectedPaymentMethod = new PaymentMethod(id: '' ,name: '' ,active: true);
 
   @override
   void initState() {
     super.initState();
     if (widget.paymentMethodSelected.name != '') {
-      _selectedPaymentMethod = widget.paymentMethodSelected;
+      _selectedPaymentMethod = widget.paymentMethodSelected ?? new PaymentMethod();
     }
   }
 
@@ -58,7 +58,7 @@ class _SelectOperatorWidget extends State<SelectOperatorWidget> {
   }
 
   Widget _chargeDropPaymentMethods(AsyncSnapshot snapshot) {
-    List<PaymentMethod> paymentsList = _paymentMethodBloc.buildPaymentMethods(snapshot.data.documents);
+    List<PaymentMethod> paymentsList = _paymentMethodBloc.buildPaymentMethods(snapshot.data.docs);
     _listPaymentMethods = builtDropdownPaymentMethod(paymentsList);
     return Column(
       children: [
@@ -98,6 +98,16 @@ class _SelectOperatorWidget extends State<SelectOperatorWidget> {
           value: documentPm,
           child: Text(
             documentPm.name ?? '',
+          ),
+        ),
+      );
+    }
+    if (_selectedPaymentMethod.id == '') {
+      listItems.add(
+        DropdownMenuItem(
+          value: _selectedPaymentMethod,
+          child: Text(
+            _selectedPaymentMethod.name ?? '',
           ),
         ),
       );

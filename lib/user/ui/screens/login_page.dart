@@ -162,7 +162,7 @@ class _LoginPage extends State<LoginPage> {
 
   Widget dropListLocations(AsyncSnapshot snapshot) {
     List<Location> locationList = blocLocation.buildLocations(
-      snapshot.data.documents,
+      snapshot.data.docs,
     );
     _dropdownMenuItems = builDropdownMenuItems(locationList);
     return DropdownButton(

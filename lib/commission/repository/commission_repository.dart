@@ -16,7 +16,7 @@ class CommissionRepository {
   List<Commission> buildCommissions(List<DocumentSnapshot> commissionListSnapshot) {
     List<Commission> commissionList = <Commission>[];
     commissionListSnapshot.forEach((p) {
-      Commission loc = Commission.fromJson(p.data as Map<String, dynamic>, id: p.id);
+      Commission loc = Commission.fromJson(p.data() as Map<String, dynamic>, id: p.id);
       commissionList.add(loc);
     });
     return commissionList;
@@ -38,7 +38,7 @@ class CommissionRepository {
     final documents = querySnapshot.docs;
     if (documents.length > 0) {
       documents.forEach((document) {
-        Commission commission = Commission.fromJson(document.data as Map<String, dynamic>, id: document.id);
+        Commission commission = Commission.fromJson(document.data(), id: document.id);
         commissionList.add(commission);
       });
     }

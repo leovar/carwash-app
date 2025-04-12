@@ -72,7 +72,7 @@ class _LocationsAdminPage extends State<LocationsAdminPage> {
   }
 
   Widget _getDataLocationsList(AsyncSnapshot snapshot) {
-    _locationList = _locationsBloc.buildAllLocations(snapshot.data.documents);
+    _locationList = _locationsBloc.buildAllLocations(snapshot.data.docs);
     return Flexible(
       child: ListView.builder(
         itemCount: _locationList.length,

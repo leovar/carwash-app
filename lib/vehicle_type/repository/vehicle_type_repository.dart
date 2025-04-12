@@ -18,10 +18,10 @@ class VehicleTypeRepository {
         .snapshots();
     return querySnapshot;
   }
-  List<VehicleType> buildVehicleType(List<DocumentSnapshot> productListSnapshot){
+  List<VehicleType> buildVehicleType(List<DocumentSnapshot> productListSnapshot) {
     List<VehicleType> vehicleTypeList = <VehicleType>[];
     productListSnapshot.forEach((p) {
-      VehicleType loc = VehicleType.fromJson(p.data as Map<String, dynamic>, id: p.id);
+      VehicleType loc = VehicleType.fromJson(p.data() as Map<String, dynamic>, id: p.id);
       vehicleTypeList.add(loc);
     });
     return vehicleTypeList;
@@ -34,7 +34,7 @@ class VehicleTypeRepository {
         .doc(idVehicleType)
         .get();
     return VehicleType.fromJson(
-      querySnapshot.data as Map<String, dynamic>,
+      querySnapshot.data() as Map<String, dynamic>,
       id: querySnapshot.id,
     );
   }
@@ -46,7 +46,7 @@ class VehicleTypeRepository {
         .where(FirestoreCollections.vehicleTypeFieldUid, isEqualTo: uIdVehicleType)
         .get();
     return VehicleType.fromJson(
-      querySnapshot.docs.first.data as Map<String, dynamic>,
+      querySnapshot.docs.first.data(),
       id: querySnapshot.docs.first.id,
     );
   }
@@ -65,7 +65,7 @@ class VehicleTypeRepository {
   List<BrandReference> buildBrandReferences(List<DocumentSnapshot> brandReferencesListSnapshot){
     List<BrandReference> brandReferencesList = <BrandReference>[];
     brandReferencesListSnapshot.forEach((p) {
-      BrandReference bref = BrandReference.fromJson(p.data as Map<String, dynamic>, id: p.id);
+      BrandReference bref = BrandReference.fromJson(p.data() as Map<String, dynamic>, id: p.id);
       brandReferencesList.add(bref);
     });
     return brandReferencesList;

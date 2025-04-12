@@ -13,6 +13,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 
+import '../../../widgets/popup_menu_widget.dart';
+import '../widgets/fiels_menu_product.dart';
+
 class ProductAdminPage extends StatefulWidget {
 
   final Product? currentProduct;
@@ -38,21 +41,23 @@ class _ProductAdminPage extends State<ProductAdminPage> {
   final String _initialIvaPercent = '19';
   List<Product> _productList = <Product>[];
   List<Location> _listLocation = <Location>[];
-  List<VehicleType> _lisVehicleType = <VehicleType>[];
+  List<VehicleType> _lisVehicleType = [];
   late List<DropdownMenuItem<VehicleType>> _dropdownVehicleTypes;
-  late VehicleType _selectedVehicleType;
+  VehicleType _selectedVehicleType = new VehicleType(vehicleType: '');
+  String _selectedVehicleTypeString = '';
   bool _productActive = true;
   bool _productTypeSpecial = false;
   bool _productTypeSimple = false;
   late Product _productSelected;
+  int _listVehicleTypesCount = 0;
 
   @override
   void initState() {
     super.initState();
     //_textIvaPercent.text = _initialIvaPercent;
-    _productSelected = widget.currentProduct ?? new Product();
+    _productSelected = widget.currentProduct ?? new Product(locations: []);
     _selectProductList();
-    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -152,7 +157,11 @@ class _ProductAdminPage extends State<ProductAdminPage> {
             _locationsToSelect(),
             SizedBox(height: 9),
             Flexible(
-              child: _dropVehicleType(),
+              child: FieldsMenuProduct(
+                listCountVehicleTypes: _listVehicleTypesCount,
+                cbHandlerVehicleType: _setHandlerUserCoordinator,
+                selectedVehicleType: _selectedVehicleTypeString,
+              ),
             ),
             SizedBox(height: 9),
             Flexible(
@@ -254,11 +263,12 @@ class _ProductAdminPage extends State<ProductAdminPage> {
       },
     );
   }
+
   Widget _getLocationsToSelectWidget(AsyncSnapshot snapshot) {
-    if (_blocLocation.buildLocations(snapshot.data.documents).length > _listLocation.length) {
-      _listLocation = _blocLocation.buildLocations(snapshot.data.documents);
+    if (_blocLocation.buildLocations(snapshot.data.docs).length != _listLocation.length) {
+      _listLocation = _blocLocation.buildLocations(snapshot.data.docs);
       _selectProductList();
-        }
+    }
     return InkWell(
       child: Container(
         height: 50,
@@ -309,56 +319,6 @@ class _ProductAdminPage extends State<ProductAdminPage> {
     );
   }
 
-  Widget _dropVehicleType() {
-    return StreamBuilder(
-      stream: _vehicleTypeBloc.vehicleTypeStream,
-      builder: (context, snapshot) {
-        switch (snapshot.connectionState) {
-          case ConnectionState.waiting:
-            return CircularProgressIndicator();
-          default:
-            return _getDataVehicleTypeList(snapshot);
-        }
-      },
-    );
-  }
-  Widget _getDataVehicleTypeList(AsyncSnapshot snapshot) {
-    if (_vehicleTypeBloc.buildVehicleType(snapshot.data.documents).length > _lisVehicleType.length) {
-      _lisVehicleType = _vehicleTypeBloc.buildVehicleType(snapshot.data.documents);
-      _selectProductList();
-        }
-    _dropdownVehicleTypes = _buildDropdownVehicleTypes(_lisVehicleType);
-    return DropdownButton(
-      isExpanded: true,
-      items: _dropdownVehicleTypes,
-      value: _selectedVehicleType,
-      onChanged: onChangeDropDawn,
-      onTap: unfocusTextFields,
-      hint: Text(
-        "Seleccione el Typo de Vehiculo...",
-        style: TextStyle(
-          color: Color(0xFFAEAEAE),
-        ),
-      ),
-      icon: Icon(
-        Icons.keyboard_arrow_down,
-        color: Color(0xFFAEAEAE),
-        size: 30,
-      ),
-      iconSize: 24,
-      elevation: 16,
-      style: TextStyle(
-        fontFamily: "AvenirNext",
-        fontWeight: FontWeight.normal,
-        color: Color(0xFFAEAEAE),
-      ),
-      underline: Container(
-        height: 1,
-        color: Color(0xFFAEAEAE),
-      ),
-    );
-  }
-
   Widget _buttonSave() {
     return Container(
       height: 100,
@@ -400,17 +360,46 @@ class _ProductAdminPage extends State<ProductAdminPage> {
     _productActive = _productSelected.productActive ?? true;
     _productTypeSimple = _productSelected.productType == 'Sencillo' ? true : false;
     _productTypeSpecial = _productSelected.productType == 'Especial' ? true : false;
-    _selectedVehicleType = (_lisVehicleType.length > 0
-        ? _lisVehicleType.firstWhere((f) => f.id == _productSelected.vehicleType?.id)
-        : null)!;
+    _selectedVehicleTypeString = '';
+    _selectedVehicleType = new VehicleType(vehicleType: '');
+    _getVehicleTypeByReference(_productSelected.vehicleType);
     _listLocation.forEach((Location loc) {
-      List<DocumentReference> dr = (_productSelected.locations??[]).where((e) => e.id == loc.id).toList();
+      List<DocumentReference> dr = [];
+      if ((_productSelected.locations??[]).length > 0) {
+        dr = (_productSelected.locations??[]).where((e) => e.id == loc.id).toList();
+      }
       if (dr.length > 0) {
         _listLocation[_listLocation.indexOf(loc)].isSelected = true;
       } else {
         _listLocation[_listLocation.indexOf(loc)].isSelected = false;
       }
     });
+  }
+
+  Future<void> _getVehicleTypeByReference (DocumentReference? valueRef) async {
+    if (valueRef != null) {
+      DocumentSnapshot docSnapshot = await valueRef.get();
+      if (docSnapshot.exists) {
+        VehicleType vType = VehicleType.fromJson(docSnapshot.data() as Map<String, dynamic>, id: docSnapshot.id);
+        if (_lisVehicleType.isNotEmpty && (vType.id??'') != '') {
+          _selectedVehicleType = _lisVehicleType.firstWhere((f) => f.id == (vType.id??''));
+          setState(() {
+            _selectedVehicleTypeString = vType.vehicleType??'';
+          });
+        }
+      }
+    }
+  }
+
+  ///Functions Select Menu
+  void _setHandlerUserCoordinator(String selectVehicleType, int countList, int operationType, List<VehicleType>? vehiclesList) {
+    if (operationType == 1) {
+      _selectedVehicleTypeString = selectVehicleType;
+      _selectedVehicleType = _lisVehicleType.firstWhere((vType) => vType.vehicleType == selectVehicleType);
+    } else {
+      _listVehicleTypesCount = countList;
+      _lisVehicleType = vehiclesList??[];
+    }
   }
 
   ///Functions Locations
@@ -421,28 +410,11 @@ class _ProductAdminPage extends State<ProductAdminPage> {
   }
 
   ///Functions VehicleType
-  List<DropdownMenuItem<VehicleType>> _buildDropdownVehicleTypes(
-      List vehicleTypes) {
-    List<DropdownMenuItem<VehicleType>> listItems = [];
-    for (VehicleType documentLoc in vehicleTypes) {
-      listItems.add(
-        DropdownMenuItem(
-          value: documentLoc,
-          child: Text(
-            documentLoc.vehicleType??'',
-          ),
-        ),
-      );
+  onChangeDropDawn(String? selectedVehicleType) {
+    if (selectedVehicleType != null) {
+      _selectedVehicleTypeString = selectedVehicleType;
+      _selectedVehicleType = _lisVehicleType.firstWhere((vType) => vType.vehicleType == selectedVehicleType);
     }
-    return listItems;
-  }
-
-  onChangeDropDawn(VehicleType? selectedVehicleType) {
-    setState(() {
-      if (selectedVehicleType != null) {
-        _selectedVehicleType = selectedVehicleType;
-      }
-    });
   }
 
   unfocusTextFields() {
@@ -497,7 +469,8 @@ class _ProductAdminPage extends State<ProductAdminPage> {
     _textIvaPercent.text = _initialIvaPercent;
     _textPrice.text = '';
     _textServiceTime.text = '';
-    _selectedVehicleType = new VehicleType();
+    _selectedVehicleTypeString = '';
+    _selectedVehicleType = new VehicleType(vehicleType: '');
     _productSelected = new Product();
     _productActive = true;
     _productTypeSpecial = false;
@@ -511,14 +484,11 @@ class _ProductAdminPage extends State<ProductAdminPage> {
 
   void _saveProduct() async {
     if (_validateInputs()) {
-      MessagesUtils.showAlertWithLoading(context: context, title: 'Guardando')
-          .show();
+      MessagesUtils.showAlertWithLoading(context: context, title: 'Guardando').show();
 
       //Add new locations at product exist
       _listLocation.where((l) => l.isSelected??false).toList().forEach((f) {
-        List<DocumentReference> listFind = (_productSelected.locations??[])
-            .where((e) => e.id == f.id)
-            .toList();
+        List<DocumentReference> listFind = (_productSelected.locations??[]).where((e) => e.id == f.id).toList();
         if (listFind.length <= 0) {
           _productSelected.locations?.add(_blocLocation.getDocumentReferenceLocationById(f.id??''));
         }

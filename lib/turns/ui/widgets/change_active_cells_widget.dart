@@ -13,8 +13,8 @@ class ChangeActiveCellsWidget extends StatefulWidget {
 }
 
 class _ChangeActiveCellsWidget extends State<ChangeActiveCellsWidget> {
-  late List<DropdownMenuItem<CellsModel>> _dropdownMenuItems;
-  late CellsModel _selectedActiveCells;
+  List<DropdownMenuItem<CellsModel>> _dropdownMenuItems = [];
+  CellsModel _selectedActiveCells = new CellsModel('', '');
 
   @override
   void initState() {
@@ -23,11 +23,17 @@ class _ChangeActiveCellsWidget extends State<ChangeActiveCellsWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(children: <Widget>[_getCellsList(), SizedBox(height: 12)]);
+    return Column(children: <Widget>[
+      _getCellsList(),
+      SizedBox(height: 12),
+    ]);
   }
 
   Widget _getCellsList() {
     List<CellsModel> listCells = getCellsList(widget.locationData.totalCells??0);
+    if (_dropdownMenuItems.isEmpty) {
+      _dropdownMenuItems = builtDropdownMenuItems(listCells);
+    }
     return Column(
       children: [
         DropdownButton(
@@ -54,12 +60,17 @@ class _ChangeActiveCellsWidget extends State<ChangeActiveCellsWidget> {
   }
 
   List<DropdownMenuItem<CellsModel>> builtDropdownMenuItems(
-    List<CellsModel> listCellItems,
-  ) {
+      List<CellsModel> listCellItems,
+      ) {
     List<DropdownMenuItem<CellsModel>> listItems = [];
     for (CellsModel cellItem in listCellItems) {
       listItems.add(
         DropdownMenuItem(value: cellItem, child: Text(cellItem.text)),
+      );
+    }
+    if (_selectedActiveCells.value == '') {
+      listItems.add(
+        DropdownMenuItem(value: _selectedActiveCells, child: Text(_selectedActiveCells.text)),
       );
     }
     return listItems;

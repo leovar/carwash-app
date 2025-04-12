@@ -160,9 +160,9 @@ class _AdminBrandReference extends State<AdminBrandReference> {
   }
 
   Widget _getListBrands(AsyncSnapshot snapshot) {
-    if (_blocInvoice.buildBrands(snapshot.data.documents).length >
+    if (_blocInvoice.buildBrands(snapshot.data.docs).length >
         _listBrands.length) {
-      _listBrands = _blocInvoice.buildBrands(snapshot.data.documents);
+      _listBrands = _blocInvoice.buildBrands(snapshot.data.docs);
     }
 
     _dropdownBrands = _buildDropdownBrands(_listBrands);
@@ -244,7 +244,7 @@ class _AdminBrandReference extends State<AdminBrandReference> {
 
   Widget _chargeListBrandReferences(AsyncSnapshot snapshot) {
     _listBrandReference =
-        _vehicleTypeBloc.buildBrandReference(snapshot.data.documents);
+        _vehicleTypeBloc.buildBrandReference(snapshot.data.docs);
     _listBrandReference.sort((a, b) => (a.reference??'').toLowerCase().compareTo((b.reference??'').toLowerCase()));
     return ListView.builder(
       itemCount: _listBrandReference.length,

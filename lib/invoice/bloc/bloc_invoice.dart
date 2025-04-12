@@ -155,7 +155,6 @@ class BlocInvoice implements Bloc {
     DateTime dateInit,
     DateTime dateFinal,
     String placa,
-    String operator,
     String consecutive,
     String productTypeSelected,
     String paymentMethod,
@@ -165,7 +164,6 @@ class BlocInvoice implements Bloc {
       dateInit,
       dateFinal,
       placa,
-      operator,
       consecutive,
       productTypeSelected,
       paymentMethod
@@ -178,7 +176,7 @@ class BlocInvoice implements Bloc {
   }
 
   /// Get invoices pending for Washing
-  Stream<QuerySnapshot> invoicesListPendingWashingStream(DocumentReference locationReference) {
+  Stream<QuerySnapshot> invoicesListPendingWashingStream(DocumentReference? locationReference) {
     return _invoiceRepository.getInvoicesListPendingWashingStream(locationReference);
   }
 
@@ -186,12 +184,12 @@ class BlocInvoice implements Bloc {
     return _invoiceRepository.buildInvoicesListFromSnapshot(invoicesListSnapshot);
   }
 
-  Future<List<Invoice>> getListPendingWashList(DocumentReference locationReference) async {
+  Future<List<Invoice>> getListPendingWashList(DocumentReference? locationReference) async {
     return await _invoiceRepository.getInvoicesListPendingWashing(locationReference);
   }
 
   /// Get invoices current Wash
-  Stream<QuerySnapshot> invoicesListWashingStream(DocumentReference locationReference) {
+  Stream<QuerySnapshot> invoicesListWashingStream(DocumentReference? locationReference) {
     return _invoiceRepository.getInvoicesListWashingStream(locationReference);
   }
 
@@ -199,7 +197,7 @@ class BlocInvoice implements Bloc {
     return _invoiceRepository.buildInvoicesListFromSnapshot(invoicesListSnapshot);
   }
 
-  Future<List<Invoice>> invoicesWashingList(DocumentReference locationReference) async {
+  Future<List<Invoice>> invoicesWashingList(DocumentReference? locationReference) async {
     return await _invoiceRepository.getInvoicesWashingList(locationReference);
   }
 

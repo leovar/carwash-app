@@ -17,7 +17,7 @@ class ProductRepository {
   List<Product> buildProducts(List<DocumentSnapshot> productListSnapshot) {
     List<Product> productList = <Product>[];
     productListSnapshot.forEach((p) {
-      Product loc = Product.fromJson(p.data as Map<String, dynamic>, id: p.id);
+      Product loc = Product.fromJson(p.data() as Map<String, dynamic>, id: p.id);
       productList.add(loc);
     });
     return productList;
@@ -42,7 +42,7 @@ class ProductRepository {
       List<DocumentSnapshot> productListSnapshot) {
     List<Product> productList = <Product>[];
     productListSnapshot.forEach((p) {
-      Product loc = Product.fromJson(p.data as Map<String, dynamic>, id: p.id);
+      Product loc = Product.fromJson(p.data() as Map<String, dynamic>, id: p.id);
       productList.add(loc);
     });
     return productList;
@@ -62,7 +62,7 @@ class ProductRepository {
         .doc(productId)
         .get();
 
-    return Product.fromJson(querySnapshot.data as Map<String, dynamic>, id: querySnapshot.id);
+    return Product.fromJson(querySnapshot.data() as Map<String, dynamic>, id: querySnapshot.id);
   }
 
   Future<List<Product>> getAllProducts() async {
@@ -75,7 +75,7 @@ class ProductRepository {
     final documents = querySnapshot.docs;
     if (documents.length > 0) {
       documents.forEach((document) {
-        Product product = Product.fromJson(document.data as Map<String, dynamic>, id: document.id);
+        Product product = Product.fromJson(document.data(), id: document.id);
         productList.add(product);
       });
     }

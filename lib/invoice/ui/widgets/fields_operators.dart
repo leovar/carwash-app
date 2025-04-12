@@ -11,7 +11,7 @@ class FieldsOperators extends StatefulWidget {
   final bool editForm;
   final bool closedInvoice;
   final String idLocation;
-  final Invoice invoice;
+  final Invoice? invoice;
 
   FieldsOperators({
     Key? key,
@@ -22,7 +22,7 @@ class FieldsOperators extends StatefulWidget {
     required this.editForm,
     required this.closedInvoice,
     required this.idLocation,
-    required this.invoice,
+    this.invoice,
   });
 
   @override

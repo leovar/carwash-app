@@ -43,7 +43,7 @@ class _InvoicePage extends State<InvoicePage> {
         bloc: BlocInvoice(),
         child: SafeArea(
           child: FormInvoice(
-            widget.invoiceToEdit ?? new Invoice(),
+            widget.invoiceToEdit,
           ),
         ),
       ),

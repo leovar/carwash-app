@@ -21,7 +21,7 @@ class CustomerRepository {
     if (documents.length > 0) {
       final documentSnapshot = documents.first;
       return Customer.fromJson(
-        documentSnapshot.data as Map<String, dynamic>,
+        documentSnapshot.data(),
         id: documentSnapshot.id,
       );
     }
@@ -36,7 +36,7 @@ class CustomerRepository {
         .get();
 
     return Customer.fromJson(
-      querySnapshot.data as Map<String, dynamic>,
+      querySnapshot.data() as Map<String, dynamic>,
       id: querySnapshot.id,
     );
   }
@@ -66,7 +66,7 @@ class CustomerRepository {
     querySnapshot = await queryFirestore.get();
     if (querySnapshot.docs.length > 0) {
       querySnapshot.docs.forEach((doc) {
-        final customer = Customer.fromJson(doc.data as Map<String, dynamic>, id: doc.id);
+        final customer = Customer.fromJson(doc.data() as Map<String, dynamic>, id: doc.id);
         customerList.add(customer);
       });
     }
@@ -98,13 +98,13 @@ class CustomerRepository {
     querySnapshot = await queryFirestore.get();
     final responses = await Future.wait(
         querySnapshot.docs.map((p) {
-            Invoice invoice = Invoice.fromJson(p.data as Map<String, dynamic>, id: p.id);
+            Invoice invoice = Invoice.fromJson(p.data() as Map<String, dynamic>, id: p.id);
             return invoice.customer != null ? invoice.customer!.get() : Future.value(null);
         }),
     );
 
     customerList = responses.map((response) {
-      Customer customerModel = Customer.fromJson(response?.data as Map<String, dynamic>, id: response?.id);
+      Customer customerModel = Customer.fromJson(response?.data() as Map<String, dynamic>, id: response?.id);
       return customerModel;
     }).toList();
     return  customerList;

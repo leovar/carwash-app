@@ -20,7 +20,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 //import 'package:flutter_open_whatsapp/flutter_open_whatsapp.dart';
-import 'package:flutter_sms/flutter_sms.dart';
+//import 'package:flutter_sms/flutter_sms.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -49,7 +49,7 @@ class _FormInvoicesList extends State<FormInvoicesList> {
   double _totalMonth = 0.0;
   String _idLocation = '';
   late Location _location;
-  PaymentMethod _selectedPaymentMethod = PaymentMethod(name: '');
+  PaymentMethod _selectedPaymentMethod = PaymentMethod(id: '' ,name: '' ,active: true);
   late Invoice _invoiceSelected;
 
   ///Filter Keys
@@ -112,7 +112,6 @@ class _FormInvoicesList extends State<FormInvoicesList> {
         _dateFilterInit,
         _dateFilterFinal,
         _textPlaca.text,
-        _operatorFilter.name ?? '',
         _textConsecutive.text,
         _productTypeSelected,
         _paymentMethodFilter.name ?? '',
@@ -129,10 +128,15 @@ class _FormInvoicesList extends State<FormInvoicesList> {
         _listInvoices = [];
         break;
       default:
-        _listInvoices = _blocInvoice.buildInvoicesListByMonth(
-          snapshot.data.documents,
-        );
-        _listInvoices.sort((a, b) => (b.consecutive??0).compareTo(a.consecutive??0));
+        if (snapshot.data != null) {
+          _listInvoices = _blocInvoice.buildInvoicesListByMonth(snapshot.data.docs);
+          if (_operatorFilter.name.isNotEmpty) {
+            _listInvoices = _listInvoices.where((doc) {
+              return doc.operatorsSplit?.contains(_operatorFilter.name)??false;
+            }).toList();
+          }
+          _listInvoices.sort((a, b) => (b.consecutive??0).compareTo(a.consecutive??0));
+        }
         _countAmountPerDayMonth();
     }
 
@@ -565,19 +569,21 @@ class _FormInvoicesList extends State<FormInvoicesList> {
     if (invoiceToClose.phoneNumber?.isNotEmpty??false) {
       String message =
           "Spa CarWash Movil -- Estimado cliente. Le informamos que el servicio de lavado de su vehículo de placa ${invoiceToClose.placa}, ha finalizado y está listo para ser entregado ☑️. "
-          "Cómo estamos comprometidos con tu satisfacción 😃, por favor ayúdanos con tu opinion en cortas respuestas en el siguinte link ➡️"
-          "https://docs.google.com/forms/d/1gdq9rSR8pMqlukEalGLxF_m5954m7_Hpm5k5HYX89yU/edit";
+          "➡️*Diligencia tus datos en este link para recibir tu factura electrónica*: https://docs.google.com/forms/d/1CoT5pPLH5NOt2Bco8PSQ-goM9vnNo9jymJvIBFf87_o/edit?ts=666ce528"
+          "➡️Si desea adelantar tu pago, puedes hacerlo en el siguiente link: https://checkout.wompi.co/l/VPOS_C74dzR"
+          "➡️Ayúdanos a mejorar, con tu opinión en el siguinte link: https://docs.google.com/forms/d/1gdq9rSR8pMqlukEalGLxF_m5954m7_Hpm5k5HYX89yU/edit";
       List<String> recipents = [invoiceToClose.phoneNumber??''];
       if (_location.sendMessageSms ?? false) {
         _sendSMS(message, recipents);
       } else if (_location.sendMessageWp ?? false) {
         _sendWhatsAppMessage(message, invoiceToClose.phoneNumber??'');
       }
-        }
+    }
   }
 
   Future<void> _sendSMS(String message, List<String> recipents) async {
-    try {
+    //TODO luego de que compile activar de nuevo esta libreria y probar
+    /*try {
       String _result = await sendSMS(
         message: message,
         recipients: recipents,
@@ -586,7 +592,7 @@ class _FormInvoicesList extends State<FormInvoicesList> {
       });
     } catch (_) {
       print(_);
-    }
+    }*/
   }
 
   void _sendWhatsAppMessage(String message, String phoneNumber) async {
@@ -595,7 +601,7 @@ class _FormInvoicesList extends State<FormInvoicesList> {
         //FlutterOpenWhatsapp.sendSingleMessage('57' + phoneNumber, message);
         //String url = 'https://api.whatsapp.com/send/?phone=57'+ phoneNumber + '&text=' + message + '&app_absent=1' ;
         String url = 'https://wa.me/57' + phoneNumber + '?text=' + message;
-        launch(url);
+        launchUrl(url as Uri);
       }
     } catch (_) {
       print(_);

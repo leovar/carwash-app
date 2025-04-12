@@ -28,7 +28,7 @@ class PaymentMethodRepository {
       List<DocumentSnapshot> paymentListSnapshot) {
     List<PaymentMethod> paymentsList = <PaymentMethod>[];
     paymentListSnapshot.forEach((p) {
-      PaymentMethod loc = PaymentMethod.fromJson(p.data as Map<String, dynamic>, id: p.id);
+      PaymentMethod loc = PaymentMethod.fromJson(p.data() as Map<String, dynamic>, id: p.id);
       paymentsList.add(loc);
     });
     return paymentsList;
@@ -43,7 +43,7 @@ class PaymentMethodRepository {
 
     PaymentMethod pm = new PaymentMethod();
     if (querySnapshot.docs.length > 0) {
-      pm = PaymentMethod.fromJson(querySnapshot.docs[0].data as Map<String, dynamic>,
+      pm = PaymentMethod.fromJson(querySnapshot.docs[0].data(),
           id: querySnapshot.docs[0].id);
     }
     return pm;
@@ -72,6 +72,6 @@ class PaymentMethodRepository {
         .doc(idPMethod)
         .get();
 
-    return PaymentMethod.fromJson(querySnapshot.data as Map<String, dynamic>, id: querySnapshot.id);
+    return PaymentMethod.fromJson(querySnapshot.data() as Map<String, dynamic>, id: querySnapshot.id);
   }
 }

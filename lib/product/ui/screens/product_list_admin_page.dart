@@ -71,8 +71,14 @@ class _ProductListAdminPage extends State<ProductListAdminPage> {
   }
 
   Widget _getDataListProducts(AsyncSnapshot snapshot) {
-    _productList = _productBloc.buildAllProduct(snapshot.data.documents);
-    _productList.sort((a,b)=> (a.vehicleTypeUid??0).compareTo(b.vehicleTypeUid??0));
+    _productList = _productBloc.buildAllProduct(snapshot.data.docs);
+    _productList.sort((a, b) {
+      int result = (a.vehicleTypeUid??0).compareTo(b.vehicleTypeUid??0);
+      if (result == 0) {
+        result = (a.productName??'').compareTo(b.productName??'');
+      }
+      return result;
+    });
     return Flexible(
       child: ListView.builder(
         itemCount: _productList.length,

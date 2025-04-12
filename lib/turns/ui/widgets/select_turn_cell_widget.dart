@@ -25,8 +25,8 @@ class SelectTurnCellWidget extends StatefulWidget {
 }
 
 class _SelectTurnCellWidget extends State<SelectTurnCellWidget> {
-  late List<DropdownMenuItem<CellsModel>> _dropdownMenuItems;
-  late CellsModel _selectedCell;
+  List<DropdownMenuItem<CellsModel>>? _dropdownMenuItems;
+  CellsModel _selectedCell = new CellsModel('', '');
 
   @override
   void initState() {
@@ -48,6 +48,14 @@ class _SelectTurnCellWidget extends State<SelectTurnCellWidget> {
       var cell = item.washingCell;
       listCells.removeWhere((item) => item.value == cell);
     });
+    if (_selectedCell.value.isEmpty) {
+      listCells.add(_selectedCell);
+    }
+
+    if (_dropdownMenuItems == null) {
+      _dropdownMenuItems = builtDropdownMenuItems(listCells);
+    }
+
     return Column(
       children: [
         DropdownButton(
@@ -110,8 +118,8 @@ class _SelectTurnCellWidget extends State<SelectTurnCellWidget> {
   }
 
   onChangeDropDawnCell(CellsModel? selectedCell) {
+    widget.selectCell(selectedCell?? new CellsModel('', ''));
     setState(() {
-      widget.selectCell(selectedCell?? new CellsModel('', ''));
       _selectedCell = selectedCell ?? new CellsModel('', '');
     });
   }
