@@ -11,11 +11,11 @@ description: Car Wash Flutter application.
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.2.0+39
+version: 1.2.0+41
 
 
 environment:
-  sdk: '>=2.12.0 <4.0.0'
+  sdk: '>=3.1.0 <4.0.0'
 
 dependencies:
   flutter:
@@ -32,14 +32,13 @@ dependencies:
   shared_preferences: ^2.5.2
   flutter_multiselect: ^1.0.2
   datetime_picker_formfield: ^2.0.1
-  ##flutter_sms: ^2.3.3   // esta libreria presenta conflictos, una vez compile el proyecto, validar de nuevo como usarla o reemplazarla
-  #flutter_open_whatsapp: ^1.0.3 // esta libreria ya no se usa por que se usa un join del numero con la url de whatsapp
   url_launcher: ^6.3.1
   permission_handler: ^11.4.0
   file_utils: ^1.0.1    #Esta libreria esta descontinuada, validar por cual se debe reemplazar
   fluttertoast: ^8.2.12
   excel: ^4.0.6
   percent_indicator: ^4.2.4
+  whatsapp_unilink: ^2.1.0
 
   #firebase
   firebase_auth:

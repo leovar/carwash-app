@@ -19,6 +19,7 @@ import 'package:car_wash_app/widgets/select_operator_widget.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 //import 'package:flutter_open_whatsapp/flutter_open_whatsapp.dart';
 //import 'package:flutter_sms/flutter_sms.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
@@ -26,6 +27,8 @@ import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
+import 'package:whatsapp_unilink/whatsapp_unilink.dart';
 
 class FormInvoicesList extends StatefulWidget {
   final locationReference;
@@ -572,39 +575,45 @@ class _FormInvoicesList extends State<FormInvoicesList> {
           "➡️*Diligencia tus datos en este link para recibir tu factura electrónica*: https://docs.google.com/forms/d/1CoT5pPLH5NOt2Bco8PSQ-goM9vnNo9jymJvIBFf87_o/edit?ts=666ce528"
           "➡️Si desea adelantar tu pago, puedes hacerlo en el siguiente link: https://checkout.wompi.co/l/VPOS_C74dzR"
           "➡️Ayúdanos a mejorar, con tu opinión en el siguinte link: https://docs.google.com/forms/d/1gdq9rSR8pMqlukEalGLxF_m5954m7_Hpm5k5HYX89yU/edit";
-      List<String> recipents = [invoiceToClose.phoneNumber??''];
+
       if (_location.sendMessageSms ?? false) {
-        _sendSMS(message, recipents);
+        _sendSMS(message, invoiceToClose.phoneNumber??'');
       } else if (_location.sendMessageWp ?? false) {
         _sendWhatsAppMessage(message, invoiceToClose.phoneNumber??'');
       }
     }
   }
 
-  Future<void> _sendSMS(String message, List<String> recipents) async {
-    //TODO luego de que compile activar de nuevo esta libreria y probar
-    /*try {
-      String _result = await sendSMS(
-        message: message,
-        recipients: recipents,
-      ).catchError((onError) {
-        print(onError);
-      });
-    } catch (_) {
-      print(_);
-    }*/
+  Future<void> _sendSMS(String message, String phoneNumber) async {
+    try {
+      if (phoneNumber.isNotEmpty) {
+        final Uri uri = Uri.parse("sms:$phoneNumber?body=${Uri.encodeComponent(message)}");
+        await launchUrl(uri);
+      }
+    } catch (e) {
+      Fluttertoast.showToast(
+        msg: "Error enviando SMS: ${e}",
+        toastLength: Toast.LENGTH_LONG,
+      );
+      print(e);
+    }
   }
 
   void _sendWhatsAppMessage(String message, String phoneNumber) async {
     try {
       if (phoneNumber.isNotEmpty) {
-        //FlutterOpenWhatsapp.sendSingleMessage('57' + phoneNumber, message);
-        //String url = 'https://api.whatsapp.com/send/?phone=57'+ phoneNumber + '&text=' + message + '&app_absent=1' ;
-        String url = 'https://wa.me/57' + phoneNumber + '?text=' + message;
-        launchUrl(url as Uri);
+        final link = WhatsAppUnilink(
+          phoneNumber: '+57$phoneNumber',
+          text: message,
+        );
+        await launchUrlString('$link');
       }
-    } catch (_) {
-      print(_);
+    } catch (e) {
+      Fluttertoast.showToast(
+        msg: "Error enviando el WhatsApp: ${e}",
+        toastLength: Toast.LENGTH_LONG,
+      );
+      print('Error enviando mensaje por WhatsApp: $e');
     }
   }
 }

@@ -241,7 +241,7 @@ class _EarningsReport extends State<EarningsReport> {
     if (picked != _dateTimeFinal) {
       setState(() {
         if (picked != null) {
-          _dateTimeInit = picked;
+          _dateTimeFinal = picked;
         }
         _textDateFinal.text = formatter.format(_dateTimeFinal);
       });
