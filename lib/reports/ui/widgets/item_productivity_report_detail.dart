@@ -72,6 +72,20 @@ class _ItemProductivityReportDetail
                   ),
                 ),
               ),
+              Flexible(
+                child: Container(
+                  padding: EdgeInsets.only(left: 12, top: 8),
+                  child: Text(
+                    '--   ${_serviceDetail.countInvoices} Lavadas',
+                    style: TextStyle(
+                      fontFamily: "Lato",
+                      fontWeight: FontWeight.w600,
+                      fontSize: 17.0,
+                      color: Color(0xFF59B258),
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
         ),

@@ -974,6 +974,11 @@ class _FormInvoice extends State<FormInvoice> {
           _textBirthDate.text = _customer.birthDate??'';
           _selectTypeSex = _customer.typeSex??'';
         });
+      } else {
+        _selectBrand = '';
+        _selectColor = '';
+        _selectedBrandReference = '';
+        setState(() {});
       }
     } catch (e) {
       print("Error fetching vehicle and customer data: $e");

@@ -38,6 +38,7 @@ class ProductsCardDetail {
   double totalCommission;
   double totalPrice;
   String dateServices;
+  int countInvoices;
 
   ProductsCardDetail(
       this.countSimpleServices,
@@ -74,5 +75,6 @@ class ProductsCardDetail {
       this.totalCommission,
       this.totalPrice,
       this.dateServices,
+      this.countInvoices,
       );
 }

@@ -100,6 +100,37 @@ class _ItemProductivityReportList extends State<ItemProductivityReportList> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(
+                                Icons.text_snippet_outlined,
+                                color: Theme.of(context).primaryColor,
+                                size: 20,
+                              ),
+                              SizedBox(width: 3),
+                              Flexible(
+                                child: Text(
+                                  widget.cardReport.invoicesList.length.toString() + ' Lavadas',
+                                  style: TextStyle(
+                                    color: Theme.of(context).primaryColor,
+                                    fontFamily: "Lato",
+                                    fontWeight: FontWeight.normal,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 3),
+                      Flexible(
+                        child: Container(
+                          alignment: Alignment.center,
+                          margin: EdgeInsets.only(
+                            right: 8,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
                                 Icons.account_circle,
                                 color: Theme.of(context).primaryColor,
                                 size: 20,

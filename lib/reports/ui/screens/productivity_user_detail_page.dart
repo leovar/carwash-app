@@ -7,8 +7,9 @@ import 'package:intl/intl.dart';
 
 class ProductivityUserDetailPage extends StatefulWidget {
   final List<ProductsCardDetail> productsList;
+  final String operatorNameList;
 
-  ProductivityUserDetailPage({Key? key, required this.productsList});
+  ProductivityUserDetailPage({Key? key, required this.productsList, required this.operatorNameList});
 
   @override
   State<StatefulWidget> createState() => _ProductivityUserDetailPage();
@@ -70,13 +71,29 @@ class _ProductivityUserDetailPage extends State<ProductivityUserDetailPage> {
 
   Widget _listServices() {
     return Flexible(
-        child: ListView.builder(
-            itemCount: _productsCard.length,
-            scrollDirection: Axis.vertical,
-            shrinkWrap: true,
-            itemBuilder: (BuildContext context, int index) {
-              return ItemProductivityReportDetail(_productsCard[index], index);
-            },
+        child: Column(
+          children: [
+            Text(widget.operatorNameList,
+              style: TextStyle(
+                fontFamily: "Lato",
+                decoration: TextDecoration.none,
+                fontWeight: FontWeight.w600,
+                color: Colors.black,
+                fontSize: 18,
+              ),
+            ),
+            SizedBox(height: 3),
+            Flexible(
+              child: ListView.builder(
+                itemCount: _productsCard.length,
+                scrollDirection: Axis.vertical,
+                shrinkWrap: true,
+                itemBuilder: (BuildContext context, int index) {
+                  return ItemProductivityReportDetail(_productsCard[index], index);
+                },
+              ),
+            ),
+          ],
         ),
     );
   }
