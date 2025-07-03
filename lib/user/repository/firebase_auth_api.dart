@@ -5,56 +5,69 @@ import 'package:google_sign_in/google_sign_in.dart';
 
 class FirebaseAuthApi {
   final FirebaseAuth _authApi = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
   final FacebookAuth _facebookSingIn = FacebookAuth.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
+  bool _googleInitialized = false;
 
-  //TODO recordar que esta fucnion en flutter 3 ya retorna un null, validar cuando es llamada como manejar este null
-  //Authentication google
-  Future<User?> signIn() async {
-    //Inicio una instancia de la ventana de google por primera vez para loguearme con google
-    final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-    if (googleUser == null) return null;  // El usuario canceló el inicio de sesion
-
-    //Obtengo las credenciales de google al autorizar el login con google
-    final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-
-    //Credenciales para Firebase
-    final UserCredential _authResult = await _authApi.signInWithCredential(
-        GoogleAuthProvider.credential(
-            idToken: googleAuth.idToken, accessToken: googleAuth.accessToken));
-    User? user = await _authResult.user;
-    return user;
+  Future<void> _initGoogleSignIn() async {
+    if (!_googleInitialized) {
+      await _googleSignIn.initialize(
+        clientId: 'TU_CLIENT_ID_IOS.apps.googleusercontent.com',
+        serverClientId: 'TU_CLIENT_ID_SERVIDOR.apps.googleusercontent.com',
+      );
+      _googleInitialized = true;
+    }
   }
 
-  //Authentication Facebook
-  //TODO el login con Facebook en IOS aun no funcion
+  // Authentication Google
+  Future<User?> signIn() async {
+    await _initGoogleSignIn();
+
+    try {
+      final GoogleSignInAccount account = await _googleSignIn.authenticate(
+        scopeHint: ['email', 'profile'],
+      );
+      final auth = account.authentication;
+      final cred = GoogleAuthProvider.credential(
+        idToken: auth.idToken,
+        accessToken: auth.accessToken,
+      );
+      final result = await _authApi.signInWithCredential(cred);
+      return result.user;
+    } on GoogleSignInException catch (e) {
+      print('Google SignIn error: ${e.code.name} — ${e.description}');
+      return null;
+    } catch (e) {
+      print('Unexpected Google SignIn error: $e');
+      return null;
+    }
+  }
+
+  // Authentication Facebook
+  // TODO el login con Facebook en IOS aun no funciona
   Future<User?> facebookSingIn() async {
     try {
-      final LoginResult result = await _facebookSingIn.login(permissions: ['email', 'public_profile']);
+      final LoginResult result =
+      await _facebookSingIn.login(permissions: ['email', 'public_profile']);
 
       switch (result.status) {
         case LoginStatus.success:
           final AccessToken accessToken = result.accessToken!;
-          print("""Login Satisfactorio 
-            Token: ${accessToken.tokenString}""");
+          print("""Login Satisfactorio \\n            Token: ${accessToken.tokenString}""");
 
           UserCredential authResult = await _authApi.signInWithCredential(
             FacebookAuthProvider.credential(accessToken.tokenString),
           );
           User? user = authResult.user;
           return user;
-          break;
         case LoginStatus.cancelled:
           print("Login Cancelado");
           return null;
-          break;
         case LoginStatus.failed:
           print("Error en login ${result.message}");
           return null;
-          break;
         default:
           return null;
-          break;
       }
     } catch (error) {
       print("Error general en login ${error}");
@@ -62,7 +75,7 @@ class FirebaseAuthApi {
     }
   }
 
-  //Authentication Email
+  // Authentication Email
   Future<User?> emailAndPasswordSignIn(String email, String password) async {
     try {
       UserCredential authResult = await _authApi.signInWithEmailAndPassword(
@@ -85,19 +98,16 @@ class FirebaseAuthApi {
           appId: 'carwash-app-9a2c2',
           messagingSenderId: '282309180715',
           projectId: 'carwash-app-9a2c2',
-          databaseURL:'https://carwash-app-9a2c2.firebaseio.com',
-        )
+          databaseURL: 'https://carwash-app-9a2c2.firebaseio.com',
+        ),
       );
 
-      // Get FirebaseAuth instance for the second app
       FirebaseAuth secondAuth = FirebaseAuth.instanceFor(app: secondApp);
 
-      // Create a user with email and password
-      UserCredential authResult = await secondAuth.createUserWithEmailAndPassword(email: email, password: password);
+      UserCredential authResult = await secondAuth
+          .createUserWithEmailAndPassword(email: email, password: password);
 
       String userUid = authResult.user!.uid;
-
-      // Sign out from the second instance
       await secondAuth.signOut();
       return userUid;
     } catch (e) {
@@ -112,7 +122,7 @@ class FirebaseAuthApi {
 
   singOut() async {
     await _authApi.signOut();
-    await _googleSignIn.signOut();
+    await _googleSignIn.disconnect();
     await _facebookSingIn.logOut();
   }
 }
