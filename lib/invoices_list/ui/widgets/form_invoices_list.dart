@@ -572,9 +572,9 @@ class _FormInvoicesList extends State<FormInvoicesList> {
     if (invoiceToClose.phoneNumber?.isNotEmpty??false) {
       String message =
           "Spa CarWash Movil -- Estimado cliente. Le informamos que el servicio de lavado de su vehículo de placa ${invoiceToClose.placa}, ha finalizado y está listo para ser entregado ☑️. "
-          "➡️*Diligencia tus datos en este link para recibir tu factura electrónica*: https://docs.google.com/forms/d/1CoT5pPLH5NOt2Bco8PSQ-goM9vnNo9jymJvIBFf87_o/edit?ts=666ce528"
-          "➡️Si desea adelantar tu pago, puedes hacerlo en el siguiente link: https://checkout.wompi.co/l/VPOS_C74dzR"
-          "➡️Ayúdanos a mejorar, con tu opinión en el siguinte link: https://docs.google.com/forms/d/1gdq9rSR8pMqlukEalGLxF_m5954m7_Hpm5k5HYX89yU/edit";
+          " ➡️*Diligencia tus datos en este link para recibir tu factura electrónica*: https://docs.google.com/forms/d/1CoT5pPLH5NOt2Bco8PSQ-goM9vnNo9jymJvIBFf87_o/edit?ts=666ce528"
+          " ➡️ Si desea adelantar tu pago, puedes hacerlo en el siguiente link: https://checkout.wompi.co/l/VPOS_C74dzR"
+          " ➡️ Ayúdanos a mejorar, con tu opinión en el siguinte link: https://docs.google.com/forms/d/1gdq9rSR8pMqlukEalGLxF_m5954m7_Hpm5k5HYX89yU/edit";
 
       if (_location.sendMessageSms ?? false) {
         _sendSMS(message, invoiceToClose.phoneNumber??'');
