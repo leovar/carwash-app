@@ -4,7 +4,7 @@ import 'package:car_wash_app/reports/bloc/bloc_reports.dart';
 import 'package:car_wash_app/reports/model/earnings_card_detail.dart';
 import 'package:car_wash_app/reports/ui/widgets/item_earning_card.dart';
 import 'package:car_wash_app/widgets/messages_utils.dart';
-import 'package:excel/excel.dart';
+import 'package:excel/excel.dart' as excel_lib;
 import 'package:path/path.dart' as path_prov;
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -33,7 +33,6 @@ class _EarningsReport extends State<EarningsReport> {
     super.initState();
     _textDateInit.text = formatter.format(_dateTimeInit);
     _textDateFinal.text = formatter.format(_dateTimeFinal);
-
   }
 
   @override
@@ -43,9 +42,7 @@ class _EarningsReport extends State<EarningsReport> {
       mainAxisSize: MainAxisSize.max,
       children: [
         _filterParamsReport(),
-        SizedBox(
-          height: 4.0,
-        ),
+        SizedBox(height: 4.0),
         /*Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
@@ -68,9 +65,7 @@ class _EarningsReport extends State<EarningsReport> {
         SizedBox(
           height: 4.0,
         ),*/
-        Expanded(
-          child: _getDataReport(),
-        ),
+        Expanded(child: _getDataReport()),
       ],
     );
   }
@@ -84,9 +79,7 @@ class _EarningsReport extends State<EarningsReport> {
           Flexible(
             child: TextField(
               controller: _textDateInit,
-              decoration: InputDecoration(
-                labelText: 'Fecha Desde',
-              ),
+              decoration: InputDecoration(labelText: 'Fecha Desde'),
               keyboardType: TextInputType.datetime,
               readOnly: true,
               onTap: () {
@@ -97,9 +90,7 @@ class _EarningsReport extends State<EarningsReport> {
           Flexible(
             child: TextField(
               controller: _textDateFinal,
-              decoration: InputDecoration(
-                labelText: 'Fecha Hasta',
-              ),
+              decoration: InputDecoration(labelText: 'Fecha Hasta'),
               keyboardType: TextInputType.datetime,
               readOnly: true,
               onTap: () {
@@ -114,21 +105,22 @@ class _EarningsReport extends State<EarningsReport> {
 
   Widget _getDataReport() {
     return StreamBuilder(
-      stream: _blocReports.earningsReportListStream(_dateTimeInit, _dateTimeFinal),
+      stream: _blocReports.earningsReportListStream(
+        _dateTimeInit,
+        _dateTimeFinal,
+      ),
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         return _containerData(snapshot);
-      }
+      },
     );
   }
 
   Widget _containerData(AsyncSnapshot snapshot) {
     switch (snapshot.connectionState) {
       case ConnectionState.waiting:
-        return Center(
-          child: CircularProgressIndicator(),
-        );
+        return Center(child: CircularProgressIndicator());
       default:
-        _listInvoices = _blocReports.buildEarningsReportList(snapshot.data.documents);
+        _listInvoices = _blocReports.buildEarningsReportList(snapshot.data.docs);
         _listCardReport = _blocReports.buildEarningCards(_listInvoices);
         _listCardReport.sort((a, b) => a.locationName.compareTo(b.locationName));
 
@@ -138,28 +130,24 @@ class _EarningsReport extends State<EarningsReport> {
             color: Colors.white,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _listCards(),
-                _quantitySummary(),
-              ],
+              children: [_listCards(), _quantitySummary()],
             ),
           );
-        } else
+        } else {
           return _emptyLocation();
+        }
     }
   }
 
   Widget _listCards() {
     return Flexible(
-        child: ListView.builder(
-          itemCount: _listCardReport.length,
-            scrollDirection: Axis.vertical,
-          itemBuilder: (BuildContext context, int index) {
-            return ItemEarningCard(
-              cardDetail: _listCardReport[index],
-            );
-          }
-        ),
+      child: ListView.builder(
+        itemCount: _listCardReport.length,
+        scrollDirection: Axis.vertical,
+        itemBuilder: (BuildContext context, int index) {
+          return ItemEarningCard(cardDetail: _listCardReport[index]);
+        },
+      ),
     );
   }
 
@@ -171,66 +159,46 @@ class _EarningsReport extends State<EarningsReport> {
     });
 
     return Container(
-      height: 30,
-      margin: EdgeInsets.only(top:8,),
+      margin: EdgeInsets.only(top: 8),
+      padding: EdgeInsets.symmetric(vertical: 8), // add vertical padding instead of height
       decoration: BoxDecoration(
         border: Border(
-          top: BorderSide(
-            color: Color(0xFFD8D8D8),
-            width: 1.0,
-          ),
+          top: BorderSide(color: Color(0xFFD8D8D8), width: 1.0),
         ),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.max,
+      child: Row(
         children: [
-          Row(
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              Flexible(
-                flex: 4,
-                child: Row(
-                  children: [
-                    Flexible(
-                      child: Container(
-                        padding: EdgeInsets.only(left: 8, top: 8,),
-                        alignment: Alignment.topLeft,
-                        child: Text(
-                          'Venta global empresa',
-                          style: TextStyle(
-                            fontFamily: "Lato",
-                            decoration: TextDecoration.none,
-                            fontSize: 17.0,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+          Expanded(
+            flex: 4,
+            child: Padding(
+              padding: EdgeInsets.only(left: 8),
+              child: Text(
+                'Venta global empresa',
+                style: TextStyle(
+                  fontFamily: "Lato",
+                  decoration: TextDecoration.none,
+                  fontSize: 17.0,
                 ),
               ),
-              Flexible(
-                flex: 2,
-                child: Row(
-                 children: [
-                   Flexible(
-                     child: Container(
-                       alignment: Alignment.centerRight,
-                       padding: EdgeInsets.only(right: 8, top: 8),
-                       child: Text(
-                         '\$${formatterPrice.format(_totalValue)}',
-                         style: TextStyle(
-                           fontFamily: "Lato",
-                           fontWeight: FontWeight.w600,
-                           fontSize: 17.0,
-                           color: Color(0xFF59B258),
-                         ),
-                       ),
-                     ),
-                   ),
-                 ],
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: Padding(
+              padding: EdgeInsets.only(right: 8),
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  '\$${formatterPrice.format(_totalValue)}',
+                  style: TextStyle(
+                    fontFamily: "Lato",
+                    fontWeight: FontWeight.w600,
+                    fontSize: 17.0,
+                    color: Color(0xFF59B258),
+                  ),
                 ),
               ),
-            ],
+            ),
           ),
         ],
       ),
@@ -239,41 +207,42 @@ class _EarningsReport extends State<EarningsReport> {
 
   Widget _emptyLocation() {
     return Container(
-      child: Center(
-        child: Text('No hay información para mostrar'),
-      ),
+      child: Center(child: Text('No hay información para mostrar')),
     );
   }
 
-
   /// Functions
   Future<Null> _datePickerFrom() async {
-    final DateTime picked = await showDatePicker(
+    final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: _dateTimeInit,
       firstDate: DateTime(1970),
       lastDate: DateTime(2100),
     );
 
-    if (picked != null && picked != _dateTimeInit) {
+    if (picked != _dateTimeInit) {
       setState(() {
-        _dateTimeInit = picked;
+        if (picked != null) {
+          _dateTimeInit = picked;
+        }
         _textDateInit.text = formatter.format(_dateTimeInit);
       });
     }
   }
 
   Future<Null> _datePickerFinal() async {
-    final DateTime picked = await showDatePicker(
+    final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: _dateTimeFinal,
       firstDate: DateTime(1970),
       lastDate: DateTime(2100),
     );
 
-    if (picked != null && picked != _dateTimeFinal) {
+    if (picked != _dateTimeFinal) {
       setState(() {
-        _dateTimeFinal = picked;
+        if (picked != null) {
+          _dateTimeFinal = picked;
+        }
         _textDateFinal.text = formatter.format(_dateTimeFinal);
       });
     }
@@ -282,19 +251,23 @@ class _EarningsReport extends State<EarningsReport> {
   void _downloadReport() async {
     int count = 0;
     try {
-      List<Invoice> _listInvoicesReport = _listInvoices.where((f) => !f.cancelledInvoice && f.invoiceClosed).toList();
+      List<Invoice> _listInvoicesReport =
+          _listInvoices
+              .where((f) => !(f.cancelledInvoice??false) && (f.invoiceClosed??false))
+              .toList();
       if (_listInvoicesReport.length > 0) {
         MessagesUtils.showAlertWithLoading(
-            context: context, title: 'Generando reporte')
-            .show();
+          context: context,
+          title: 'Generando reporte',
+        ).show();
 
         int _maxCountOperators = 0;
         _listInvoicesReport.forEach((itemInvoice) {
-          if ((itemInvoice.countOperators??0) > _maxCountOperators)
-            _maxCountOperators = itemInvoice.countOperators;
+          if ((itemInvoice.countOperators ?? 0) > _maxCountOperators)
+            _maxCountOperators = itemInvoice.countOperators??0;
         });
 
-        var excel = Excel.createExcel();
+        var excel = excel_lib.Excel.createExcel();
         var sheetObject = excel["Sheet1"];
 
         List<String> header = [
@@ -310,46 +283,49 @@ class _EarningsReport extends State<EarningsReport> {
         for (var i = 1; i <= _maxCountOperators; i++) {
           header.add("Operador " + i.toString());
         }
-        sheetObject.appendRow(header);
+        sheetObject.appendRow(header.cast<excel_lib.CellValue?>());
         _listInvoicesReport.forEach((item) {
           count++;
           List<String> row = [
-            "${formatter.format(item.creationDate.toDate())}",
+            "${formatter.format(item.creationDate!.toDate())}",
             "${item.locationName}",
             "${item.consecutive}",
-            "${item.totalPrice.toInt()}",
+            "${(item.totalPrice??0).toInt()}",
             "${item.totalCommission}",
             "${item.countOperators}",
-            "${((item.totalCommission??0) / item.countOperators)}",
-            "${item.operatorsSplit}"
+            "${((item.totalCommission ?? 0) / (item.countOperators??0))}",
+            "${item.operatorsSplit}",
           ];
-          item.operatorUsers.forEach((itemOpp) {
+          item.operatorUsers?.forEach((itemOpp) {
             row.add("${itemOpp.name}");
           });
-          sheetObject.appendRow(row);
+          sheetObject.appendRow(row.cast<excel_lib.CellValue?>());
         });
 
         excel.rename("Sheet1", "Hoja1");
 
         String outputFile =
             "/storage/emulated/0/Download/ReporteGanancias.xlsx";
-        excel.encode().then((onValue) {
+        var encodedExcel = await excel.encode();
+        if (encodedExcel != null) {
           File(path_prov.join(outputFile))
             ..createSync(recursive: true)
-            ..writeAsBytesSync(onValue);
-        });
+            ..writeAsBytesSync(encodedExcel);
+        }
 
         Navigator.pop(context); //Close popUp Save
         Fluttertoast.showToast(
-            msg: "Su reporte ha sido descargado en: ${outputFile}",
-            toastLength: Toast.LENGTH_LONG);
+          msg: "Su reporte ha sido descargado en: ${outputFile}",
+          toastLength: Toast.LENGTH_LONG,
+        );
       }
     } catch (_error) {
       print('$_error');
       Navigator.pop(context);
       Fluttertoast.showToast(
-          msg: "Error generando el informe: Linea $count  $_error",
-          toastLength: Toast.LENGTH_LONG);
+        msg: "Error generando el informe: Linea $count  $_error",
+        toastLength: Toast.LENGTH_LONG,
+      );
     }
   }
 }

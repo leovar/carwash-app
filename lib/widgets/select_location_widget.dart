@@ -1,13 +1,13 @@
 import 'package:car_wash_app/location/bloc/bloc_location.dart';
 import 'package:car_wash_app/location/model/location.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 
 class SelectLocationWidget extends StatefulWidget {
   final Function(Location) selectLocation;
   final Location locationSelected;
 
-  SelectLocationWidget({Key key, this.locationSelected, this.selectLocation});
+  SelectLocationWidget({Key? key, required this.locationSelected, required this.selectLocation});
 
   @override
   State<StatefulWidget> createState() => _SelectLocationWidget();
@@ -15,15 +15,13 @@ class SelectLocationWidget extends StatefulWidget {
 
 class _SelectLocationWidget extends State<SelectLocationWidget> {
   BlocLocation _blocLocation = BlocLocation();
-  List<DropdownMenuItem<Location>> _dropdownMenuItems;
-  Location _selectedLocation;
+  late List<DropdownMenuItem<Location>> _dropdownMenuItems;
+  late Location _selectedLocation;
 
   @override
   void initState() {
     super.initState();
-    if (widget.locationSelected.locationName != null) {
-      _selectedLocation = widget.locationSelected;
-    }
+    _selectedLocation = widget.locationSelected;
   }
 
   @override
@@ -36,22 +34,30 @@ class _SelectLocationWidget extends State<SelectLocationWidget> {
   }
 
   Widget _getLocationsList() {
-    return StreamBuilder(
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
       stream: _blocLocation.locationsStream,
       builder: (context, snapshot) {
-        switch (snapshot.connectionState) {
-          case ConnectionState.waiting:
-            return CircularProgressIndicator();
-          default:
-            return _chargeDropLocations(snapshot);
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return CircularProgressIndicator(); // Show loading indicator
         }
+        if (snapshot.hasError) {
+          return Center(child: Text("Error loading locations"));
+        }
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return Center(child: Text("No locations found"));
+        }
+        return _chargeDropLocations(snapshot);
       },
     );
   }
 
   Widget _chargeDropLocations(AsyncSnapshot snapshot) {
+    if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+      return Center(child: Text("No locations available"));
+    }
+
     List<Location> locationList =
-        _blocLocation.buildLocations(snapshot.data.documents);
+        _blocLocation.buildLocations(snapshot.data!.docs);
     _dropdownMenuItems = builtDropdownMenuItems(locationList);
 
     return DropdownButton(
@@ -75,19 +81,29 @@ class _SelectLocationWidget extends State<SelectLocationWidget> {
       ),
       underline: Container(
         height: 1,
-        color: Theme.of(context).cursorColor,
+        color: Theme.of(context).colorScheme.primary,
       ),
     );
   }
 
   List<DropdownMenuItem<Location>> builtDropdownMenuItems(List locations) {
-    List<DropdownMenuItem<Location>> listItems = List();
+    List<DropdownMenuItem<Location>> listItems = [];
     for (Location documentLoc in locations) {
       listItems.add(
         DropdownMenuItem(
           value: documentLoc,
           child: Text(
-            documentLoc.locationName,
+            documentLoc.locationName ?? '',
+          ),
+        ),
+      );
+    }
+    if (widget.locationSelected.id == null) {
+      listItems.add(
+        DropdownMenuItem(
+          value: widget.locationSelected,
+          child: Text(
+            widget.locationSelected.locationName ?? '',
           ),
         ),
       );
@@ -95,10 +111,10 @@ class _SelectLocationWidget extends State<SelectLocationWidget> {
     return listItems;
   }
 
-  onChangeDropDawn(Location selectedLocation) {
+  onChangeDropDawn(Location? selectedLocation) {
     setState(() {
-      widget.selectLocation(selectedLocation);
-      _selectedLocation = selectedLocation;
+      widget.selectLocation(selectedLocation ?? new Location());
+      _selectedLocation = selectedLocation ?? new Location();
     });
   }
 }

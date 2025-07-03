@@ -1,11 +1,9 @@
-
 import 'package:car_wash_app/user/bloc/bloc_user.dart';
 import 'package:car_wash_app/widgets/gradient_back.dart';
 import 'package:car_wash_app/widgets/messages_utils.dart';
 import 'package:car_wash_app/widgets/text_field_input_validate.dart';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 import 'package:intl/intl.dart';
@@ -17,7 +15,7 @@ class RegisterUser extends StatefulWidget {
 }
 
 class _RegisterUser extends State<RegisterUser> {
-  UserBloc _userBloc;
+  late UserBloc _userBloc;
 
   final _textEmail = TextEditingController();
   final _textPassword = TextEditingController();
@@ -50,12 +48,7 @@ class _RegisterUser extends State<RegisterUser> {
     _userBloc = BlocProvider.of(context);
     return Scaffold(
       body: SafeArea(
-        child: Stack(
-          children: <Widget>[
-            GradientBack(),
-            bodyContainer(),
-          ],
-        ),
+        child: Stack(children: <Widget>[GradientBack(), bodyContainer()]),
       ),
     );
   }
@@ -63,14 +56,11 @@ class _RegisterUser extends State<RegisterUser> {
   Widget bodyContainer() {
     return SingleChildScrollView(
       child: Container(
-        margin: EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 16,
-        ),
+        margin: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         child: Center(
           child: Form(
             key: _formKey,
-            autovalidate: _autoValidate,
+            autovalidateMode: _autoValidate ? AutovalidateMode.always : AutovalidateMode.disabled,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
@@ -99,6 +89,7 @@ class _RegisterUser extends State<RegisterUser> {
                   autofocus: false,
                   colorText: Colors.white,
                   validateType: 1,
+                  onFinalEditText: (){},
                 ),
                 SizedBox(height: 16),
                 this._inputTextPassword(),
@@ -137,7 +128,7 @@ class _RegisterUser extends State<RegisterUser> {
                 //  colorText: Colors.white,
                 //  hintText: 'dd/mm/aaaa',
                 //  inputType: TextInputType.datetime,
-                  //textInputFormatter: [WhitelistingTextInputFormatter(RegExp('^[0-9]*\/*[0-9]*\/*[0-9]*'))],
+                //textInputFormatter: [WhitelistingTextInputFormatter(RegExp('^[0-9]*\/*[0-9]*\/*[0-9]*'))],
                 //  onFinalEditText: _onChangeTextBirthDate,
                 //),
                 //SizedBox(height: 16),
@@ -146,7 +137,7 @@ class _RegisterUser extends State<RegisterUser> {
                 //  textController: _textPlaca,
                 //  isUpperCase: true,
                 //  textInputFormatter: [
-                    //WhitelistingTextInputFormatter(RegExp("^[a-zA-Z0-9]*"))
+                //WhitelistingTextInputFormatter(RegExp("^[a-zA-Z0-9]*"))
                 //  ],
                 //  colorText: Colors.white,
                 //),
@@ -166,11 +157,12 @@ class _RegisterUser extends State<RegisterUser> {
       width: 250,
       height: 86,
       decoration: BoxDecoration(
-          image: DecorationImage(
-            fit: BoxFit.cover,
-            image: AssetImage("assets/images/car_wash_movil_logo_blanco.png"),
-          ),
-          shape: BoxShape.rectangle),
+        image: DecorationImage(
+          fit: BoxFit.cover,
+          image: AssetImage("assets/images/car_wash_movil_logo_blanco.png"),
+        ),
+        shape: BoxShape.rectangle,
+      ),
     );
   }
 
@@ -182,7 +174,6 @@ class _RegisterUser extends State<RegisterUser> {
       cursorColor: Colors.white,
       style: TextStyle(
         fontFamily: "Lato",
-        decoration: TextDecoration.none,
         color: Colors.white,
         fontSize: 18,
       ),
@@ -194,47 +185,29 @@ class _RegisterUser extends State<RegisterUser> {
           fontFamily: "Lato",
           color: Colors.white,
         ),
-        border: OutlineInputBorder(
-          borderSide: BorderSide(
-            color: Colors.white,
-          ),
-        ),
+        border: OutlineInputBorder(borderSide: BorderSide(color: Colors.white)),
         focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(
-            width: 2,
-            color: Colors.white,
-          ),
+          borderSide: BorderSide(width: 2, color: Colors.white),
         ),
         disabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(
-            width: 1,
-            color: Colors.white,
-          ),
+          borderSide: BorderSide(width: 1, color: Colors.white),
         ),
         enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(
-            width: 1,
-            color: Colors.white,
-          ),
+          borderSide: BorderSide(width: 1, color: Colors.white),
         ),
         suffixIcon: InkWell(
           onTap: () => this._togglePassword(),
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 10),
-            child: _obscureText
-                ? Icon(
-                    Icons.visibility,
-                    color: Colors.white,
-                  )
-                : Icon(
-                    Icons.visibility_off,
-                    color: Colors.white,
-                  ),
+            child:
+                _obscureText
+                    ? Icon(Icons.visibility, color: Colors.white)
+                    : Icon(Icons.visibility_off, color: Colors.white),
           ),
         ),
       ),
-      validator: (String args) {
-        if (args.isEmpty)
+      validator: (String? args) {
+        if (args == null || args.isEmpty)
           return 'El campo no puede estar vacio';
         else
           return null;
@@ -268,10 +241,7 @@ class _RegisterUser extends State<RegisterUser> {
         color: Colors.transparent,
       ),
       decoration: BoxDecoration(
-        border: Border.all(
-          color: Colors.white,
-          width: 1.0,
-        ),
+        border: Border.all(color: Colors.white, width: 1.0),
         borderRadius: BorderRadius.circular(7.0),
       ),
     );
@@ -282,14 +252,15 @@ class _RegisterUser extends State<RegisterUser> {
   void _onChangeTextBirthDate() {
     var text = _textBirthDate.text;
     var val = _textBirthDate.text.split('/');
-    var val1 = int.tryParse(val[0] ?? 0);
+    var val1 = int.tryParse(val.isNotEmpty ? val[0] : '0');
     var val2 = int.tryParse(val.length > 1 ? val[1] : '0');
     var val3 = int.tryParse(val.length > 2 ? val[2] : '0');
 
     if (text.length > 10) {
       _textBirthDate.text = _oldTextBirthDay;
       _textBirthDate.selection = TextSelection.fromPosition(
-          TextPosition(offset: _textBirthDate.text.length));
+        TextPosition(offset: _textBirthDate.text.length),
+      );
       return;
     }
 
@@ -298,38 +269,40 @@ class _RegisterUser extends State<RegisterUser> {
         _textBirthDate.text =
             text.substring(0, 2) + '/' + text.substring(2, text.length);
         _textBirthDate.selection = TextSelection.fromPosition(
-            TextPosition(offset: _textBirthDate.text.length));
+          TextPosition(offset: _textBirthDate.text.length),
+        );
       } else if (text.length > 5 && text.length < 7) {
         _textBirthDate.text =
             text.substring(0, 5) + '/' + text.substring(5, text.length);
         _textBirthDate.selection = TextSelection.fromPosition(
-            TextPosition(offset: _textBirthDate.text.length));
+          TextPosition(offset: _textBirthDate.text.length),
+        );
       }
 
-      if (val1 > 31 && val1.toString().length == 2) {
+      if (val1! > 31 && val1.toString().length == 2) {
         MessagesUtils.showAlert(
-                context: context,
-                title: 'El dia no puede ser superior a 31',
-                alertType: AlertType.warning)
-            .show();
+          context: context,
+          title: 'El dia no puede ser superior a 31',
+          alertType: AlertType.warning,
+        ).show();
       }
 
-      if (val2 > 12 && val2.toString().length == 2) {
+      if (val2! > 12 && val2.toString().length == 2) {
         MessagesUtils.showAlert(
-                context: context,
-                title: 'El mes no puede ser superior a 12',
-                alertType: AlertType.warning)
-            .show();
+          context: context,
+          title: 'El mes no puede ser superior a 12',
+          alertType: AlertType.warning,
+        ).show();
       }
 
-      if (val3 > 0 &&
+      if (val3! > 0 &&
           val3.toString().length == 4 &&
           (val3 < 1900 || val3 >= DateTime.now().year)) {
         MessagesUtils.showAlert(
-                context: context,
-                title: 'Ingrese un año válido',
-                alertType: AlertType.warning)
-            .show();
+          context: context,
+          title: 'Ingrese un año válido',
+          alertType: AlertType.warning,
+        ).show();
       }
     }
     _oldTextBirthDay = text;
@@ -355,30 +328,32 @@ class _RegisterUser extends State<RegisterUser> {
   Future<Null> _selectDate(BuildContext context) async {
     final formatDate = DateFormat.yMd('ES');
     Locale myLocale = Localizations.localeOf(context);
-    final DateTime picked = await showDatePicker(
-        context: context,
-        initialDate: _date,
-        locale: myLocale,
-        firstDate: DateTime(1901, 1),
-        lastDate: DateTime(2100));
-    if (picked != null && picked != _date)
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _date,
+      locale: myLocale,
+      firstDate: DateTime(1901, 1),
+      lastDate: DateTime(2100),
+    );
+    if (picked != _date)
       setState(() {
-        _date = picked;
-        _textBirthDate.value =
-            TextEditingValue(text: formatDate.format(picked));
+        _date = picked!;
+        _textBirthDate.value = TextEditingValue(
+          text: formatDate.format(picked),
+        );
       });
   }
 
   bool _validations() {
     bool emailValid = RegExp(
-            r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
-        .hasMatch(_textEmail.text.trim());
+      r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+",
+    ).hasMatch(_textEmail.text.trim());
     if (!emailValid) {
       MessagesUtils.showAlert(
-              context: context,
-              title: 'Por favor digite un correo valido',
-              alertType: AlertType.warning)
-          .show();
+        context: context,
+        title: 'Por favor digite un correo valido',
+        alertType: AlertType.warning,
+      ).show();
       return false;
     }
 
@@ -391,24 +366,25 @@ class _RegisterUser extends State<RegisterUser> {
   }
 
   Future<void> _registerUser() async {
-    if (_formKey.currentState.validate()) {
+    if (_formKey.currentState?.validate() ?? false) {
       if (_validations()) {
         if (_textEmail.text.isNotEmpty && _textPassword.text.isNotEmpty) {
           try {
             await _userBloc
                 .registerEmailUser(
-                    _textEmail.text.trim(), _textPassword.text.trim())
+                  _textEmail.text.trim(),
+                  _textPassword.text.trim(),
+                )
                 .then((registerUid) {
-                      _cleanData();
-                      MessagesUtils.showAlert(
-                          context: context,
-                          title: 'Usuario Registrado',
-                          alertType: AlertType.success)
-                          .show();
+                  _cleanData();
+                  MessagesUtils.showAlert(
+                    context: context,
+                    title: 'Usuario Registrado',
+                    alertType: AlertType.success,
+                  ).show();
+                });
 
-                    });
-
-            _formKey.currentState.save();
+            _formKey.currentState?.save();
           } on PlatformException catch (e) {
             if (e.message ==
                 'The email address is already in use by another account.') {

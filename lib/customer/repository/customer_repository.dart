@@ -4,7 +4,7 @@ import 'package:car_wash_app/widgets/firestore_collections.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CustomerRepository {
-  final Firestore _db = Firestore.instance;
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   Future<Customer> getCustomerByVehicle(
       DocumentReference vehicleReference) async {
@@ -15,29 +15,29 @@ class CustomerRepository {
         arrayContains: vehicleReference)
         .orderBy(
         FirestoreCollections.customerFieldCreationDate, descending: true)
-        .getDocuments();
+        .get();
 
-    final documents = querySnapshot.documents;
+    final documents = querySnapshot.docs;
     if (documents.length > 0) {
       final documentSnapshot = documents.first;
       return Customer.fromJson(
-        documentSnapshot.data,
-        id: documentSnapshot.documentID,
+        documentSnapshot.data(),
+        id: documentSnapshot.id,
       );
     }
-    return null;
+    return Future.value(null);
   }
 
   Future<Customer> getCustomerByIdCustomer(String idCustomer) async {
     final querySnapshot = await this
         ._db
         .collection(FirestoreCollections.customers)
-        .document(idCustomer)
+        .doc(idCustomer)
         .get();
 
     return Customer.fromJson(
-      querySnapshot.data,
-      id: querySnapshot.documentID,
+      querySnapshot.data() as Map<String, dynamic>,
+      id: querySnapshot.id,
     );
   }
 
@@ -63,10 +63,10 @@ class CustomerRepository {
           isEqualTo: email.toLowerCase());
     }
 
-    querySnapshot = await queryFirestore.getDocuments();
-    if (querySnapshot.documents.length > 0) {
-      querySnapshot.documents.forEach((doc) {
-        final customer = Customer.fromJson(doc.data, id: doc.documentID);
+    querySnapshot = await queryFirestore.get();
+    if (querySnapshot.docs.length > 0) {
+      querySnapshot.docs.forEach((doc) {
+        final customer = Customer.fromJson(doc.data() as Map<String, dynamic>, id: doc.id);
         customerList.add(customer);
       });
     }
@@ -76,13 +76,13 @@ class CustomerRepository {
 
   Future<DocumentReference> updateCustomer(Customer customer) async {
     DocumentReference ref =
-    _db.collection(FirestoreCollections.customers).document(customer.id);
-    ref.setData(customer.toJson(), merge: true);
+    _db.collection(FirestoreCollections.customers).doc(customer.id);
+    ref.set(customer.toJson(), SetOptions(merge: true));
     return ref;
   }
 
   Future<DocumentReference> getCustomerReference(String customerId) async {
-    return _db.collection(FirestoreCollections.customers).document(customerId);
+    return _db.collection(FirestoreCollections.customers).doc(customerId);
   }
 
   Future<List<Customer>> getCustomersByLocation(
@@ -95,19 +95,18 @@ class CustomerRepository {
         .where(FirestoreCollections.invoiceFieldLocation,
         isEqualTo: locationReference);
 
-    querySnapshot = await queryFirestore.getDocuments();
+    querySnapshot = await queryFirestore.get();
     final responses = await Future.wait(
-        querySnapshot.documents.map((p) {
-            Invoice invoice = Invoice.fromJson(p.data, id: p.documentID);
-            return invoice.customer.get();
+        querySnapshot.docs.map((p) {
+            Invoice invoice = Invoice.fromJson(p.data() as Map<String, dynamic>, id: p.id);
+            return invoice.customer != null ? invoice.customer!.get() : Future.value(null);
         }),
     );
 
     customerList = responses.map((response) {
-      Customer customerModel = Customer.fromJson(response.data, id: response.documentID);
+      Customer customerModel = Customer.fromJson(response?.data() as Map<String, dynamic>, id: response?.id);
       return customerModel;
     }).toList();
-
     return  customerList;
   }
 }

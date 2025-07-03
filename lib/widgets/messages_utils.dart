@@ -41,8 +41,8 @@ class MessagesUtils {
   );
 
   static Alert showAlert({
-    @required BuildContext context,
-    @required String title,
+    required BuildContext context,
+    required String title,
     AlertType alertType = AlertType.info,
   }) {
     return Alert(
@@ -52,10 +52,10 @@ class MessagesUtils {
       style: alertStyle,
       buttons: [
         DialogButton(
-          color: Theme.of(context).accentColor,
+          color: Theme.of(context).colorScheme.secondary,
           child: Text(
             'ACEPTAR',
-            style: Theme.of(context).textTheme.button,
+            style: Theme.of(context).textTheme.labelLarge,
           ),
           onPressed: () => Navigator.of(context).pop(),
         )
@@ -64,8 +64,8 @@ class MessagesUtils {
   }
 
   static Alert showAlertWithLoading({
-    @required BuildContext context,
-    @required String title,
+    required BuildContext context,
+    required String title,
   }) {
     return Alert(
       context: context,

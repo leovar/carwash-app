@@ -1,7 +1,6 @@
 import 'package:car_wash_app/location/bloc/bloc_location.dart';
 import 'package:car_wash_app/location/model/location.dart';
 import 'package:car_wash_app/location/ui/widgets/item_location_admin_list.dart';
-import 'package:car_wash_app/user/bloc/bloc_user.dart';
 import 'package:flutter/material.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 
@@ -13,7 +12,7 @@ class LocationsAdminPage extends StatefulWidget{
 }
 
 class _LocationsAdminPage extends State<LocationsAdminPage> {
-  BlocLocation _locationsBloc;
+  late BlocLocation _locationsBloc;
   List<Location> _locationList = <Location>[];
 
   @override
@@ -73,7 +72,7 @@ class _LocationsAdminPage extends State<LocationsAdminPage> {
   }
 
   Widget _getDataLocationsList(AsyncSnapshot snapshot) {
-    _locationList = _locationsBloc.buildAllLocations(snapshot.data.documents);
+    _locationList = _locationsBloc.buildAllLocations(snapshot.data.docs);
     return Flexible(
       child: ListView.builder(
         itemCount: _locationList.length,
@@ -92,9 +91,11 @@ class _LocationsAdminPage extends State<LocationsAdminPage> {
       margin: EdgeInsets.only(top: 8,),
       child: Align(
         alignment: Alignment.bottomCenter,
-        child: RaisedButton(
-          padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
-          color: Color(0xFF59B258),
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
+            backgroundColor: Color(0xFF59B258),
+          ),
           child: Text(
             "Nueva Sede",
             style: TextStyle(

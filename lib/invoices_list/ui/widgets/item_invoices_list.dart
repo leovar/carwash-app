@@ -1,6 +1,5 @@
 import 'package:car_wash_app/invoice/model/invoice.dart';
 import 'package:car_wash_app/invoice/ui/screens/invoice_page.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -13,21 +12,21 @@ class ItemInvoicesList extends StatefulWidget {
   final Function(Invoice) closeInvoice;
 
   ItemInvoicesList(
-      {Key key,
-      this.listInvoices,
-      this.index,
-      this.updateDate,
-      this.isAdmon,
-      this.finishInvoice,
-      this.closeInvoice});
+      {Key? key,
+      required this.listInvoices,
+      required this.index,
+      required this.updateDate,
+      required this.isAdmon,
+      required this.finishInvoice,
+      required this.closeInvoice});
 
   @override
   State<StatefulWidget> createState() => _ItemInvoicesList();
 }
 
 class _ItemInvoicesList extends State<ItemInvoicesList> {
-  double _imageWith;
-  String _iconVehicle;
+  late double _imageWith;
+  late String _iconVehicle;
   var formatter = new DateFormat('dd-MM-yyyy hh:mm a');
 
   @override
@@ -79,7 +78,7 @@ class _ItemInvoicesList extends State<ItemInvoicesList> {
         false;
     bool _cancelInvoice = invoiceList.cancelledInvoice ?? false;
     bool _finishedInvoice =
-    ((invoiceList.countOperators ?? 0) > 0 && invoiceList.closedDate != null) ? true : false;
+    ((invoiceList.countOperators ?? 0) > 0) ? true : false;
     final formatterNumber = NumberFormat("#,###");
     return ConstrainedBox(
       constraints: BoxConstraints(
@@ -172,7 +171,7 @@ class _ItemInvoicesList extends State<ItemInvoicesList> {
                           Flexible(
                             child: Text(
                               formatter
-                                  .format(invoiceList.creationDate.toDate()),
+                                  .format(invoiceList.creationDate!.toDate()),
                               style: TextStyle(
                                 color: Color(0xFF787A71),
                                 fontFamily: "Lato",
@@ -228,21 +227,27 @@ class _ItemInvoicesList extends State<ItemInvoicesList> {
                                 margin: EdgeInsets.only(right: 2),
                                 child: ButtonTheme(
                                   minWidth: 84,
-                                  child: RaisedButton(
-                                    shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            new BorderRadius.circular(18.0),
-                                        side: BorderSide(
-                                            color:
-                                                Theme.of(context).accentColor)),
-                                    color: Theme.of(context).accentColor,
+                                  child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                          new BorderRadius.circular(18.0),
+                                          side: BorderSide(
+                                              color:
+                                              Theme.of(context).colorScheme.secondary)),
+                                      backgroundColor: Theme.of(context).colorScheme.secondary,
+                                      foregroundColor: Colors.white,
+                                      textStyle: TextStyle(fontSize: 12),
+                                    ),
                                     onPressed: () {
                                       widget.closeInvoice(invoiceList);
                                     },
-                                    textColor: Colors.white,
-                                    child: Text(
-                                      'Completar'.toUpperCase(),
-                                      style: TextStyle(fontSize: 12),
+                                    child: FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      child: Text(
+                                        'Completar'.toUpperCase(),
+                                        style: TextStyle(fontSize: 12),
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -251,21 +256,26 @@ class _ItemInvoicesList extends State<ItemInvoicesList> {
                                 margin: EdgeInsets.only(right: 2),
                                 child: ButtonTheme(
                                   minWidth: 84,
-                                  child: RaisedButton(
-                                    shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            new BorderRadius.circular(18.0),
-                                        side: BorderSide(
-                                            color:
-                                                Theme.of(context).errorColor)),
-                                    color: Theme.of(context).errorColor,
+                                  child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                          new BorderRadius.circular(18.0),
+                                          side: BorderSide(
+                                              color:
+                                              Theme.of(context).colorScheme.error)),
+                                      backgroundColor: Theme.of(context).colorScheme.error,
+                                      foregroundColor: Colors.white,
+                                      textStyle: TextStyle(fontSize: 12),
+                                    ),
                                     onPressed: () {
                                       widget.finishInvoice(invoiceList);
                                     },
-                                    textColor: Colors.white,
-                                    child: Text(
-                                      'Terminar'.toUpperCase(),
-                                      style: TextStyle(fontSize: 12),
+                                    child: FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      child: Text(
+                                        'Terminar'.toUpperCase(),
+                                      ),
                                     ),
                                   ),
                                 ),

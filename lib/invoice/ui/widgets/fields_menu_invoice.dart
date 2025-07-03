@@ -1,7 +1,7 @@
 import 'package:car_wash_app/invoice/bloc/bloc_invoice.dart';
 import 'package:car_wash_app/payment_methods/bloc/bloc_payment_method.dart';
 import 'package:car_wash_app/payment_methods/model/payment_methods.dart';
-import 'package:car_wash_app/user/model/user.dart';
+import 'package:car_wash_app/user/model/sysUser.dart';
 import 'package:car_wash_app/widgets/popup_menu_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
@@ -29,27 +29,27 @@ class FieldsMenusInvoice extends StatefulWidget {
   final bool enableForm;
 
   FieldsMenusInvoice({
-    Key key,
-    this.listCountCoordinators,
-    this.listCountBrands,
-    this.listCountBrandReference,
-    this.listCountColors,
-    this.listCountPaymentMethods,
-    this.cbHandlerCoordinator,
-    this.cbHandlerVehicleBrand,
-    this.cbHandlerVehicleBrandReference,
-    this.cbHandlerVehicleColor,
-    this.cbHandlerTypeSex,
-    this.cbHandlerPaymentMethod,
-    this.selectedCoordinator,
-    this.idLocation,
-    this.selectedVehicleBrand,
-    this.selectVehicleBrandReference,
-    this.selectedVehicleColor,
-    this.selectedTypeSex,
-    this.selectedPaymentMethod,
-    this.uidVehicleType,
-    this.enableForm,
+    Key? key,
+    required this.listCountCoordinators,
+    required this.listCountBrands,
+    required this.listCountBrandReference,
+    required this.listCountColors,
+    required this.listCountPaymentMethods,
+    required this.cbHandlerCoordinator,
+    required this.cbHandlerVehicleBrand,
+    required this.cbHandlerVehicleBrandReference,
+    required this.cbHandlerVehicleColor,
+    required this.cbHandlerTypeSex,
+    required this.cbHandlerPaymentMethod,
+    required this.selectedCoordinator,
+    required this.idLocation,
+    required this.selectedVehicleBrand,
+    required this.selectVehicleBrandReference,
+    required this.selectedVehicleColor,
+    required this.selectedTypeSex,
+    required this.selectedPaymentMethod,
+    required this.uidVehicleType,
+    required this.enableForm,
   });
 
   @override
@@ -59,10 +59,10 @@ class FieldsMenusInvoice extends StatefulWidget {
 }
 
 class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
-  BlocInvoice _blocInvoice;
+  late BlocInvoice _blocInvoice;
   BlocPaymentMethod _paymentMethodBloc = BlocPaymentMethod();
-  List<User> _listUsersCoordinators;
-  List<PaymentMethod> _listMasterPaymentsMethods;
+  late List<SysUser> _listUsersCoordinators;
+  late List<PaymentMethod> _listMasterPaymentsMethods;
   List<String> _listCoordinators = <String>[];
   List<String> _listBrands = <String>[];
   List<String> _listBrandReferences = <String>[];
@@ -129,6 +129,10 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
 
   Widget _getCoordinators() {
     if (widget.listCountCoordinators == 0) {
+      if (widget.idLocation == '') {
+        return CircularProgressIndicator();
+      }
+
       return StreamBuilder(
         stream: _blocInvoice.coordinatorsByLocationStream(widget.idLocation),
         builder: (BuildContext context, AsyncSnapshot snapshot) {
@@ -146,10 +150,8 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
   }
 
   Widget showPopUpCoordinators(AsyncSnapshot snapshot) {
-    _listUsersCoordinators =
-        _blocInvoice.buildCoordinators(snapshot.data.documents);
-    _listCoordinators =
-        _listUsersCoordinators.map((user) => user.name).toList();
+    _listUsersCoordinators = _blocInvoice.buildCoordinators(snapshot.data.docs);
+    _listCoordinators = _listUsersCoordinators.map((SysUser) => SysUser.name).toList();
     widget.cbHandlerCoordinator('', _listUsersCoordinators.length, 2);
     return chargeCoordinatorsWidget();
   }
@@ -161,6 +163,7 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
       listString: _listCoordinators,
       valueSelect: _selectCoordinator,
       enableForm: widget.enableForm,
+      editForm: false,
     );
   }
 
@@ -195,7 +198,7 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
   }
 
   Widget _getListBrands(AsyncSnapshot snapshot) {
-    _listBrands = _blocInvoice.buildBrandsInvoice(snapshot.data.documents);
+    _listBrands = _blocInvoice.buildBrandsInvoice(snapshot.data.docs);
     widget.cbHandlerVehicleBrand('', _listBrands.length, 2);
     return _chargeListBrands();
   }
@@ -207,6 +210,7 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
       listString: _listBrands,
       valueSelect: _selectedBrand,
       enableForm: widget.enableForm,
+      editForm: false,
     );
   }
 
@@ -218,6 +222,7 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
       listString: _listBrandReferences,
       valueSelect: _selectBrandReference ?? 'Referencia',
       enableForm: widget.enableForm,
+      editForm: false,
     );
   }
 
@@ -248,7 +253,7 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
   }
 
   Widget _getColorsList(AsyncSnapshot snapshot) {
-    _listColors = _blocInvoice.buildColors(snapshot.data.documents);
+    _listColors = _blocInvoice.buildColors(snapshot.data.docs);
     widget.cbHandlerVehicleColor('', _listColors.length, 2);
     return _chargeListColors();
   }
@@ -260,6 +265,7 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
       listString: _listColors,
       valueSelect: _selectedColor,
       enableForm: widget.enableForm,
+      editForm: false,
     );
   }
 
@@ -270,6 +276,7 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
       listString: _listTypeSex,
       valueSelect: _selectTypeSex ?? 'Sexo',
       enableForm: widget.enableForm,
+      editForm: false,
     );
   }
 
@@ -292,8 +299,8 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
   }
 
   Widget showPopUpPaymentMethods(AsyncSnapshot snapshot) {
-    _listMasterPaymentsMethods = _paymentMethodBloc.buildPaymentMethods(snapshot.data.documents);
-    _listPaymentMethods = _listMasterPaymentsMethods.map((pm) => pm.name).toList();
+    _listMasterPaymentsMethods = _paymentMethodBloc.buildPaymentMethods(snapshot.data.docs);
+    _listPaymentMethods = _listMasterPaymentsMethods.map((pm) => pm.name).toList().whereType<String>().toList();
     widget.cbHandlerPaymentMethod('', _listMasterPaymentsMethods.length, 2);
     return chargePaymentMethodsControl();
   }
@@ -305,6 +312,7 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
       listString: _listPaymentMethods,
       valueSelect: _selectPaymentMethod??'',
       enableForm: widget.enableForm,
+      editForm: false,
     );
   }
 

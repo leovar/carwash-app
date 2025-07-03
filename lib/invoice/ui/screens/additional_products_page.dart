@@ -3,7 +3,6 @@ import 'package:car_wash_app/invoice/model/header_services.dart';
 import 'package:car_wash_app/invoice/ui/widgets/text_field_input.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:meta/dart2js.dart';
 
 class AdditionalProductPage extends StatefulWidget {
   final Function(List<AdditionalProduct>) setCbAdditionalProducts;
@@ -12,7 +11,7 @@ class AdditionalProductPage extends StatefulWidget {
   final bool editForm;
 
   AdditionalProductPage(
-      {Key key, this.setCbAdditionalProducts, this.additionalProductsList, this.editForm, this.vehicleTypeSelect,});
+      {Key? key, required this.setCbAdditionalProducts, required this.additionalProductsList, required this.editForm, required this.vehicleTypeSelect,});
 
   @override
   State<StatefulWidget> createState() {
@@ -25,7 +24,7 @@ class _AdditionalProductPage extends State<AdditionalProductPage> {
   final _valueAdditionalService = TextEditingController();
   final _valueServiceTime = TextEditingController();
   bool _checkIva = false;
-  FocusNode nameFocusNode;
+  late FocusNode nameFocusNode;
 
   @override
   void initState() {
@@ -119,10 +118,12 @@ class _AdditionalProductPage extends State<AdditionalProductPage> {
                       children: <Widget>[
                         Checkbox(
                           value: _checkIva,
-                          onChanged: (bool value) {
+                          onChanged: (bool? value) {
                             if (mounted) {
                               setState(() {
-                                _checkIva = value;
+                                if (value != null) {
+                                  _checkIva = value;
+                                }
                               });
                             }
                           },
@@ -143,10 +144,11 @@ class _AdditionalProductPage extends State<AdditionalProductPage> {
                     Container(
                       child: Align(
                         alignment: Alignment.center,
-                        child: RaisedButton(
-                          padding:
-                          EdgeInsets.symmetric(vertical: 8, horizontal: 10),
-                          color: Color(0xFF59B258),
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            padding: EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+                            backgroundColor: Color(0xFF59B258),
+                          ),
                           child: Text(
                             "Agregar Servicio",
                             style: TextStyle(

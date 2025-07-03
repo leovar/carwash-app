@@ -21,19 +21,19 @@ class FieldsInvoice extends StatefulWidget {
   final editForm;
 
   FieldsInvoice({
-    Key key,
+    Key? key,
     this.textPlaca,
-    this.sendEmail,
-    this.cbHandlerSendEmail,
+    required this.sendEmail,
+    required this.cbHandlerSendEmail,
     this.textClient,
     this.textEmail,
     this.textPhoneNumber,
     this.textNeighborhood,
     this.textBirthDate,
     this.textTimeDelivery,
-    this.finalEditPlaca,
-    this.enableForm,
-    this.validatePlaca,
+    required this.finalEditPlaca,
+    required this.enableForm,
+    required this.validatePlaca,
     this.focusClient,
     this.autofocusPlaca,
     this.editForm,
@@ -69,25 +69,22 @@ class _FieldsInvoice extends State<FieldsInvoice> {
           textController: widget.textPlaca,
           isUpperCase: true,
           textInputFormatter: [
-            FilteringTextInputFormatter.allow(RegExp("^[a-zA-Z0-9]*"))
+            FilteringTextInputFormatter.allow(RegExp("^[a-zA-Z0-9]*")),
+            UpperCaseTextFormatter(),
           ],
           onFinalEditText: widget.finalEditPlaca,
           validate: widget.validatePlaca,
           textValidate: 'El Campo no puede estar vacio',
           autofocus: widget.autofocusPlaca,
         ),
-        SizedBox(
-          height: 9,
-        ),
+        SizedBox(height: 9),
         TextFieldInput(
           labelText: "Cliente",
           textController: widget.textClient,
           enable: widget.enableForm,
           focusNode: widget.focusClient,
         ),
-        SizedBox(
-          height: 9,
-        ),
+        SizedBox(height: 9),
         TextFieldInput(
           labelText: "Telefono",
           textController: widget.textPhoneNumber,
@@ -96,9 +93,7 @@ class _FieldsInvoice extends State<FieldsInvoice> {
           autofocus: false,
           maxLength: 10,
         ),
-        SizedBox(
-          height: 9,
-        ),
+        SizedBox(height: 9),
         TextFieldInput(
           labelText: "Correo Electrónico",
           textController: widget.textEmail,
@@ -106,9 +101,7 @@ class _FieldsInvoice extends State<FieldsInvoice> {
           //enable: widget.enableForm,
           autofocus: false,
         ),
-        SizedBox(
-          height: 9,
-        ),
+        SizedBox(height: 9),
         TextFieldInput(
           labelText: "Barrio",
           textController: widget.textNeighborhood,
@@ -128,9 +121,7 @@ class _FieldsInvoice extends State<FieldsInvoice> {
             ),
           ),
         ),
-        SizedBox(
-          height: 9,
-        ),
+        SizedBox(height: 9),
         GestureDetector(
           onTap: widget.enableForm ? () => _selectTime(context) : null,
           child: AbsorbPointer(
@@ -143,21 +134,22 @@ class _FieldsInvoice extends State<FieldsInvoice> {
             ),
           ),
         ),
-        SizedBox(
-          height: 9,
-        ),
+        SizedBox(height: 9),
         Row(
           children: <Widget>[
             Checkbox(
               value: _sendEmail,
-              onChanged: true //widget.enableForm
-                  ? (bool value) {
-                setState(() {
-                  _sendEmail = value;
-                });
-                widget.cbHandlerSendEmail(value);
-              }
-                  : null,
+              onChanged:
+                  true //widget.enableForm
+                      ? (bool? value) {
+                        if (value != null) {
+                          setState(() {
+                            _sendEmail = value;
+                          });
+                          widget.cbHandlerSendEmail(value);
+                        }
+                      }
+                      : null,
               checkColor: Colors.white,
               activeColor: Color(0xFF59B258),
             ),
@@ -181,43 +173,53 @@ class _FieldsInvoice extends State<FieldsInvoice> {
   Future<Null> _selectDate(BuildContext context) async {
     final formatDate = DateFormat.yMd('ES');
     Locale myLocale = Localizations.localeOf(context);
-    final DateTime picked = await showDatePicker(
-        context: context,
-        initialDate: _date,
-        locale: myLocale,
-        firstDate: DateTime(1901, 1),
-        lastDate: DateTime(2100));
-    if (picked != null && picked != _date)
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _date,
+      locale: myLocale,
+      firstDate: DateTime(1901, 1),
+      lastDate: DateTime(2100),
+    );
+    if (picked != _date)
       setState(() {
-        _date = picked;
-        widget.textBirthDate.value =
-            TextEditingValue(text: formatDate.format(picked));
+        if (picked != null) {
+          _date = picked;
+          widget.textBirthDate.value = TextEditingValue(
+            text: formatDate.format(picked),
+          );
+        }
       });
   }
 
   Future<Null> _selectTime(BuildContext context) async {
     String text12Hour = '';
-    final TimeOfDay picked = await showTimePicker(
+    final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: TimeOfDay.now(),
     );
     if (picked != null && picked != _time)
       setState(() {
         _time = picked;
-        TimeOfDay _hour12Format = picked.replacing(hour: picked.hourOfPeriod);
-        int hour24;
-        if (_time.format(context).length > 4) {
-          hour24 = int.parse(_time.format(context).substring(0, 2));
-        } else {
-          hour24 = int.parse(_time.format(context).substring(0, 1));
-        }
 
-        if (hour24 <= 12) {
-          text12Hour = '${_hour12Format.format(context)} A.M';
-        } else {
-          text12Hour = '${_hour12Format.format(context)} P.M';
-        }
+        final hour = picked.hourOfPeriod == 0 ? 12 : picked.hourOfPeriod;
+        final minute = picked.minute.toString().padLeft(2, '0');
+        final period = picked.period == DayPeriod.am ? 'A.M' : 'P.M';
+
+        text12Hour = '$hour:$minute $period';
         widget.textTimeDelivery.value = TextEditingValue(text: text12Hour);
       });
+  }
+}
+
+// Custom Formatter to force uppercase input
+class UpperCaseTextFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue,
+      TextEditingValue newValue,
+      ) {
+    return newValue.copyWith(
+      text: newValue.text.toUpperCase(),
+    );
   }
 }

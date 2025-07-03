@@ -15,20 +15,20 @@ class FieldsProducts extends StatefulWidget {
   final int selectedProductsCount;
   final String idLocation;
   final bool editForm;
-  final Invoice invoice;
+  final Invoice? invoice;
 
   FieldsProducts({
-    Key key,
-    this.callbackProductsList,
-    this.productListCallback,
-    this.callbackAdditionalProdList,
-    this.additionalProductListCb,
-    this.vehicleTypeSelect,
-    this.enableForm,
-    this.selectedProductsCount,
-    this.idLocation,
-    this.editForm,
-    this.invoice,
+    Key? key,
+    required this.callbackProductsList,
+    required this.productListCallback,
+    required this.callbackAdditionalProdList,
+    required this.additionalProductListCb,
+    required this.vehicleTypeSelect,
+    required this.enableForm,
+    required this.selectedProductsCount,
+    required this.idLocation,
+    required this.editForm,
+    required this.invoice,
   });
 
   @override
@@ -84,7 +84,7 @@ class _FieldsProducts extends State<FieldsProducts> {
                   color: Colors.white,
                   size: 30,
                 ),
-                backgroundColor: Theme.of(context).accentColor,
+                backgroundColor: Theme.of(context).colorScheme.secondary,
                 onPressed: (widget.enableForm || !widget.editForm)
                     ? () {
                         Navigator.push(

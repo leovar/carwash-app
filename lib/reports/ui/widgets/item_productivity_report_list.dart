@@ -1,9 +1,5 @@
 import 'package:car_wash_app/invoice/model/invoice.dart';
-import 'package:car_wash_app/invoice/ui/screens/invoice_page.dart';
-import 'package:car_wash_app/main.dart';
 import 'package:car_wash_app/reports/model/card_report.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -12,9 +8,9 @@ class ItemProductivityReportList extends StatefulWidget {
   final Function(String, List<Invoice>) servicesDetail;
 
   ItemProductivityReportList(
-      {Key key,
-      this.cardReport,
-      this.servicesDetail});
+      {Key? key,
+      required this.cardReport,
+      required this.servicesDetail});
 
   @override
   State<StatefulWidget> createState() => _ItemProductivityReportList();
@@ -74,7 +70,7 @@ class _ItemProductivityReportList extends State<ItemProductivityReportList> {
                                 child: Text(
                                   'Total:',
                                   style: TextStyle(
-                                    color: Theme.of(context).accentColor,
+                                    color: Theme.of(context).colorScheme.secondary,
                                     fontFamily: "Lato",
                                     fontWeight: FontWeight.bold,
                                     fontSize: 17,
@@ -94,6 +90,37 @@ class _ItemProductivityReportList extends State<ItemProductivityReportList> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
+                      Flexible(
+                        child: Container(
+                          alignment: Alignment.center,
+                          margin: EdgeInsets.only(
+                            right: 8,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.text_snippet_outlined,
+                                color: Theme.of(context).primaryColor,
+                                size: 20,
+                              ),
+                              SizedBox(width: 3),
+                              Flexible(
+                                child: Text(
+                                  widget.cardReport.invoicesList.length.toString() + ' Lavadas',
+                                  style: TextStyle(
+                                    color: Theme.of(context).primaryColor,
+                                    fontFamily: "Lato",
+                                    fontWeight: FontWeight.normal,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 3),
                       Flexible(
                         child: Container(
                           alignment: Alignment.center,
@@ -164,7 +191,7 @@ class _ItemProductivityReportList extends State<ItemProductivityReportList> {
                           child: Text(
                               '\$${formatter.format(widget.cardReport.totalPrice)}',
                             style: TextStyle(
-                              color: Theme.of(context).accentColor,
+                              color: Theme.of(context).colorScheme.secondary,
                               fontFamily: "Lato",
                               fontWeight: FontWeight.normal,
                               fontSize: 17,

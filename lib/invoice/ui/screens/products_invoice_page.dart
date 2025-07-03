@@ -15,17 +15,17 @@ class ProductsInvoicePage extends StatefulWidget {
   final HeaderServices vehicleTypeSelect;
   final String idLocation;
   final bool editForm;
-  final Invoice invoice;
+  final Invoice? invoice;
 
   ProductsInvoicePage({
-    Key key,
-    this.callbackSetProductsList,
-    this.productListCallback,
-    this.cbAdditionalProducts,
-    this.additionalProductListCb,
-    this.vehicleTypeSelect,
-    this.idLocation,
-    this.editForm,
+    Key? key,
+    required this.callbackSetProductsList,
+    required this.productListCallback,
+    required this.cbAdditionalProducts,
+    required this.additionalProductListCb,
+    required this.vehicleTypeSelect,
+    required this.idLocation,
+    required this.editForm,
     this.invoice,
   });
 
@@ -64,7 +64,7 @@ class _ProductsInvoicePage extends State<ProductsInvoicePage> {
   }
 
   Widget getProducts() {
-    if (widget.invoice != null && widget.invoice.invoiceClosed) {
+    if (widget.invoice != null && (widget.invoice?.invoiceClosed??false)) {
       List<Product> productsList = [];
       widget.productListCallback.forEach((prod) {
         Product prodSelected = Product.copyProductInvoiceWith(
@@ -94,14 +94,13 @@ class _ProductsInvoicePage extends State<ProductsInvoicePage> {
   }
 
   Widget listProducts(AsyncSnapshot snapshot) {
-    List<Product> productsList =
-        _productBloc.buildProductByLocation(snapshot.data.documents);
+    List<Product> productsList = _productBloc.buildProductByLocation(snapshot.data.docs);
     List<Product> productGet = <Product>[];
     productsList.forEach((prod) {
       Product proFindSelect = widget.productListCallback.firstWhere(
-          (d) => d.id == prod.id && d.isSelected,
-          orElse: () => null);
-      if (proFindSelect == null) {
+          (d) => d.id == prod.id && (d.isSelected??false),
+          orElse: () => new Product());
+      if (proFindSelect.id == null) {
         productGet.add(prod);
       } else {
         Product prodSelected = Product.copyProductInvoiceWith(
@@ -170,9 +169,11 @@ class _ProductsInvoicePage extends State<ProductsInvoicePage> {
                 height: 100,
                 child: Align(
                   alignment: Alignment.center,
-                  child: RaisedButton(
-                    padding: EdgeInsets.symmetric(vertical: 15, horizontal: 25),
-                    color: Color(0xFF59B258),
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(vertical: 15, horizontal: 25),
+                      backgroundColor: Color(0xFF59B258),
+                    ),
                     child: Text(
                       "Otros Servicios",
                       style: TextStyle(
@@ -207,9 +208,11 @@ class _ProductsInvoicePage extends State<ProductsInvoicePage> {
                 height: 100,
                 child: Align(
                   alignment: Alignment.center,
-                  child: RaisedButton(
-                    padding: EdgeInsets.symmetric(vertical: 15, horizontal: 25),
-                    color: Color(0xFF59B258),
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(vertical: 15, horizontal: 25),
+                      backgroundColor: Color(0xFF59B258),
+                    ),
                     child: Text(
                       "Aceptar",
                       style: TextStyle(

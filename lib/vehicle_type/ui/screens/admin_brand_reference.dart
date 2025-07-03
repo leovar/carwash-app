@@ -7,7 +7,6 @@ import 'package:car_wash_app/vehicle_type/ui/screens/admin_create_brand.dart';
 import 'package:car_wash_app/vehicle_type/ui/widgets/item_brand_reference_list.dart';
 import 'package:car_wash_app/widgets/messages_utils.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 
 class AdminBrandReference extends StatefulWidget {
@@ -16,15 +15,15 @@ class AdminBrandReference extends StatefulWidget {
 }
 
 class _AdminBrandReference extends State<AdminBrandReference> {
-  VehicleTypeBloc _vehicleTypeBloc;
+  late VehicleTypeBloc _vehicleTypeBloc;
   BlocInvoice _blocInvoice = BlocInvoice();
   bool _validateReference = false;
   final _textReferenceName = TextEditingController();
   List<Brand> _listBrands = <Brand>[];
   List<BrandReference> _listBrandReference = [];
-  List<DropdownMenuItem<Brand>> _dropdownBrands;
-  Brand _selectedBrand;
-  BrandReference _referenceToEdit;
+  late List<DropdownMenuItem<Brand>> _dropdownBrands;
+  late Brand _selectedBrand;
+  late BrandReference _referenceToEdit;
 
   @override
   void initState() {
@@ -117,7 +116,7 @@ class _AdminBrandReference extends State<AdminBrandReference> {
             color: Colors.white,
             size: 30,
           ),
-          backgroundColor: Theme.of(context).accentColor,
+          backgroundColor: Theme.of(context).colorScheme.secondary,
           onPressed: () {
             Navigator.push(
               context,
@@ -161,9 +160,9 @@ class _AdminBrandReference extends State<AdminBrandReference> {
   }
 
   Widget _getListBrands(AsyncSnapshot snapshot) {
-    if (_blocInvoice.buildBrands(snapshot.data.documents).length >
+    if (_blocInvoice.buildBrands(snapshot.data.docs).length >
         _listBrands.length) {
-      _listBrands = _blocInvoice.buildBrands(snapshot.data.documents);
+      _listBrands = _blocInvoice.buildBrands(snapshot.data.docs);
     }
 
     _dropdownBrands = _buildDropdownBrands(_listBrands);
@@ -203,9 +202,11 @@ class _AdminBrandReference extends State<AdminBrandReference> {
       height: 100,
       child: Align(
         alignment: Alignment.center,
-        child: RaisedButton(
-          padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
-          color: Color(0xFF59B258),
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
+            backgroundColor: Color(0xFF59B258),
+          ),
           child: Text(
             "Guardar",
             style: TextStyle(
@@ -228,8 +229,7 @@ class _AdminBrandReference extends State<AdminBrandReference> {
     return Container(
       padding: EdgeInsets.only(top: 10, bottom: 17),
       child: StreamBuilder(
-        stream: _vehicleTypeBloc.vehicleBrandReferences(
-            _selectedBrand == null ? '1' : _selectedBrand.id),
+        stream: _vehicleTypeBloc.vehicleBrandReferences(_selectedBrand.id ?? '1'),
         builder: (context, snapshot) {
           switch (snapshot.connectionState) {
             case ConnectionState.waiting:
@@ -244,9 +244,8 @@ class _AdminBrandReference extends State<AdminBrandReference> {
 
   Widget _chargeListBrandReferences(AsyncSnapshot snapshot) {
     _listBrandReference =
-        _vehicleTypeBloc.buildBrandReference(snapshot.data.documents);
-    _listBrandReference.sort((a, b) =>
-        a.reference.toLowerCase().compareTo(b.reference.toLowerCase()));
+        _vehicleTypeBloc.buildBrandReference(snapshot.data.docs);
+    _listBrandReference.sort((a, b) => (a.reference??'').toLowerCase().compareTo((b.reference??'').toLowerCase()));
     return ListView.builder(
       itemCount: _listBrandReference.length,
       scrollDirection: Axis.vertical,
@@ -265,13 +264,13 @@ class _AdminBrandReference extends State<AdminBrandReference> {
   /// Functions
 
   List<DropdownMenuItem<Brand>> _buildDropdownBrands(List vehicleBrands) {
-    List<DropdownMenuItem<Brand>> listItems = List();
+    List<DropdownMenuItem<Brand>> listItems = [];
     for (Brand documentLoc in vehicleBrands) {
       listItems.add(
         DropdownMenuItem(
           value: documentLoc,
           child: Text(
-            documentLoc.brand,
+            documentLoc.brand??'',
           ),
         ),
       );
@@ -279,38 +278,25 @@ class _AdminBrandReference extends State<AdminBrandReference> {
     return listItems;
   }
 
-  onChangeDropDawn(Brand selectedBrand) {
+  onChangeDropDawn(Brand? selectedBrand) {
     setState(() {
       _textReferenceName.text = '';
-      _selectedBrand = selectedBrand;
+      _selectedBrand = selectedBrand?? new Brand();
     });
   }
 
   void _saveReference() {
     if (_textReferenceName.text.trim().isNotEmpty) {
-      if (_selectedBrand != null) {
-        BrandReference ref;
-        if (_referenceToEdit != null) {
-          ref = BrandReference(
-            id: _referenceToEdit.id,
-            reference: _textReferenceName.text,
-            active: true,
-          );
+      BrandReference ref;
+      ref = BrandReference(
+        id: _referenceToEdit.id,
+        reference: _textReferenceName.text,
+        active: true,
+      );
+          _vehicleTypeBloc.updateBrandReference(_selectedBrand.id??'', ref);
+      _referenceToEdit = new BrandReference();
+      _textReferenceName.text = '';
         } else {
-          ref = BrandReference(
-            reference: _textReferenceName.text,
-            active: true,
-          );
-        }
-        _vehicleTypeBloc.updateBrandReference(_selectedBrand.id, ref);
-        _referenceToEdit = null;
-        _textReferenceName.text = '';
-      } else
-        MessagesUtils.showAlert(
-          context: context,
-          title: 'Seleccione una marca',
-        ).show();
-    } else {
       MessagesUtils.showAlert(
         context: context,
         title: 'Escriba una referencia',
@@ -318,9 +304,9 @@ class _AdminBrandReference extends State<AdminBrandReference> {
     }
   }
 
-  void _editBrandReference(Brand selectBrand, BrandReference brandRef) {
-    _referenceToEdit = brandRef;
-    _textReferenceName.text = brandRef.reference;
-    _selectedBrand = selectBrand;
+  void _editBrandReference(Brand? selectBrand, BrandReference? brandRef) {
+    _referenceToEdit = brandRef ?? new BrandReference();
+    _textReferenceName.text = brandRef?.reference??'';
+    _selectedBrand = selectBrand ?? new Brand();
   }
 }

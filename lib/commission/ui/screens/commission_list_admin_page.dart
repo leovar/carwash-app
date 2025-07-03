@@ -1,10 +1,8 @@
 import 'package:car_wash_app/commission/bloc/bloc_commission.dart';
 import 'package:car_wash_app/commission/model/commission.dart';
 import 'package:car_wash_app/commission/ui/widgets/item_commission_admin_list.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
 
 class CommissionListAdminPage extends StatefulWidget {
   @override
@@ -12,7 +10,7 @@ class CommissionListAdminPage extends StatefulWidget {
 }
 
 class _CommissionListAdminPage extends State<CommissionListAdminPage> {
-  BlocCommission _blocCommission;
+  late BlocCommission _blocCommission;
   List<Commission> _commissionList = <Commission>[];
 
   @override
@@ -62,8 +60,8 @@ class _CommissionListAdminPage extends State<CommissionListAdminPage> {
   }
 
   Widget _getDataListCommissions(AsyncSnapshot snapshot) {
-    _commissionList = _blocCommission.buildAllCommissions(snapshot.data.documents);
-    _commissionList.sort((a,b)=> a.uidVehicleType.compareTo(b.uidVehicleType));
+    _commissionList = _blocCommission.buildAllCommissions(snapshot.data.docs);
+    _commissionList.sort((a,b)=> (a.uidVehicleType??0).compareTo(b.uidVehicleType??0));
 
     return ListView.builder(
       itemCount: _commissionList.length,

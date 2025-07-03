@@ -1,33 +1,32 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class TextFieldInput extends StatefulWidget {
   final String labelText;
   final textController;
-  final TextInputType inputType;
+  final TextInputType? inputType;
   final textInputFormatter;
   final focusNode;
   final bool isUpperCase;
-  final VoidCallback onFinalEditText;
+  final VoidCallback? onFinalEditText;
   final bool enable;
   final bool validate;
-  final String textValidate;
+  final String? textValidate;
   final bool autofocus;
-  final int maxLength;
+  final int? maxLength;
   final int maxLines;
   final bool isPassword;
-  final Color colorText;
-  final String hintText;
+  final Color? colorText;
+  final String? hintText;
 
   TextFieldInput({
-    Key key,
-    this.labelText,
+    Key? key,
+    required this.labelText,
     this.textController,
     this.onFinalEditText,
     this.textValidate,
     this.focusNode = null,
-    this.inputType = null,
+    this.inputType,
     this.textInputFormatter = null,
     this.isUpperCase = false,
     this.enable = true,
@@ -56,14 +55,16 @@ class _TextFieldInput extends State<TextFieldInput> {
       maxLength: widget.maxLength ?? null,
       autofocus: widget.autofocus ?? false,
       focusNode: widget.focusNode,
-      keyboardType: widget.inputType ?? null,
+      keyboardType: widget.inputType ?? TextInputType.text,
       inputFormatters: widget.textInputFormatter ?? null,
       textCapitalization: widget.isUpperCase ?? false
           ? TextCapitalization.characters
           : TextCapitalization.sentences,
       cursorColor: widget.colorText ?? Color(0xFFAEAEAE),
       onChanged: (value) {
-        widget.onFinalEditText();
+        if (widget.onFinalEditText != null) {
+          widget.onFinalEditText!();
+        }
       },
       enabled: widget.enable ?? true,
       style: TextStyle(

@@ -1,29 +1,27 @@
-import 'package:car_wash_app/location/model/location.dart';
-import 'package:car_wash_app/vehicle_type/model/vehicleType.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
 @immutable
 class Product extends Equatable {
-  final String id;
-  final String productName;
-  final double price;
-  final double ivaPercent;
-  final DocumentReference vehicleType;
-  final List<DocumentReference> locations;
-  final bool productActive;
-  final int vehicleTypeUid;
-  bool isSelected;
-  final bool isAdditional;
-  bool newProduct;
-  final String productType;
-  final String productInvoiceId;
-  final Timestamp dateAdded;
-  final int serviceTime;
-  final double productCommission;
-  int countOperatorsInvoice;
-  int invoiceConsecutive;
+  final String? id;
+  final String? productName;
+  final double? price;
+  final double? ivaPercent;
+  final DocumentReference? vehicleType;
+  final List<DocumentReference>? locations;
+  final bool? productActive;
+  final int? vehicleTypeUid;
+  bool? isSelected;
+  final bool? isAdditional;
+  bool? newProduct;
+  final String? productType;
+  final String? productInvoiceId;
+  final Timestamp? dateAdded;
+  final int? serviceTime;
+  final double? productCommission;
+  int? countOperatorsInvoice;
+  int? invoiceConsecutive;
 
   Product({
     this.id,
@@ -46,10 +44,10 @@ class Product extends Equatable {
     this.invoiceConsecutive,
   });
 
-  factory Product.fromJson(Map<String, dynamic> json, {String id}) {
+  factory Product.fromJson(Map<String, dynamic> json, {String? id}) {
     List<DocumentReference> locationsListDb = <DocumentReference>[];
-    List locationsList = json['locations'];
-    locationsList?.forEach((drLocation) {
+    List locationsList = json['locations']??[];
+    locationsList.forEach((drLocation) {
       locationsListDb.add(drLocation);
     });
 
@@ -72,7 +70,7 @@ class Product extends Equatable {
   factory Product.fromJsonTemporal(Map<String, dynamic> json) {
     List<DocumentReference> locationsListDb = <DocumentReference>[];
     List locationsList = json['locations'];
-    locationsList?.forEach((drLocation) {
+    locationsList.forEach((drLocation) {
       locationsListDb.add(drLocation);
     });
     bool additional = json['isAdditional'];
@@ -98,10 +96,10 @@ class Product extends Equatable {
     );
   }
 
-  factory Product.fromJsonProInvoice(Map<String, dynamic> json, {String id}) {
+  factory Product.fromJsonProInvoice(Map<String, dynamic> json, {String? id}) {
     List<DocumentReference> locationsListDb = <DocumentReference>[];
     List locationsList = json['locations'];
-    locationsList?.forEach((drLocation) {
+    locationsList.forEach((drLocation) {
       locationsListDb.add(drLocation);
     });
 
@@ -124,12 +122,17 @@ class Product extends Equatable {
   }
 
   factory Product.fromJsonProductIntoInvoice(
-      Map<dynamic, dynamic> json, int uidVehicleType, Timestamp addDate, int countOperators, int consecutive) {
+    Map<dynamic, dynamic> json,
+    int? uidVehicleType,
+    Timestamp? addDate,
+    int? countOperators,
+    int? consecutive,
+  ) {
     return Product(
       id: json['Id'],
       productName: json['productName'],
-      price: json['price'].toDouble(),
-      ivaPercent: json['ivaPercent'].toDouble(),
+      price: (json['price']??0).toDouble(),
+      ivaPercent: (json['ivaPercent']??0).toDouble(),
       isAdditional: json['isAdditional'],
       isSelected: true,
       productType: json['productType'],
@@ -138,7 +141,7 @@ class Product extends Equatable {
       serviceTime: json['serviceTime'],
       productCommission: json['productCommission'],
       countOperatorsInvoice: countOperators,
-      invoiceConsecutive : consecutive,
+      invoiceConsecutive: consecutive,
     );
   }
 
@@ -157,14 +160,14 @@ class Product extends Equatable {
   }
 
   Map<String, dynamic> toJsonInvoiceProduct(
-    String productName,
-    double price,
-    double ivaPercent,
-    bool isAdditional,
-    String productId,
-    String productType,
-    int serviceTime,
-    double commission,
+    String? productName,
+    double? price,
+    double? ivaPercent,
+    bool? isAdditional,
+    String? productId,
+    String? productType,
+    int? serviceTime,
+    double? commission,
   ) {
     return {
       'productName': productName,
@@ -174,19 +177,19 @@ class Product extends Equatable {
       'Id': productId,
       'productType': productType,
       'serviceTime': serviceTime,
-      'productCommission' : commission,
+      'productCommission': commission,
     };
   }
 
   factory Product.copyProductInvoiceWith({
-    @required Product origin,
-    String id,
-    bool isSelected,
-    double price,
-    double ivaPercent,
-    String productType,
-    String productInvoiceId,
-    double commission,
+    required Product origin,
+    String? id,
+    bool? isSelected,
+    double? price,
+    double? ivaPercent,
+    String? productType,
+    String? productInvoiceId,
+    double? commission,
   }) {
     return Product(
       id: id ?? origin.id,
@@ -208,14 +211,14 @@ class Product extends Equatable {
 
   //Copy Product to add product in new invoice at save
   factory Product.copyProductToSaveInvoice({
-    String id,
-    String productName,
-    double price,
-    double ivaPercent,
-    bool isAdditional,
-    String productType,
-    int serviceTime,
-    double commission,
+    String? id,
+    String? productName,
+    double? price,
+    double? ivaPercent,
+    bool? isAdditional,
+    String? productType,
+    int? serviceTime,
+    double? commission,
   }) {
     return Product(
       id: id,
@@ -231,18 +234,18 @@ class Product extends Equatable {
 
   @override
   List<Object> get props => [
-        id,
-        productName,
-        price,
-        ivaPercent,
-        vehicleType,
-        locations,
-        productActive,
-        vehicleTypeUid,
-        isSelected,
-        productType,
-        productInvoiceId,
-        serviceTime,
-        productCommission,
-      ];
+    id ?? '',
+    productName ?? '',
+    price ?? 0,
+    ivaPercent ?? 0,
+    vehicleType ?? FirebaseFirestore.instance.doc("placeholder/empty"),
+    locations ?? [],
+    productActive ?? false,
+    vehicleTypeUid ?? 0,
+    isSelected ?? false,
+    productType ?? '',
+    productInvoiceId ?? '',
+    serviceTime ?? 0,
+    productCommission ?? 0,
+  ];
 }

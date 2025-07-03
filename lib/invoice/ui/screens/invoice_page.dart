@@ -2,7 +2,6 @@
 import 'package:car_wash_app/invoice/bloc/bloc_invoice.dart';
 import 'package:car_wash_app/invoice/model/invoice.dart';
 import 'package:car_wash_app/invoice/ui/widgets/form_invoice.dart';
-import 'package:car_wash_app/user/model/user.dart';
 import 'package:car_wash_app/widgets/app_bar_widget.dart';
 import 'package:car_wash_app/widgets/drawer_page.dart';
 import 'package:car_wash_app/widgets/keys.dart';
@@ -11,10 +10,10 @@ import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class InvoicePage extends StatefulWidget {
-  final bool showDrawer;
-  final Invoice invoiceToEdit;
+  final bool? showDrawer;
+  final Invoice? invoiceToEdit;
 
-  InvoicePage({Key key, this.showDrawer, this.invoiceToEdit});
+  InvoicePage({Key? key, this.showDrawer, this.invoiceToEdit});
 
   @override
   State<StatefulWidget> createState() {
@@ -48,15 +47,15 @@ class _InvoicePage extends State<InvoicePage> {
           ),
         ),
       ),
-      drawer: widget.showDrawer ? DrawerPage() : null,
+      drawer: (widget.showDrawer??false) ? DrawerPage() : null,
     );
   }
 
   void _getPreferences() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
-    String userId = pref.getString(Keys.userId);
+    String userId = pref.getString(Keys.userId)??'';
     setState(() {
-      photoUser = pref.getString(Keys.photoUserUrl);
+      photoUser = pref.getString(Keys.photoUserUrl)??'';
     });
   }
 }

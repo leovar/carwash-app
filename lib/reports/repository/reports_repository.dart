@@ -7,7 +7,7 @@ import 'package:car_wash_app/widgets/firestore_collections.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ReportsRepository {
-  final Firestore _db = Firestore.instance;
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
   final _invoiceRepository = InvoiceRepository();
 
   ///Get productivity report list
@@ -36,7 +36,7 @@ class ReportsRepository {
   List<Invoice> buildInvoiceListReport(List<DocumentSnapshot> invoicesListSnapshot) {
     List<Invoice> invoicesList = <Invoice>[];
     invoicesListSnapshot.forEach((p) {
-      Invoice invoice = Invoice.fromJson(p.data, id: p.documentID);
+      Invoice invoice = Invoice.fromJson(p.data() as Map<String, dynamic>, id: p.id);
       invoicesList.add(invoice);
     });
     return invoicesList;
@@ -87,12 +87,12 @@ class ReportsRepository {
     final querySnapshot = await this
         ._db
         .collection(FirestoreCollections.invoices)
-        .getDocuments();
+        .get();
 
-    final documents = querySnapshot.documents;
+    final documents = querySnapshot.docs;
     if (documents.length > 0) {
       documents.forEach((document) {
-        Invoice product = Invoice.fromJson(document.data, id: document.documentID);
+        Invoice product = Invoice.fromJson(document.data(), id: document.id);
         invoiceList.add(product);
       });
     }
@@ -113,17 +113,17 @@ class ReportsRepository {
         .where(FirestoreCollections.invoiceFieldCreationDate,
           isLessThanOrEqualTo: Timestamp.fromDate(dateFinalModify));
 
-    if (locationReference != null) {
+    if (locationReference.id != 'defaultDocId') {
       queryFirestore = queryFirestore.where(FirestoreCollections.invoiceFieldLocation,
-        isEqualTo: locationReference);
+          isEqualTo: locationReference);
     }
-
-    querySnapshot = await queryFirestore.getDocuments();
+  
+    querySnapshot = await queryFirestore.get();
     final responses = await Future.wait(
-      querySnapshot.documents.map((p) async {
-        Invoice invoice = Invoice.fromJson(p.data, id: p.documentID);
-        final customerResponse = await invoice.customer.get();
-        Customer cus = Customer.fromJson(customerResponse.data, id: customerResponse.documentID);
+      querySnapshot.docs.map((p) async {
+        Invoice invoice = Invoice.fromJson(p.data() as Map<String, dynamic>, id: p.id);
+        final customerResponse = await invoice.customer?.get();
+        Customer cus = Customer.fromJson(customerResponse?.data() as Map<String, dynamic>, id: customerResponse?.id);
         Invoice newInvoice = Invoice.copyWith(origin: invoice, customerName: cus.name, customerPhone: cus.phoneNumber);
         invoicesList.add(newInvoice);
       }),

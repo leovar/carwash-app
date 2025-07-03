@@ -11,7 +11,7 @@ class ProductListAdminPage extends StatefulWidget {
 }
 
 class _ProductListAdminPage extends State<ProductListAdminPage> {
-  ProductBloc _productBloc;
+  late ProductBloc _productBloc;
   List<Product> _productList = <Product>[];
 
   @override
@@ -71,8 +71,14 @@ class _ProductListAdminPage extends State<ProductListAdminPage> {
   }
 
   Widget _getDataListProducts(AsyncSnapshot snapshot) {
-    _productList = _productBloc.buildAllProduct(snapshot.data.documents);
-    _productList.sort((a,b)=> a.vehicleTypeUid.compareTo(b.vehicleTypeUid));
+    _productList = _productBloc.buildAllProduct(snapshot.data.docs);
+    _productList.sort((a, b) {
+      int result = (a.vehicleTypeUid??0).compareTo(b.vehicleTypeUid??0);
+      if (result == 0) {
+        result = (a.productName??'').compareTo(b.productName??'');
+      }
+      return result;
+    });
     return Flexible(
       child: ListView.builder(
         itemCount: _productList.length,
@@ -91,9 +97,11 @@ class _ProductListAdminPage extends State<ProductListAdminPage> {
       margin: EdgeInsets.only(top: 8,),
       child: Align(
         alignment: Alignment.bottomCenter,
-        child: RaisedButton(
-          padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
-          color: Color(0xFF59B258),
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
+            backgroundColor: Color(0xFF59B258),
+          ),
           child: Text(
             "Nuevo Servicio",
             style: TextStyle(

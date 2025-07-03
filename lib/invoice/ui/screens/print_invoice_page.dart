@@ -14,6 +14,8 @@ import 'package:car_wash_app/location/model/location.dart';
 import 'package:car_wash_app/product/model/product.dart';
 import 'package:car_wash_app/widgets/keys.dart';
 import 'package:car_wash_app/widgets/messages_utils.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:file_utils/file_utils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -21,32 +23,33 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
-import 'package:image_gallery_saver/image_gallery_saver.dart';
-import 'package:image_picker_saver/image_picker_saver.dart';
+//import 'package:image_picker_saver/image_picker_saver.dart';
 import 'package:intl/intl.dart';
 import 'package:image/image.dart' as im;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:permission_handler/permission_handler.dart';
+import 'package:flutter/services.dart';
 import 'package:mailer/mailer.dart' as ml;
 import 'package:mailer/smtp_server.dart';
 import 'package:mailer/smtp_server/gmail.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class PrintInvoicePage extends StatefulWidget {
-  final Invoice currentInvoice;
+  final Invoice? currentInvoice;
   final List<Product> selectedProducts;
   final List<AdditionalProduct> additionalProducts;
   final String customerEmail;
   final Configuration configuration;
 
-  PrintInvoicePage(
-      {Key key,
-      this.currentInvoice,
-      this.selectedProducts,
-      this.additionalProducts,
-      this.customerEmail,
-      this.configuration});
+  PrintInvoicePage({
+    Key? key,
+    this.currentInvoice,
+    required this.selectedProducts,
+    required this.additionalProducts,
+    required this.customerEmail,
+    required this.configuration,
+  });
 
   @override
   State<StatefulWidget> createState() => _PrintInvoicePage();
@@ -56,7 +59,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
   GlobalKey<OverRepaintBoundaryState> globalKeyBoundary = GlobalKey();
   final _locationBloc = BlocLocation();
   final _customerBloc = BlocCustomer();
-  Uint8List imageInMemory;
+  late Uint8List imageInMemory;
   bool inside = false;
   Location _location = Location();
   Customer _customer = Customer();
@@ -77,18 +80,15 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
   void initState() {
     super.initState();
     _getPreferences();
-    _getCustomer(widget.currentInvoice.customer.documentID);
-    PermissionHandler().requestPermissions(<PermissionGroup>[
-      PermissionGroup.storage,
-      PermissionGroup.photos,
-    ]);
+    _getCustomer(widget.currentInvoice?.customer?.id??'');
+    _requestPermissions();
   }
 
   @override
   Widget build(BuildContext context) {
-    double width = MediaQuery.of(context). size. width;
+    double width = MediaQuery.of(context).size.width;
     print(width);
-    if(width > 610) {
+    if (width > 610) {
       _logoSize = 460;
       _invoiceTitle = 42;
       _textInfoLocationSize = 30;
@@ -107,9 +107,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
             SingleChildScrollView(
               child: OverRepaintBoundary(
                 key: globalKeyBoundary,
-                child: RepaintBoundary(
-                  child: _containerPrint(),
-                ),
+                child: RepaintBoundary(child: _containerPrint()),
               ),
             ),
             _buttonPrint(),
@@ -135,102 +133,97 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
             ),
           ),
           Container(
-              color: Colors.white,
-              child: Column(
-                children: <Widget>[
-                  SizedBox(height: 3),
-                  Center(
-                    child: Text(
-                      'Spa Car Wash Móvil',
-                      style: TextStyle(
-                        fontFamily: "Lato",
-                        decoration: TextDecoration.none,
-                        fontWeight: FontWeight.w400,
-                        color: Colors.black,
-                        fontSize: _invoiceTitle,
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 6),
-                  Center(
-                    child: Text(
-                      _location.director ?? '',
-                      style: TextStyle(
-                        fontFamily: "Lato",
-                        decoration: TextDecoration.none,
-                        fontWeight: FontWeight.w300,
-                        color: Colors.black,
-                        fontSize: _textInfoLocationSize,
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 4),
-                  Center(
-                    child: Text(
-                      _location.regimen ?? '',
-                      style: TextStyle(
-                        fontFamily: "Lato",
-                        decoration: TextDecoration.none,
-                        fontWeight: FontWeight.w400,
-                        color: Colors.black,
-                        fontSize: _textInfoLocationSize,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  SizedBox(height: 4),
-                  Center(
-                    child: Text(
-                      _location.address ?? '',
-                      style: TextStyle(
-                        fontFamily: "Lato",
-                        decoration: TextDecoration.none,
-                        fontWeight: FontWeight.w400,
-                        color: Colors.black,
-                        fontSize: _textInfoLocationSize,
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 4),
-                  Center(
-                    child: Text(
-                      'Teléfono:  ${_location.phoneNumber}',
-                      style: TextStyle(
-                        fontFamily: "Lato",
-                        decoration: TextDecoration.none,
-                        fontWeight: FontWeight.w400,
-                        color: Colors.black,
-                        fontSize: _textInfoLocationSize,
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 4),
-                  Center(
-                    child: Text(
-                      'Nit:  ${_location.nit}',
-                      style: TextStyle(
-                        fontFamily: "Lato",
-                        decoration: TextDecoration.none,
-                        fontWeight: FontWeight.w400,
-                        color: Colors.black,
-                        fontSize: _textInfoLocationSize,
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 14),
-                ],
-              )),
-          _infoInvoice(),
-          Container(
-            height: _spaceInfoToServices,
             color: Colors.white,
+            child: Column(
+              children: <Widget>[
+                SizedBox(height: 3),
+                Center(
+                  child: Text(
+                    'Spa Car Wash Móvil',
+                    style: TextStyle(
+                      fontFamily: "Lato",
+                      decoration: TextDecoration.none,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.black,
+                      fontSize: _invoiceTitle,
+                    ),
+                  ),
+                ),
+                SizedBox(height: 6),
+                Center(
+                  child: Text(
+                    _location.director ?? '',
+                    style: TextStyle(
+                      fontFamily: "Lato",
+                      decoration: TextDecoration.none,
+                      fontWeight: FontWeight.w300,
+                      color: Colors.black,
+                      fontSize: _textInfoLocationSize,
+                    ),
+                  ),
+                ),
+                SizedBox(height: 4),
+                Center(
+                  child: Text(
+                    _location.regimen ?? '',
+                    style: TextStyle(
+                      fontFamily: "Lato",
+                      decoration: TextDecoration.none,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.black,
+                      fontSize: _textInfoLocationSize,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                SizedBox(height: 4),
+                Center(
+                  child: Text(
+                    _location.address ?? '',
+                    style: TextStyle(
+                      fontFamily: "Lato",
+                      decoration: TextDecoration.none,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.black,
+                      fontSize: _textInfoLocationSize,
+                    ),
+                  ),
+                ),
+                SizedBox(height: 4),
+                Center(
+                  child: Text(
+                    'Teléfono:  ${_location.phoneNumber}',
+                    style: TextStyle(
+                      fontFamily: "Lato",
+                      decoration: TextDecoration.none,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.black,
+                      fontSize: _textInfoLocationSize,
+                    ),
+                  ),
+                ),
+                SizedBox(height: 4),
+                Center(
+                  child: Text(
+                    'Nit:  ${_location.nit}',
+                    style: TextStyle(
+                      fontFamily: "Lato",
+                      decoration: TextDecoration.none,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.black,
+                      fontSize: _textInfoLocationSize,
+                    ),
+                  ),
+                ),
+                SizedBox(height: 14),
+              ],
+            ),
           ),
+          _infoInvoice(),
+          Container(height: _spaceInfoToServices, color: Colors.white),
           _listServices(),
           _listAdditionalServices(),
-          Container(
-            height: _spaceServicesToPrice,
-            color: Colors.white,
-          ),
+          Container(height: _spaceServicesToPrice, color: Colors.white),
           Container(
             color: Colors.white,
             child: Row(
@@ -243,10 +236,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                   width: 100,
                   decoration: BoxDecoration(
                     border: Border(
-                      bottom: BorderSide(
-                        color: Colors.black,
-                        width: 2.0,
-                      ),
+                      bottom: BorderSide(color: Colors.black, width: 2.0),
                     ),
                   ),
                 ),
@@ -254,18 +244,15 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
             ),
           ),
           _infoPrice(),
-          Container(
-            height: _spacePriceNotes,
-            color: Colors.white,
-          ),
+          Container(height: _spacePriceNotes, color: Colors.white),
           Container(
             margin: EdgeInsets.only(right: 50, left: 50),
             child: Center(
               child: Text(
                 'El operador y la empresa no se hacen responsables por: 1.fallas eléctricas o mecánicas del vehiculo. /2. '
-                    'Robo total o parcial del mismo. /3. Bienes olvidados dentro o fuera del vehículo sin inventario. /4. '
-                    'No se responde por afectaciones que no se vean debido al polvo. *No se aceptan reclamaciones posteriores '
-                    'a la entrega del servicio. *El servicio es independiente al centro comercial.',
+                'Robo total o parcial del mismo. /3. Bienes olvidados dentro o fuera del vehículo sin inventario. /4. '
+                'No se responde por afectaciones que no se vean debido al polvo. *No se aceptan reclamaciones posteriores '
+                'a la entrega del servicio. *El servicio es independiente al centro comercial.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontFamily: "Lato",
@@ -283,7 +270,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
   }
 
   Widget _infoInvoice() {
-    var _timeDelivery = widget.currentInvoice.timeDelivery ?? '';
+    var _timeDelivery = widget.currentInvoice?.timeDelivery ?? '';
     return Container(
       color: Colors.white,
       padding: EdgeInsets.symmetric(horizontal: 20),
@@ -292,7 +279,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Text(
-            'Factura # ${widget.currentInvoice.consecutive}',
+            'Factura # ${widget.currentInvoice?.consecutive}',
             style: TextStyle(
               fontFamily: "Lato",
               decoration: TextDecoration.none,
@@ -303,7 +290,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
           ),
           SizedBox(height: _spaceInfoInvoice),
           Text(
-            formatter.format(widget.currentInvoice.creationDate.toDate()),
+            formatter.format((widget.currentInvoice?.creationDate??Timestamp.now()).toDate()),
             style: TextStyle(
               fontFamily: "Lato",
               decoration: TextDecoration.none,
@@ -330,7 +317,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                   ),
                 ),
                 Text(
-                  widget.currentInvoice.timeDelivery ?? '',
+                  widget.currentInvoice?.timeDelivery ?? '',
                   textAlign: TextAlign.right,
                   style: TextStyle(
                     fontFamily: "Lato",
@@ -359,7 +346,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                 ),
               ),
               Text(
-                widget.currentInvoice.placa,
+                widget.currentInvoice?.placa??'',
                 textAlign: TextAlign.right,
                 style: TextStyle(
                   fontFamily: "Lato",
@@ -387,7 +374,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                 ),
               ),
               Text(
-                widget.currentInvoice.vehicleBrand,
+                widget.currentInvoice?.vehicleBrand??'',
                 textAlign: TextAlign.right,
                 style: TextStyle(
                   fontFamily: "Lato",
@@ -474,7 +461,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
               ),
               Flexible(
                 child: Text(
-                  widget.currentInvoice.userCoordinatorName,
+                  widget.currentInvoice?.userCoordinatorName??'',
                   textAlign: TextAlign.right,
                   style: TextStyle(
                     fontFamily: "Lato",
@@ -525,7 +512,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                 children: <Widget>[
                   Flexible(
                     child: Text(
-                      product.productName,
+                      product.productName??'',
                       style: TextStyle(
                         fontFamily: "Lato",
                         decoration: TextDecoration.none,
@@ -633,7 +620,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                   ),
                 ),
                 Text(
-                  '\$${numberFormatter.format(widget.currentInvoice.subtotal)}',
+                  '\$${numberFormatter.format(widget.currentInvoice?.subtotal)}',
                   textAlign: TextAlign.right,
                   style: TextStyle(
                     fontFamily: "Lato",
@@ -664,7 +651,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                   ),
                 ),
                 Text(
-                  '\$${numberFormatter.format(widget.currentInvoice.iva)}',
+                  '\$${numberFormatter.format(widget.currentInvoice?.iva)}',
                   textAlign: TextAlign.right,
                   style: TextStyle(
                     fontFamily: "Lato",
@@ -693,7 +680,7 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
                 ),
               ),
               Text(
-                '\$${numberFormatter.format(widget.currentInvoice.totalPrice)}',
+                '\$${numberFormatter.format(widget.currentInvoice?.totalPrice)}',
                 textAlign: TextAlign.right,
                 style: TextStyle(
                   fontFamily: "Lato",
@@ -717,9 +704,11 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
         height: 80,
         child: Align(
           alignment: Alignment.bottomCenter,
-          child: RaisedButton(
-            padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
-            color: Theme.of(context).accentColor,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
+              backgroundColor: Theme.of(context).colorScheme.secondary,
+            ),
             child: Text(
               "IMPRIMIR",
               style: TextStyle(
@@ -741,48 +730,85 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
 
   void _capturePng() async {
     try {
-      MessagesUtils.showAlertWithLoading(context: context, title: 'Imprimiendo Factura').show();
+      MessagesUtils.showAlertWithLoading(
+        context: context,
+        title: 'Imprimiendo Factura',
+      ).show();
 
-      print('inside');
       inside = true;
-      RenderRepaintBoundary boundary =
-      globalKeyBoundary.currentContext.findRenderObject();
-      ui.Image image = await boundary.toImage(pixelRatio: 2.5);
-      ByteData byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-      Uint8List pngBytes = byteData.buffer.asUint8List();
-
-      //Save Image
-      var filePath = await ImagePickerSaver.saveFile(
-        fileData: pngBytes,
-        title: 'Factura#${widget.currentInvoice.consecutive.toString()}',
-        description: 'Factura Carwash',
-      );
-
-      if (filePath.isEmpty) {
-        final Map<dynamic,dynamic> filePathGet = await ImageGallerySaver.saveImage(pngBytes);
-        //Fluttertoast.showToast(msg: "$filePathGet", toastLength: Toast.LENGTH_LONG);
-        filePath = filePathGet['filePath'].substring(filePathGet['filePath'].indexOf('storage') - 1, filePathGet['filePath'].length);
+      RenderRepaintBoundary? boundary = globalKeyBoundary.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+      if (boundary == null) {
+        throw Exception("No render boundary found");
       }
 
-      //Save resized image
-      im.Image imageDecode = im.decodePng(pngBytes);
-      im.Image thumbnail = im.copyResize(imageDecode, width: 560);
-      File(filePath).writeAsBytesSync(im.encodePng(thumbnail));
+      final image = await boundary.toImage(pixelRatio: 2.5);
+      ByteData? byteData = await image.toByteData(
+        format: ui.ImageByteFormat.png,
+      );
+      if (byteData == null) {
+        throw Exception("Failed to convert image to bytes");
+      }
 
-      //Set new name based in invoice number
-      final partialNewPath =
-      filePath.substring(0, filePath.lastIndexOf('/') + 1);
-      final fileExtension =
-      filePath.substring(filePath.lastIndexOf('.'), filePath.length);
-      final newPath = partialNewPath +
-          'Factura#${widget.currentInvoice.consecutive.toString()}' +
-          fileExtension;
+      Uint8List pngBytes = byteData.buffer.asUint8List();
 
-      //Rename Image
-      await File(filePath).rename(newPath);
+      // Redimensionar imagen
+      final imageDecoded = im.decodePng(pngBytes)!;
+      final resized = im.copyResize(imageDecoded, width: 560);
+      final resizedBytes = im.encodePng(resized);
 
-      if(widget.currentInvoice.sendEmailInvoice != null && widget.currentInvoice.sendEmailInvoice) {
-        _sendMail(newPath);
+      final androidInfo = await DeviceInfoPlugin().androidInfo;
+      final sdkInt = androidInfo.version.sdkInt ?? 0;
+      if (Platform.isAndroid) {
+        if (sdkInt >= 33) {
+          final photosStatus = await Permission.photos.request();
+          if (!photosStatus.isGranted) {
+            throw Exception("Permiso para imágenes denegado");
+          }
+        } else {
+          final storageStatus = await Permission.storage.request();
+          if (!storageStatus.isGranted) {
+            throw Exception("Permiso de almacenamiento denegado");
+          }
+        }
+      }
+
+      var filePath;
+      if (sdkInt >= 29) {
+        final filename = 'Factura#${widget.currentInvoice?.consecutive ?? '000'}-${DateTime.now().millisecondsSinceEpoch}.png'; //'$fileName-$now.png';
+        filePath = await MethodChannel('com.car_wash_app.channel.media_store').invokeMethod<String>('saveImageToPictures', {
+          'filename': filename,
+          'bytes': resizedBytes,
+        });
+      } else {
+        final Directory picturesDir = (Platform.isAndroid)
+            ? Directory('/storage/emulated/0/Pictures/CarWashFacturas')
+            : await path_provider.getApplicationDocumentsDirectory(); // iOS fallback
+
+        if (!await picturesDir.exists()) {
+          await picturesDir.create(recursive: true);
+        }
+
+        final fileName = 'Factura#${widget.currentInvoice?.consecutive ?? '000'}.png';
+        filePath = '${picturesDir.path}/$fileName';
+
+        final file = File(filePath);
+        await file.writeAsBytes(resizedBytes);
+
+        // Indexar imagen en Android
+        if (Platform.isAndroid) {
+          await Process.run('am', [
+            'broadcast',
+            '-a',
+            'android.intent.action.MEDIA_SCANNER_SCAN_FILE',
+            '-d',
+            'file://${filePath}'
+          ]);
+        }
+      }
+
+      // Enviar por correo si aplica
+      if(widget.currentInvoice?.sendEmailInvoice != null && (widget.currentInvoice?.sendEmailInvoice??false) && filePath != null) {
+        _sendMail(filePath);
       }
 
       print('png done');
@@ -794,7 +820,10 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
       });
     } catch (e) {
       Navigator.pop(context);
-      MessagesUtils.showAlert(context: context, title: 'Error guardando la imagen $e').show();
+      MessagesUtils.showAlert(
+        context: context,
+        title: 'Error guardando la imagen $e',
+      ).show();
     }
   }
 
@@ -802,37 +831,50 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
       (attachments ?? []).map((a) => ml.FileAttachment(File(a)));
 
   void _sendMail(String imagePath) async {
-    String username = widget.configuration.emailFrom;
-    String password = widget.configuration.passFrom;
-    String domainSmtp = widget.configuration.smtpFrom;
+    String username = widget.configuration.emailFrom??'';
+    String password = widget.configuration.passFrom??'';
+    String domainSmtp = widget.configuration.smtpFrom??'';
 
     if (widget.customerEmail.isNotEmpty) {
       final emailSplit = widget.customerEmail.split(',');
       final smtpServer = gmail(username, password);
-      final message = ml.Message()
-        ..from = ml.Address(username, 'Spa Car Wash Movil')
-      //..recipients.add(element.trim())
-        ..ccRecipients.addAll(emailSplit.map((e) => e.trim()))
-      //..bccRecipients.add(Address('bccAddress@example.com'))
-        ..subject = 'Tu factura Spa Car Wash Movil :: 😀 :: ${DateTime.now()}'
-      //..text = 'This is the plain text.\nThis is line 2 of the text part.'
-        ..html = "<h1>Hola</h1>\n<p>Estamos felices con tu visita en nuestro Spa de Autos. Gracias por elegirnos. Adjuntamos la factura del servicio realizado.</p>"
-        ..attachments.addAll(toAt([imagePath] as Iterable<String>));
+      final message =
+          ml.Message()
+            ..from = ml.Address(username, 'Spa Car Wash Movil')
+            //..recipients.add(element.trim())
+            ..ccRecipients.addAll(emailSplit.map((e) => e.trim()))
+            //..bccRecipients.add(Address('bccAddress@example.com'))
+            ..subject =
+                'Tu factura Spa Car Wash Movil :: 😀 :: ${DateTime.now()}'
+            //..text = 'This is the plain text.\nThis is line 2 of the text part.'
+            ..html =
+                "<h1>Hola</h1>\n<p>Estamos felices con tu visita en nuestro Spa de Autos. Gracias por elegirnos. Adjuntamos la factura del servicio realizado.</p>"
+            ..attachments.addAll(toAt([imagePath] as Iterable<String>));
 
       try {
-        final sendReport = await ml.send(message, smtpServer, timeout: Duration(seconds: 15));
+        final sendReport = await ml.send(
+          message,
+          smtpServer,
+          timeout: Duration(seconds: 15),
+        );
         print('Message sent: ' + sendReport.toString());
-        Fluttertoast.showToast(msg: "Correo enviado", toastLength: Toast.LENGTH_LONG);
+        Fluttertoast.showToast(
+          msg: "Correo enviado",
+          toastLength: Toast.LENGTH_LONG,
+        );
       } on ml.MailerException catch (e) {
         print('Message not sent.');
-        Fluttertoast.showToast(msg: "Error enviando el correo: ${e.message}", toastLength: Toast.LENGTH_LONG);
+        Fluttertoast.showToast(
+          msg: "Error enviando el correo: ${e.message}",
+          toastLength: Toast.LENGTH_LONG,
+        );
       }
     }
   }
 
   void _getPreferences() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
-    String idLocation = pref.getString(Keys.idLocation);
+    String idLocation = pref.getString(Keys.idLocation)??'';
     _location = await _locationBloc.getLocationById(idLocation);
     setState(() {});
   }
@@ -840,6 +882,17 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
   void _getCustomer(String customerId) async {
     _customer = await _customerBloc.getCustomerByIdCustomer(customerId);
     setState(() {});
+  }
+
+  Future<void> _requestPermissions() async {
+    if (Platform.isAndroid) {
+      if (await Permission.storage.isDenied) {
+        await Permission.storage.request();
+      }
+      if (await Permission.photos.isDenied) {
+        await Permission.photos.request();
+      }
+    }
   }
 }
 
@@ -883,21 +936,18 @@ class UiImagePainter extends CustomPainter {
 class UiImageDrawer extends StatelessWidget {
   final ui.Image image;
 
-  const UiImageDrawer({Key key, this.image}) : super(key: key);
+  const UiImageDrawer({Key? key, required this.image}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      size: Size.infinite,
-      painter: UiImagePainter(image),
-    );
+    return CustomPaint(size: Size.infinite, painter: UiImagePainter(image));
   }
 }
 
 class OverRepaintBoundary extends StatefulWidget {
   final Widget child;
 
-  const OverRepaintBoundary({Key key, this.child}) : super(key: key);
+  const OverRepaintBoundary({Key? key, required this.child}) : super(key: key);
 
   @override
   OverRepaintBoundaryState createState() => OverRepaintBoundaryState();

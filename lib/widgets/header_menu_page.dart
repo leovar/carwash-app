@@ -1,11 +1,7 @@
-
-import 'package:car_wash_app/user/model/user.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-import 'keys.dart';
 
-class HeaderMenuPage extends StatelessWidget{
+class HeaderMenuPage extends StatelessWidget {
   final GlobalKey<ScaffoldState> _scaffoldKey;
   bool showDrawerIcon = true;
   String _userPhotoUrl;
@@ -29,7 +25,7 @@ class HeaderMenuPage extends StatelessWidget{
               color: showDrawerIcon ? Color(0xFF59B258) : Colors.white,
             ),
             onPressed: () {
-              _scaffoldKey.currentState.openDrawer();
+              _scaffoldKey.currentState?.openDrawer();
             },
           ),
           Container(
@@ -39,8 +35,9 @@ class HeaderMenuPage extends StatelessWidget{
               color: Colors.transparent,
               image: DecorationImage(
                 fit: BoxFit.cover,
-                image:
-                AssetImage("assets/images/car_wash_movil_logo_color.png"),
+                image: AssetImage(
+                  "assets/images/car_wash_movil_logo_color.png",
+                ),
               ),
             ),
           ),
@@ -48,16 +45,14 @@ class HeaderMenuPage extends StatelessWidget{
             width: 46,
             height: 46,
             decoration: BoxDecoration(
-              border: Border.all(
-                width: 2,
-                color: Colors.grey,
-              ),
+              border: Border.all(width: 2, color: Colors.grey),
               shape: BoxShape.circle,
               image: DecorationImage(
                 fit: BoxFit.cover,
-                image: (_userPhotoUrl == null || _userPhotoUrl.isEmpty)
-                    ? AssetImage('assets/images/profile_placeholder.png')
-                    : NetworkImage(_userPhotoUrl),
+                image:
+                    _userPhotoUrl.isEmpty ?? true
+                        ? AssetImage('assets/images/profile_placeholder.png') as ImageProvider
+                        : NetworkImage(_userPhotoUrl) as ImageProvider,
               ),
             ),
           ),

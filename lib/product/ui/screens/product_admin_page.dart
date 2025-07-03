@@ -1,4 +1,3 @@
-import 'dart:convert';
 
 import 'package:car_wash_app/invoice/ui/widgets/text_field_input.dart';
 import 'package:car_wash_app/location/bloc/bloc_location.dart';
@@ -14,18 +13,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 
+import '../../../widgets/popup_menu_widget.dart';
+import '../widgets/fiels_menu_product.dart';
+
 class ProductAdminPage extends StatefulWidget {
 
-  final Product currentProduct;
+  final Product? currentProduct;
 
-  ProductAdminPage({Key key, this.currentProduct});
+  ProductAdminPage({Key? key, this.currentProduct});
 
   @override
   State<StatefulWidget> createState() => _ProductAdminPage();
 }
 
 class _ProductAdminPage extends State<ProductAdminPage> {
-  ProductBloc _productBloc;
+  late ProductBloc _productBloc;
   BlocLocation _blocLocation = BlocLocation();
   VehicleTypeBloc _vehicleTypeBloc = VehicleTypeBloc();
 
@@ -39,22 +41,22 @@ class _ProductAdminPage extends State<ProductAdminPage> {
   final String _initialIvaPercent = '19';
   List<Product> _productList = <Product>[];
   List<Location> _listLocation = <Location>[];
-  List<VehicleType> _lisVehicleType = <VehicleType>[];
-  List<DropdownMenuItem<VehicleType>> _dropdownVehicleTypes;
-  VehicleType _selectedVehicleType;
+  List<VehicleType> _lisVehicleType = [];
+  late List<DropdownMenuItem<VehicleType>> _dropdownVehicleTypes;
+  VehicleType _selectedVehicleType = new VehicleType(vehicleType: '');
+  String _selectedVehicleTypeString = '';
   bool _productActive = true;
   bool _productTypeSpecial = false;
   bool _productTypeSimple = false;
-  Product _productSelected;
+  late Product _productSelected;
+  int _listVehicleTypesCount = 0;
 
   @override
   void initState() {
     super.initState();
     //_textIvaPercent.text = _initialIvaPercent;
-    if (widget.currentProduct != null) {
-      _productSelected = widget.currentProduct;
-      _selectProductList();
-    }
+    _productSelected = widget.currentProduct ?? new Product(locations: []);
+    _selectProductList();
   }
 
   @override
@@ -106,7 +108,7 @@ class _ProductAdminPage extends State<ProductAdminPage> {
                   validate: _validateName,
                   textValidate: 'Escriba el nombre del producto',
                   inputType: TextInputType.multiline,
-                  maxLines: null,
+                  maxLines: 10,
                 ),
               ),
             ),
@@ -121,7 +123,7 @@ class _ProductAdminPage extends State<ProductAdminPage> {
                 textValidate: 'Escriba el valor del producto',
                 inputType: TextInputType.number,
                 textInputFormatter: [
-                  WhitelistingTextInputFormatter(RegExp("^[0-9.]*"))
+                  FilteringTextInputFormatter.allow(RegExp("^[0-9.]*")),
                 ],
               ),
             ),
@@ -134,7 +136,7 @@ class _ProductAdminPage extends State<ProductAdminPage> {
                 textValidate: 'Escriba el % de iva del producto',
                 inputType: TextInputType.number,
                 textInputFormatter: [
-                  WhitelistingTextInputFormatter(RegExp("^[0-9.]*"))
+                  FilteringTextInputFormatter.allow(RegExp("^[0-9.]*")),
                 ],
               ),
             ),
@@ -147,7 +149,7 @@ class _ProductAdminPage extends State<ProductAdminPage> {
                 textValidate: 'Escriba la duración del servicio en minutos',
                 inputType: TextInputType.number,
                 textInputFormatter: [
-                  WhitelistingTextInputFormatter(RegExp("^[0-9.]*"))
+                  FilteringTextInputFormatter.allow(RegExp("^[0-9.]*")),
                 ],
               ),
             ),
@@ -155,7 +157,11 @@ class _ProductAdminPage extends State<ProductAdminPage> {
             _locationsToSelect(),
             SizedBox(height: 9),
             Flexible(
-              child: _dropVehicleType(),
+              child: FieldsMenuProduct(
+                listCountVehicleTypes: _listVehicleTypesCount,
+                cbHandlerVehicleType: _setHandlerUserCoordinator,
+                selectedVehicleType: _selectedVehicleTypeString,
+              ),
             ),
             SizedBox(height: 9),
             Flexible(
@@ -163,7 +169,7 @@ class _ProductAdminPage extends State<ProductAdminPage> {
                 children: <Widget>[
                   Checkbox(
                     value: _productTypeSpecial,
-                    onChanged: (bool value) {
+                    onChanged: (bool? value) {
                       _onChangeRol(1, value);
                     },
                     checkColor: Colors.white,
@@ -187,7 +193,7 @@ class _ProductAdminPage extends State<ProductAdminPage> {
                 children: <Widget>[
                   Checkbox(
                     value: _productTypeSimple,
-                    onChanged: (bool value) {
+                    onChanged: (bool? value) {
                       _onChangeRol(2, value);
                     },
                     checkColor: Colors.white,
@@ -211,9 +217,11 @@ class _ProductAdminPage extends State<ProductAdminPage> {
                 children: <Widget>[
                   Checkbox(
                     value: _productActive,
-                    onChanged: (bool value) {
+                    onChanged: (bool? value) {
                       setState(() {
-                        _productActive = value;
+                        if (value != null) {
+                          _productActive = value;
+                        }
                       });
                     },
                     checkColor: Colors.white,
@@ -255,12 +263,11 @@ class _ProductAdminPage extends State<ProductAdminPage> {
       },
     );
   }
+
   Widget _getLocationsToSelectWidget(AsyncSnapshot snapshot) {
-    if (_blocLocation.buildLocations(snapshot.data.documents).length > _listLocation.length) {
-      _listLocation = _blocLocation.buildLocations(snapshot.data.documents);
-      if (widget.currentProduct != null) {
-        _selectProductList();
-      }
+    if (_blocLocation.buildLocations(snapshot.data.docs).length != _listLocation.length) {
+      _listLocation = _blocLocation.buildLocations(snapshot.data.docs);
+      _selectProductList();
     }
     return InkWell(
       child: Container(
@@ -272,7 +279,7 @@ class _ProductAdminPage extends State<ProductAdminPage> {
             Container(
               padding: EdgeInsets.only(left: 10),
               child: Text(
-                '${_listLocation.where((f) => f.isSelected).toList().length} sedes agregadas',
+                '${_listLocation.where((f) => (f.isSelected??false)).toList().length} sedes agregadas',
                 style: TextStyle(
                   fontFamily: "Lato",
                   decoration: TextDecoration.none,
@@ -312,66 +319,16 @@ class _ProductAdminPage extends State<ProductAdminPage> {
     );
   }
 
-  Widget _dropVehicleType() {
-    return StreamBuilder(
-      stream: _vehicleTypeBloc.vehicleTypeStream,
-      builder: (context, snapshot) {
-        switch (snapshot.connectionState) {
-          case ConnectionState.waiting:
-            return CircularProgressIndicator();
-          default:
-            return _getDataVehicleTypeList(snapshot);
-        }
-      },
-    );
-  }
-  Widget _getDataVehicleTypeList(AsyncSnapshot snapshot) {
-    if (_vehicleTypeBloc.buildVehicleType(snapshot.data.documents).length > _lisVehicleType.length) {
-      _lisVehicleType = _vehicleTypeBloc.buildVehicleType(snapshot.data.documents);
-      if (widget.currentProduct != null) {
-        _selectProductList();
-      }
-    }
-    _dropdownVehicleTypes = _buildDropdownVehicleTypes(_lisVehicleType);
-    return DropdownButton(
-      isExpanded: true,
-      items: _dropdownVehicleTypes,
-      value: _selectedVehicleType,
-      onChanged: onChangeDropDawn,
-      onTap: unfocusTextFields,
-      hint: Text(
-        "Seleccione el Typo de Vehiculo...",
-        style: TextStyle(
-          color: Color(0xFFAEAEAE),
-        ),
-      ),
-      icon: Icon(
-        Icons.keyboard_arrow_down,
-        color: Color(0xFFAEAEAE),
-        size: 30,
-      ),
-      iconSize: 24,
-      elevation: 16,
-      style: TextStyle(
-        fontFamily: "AvenirNext",
-        fontWeight: FontWeight.normal,
-        color: Color(0xFFAEAEAE),
-      ),
-      underline: Container(
-        height: 1,
-        color: Color(0xFFAEAEAE),
-      ),
-    );
-  }
-
   Widget _buttonSave() {
     return Container(
       height: 100,
       child: Align(
         alignment: Alignment.center,
-        child: RaisedButton(
-          padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
-          color: Color(0xFF59B258),
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
+            backgroundColor: Color(0xFF59B258),
+          ),
           child: Text(
             "Guardar",
             style: TextStyle(
@@ -396,26 +353,53 @@ class _ProductAdminPage extends State<ProductAdminPage> {
   void _selectProductList() {
     _validateName = false;
     _validatePrice = false;
-    _textProductName.text = _productSelected.productName;
-    _textIvaPercent.text = _productSelected.ivaPercent.toStringAsFixed(0);
-    _textPrice.text = _productSelected.price.toStringAsFixed(2);
-    _textServiceTime.text = _productSelected.serviceTime == null ? '0' : _productSelected.serviceTime.toStringAsFixed(0);
+    _textProductName.text = _productSelected.productName??'';
+    _textIvaPercent.text = (_productSelected.ivaPercent ?? 0).toStringAsFixed(0);
+    _textPrice.text = (_productSelected.price ?? 0).toStringAsFixed(2);
+    _textServiceTime.text = _productSelected.serviceTime == null ? '0' : (_productSelected.serviceTime ?? 0).toStringAsFixed(0);
     _productActive = _productSelected.productActive ?? true;
     _productTypeSimple = _productSelected.productType == 'Sencillo' ? true : false;
     _productTypeSpecial = _productSelected.productType == 'Especial' ? true : false;
-    _selectedVehicleType = _lisVehicleType.length > 0
-        ? _lisVehicleType.firstWhere((f) => f.id == _productSelected.vehicleType.documentID)
-        : null;
+    _selectedVehicleTypeString = '';
+    _selectedVehicleType = new VehicleType(vehicleType: '');
+    _getVehicleTypeByReference(_productSelected.vehicleType);
     _listLocation.forEach((Location loc) {
-      List<DocumentReference> dr = _productSelected.locations
-          .where((e) => e.documentID == loc.id)
-          .toList();
+      List<DocumentReference> dr = [];
+      if ((_productSelected.locations??[]).length > 0) {
+        dr = (_productSelected.locations??[]).where((e) => e.id == loc.id).toList();
+      }
       if (dr.length > 0) {
         _listLocation[_listLocation.indexOf(loc)].isSelected = true;
       } else {
         _listLocation[_listLocation.indexOf(loc)].isSelected = false;
       }
     });
+  }
+
+  Future<void> _getVehicleTypeByReference (DocumentReference? valueRef) async {
+    if (valueRef != null) {
+      DocumentSnapshot docSnapshot = await valueRef.get();
+      if (docSnapshot.exists) {
+        VehicleType vType = VehicleType.fromJson(docSnapshot.data() as Map<String, dynamic>, id: docSnapshot.id);
+        if (_lisVehicleType.isNotEmpty && (vType.id??'') != '') {
+          _selectedVehicleType = _lisVehicleType.firstWhere((f) => f.id == (vType.id??''));
+          setState(() {
+            _selectedVehicleTypeString = vType.vehicleType??'';
+          });
+        }
+      }
+    }
+  }
+
+  ///Functions Select Menu
+  void _setHandlerUserCoordinator(String selectVehicleType, int countList, int operationType, List<VehicleType>? vehiclesList) {
+    if (operationType == 1) {
+      _selectedVehicleTypeString = selectVehicleType;
+      _selectedVehicleType = _lisVehicleType.firstWhere((vType) => vType.vehicleType == selectVehicleType);
+    } else {
+      _listVehicleTypesCount = countList;
+      _lisVehicleType = vehiclesList??[];
+    }
   }
 
   ///Functions Locations
@@ -426,26 +410,11 @@ class _ProductAdminPage extends State<ProductAdminPage> {
   }
 
   ///Functions VehicleType
-  List<DropdownMenuItem<VehicleType>> _buildDropdownVehicleTypes(
-      List vehicleTypes) {
-    List<DropdownMenuItem<VehicleType>> listItems = List();
-    for (VehicleType documentLoc in vehicleTypes) {
-      listItems.add(
-        DropdownMenuItem(
-          value: documentLoc,
-          child: Text(
-            documentLoc.vehicleType,
-          ),
-        ),
-      );
+  onChangeDropDawn(String? selectedVehicleType) {
+    if (selectedVehicleType != null) {
+      _selectedVehicleTypeString = selectedVehicleType;
+      _selectedVehicleType = _lisVehicleType.firstWhere((vType) => vType.vehicleType == selectedVehicleType);
     }
-    return listItems;
-  }
-
-  onChangeDropDawn(VehicleType selectedVehicleType) {
-    setState(() {
-      _selectedVehicleType = selectedVehicleType;
-    });
   }
 
   unfocusTextFields() {
@@ -474,13 +443,8 @@ class _ProductAdminPage extends State<ProductAdminPage> {
     } else
       _validatePrice = false;
 
-    if (_listLocation.where((f) => f.isSelected).toList().length == 0) {
+    if (_listLocation.where((f) => f.isSelected??false).toList().length == 0) {
       listSedesEmpty = true;
-      canSave = false;
-    }
-
-    if (_selectedVehicleType == null) {
-      listVehicleTypeEmpty = true;
       canSave = false;
     }
 
@@ -505,8 +469,9 @@ class _ProductAdminPage extends State<ProductAdminPage> {
     _textIvaPercent.text = _initialIvaPercent;
     _textPrice.text = '';
     _textServiceTime.text = '';
-    _selectedVehicleType = null;
-    _productSelected = null;
+    _selectedVehicleTypeString = '';
+    _selectedVehicleType = new VehicleType(vehicleType: '');
+    _productSelected = new Product();
     _productActive = true;
     _productTypeSpecial = false;
     _productTypeSimple = false;
@@ -519,44 +484,36 @@ class _ProductAdminPage extends State<ProductAdminPage> {
 
   void _saveProduct() async {
     if (_validateInputs()) {
-      MessagesUtils.showAlertWithLoading(context: context, title: 'Guardando')
-          .show();
+      MessagesUtils.showAlertWithLoading(context: context, title: 'Guardando').show();
 
       //Add new locations at product exist
-      if (_productSelected != null) {
-        _listLocation.where((l) => l.isSelected).toList().forEach((f) {
-          List<DocumentReference> listFind = _productSelected.locations
-              .where((e) => e.documentID == f.id)
-              .toList();
-          if (listFind.length <= 0) {
-            _productSelected.locations
-                .add(_blocLocation.getDocumentReferenceLocationById(f.id));
-          }
-        });
-      }
-
+      _listLocation.where((l) => l.isSelected??false).toList().forEach((f) {
+        List<DocumentReference> listFind = (_productSelected.locations??[]).where((e) => e.id == f.id).toList();
+        if (listFind.length <= 0) {
+          _productSelected.locations?.add(_blocLocation.getDocumentReferenceLocationById(f.id??''));
+        }
+      });
+    
       //Delete locations at product exist
-      if (_productSelected != null) {
-        List<DocumentReference> locListDeleted = <DocumentReference>[];
-        _productSelected.locations.forEach((item) {
-          locListDeleted.add(item);
-        });
-        _productSelected.locations.forEach((DocumentReference locRefDelete) {
-          List<Location> lotionsFind = _listLocation.where((f) => f.id == locRefDelete.documentID && f.isSelected).toList();
-          if (lotionsFind.length == 0) {
-            locListDeleted.removeAt(_productSelected.locations.indexOf(locRefDelete));
-          }
-        });
-        _productSelected.locations.clear();
-        locListDeleted.forEach((d) {
-          _productSelected.locations.add(d);
-        });
-      }
-
+      List<DocumentReference> locListDeleted = <DocumentReference>[];
+      _productSelected.locations?.forEach((item) {
+        locListDeleted.add(item);
+      });
+      _productSelected.locations?.forEach((DocumentReference locRefDelete) {
+        List<Location> lotionsFind = _listLocation.where((f) => f.id == locRefDelete.id && (f.isSelected??false)).toList();
+        if (lotionsFind.length == 0) {
+          locListDeleted.removeAt((_productSelected.locations??[]).indexOf(locRefDelete));
+        }
+      });
+      _productSelected.locations?.clear();
+      locListDeleted.forEach((d) {
+        _productSelected.locations?.add(d);
+      });
+    
       List<DocumentReference> _newListLocationsReferences = <DocumentReference>[];
-      _listLocation.where((d) => d.isSelected).toList().forEach((f) {
+      _listLocation.where((d) => d.isSelected??false).toList().forEach((f) {
         _newListLocationsReferences
-            .add(_blocLocation.getDocumentReferenceLocationById(f.id));
+            .add(_blocLocation.getDocumentReferenceLocationById(f.id??''));
       });
 
       final product = Product(
@@ -565,7 +522,7 @@ class _ProductAdminPage extends State<ProductAdminPage> {
           price: double.tryParse(_textPrice.text.trim()) ?? 0.0,
           ivaPercent: double.tryParse(_textIvaPercent.text.trim()) ?? 0.0,
           vehicleType: _vehicleTypeBloc
-              .getVehicleTypeReferenceById(_selectedVehicleType.id),
+              .getVehicleTypeReferenceById(_selectedVehicleType.id??''),
           locations: _productSelected != null
               ? _productSelected.locations
               : _newListLocationsReferences,
@@ -585,16 +542,16 @@ class _ProductAdminPage extends State<ProductAdminPage> {
   }
 
   //1. product Special, 2. product simple
-  void _onChangeRol(int productType, bool value) {
+  void _onChangeRol(int productType, bool? value) {
     setState(() {
       switch (productType) {
         case 1:
-          _productTypeSpecial = value;
+          _productTypeSpecial = value ?? false;
           _productTypeSimple = false;
           break;
         case 2:
           _productTypeSpecial = false;
-          _productTypeSimple = value;
+          _productTypeSimple = value ?? false;
           break;
       }
     });

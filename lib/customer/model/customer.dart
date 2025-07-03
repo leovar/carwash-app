@@ -4,16 +4,16 @@ import 'package:meta/meta.dart';
 
 @immutable
 class Customer extends Equatable {
-  final String id;
-  final String name;
-  final String address;
-  final String phoneNumber;
-  final String email;
-  final Timestamp creationDate;
-  final List<DocumentReference> vehicles;
-  final String birthDate;
-  final String neighborhood;
-  final String typeSex;
+  final String? id;
+  final String? name;
+  final String? address;
+  final String? phoneNumber;
+  final String? email;
+  final Timestamp? creationDate;
+  final List<DocumentReference>? vehicles;
+  final String? birthDate;
+  final String? neighborhood;
+  final String? typeSex;
 
   Customer({
     this.id,
@@ -28,10 +28,10 @@ class Customer extends Equatable {
     this.typeSex,
   });
 
-  factory Customer.fromJson(Map<String, dynamic> json, {String id}) {
+  factory Customer.fromJson(Map<String, dynamic> json, {String? id}) {
     List<DocumentReference> vehiclesListDb = <DocumentReference>[];
     List vehiclesList = json['vehicles'];
-    vehiclesList?.forEach((drLocation) {
+    vehiclesList.forEach((drLocation) {
       vehiclesListDb.add(drLocation);
     });
 
@@ -64,15 +64,15 @@ class Customer extends Equatable {
   }
 
   factory Customer.copyWith({
-    @required Customer origin,
-    String name,
-    String address,
-    String phoneNumber,
-    String email,
-    String birthDate,
-    String neighborhood,
-    String typeSex,
-    List<DocumentReference> vehicles,
+    required Customer origin,
+    String? name,
+    String? address,
+    String? phoneNumber,
+    String? email,
+    String? birthDate,
+    String? neighborhood,
+    String? typeSex,
+    List<DocumentReference>? vehicles,
   }) {
     return Customer(
       id: origin.id,
@@ -90,15 +90,15 @@ class Customer extends Equatable {
 
   @override
   List<Object> get props => [
-        id,
-        name,
-        address,
-        phoneNumber,
-        email,
-        creationDate,
-        vehicles,
-        birthDate,
-        neighborhood,
-        typeSex,
-      ];
+    id ?? '',
+    name ?? '',
+    address ?? '',
+    phoneNumber ?? '',
+    email ?? '',
+    creationDate ?? Timestamp.now(),
+    vehicles ?? DocumentReference as DocumentReference,
+    birthDate ?? '',
+    neighborhood ?? '',
+    typeSex ?? '',
+  ];
 }

@@ -4,17 +4,17 @@ import 'package:meta/meta.dart';
 
 @immutable
 class VehicleType extends Equatable {
-  final String id;
-  final int uid;
+  final String? id;
+  final int? uid;
   final String vehicleType;
 
   VehicleType({
     this.id,
     this.uid,
-    this.vehicleType,
+    required this.vehicleType,
   });
 
-  factory VehicleType.fromJson(Map<String, dynamic> json, {String id}) {
+  factory VehicleType.fromJson(Map<String, dynamic> json, {required String id}) {
     return VehicleType(
       id: id,
       uid: json['uid'],
@@ -31,8 +31,8 @@ class VehicleType extends Equatable {
 
   @override
   List<Object> get props => [
-    id,
-    uid,
-    vehicleType,
+    id ?? '',
+    uid ?? 0,
+    vehicleType ?? '',
   ];
 }

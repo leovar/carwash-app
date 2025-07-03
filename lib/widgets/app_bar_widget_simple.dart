@@ -1,7 +1,5 @@
 
-import 'package:car_wash_app/user/model/user.dart';
 import 'package:flutter/material.dart';
-import 'header_menu_page.dart';
 
 class SimpleAppBarWidget extends StatelessWidget{
 

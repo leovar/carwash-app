@@ -4,10 +4,9 @@ import 'package:car_wash_app/customer/bloc/bloc_customer.dart';
 import 'package:car_wash_app/customer/model/customer.dart';
 import 'package:car_wash_app/invoice/ui/widgets/text_field_input.dart';
 import 'package:car_wash_app/user/bloc/bloc_user.dart';
-import 'package:car_wash_app/user/model/user.dart';
+import 'package:car_wash_app/user/model/sysUser.dart';
 import 'package:car_wash_app/widgets/keys.dart';
 import 'package:car_wash_app/widgets/messages_utils.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
@@ -19,7 +18,6 @@ import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserProfilePage extends StatefulWidget {
-
   @override
   State<StatefulWidget> createState() => _UserProfilePage();
 }
@@ -38,7 +36,7 @@ class _UserProfilePage extends State<UserProfilePage> {
   final _textBirthDate = TextEditingController();
   final double _heightTextField = 60;
   String _imageUrl = '';
-  User _currentUser;
+  late SysUser _currentUser;
   Customer _currentCustomer = Customer();
   bool _obscureText = true;
   DateTime _date = new DateTime.now();
@@ -56,7 +54,7 @@ class _UserProfilePage extends State<UserProfilePage> {
   @override
   Widget build(BuildContext context) {
     //_userBloc = BlocProvider.of(context);
-    PopupMenu.context = context;
+    //PopupMenu.context = context;
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -145,13 +143,15 @@ class _UserProfilePage extends State<UserProfilePage> {
               textController: _textBirthDate,
               hintText: 'dd/mm/aaaa',
               inputType: TextInputType.datetime,
-              textInputFormatter: [WhitelistingTextInputFormatter(RegExp('^[0-9]*\/*[0-9]*\/*[0-9]*'))],
+              textInputFormatter: [
+                FilteringTextInputFormatter.allow(
+                  RegExp('^[0-9]*\/*[0-9]*\/*[0-9]*'),
+                ),
+              ],
               onFinalEditText: _onChangeTextBirthDate,
             ),
             SizedBox(height: 9),
-            Flexible(
-              child: _buttonSave(),
-            ),
+            Flexible(child: _buttonSave()),
             SizedBox(height: 9),
           ],
         ),
@@ -166,10 +166,7 @@ class _UserProfilePage extends State<UserProfilePage> {
       width: 120,
       height: 120,
       decoration: BoxDecoration(
-        border: Border.all(
-          width: 2,
-          color: Colors.grey,
-        ),
+        border: Border.all(width: 2, color: Colors.grey),
         shape: BoxShape.circle,
         image: DecorationImage(
           fit: BoxFit.cover,
@@ -179,16 +176,18 @@ class _UserProfilePage extends State<UserProfilePage> {
     );
   }
 
-  Widget _buttonChangeImage(){
+  Widget _buttonChangeImage() {
     return Center(
       child: Container(
         height: 55,
         child: Align(
           alignment: Alignment.center,
-          child: RaisedButton(
+          child: ElevatedButton(
             key: btnChangeImageProfile,
-            padding: EdgeInsets.symmetric(vertical: 4, horizontal: 17),
-            color: Color(0xFF59B258),
+            style: ElevatedButton.styleFrom(
+              padding: EdgeInsets.symmetric(vertical: 4, horizontal: 17),
+              backgroundColor: Color(0xFF59B258),
+            ),
             child: Text(
               "Cambiar Imagen",
               style: TextStyle(
@@ -229,46 +228,29 @@ class _UserProfilePage extends State<UserProfilePage> {
           color: Color(0xFFAEAEAE),
         ),
         border: OutlineInputBorder(
-          borderSide: BorderSide(
-            color: Color(0xFFAEAEAE),
-          ),
+          borderSide: BorderSide(color: Color(0xFFAEAEAE)),
         ),
         focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(
-            width: 2,
-            color: Color(0xFFAEAEAE),
-          ),
+          borderSide: BorderSide(width: 2, color: Color(0xFFAEAEAE)),
         ),
         disabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(
-            width: 1,
-            color: Color(0xFFAEAEAE),
-          ),
+          borderSide: BorderSide(width: 1, color: Color(0xFFAEAEAE)),
         ),
         enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(
-            width: 1,
-            color: Color(0xFFAEAEAE),
-          ),
+          borderSide: BorderSide(width: 1, color: Color(0xFFAEAEAE)),
         ),
         suffixIcon: InkWell(
           onTap: () => this._togglePassword(),
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 10),
             child: _obscureText
-                ? Icon(
-              Icons.visibility,
-              color: Color(0xFFAEAEAE),
-            )
-                : Icon(
-              Icons.visibility_off,
-              color: Color(0xFFAEAEAE),
-            ),
+                ? Icon(Icons.visibility, color: Color(0xFFAEAEAE))
+                : Icon(Icons.visibility_off, color: Color(0xFFAEAEAE)),
           ),
         ),
       ),
-      validator: (String args) {
-        if (args.isEmpty)
+      validator: (args) {
+        if (args!.isEmpty)
           return 'El campo no puede estar vacio';
         else
           return null;
@@ -281,9 +263,11 @@ class _UserProfilePage extends State<UserProfilePage> {
       height: 100,
       child: Align(
         alignment: Alignment.center,
-        child: RaisedButton(
-          padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
-          color: Color(0xFF59B258),
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
+            backgroundColor: Color(0xFF59B258),
+          ),
           child: Text(
             "Guardar",
             style: TextStyle(
@@ -317,26 +301,26 @@ class _UserProfilePage extends State<UserProfilePage> {
 
   void _changeProfileImage() {
     PopupMenu menu = PopupMenu(
+      context: context,
+      config: MenuConfig(
         backgroundColor: Color(0xFF59B258),
         lineColor: Color(0xFF59B258),
         maxColumn: 1,
-        items: [
-          MenuItem(
-              title: _cameraTag,
-              textStyle: TextStyle(color: Colors.white),
-              image: Icon(
-                Icons.camera_alt,
-                color: Colors.white,
-              )),
-          MenuItem(
-              title: _galleryTag,
-              textStyle: TextStyle(color: Colors.white),
-              image: Icon(
-                Icons.image,
-                color: Colors.white,
-              )),
-        ],
-        onClickMenu: _onClickMenuImageSelected);
+      ),
+      items: [
+        MenuItem(
+          title: _cameraTag,
+          textStyle: TextStyle(color: Colors.white),
+          image: Icon(Icons.camera_alt, color: Colors.white),
+        ),
+        MenuItem(
+          title: _galleryTag,
+          textStyle: TextStyle(color: Colors.white),
+          image: Icon(Icons.image, color: Colors.white),
+        ),
+      ],
+      onClickMenu: _onClickMenuImageSelected,
+    );
     menu.show(widgetKey: btnChangeImageProfile);
   }
 
@@ -347,64 +331,67 @@ class _UserProfilePage extends State<UserProfilePage> {
   }
 
   Future _addImageTour() async {
-    var imageCapture = await ImagePicker.pickImage(
-        source: _selectSourceImagePicker == _cameraTag
-            ? ImageSource.camera
-            : ImageSource.gallery)
+    final XFile? imageCapture = await ImagePicker()
+        .pickImage(
+            source: _selectSourceImagePicker == _cameraTag
+                ? ImageSource.camera
+                : ImageSource.gallery,
+            preferredCameraDevice: CameraDevice.front)
         .catchError((onError) => print(onError));
 
     if (imageCapture != null) {
       setState(() {
-        print(imageCapture.lengthSync());
         _cropImage(imageCapture);
       });
     }
   }
 
-  Future<Null> _cropImage(File imageCapture) async {
-    File croppedFile = await ImageCropper.cropImage(
+  Future<Null> _cropImage(imageCapture) async {
+    CroppedFile? croppedFile = await ImageCropper().cropImage(
       sourcePath: imageCapture.path,
-      aspectRatioPresets: Platform.isAndroid
-          ? [
-        CropAspectRatioPreset.square,
-        CropAspectRatioPreset.ratio3x2,
-        CropAspectRatioPreset.original,
-        CropAspectRatioPreset.ratio4x3,
-        CropAspectRatioPreset.ratio16x9
-      ]
-          : [
-        CropAspectRatioPreset.original,
-        CropAspectRatioPreset.square,
-        CropAspectRatioPreset.ratio3x2,
-        CropAspectRatioPreset.ratio4x3,
-        CropAspectRatioPreset.ratio5x3,
-        CropAspectRatioPreset.ratio5x4,
-        CropAspectRatioPreset.ratio7x5,
-        CropAspectRatioPreset.ratio16x9
-      ],
-      androidUiSettings: AndroidUiSettings(
+      uiSettings: [
+        AndroidUiSettings(
           toolbarTitle: 'Cropper',
           toolbarColor: Colors.white,
           toolbarWidgetColor: Theme.of(context).primaryColor,
           initAspectRatio: CropAspectRatioPreset.original,
-          lockAspectRatio: false),
-      iosUiSettings: IOSUiSettings(
-        minimumAspectRatio: 1.0,
-      ),
+          lockAspectRatio: false,
+          aspectRatioPresets: [
+            CropAspectRatioPreset.square,
+            CropAspectRatioPreset.ratio3x2,
+            CropAspectRatioPreset.original,
+            CropAspectRatioPreset.ratio4x3,
+            CropAspectRatioPreset.ratio16x9,
+          ],
+        ),
+        IOSUiSettings(
+          title: 'Cropper',
+          minimumAspectRatio: 1.0,
+          aspectRatioPresets: [
+            CropAspectRatioPreset.original,
+            CropAspectRatioPreset.square,
+            CropAspectRatioPreset.ratio3x2,
+            CropAspectRatioPreset.ratio4x3,
+            CropAspectRatioPreset.ratio5x3,
+            CropAspectRatioPreset.ratio5x4,
+            CropAspectRatioPreset.ratio7x5,
+            CropAspectRatioPreset.ratio16x9,
+          ],
+        ),
+      ],
     );
-    if (croppedFile != null) {
-      final dir = await path_provider.getTemporaryDirectory();
-      final targetPath = dir.absolute.path + "/${imageCapture.path.substring(imageCapture.path.length-10 ,imageCapture.path.length)}"; //dir.absolute.path + "/temp${imageList.length}.jpg";
-      File fileCompress = await FlutterImageCompress.compressAndGetFile(
-        croppedFile.absolute.path,
-        targetPath,
-        quality: 30,
-      );
+    final dir = await path_provider.getTemporaryDirectory();
+    final targetPath = dir.absolute.path +
+        "/${imageCapture.path.substring(imageCapture.path.length - 10, imageCapture.path.length)}"; //dir.absolute.path + "/temp${imageList.length}.jpg";
+    final XFile? fileCompress = await FlutterImageCompress.compressAndGetFile(
+      croppedFile!.path,
+      targetPath,
+      quality: 30,
+    );
 
-      setState(() {
-        _imageUrl = fileCompress.path;
-      });
-    }
+    setState(() {
+      _imageUrl = fileCompress!.path;
+    });
   }
 
   // Toggles the password show status
@@ -417,15 +404,16 @@ class _UserProfilePage extends State<UserProfilePage> {
   //Change Text Birth Date
   void _onChangeTextBirthDate() {
     var text = _textBirthDate.text;
-    var val = _textBirthDate.text.split('/');
-    var val1 = int.tryParse(val[0] ?? 0);
+    List<String> val = _textBirthDate.text.split('/');
+    var val1 = int.tryParse(val[0].isNotEmpty ? val[0] : '0');
     var val2 = int.tryParse(val.length > 1 ? val[1] : '0');
     var val3 = int.tryParse(val.length > 2 ? val[2] : '0');
 
     if (text.length > 10) {
       _textBirthDate.text = _oldTextBirthDay;
       _textBirthDate.selection = TextSelection.fromPosition(
-          TextPosition(offset: _textBirthDate.text.length));
+        TextPosition(offset: _textBirthDate.text.length),
+      );
       return;
     }
 
@@ -434,38 +422,40 @@ class _UserProfilePage extends State<UserProfilePage> {
         _textBirthDate.text =
             text.substring(0, 2) + '/' + text.substring(2, text.length);
         _textBirthDate.selection = TextSelection.fromPosition(
-            TextPosition(offset: _textBirthDate.text.length));
+          TextPosition(offset: _textBirthDate.text.length),
+        );
       } else if (text.length > 5 && text.length < 7) {
         _textBirthDate.text =
             text.substring(0, 5) + '/' + text.substring(5, text.length);
         _textBirthDate.selection = TextSelection.fromPosition(
-            TextPosition(offset: _textBirthDate.text.length));
+          TextPosition(offset: _textBirthDate.text.length),
+        );
       }
 
-      if (val1 > 31 && val1.toString().length == 2) {
+      if (val1! > 31 && val1.toString().length == 2) {
         MessagesUtils.showAlert(
-            context: context,
-            title: 'El dia no puede ser superior a 31',
-            alertType: AlertType.warning)
-            .show();
+          context: context,
+          title: 'El dia no puede ser superior a 31',
+          alertType: AlertType.warning,
+        ).show();
       }
 
-      if (val2 > 12 && val2.toString().length == 2) {
+      if (val2! > 12 && val2.toString().length == 2) {
         MessagesUtils.showAlert(
-            context: context,
-            title: 'El mes no puede ser superior a 12',
-            alertType: AlertType.warning)
-            .show();
+          context: context,
+          title: 'El mes no puede ser superior a 12',
+          alertType: AlertType.warning,
+        ).show();
       }
 
-      if (val3 > 0 &&
+      if (val3! > 0 &&
           val3.toString().length == 4 &&
           (val3 < 1900 || val3 >= DateTime.now().year)) {
         MessagesUtils.showAlert(
-            context: context,
-            title: 'Ingrese un año válido',
-            alertType: AlertType.warning)
-            .show();
+          context: context,
+          title: 'Ingrese un año válido',
+          alertType: AlertType.warning,
+        ).show();
       }
     }
     _oldTextBirthDay = text;
@@ -474,23 +464,23 @@ class _UserProfilePage extends State<UserProfilePage> {
   ///Function user selected
   void _selectUserList() {
     _validateName = false;
-    _textUserName.text = _currentUser.name??'';
+    _textUserName.text = _currentUser.name ?? '';
     _textEmail.text = _currentUser.email;
     _textPassword.text = '';
-    _textPhone.text = _currentCustomer.phoneNumber??'';
-    _textNeighborhood.text = _currentCustomer.neighborhood??'';
-    _textBirthDate.text = _currentCustomer.birthDate??'';
+    _textPhone.text = _currentCustomer.phoneNumber ?? '';
+    _textNeighborhood.text = _currentCustomer.neighborhood ?? '';
+    _textBirthDate.text = _currentCustomer.birthDate ?? '';
     setState(() {
-      _imageUrl = _currentUser.photoUrl??'';
+      _imageUrl = _currentUser.photoUrl ?? '';
     });
   }
 
   void _getUser() {
-    _userBloc.getCurrentUser().then((User user) {
-      _currentUser = user;
+    _userBloc.getCurrentUser().then((user) {
+      _currentUser = user?? new SysUser(uid: '', name: '', email: '');
       _updatePreference();
       this._selectUserList();
-      _customerBloc.getCustomerFilter('', user.email).then((customer) {
+      _customerBloc.getCustomerFilter('', user?.email ?? '').then((customer) {
         if (customer.length > 0) {
           _currentCustomer = customer[0];
           this._selectUserList();
@@ -517,7 +507,10 @@ class _UserProfilePage extends State<UserProfilePage> {
 
     if (canSave == false) {
       setState(() {
-        MessagesUtils.showAlert(context: context, title: 'Faltan campos por llenar').show();
+        MessagesUtils.showAlert(
+          context: context,
+          title: 'Faltan campos por llenar',
+        ).show();
       });
     }
 
@@ -526,16 +519,18 @@ class _UserProfilePage extends State<UserProfilePage> {
 
   void _updatePreference() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
-    pref.setString(Keys.photoUserUrl, _currentUser.photoUrl);
+    pref.setString(Keys.photoUserUrl, _currentUser.photoUrl ?? '');
     pref.setString(Keys.userName, _currentUser.name);
     pref.setString(Keys.userEmail, _currentUser.email);
   }
 
-
   Future<void> _saveUser() async {
     if (_validateInputs()) {
       try {
-        MessagesUtils.showAlertWithLoading(context: context, title: 'Guardando').show();
+        MessagesUtils.showAlertWithLoading(
+          context: context,
+          title: 'Guardando',
+        ).show();
 
         //Update email if is required
         if (_currentUser.email != _textEmail.text.trim()) {
@@ -548,7 +543,7 @@ class _UserProfilePage extends State<UserProfilePage> {
         }
 
         // Update user db Info
-        final user = User.copyWith(
+        final user = SysUser.copyWith(
           origin: _currentUser,
           name: _textUserName.text.trim(),
           email: _textEmail.text.trim(),
@@ -557,45 +552,27 @@ class _UserProfilePage extends State<UserProfilePage> {
         await _userBloc.updateUserData(user);
 
         // Update Customer
-        if (_currentCustomer == null || _currentCustomer.id == null) {
-          final customer = Customer(
-            email: _textEmail.text.trim().toLowerCase(),
-            name: _textUserName.text.trim(),
-            phoneNumber: _textPhone.text.trim(),
-            neighborhood: _textNeighborhood.text.trim(),
-            birthDate: _textBirthDate.text.trim(),
-            creationDate: Timestamp.now(),
-            address: '',
-            typeSex: '',
-            vehicles: [],
-          );
-          await _customerBloc.updateCustomer(customer);
-        } else {
-          final customerCopy = Customer.copyWith(
-              origin: _currentCustomer,
-              phoneNumber: _textPhone.text.trim(),
-              neighborhood: _textNeighborhood.text.trim(),
-              birthDate: _textBirthDate.text.trim(),
-          );
-           await _customerBloc.updateCustomer(customerCopy);
-        }
+        final customerCopy = Customer.copyWith(
+          origin: _currentCustomer,
+          phoneNumber: _textPhone.text.trim(),
+          neighborhood: _textNeighborhood.text.trim(),
+          birthDate: _textBirthDate.text.trim(),
+        );
+        await _customerBloc.updateCustomer(customerCopy);
         _getUser();
 
         Navigator.pop(context);
         //Navigator.of(context, rootNavigator: true)..pop()..pop();
         MessagesUtils.showAlert(
           context: context,
-          title:
-          'Perfil guardado',
+          title: 'Perfil guardado',
           alertType: AlertType.success,
         ).show();
-
-      } catch(error) {
+      } catch (error) {
         Navigator.pop(context);
         MessagesUtils.showAlert(
           context: context,
-          title:
-          'Error actualizando el perfil',
+          title: 'Error actualizando el perfil',
           alertType: AlertType.info,
         ).show();
       }

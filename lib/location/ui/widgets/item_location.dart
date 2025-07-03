@@ -1,5 +1,4 @@
 import 'package:car_wash_app/location/model/location.dart';
-import 'package:car_wash_app/product/model/product.dart';
 import 'package:flutter/material.dart';
 
 class ItemLocation extends StatefulWidget {
@@ -20,7 +19,7 @@ class _ItemLocation extends State<ItemLocation> {
       splashColor: Colors.white,
       onTap: () {
         setState(() {
-          if (widget.locationList[widget.index].isSelected) {
+          if (widget.locationList[widget.index].isSelected??false) {
             widget.locationList[widget.index].isSelected = false;
           } else {
             widget.locationList[widget.index].isSelected = true;
@@ -40,7 +39,7 @@ class _ItemLocation extends State<ItemLocation> {
       child: Container(
         width: MediaQuery.of(context).size.width,
         decoration: BoxDecoration(
-          color: _itemLocation.isSelected ? Color(0xFFF1F1F1) : Colors.white,
+          color: (_itemLocation.isSelected??false) ? Color(0xFFF1F1F1) : Colors.white,
           border: Border(
             bottom: BorderSide(
               color: Color(0xFFD8D8D8),
@@ -53,7 +52,7 @@ class _ItemLocation extends State<ItemLocation> {
             Container(
               margin: EdgeInsets.only(left: 10),
               width: 30,
-              child: _itemLocation.isSelected
+              child: _itemLocation.isSelected??false
                   ? Icon(
                 Icons.check,
                 color: Color(0xFF59B258),
@@ -65,7 +64,7 @@ class _ItemLocation extends State<ItemLocation> {
               child: Container(
                 margin: EdgeInsets.only(left: 15),
                 child: Text(
-                  _itemLocation.locationName,
+                  _itemLocation.locationName??'',
                   style: TextStyle(
                     fontFamily: "Lato",
                     decoration: TextDecoration.none,

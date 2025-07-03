@@ -3,31 +3,28 @@ import 'dart:core';
 import 'package:car_wash_app/invoice/bloc/bloc_invoice.dart';
 import 'package:car_wash_app/invoice/model/invoice.dart';
 import 'package:car_wash_app/invoice/ui/widgets/item_operator.dart';
-import 'package:car_wash_app/invoice/ui/widgets/item_product.dart';
-import 'package:car_wash_app/user/model/user.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:car_wash_app/user/model/sysUser.dart';
 import 'package:flutter/material.dart';
-import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 
 class OperatorsInvoicePage extends StatefulWidget {
-  final Function(List<User>) callbackSetOperatorsList;
+  final Function(List<SysUser>) callbackSetOperatorsList;
   final Function() callbackFinishInvoice;
-  List<User> usersListCallback;
+  List<SysUser> usersListCallback;
   final bool editForm;
   final String idLocation;
   final bool closedInvoice;
   final bool fromCompleteInvoice;
-  final Invoice invoice;
+  final Invoice? invoice;
 
   OperatorsInvoicePage({
-    Key key,
-    this.callbackSetOperatorsList,
-    this.callbackFinishInvoice,
-    this.usersListCallback,
-    this.editForm,
-    this.idLocation,
-    this.closedInvoice,
-    this.fromCompleteInvoice,
+    Key? key,
+    required this.callbackSetOperatorsList,
+    required this.callbackFinishInvoice,
+    required this.usersListCallback,
+    required this.editForm,
+    required this.idLocation,
+    required this.closedInvoice,
+    required this.fromCompleteInvoice,
     this.invoice,
   });
 
@@ -64,10 +61,10 @@ class _OperatorsInvoicePage extends State<OperatorsInvoicePage> {
   }
 
   Widget listUsers() {
-    if (widget.invoice != null && widget.invoice.invoiceClosed) {
-      List<User> operatorsList = [];
+    if (widget.invoice != null && (widget.invoice?.invoiceClosed??false)) {
+      List<SysUser> operatorsList = [];
       widget.usersListCallback.forEach((item) {
-        User userSelected = User.copyWith(
+        SysUser userSelected = SysUser.copyWith(
           origin: item,
           isSelected: true,
         );
@@ -91,17 +88,16 @@ class _OperatorsInvoicePage extends State<OperatorsInvoicePage> {
   }
 
   Widget showOperatorsWidget(AsyncSnapshot snapshot) {
-    List<User> _listUsersOperators =
-        _blocInvoice.buildOperators(snapshot.data.documents);
-    List<User> _userGet = <User>[];
+    List<SysUser> _listUsersOperators = _blocInvoice.buildOperators(snapshot.data.docs);
+    List<SysUser> _userGet = <SysUser>[];
     _listUsersOperators.forEach((item) {
-      User userFind = widget.usersListCallback.firstWhere(
-          (element) => element.id == item.id && element.isSelected,
-          orElse: () => null);
-      if (userFind == null) {
+      SysUser userFind = widget.usersListCallback.firstWhere(
+          (element) => element.id == item.id && (element.isSelected??false),
+          orElse: () => new SysUser(uid: '', name: '', email: ''));
+      if (userFind.name.isEmpty) {
         _userGet.add(item);
       } else {
-        User userSelected = User.copyWith(
+        SysUser userSelected = SysUser.copyWith(
           origin: item,
           isSelected: true,
         );
@@ -137,9 +133,11 @@ class _OperatorsInvoicePage extends State<OperatorsInvoicePage> {
           height: 100,
           child: Align(
             alignment: Alignment.center,
-            child: RaisedButton(
-              padding: EdgeInsets.symmetric(vertical: 15, horizontal: 25),
-              color: Color(0xFF59B258),
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                padding: EdgeInsets.symmetric(vertical: 15, horizontal: 25),
+                backgroundColor: Color(0xFF59B258),
+              ),
               child: Text(
                 widget.fromCompleteInvoice ?? false ? "Terminar" : "Aceptar",
                 style: TextStyle(

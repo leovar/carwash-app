@@ -5,10 +5,10 @@ import 'package:car_wash_app/widgets/firestore_collections.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class VehicleTypeRepository {
-  final Firestore _db = Firestore.instance;
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
   
   DocumentReference getVehicleTypeReferenceById (String idVehicleType){
-    return _db.document('${FirestoreCollections.vehicleType}/$idVehicleType');
+    return _db.doc('${FirestoreCollections.vehicleType}/$idVehicleType');
   }
 
   Stream<QuerySnapshot> getListVehicleTypesStream() {
@@ -18,10 +18,10 @@ class VehicleTypeRepository {
         .snapshots();
     return querySnapshot;
   }
-  List<VehicleType> buildVehicleType(List<DocumentSnapshot> productListSnapshot){
+  List<VehicleType> buildVehicleType(List<DocumentSnapshot> productListSnapshot) {
     List<VehicleType> vehicleTypeList = <VehicleType>[];
     productListSnapshot.forEach((p) {
-      VehicleType loc = VehicleType.fromJson(p.data, id: p.documentID);
+      VehicleType loc = VehicleType.fromJson(p.data() as Map<String, dynamic>, id: p.id);
       vehicleTypeList.add(loc);
     });
     return vehicleTypeList;
@@ -31,11 +31,11 @@ class VehicleTypeRepository {
     final querySnapshot = await this
         ._db
         .collection(FirestoreCollections.vehicleType)
-        .document(idVehicleType)
+        .doc(idVehicleType)
         .get();
     return VehicleType.fromJson(
-      querySnapshot.data,
-      id: querySnapshot.documentID,
+      querySnapshot.data() as Map<String, dynamic>,
+      id: querySnapshot.id,
     );
   }
 
@@ -44,10 +44,10 @@ class VehicleTypeRepository {
         ._db
         .collection(FirestoreCollections.vehicleType)
         .where(FirestoreCollections.vehicleTypeFieldUid, isEqualTo: uIdVehicleType)
-        .getDocuments();
+        .get();
     return VehicleType.fromJson(
-      querySnapshot.documents.first.data,
-      id: querySnapshot.documents.first.documentID,
+      querySnapshot.docs.first.data(),
+      id: querySnapshot.docs.first.id,
     );
   }
 
@@ -56,7 +56,7 @@ class VehicleTypeRepository {
     final querySnapshot = this
         ._db
         .collection(FirestoreCollections.brands)
-        .document(brandId)
+        .doc(brandId)
         .collection(FirestoreCollections.brandReferences)
         .snapshots();
 
@@ -65,7 +65,7 @@ class VehicleTypeRepository {
   List<BrandReference> buildBrandReferences(List<DocumentSnapshot> brandReferencesListSnapshot){
     List<BrandReference> brandReferencesList = <BrandReference>[];
     brandReferencesListSnapshot.forEach((p) {
-      BrandReference bref = BrandReference.fromJson(p.data, id: p.documentID);
+      BrandReference bref = BrandReference.fromJson(p.data() as Map<String, dynamic>, id: p.id);
       brandReferencesList.add(bref);
     });
     return brandReferencesList;
@@ -76,10 +76,10 @@ class VehicleTypeRepository {
     DocumentReference ref =
     _db
         .collection(FirestoreCollections.brands)
-        .document(brandId)
+        .doc(brandId)
         .collection(FirestoreCollections.brandReferences)
-        .document(product.id);
-    return await ref.setData(product.toJson(), merge: true);
+        .doc(product.id);
+    return await ref.set(product.toJson(), SetOptions(merge: true));
   }
 
   // Save Brand
@@ -87,7 +87,7 @@ class VehicleTypeRepository {
     DocumentReference ref =
     _db
         .collection(FirestoreCollections.brands)
-        .document(brand.id);
-    return await ref.setData(brand.toJson(), merge: true);
+        .doc(brand.id);
+    return await ref.set(brand.toJson(), SetOptions(merge: true));
   }
 }

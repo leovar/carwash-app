@@ -1,9 +1,9 @@
 import 'package:equatable/equatable.dart';
 
 class BrandReference extends Equatable {
-  final String id;
-  final String reference;
-  final bool active;
+  final String? id;
+  final String? reference;
+  final bool? active;
 
   BrandReference({
     this.id,
@@ -11,7 +11,7 @@ class BrandReference extends Equatable {
     this.active,
   });
 
-  factory BrandReference.fromJson(Map<String, dynamic> json, {String id}) {
+  factory BrandReference.fromJson(Map<String, dynamic> json, {required String id}) {
     return BrandReference(
       id: id,
       reference: json['reference'],
@@ -28,8 +28,8 @@ class BrandReference extends Equatable {
 
   @override
   List<Object> get props => [
-    id,
-    reference,
-    active,
+    id!,
+    reference!,
+    active!,
   ];
 }

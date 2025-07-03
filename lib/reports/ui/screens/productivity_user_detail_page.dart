@@ -1,28 +1,28 @@
 import 'package:car_wash_app/reports/bloc/bloc_reports.dart';
 import 'package:car_wash_app/reports/model/products_card_detail.dart';
 import 'package:car_wash_app/reports/ui/widgets/item_productivity_report_detail.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 import 'package:intl/intl.dart';
 
 class ProductivityUserDetailPage extends StatefulWidget {
   final List<ProductsCardDetail> productsList;
+  final String operatorNameList;
 
-  ProductivityUserDetailPage({Key key, this.productsList});
+  ProductivityUserDetailPage({Key? key, required this.productsList, required this.operatorNameList});
 
   @override
   State<StatefulWidget> createState() => _ProductivityUserDetailPage();
 }
 
 class _ProductivityUserDetailPage extends State<ProductivityUserDetailPage> {
-  BlocReports _blocReports;
-  List<ProductsCardDetail> _productsCard;
+  late BlocReports _blocReports;
+  late List<ProductsCardDetail> _productsCard;
 
   @override
   void initState() {
     super.initState();
-    if (widget.productsList != null) {
+    if (widget.productsList.isNotEmpty) {
       _productsCard = widget.productsList;
     }
   }
@@ -71,13 +71,29 @@ class _ProductivityUserDetailPage extends State<ProductivityUserDetailPage> {
 
   Widget _listServices() {
     return Flexible(
-        child: ListView.builder(
-            itemCount: _productsCard.length,
-            scrollDirection: Axis.vertical,
-            shrinkWrap: true,
-            itemBuilder: (BuildContext context, int index) {
-              return ItemProductivityReportDetail(_productsCard[index], index);
-            },
+        child: Column(
+          children: [
+            Text(widget.operatorNameList,
+              style: TextStyle(
+                fontFamily: "Lato",
+                decoration: TextDecoration.none,
+                fontWeight: FontWeight.w600,
+                color: Colors.black,
+                fontSize: 18,
+              ),
+            ),
+            SizedBox(height: 3),
+            Flexible(
+              child: ListView.builder(
+                itemCount: _productsCard.length,
+                scrollDirection: Axis.vertical,
+                shrinkWrap: true,
+                itemBuilder: (BuildContext context, int index) {
+                  return ItemProductivityReportDetail(_productsCard[index], index);
+                },
+              ),
+            ),
+          ],
         ),
     );
   }
@@ -94,7 +110,6 @@ class _ProductivityUserDetailPage extends State<ProductivityUserDetailPage> {
     });
 
     return Container(
-      height: 96,
       margin: EdgeInsets.only(top: 8),
       decoration: BoxDecoration(
         border: Border(
@@ -104,121 +119,124 @@ class _ProductivityUserDetailPage extends State<ProductivityUserDetailPage> {
           ),
         ),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          Row(
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              Flexible(
-                flex: 4,
-                child: Row(
-                  children: [
-                    Flexible(
-                      child: Container(
-                        padding: EdgeInsets.only(left: 8, top: 8),
-                        alignment: Alignment.topLeft,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Flexible(
-                              child: Text(
-                                'Total Servicios',
-                                style: TextStyle(
-                                  fontFamily: "Lato",
-                                  decoration: TextDecoration.none,
-                                  fontSize: 17.0,
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: 8),
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            Row(
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                Flexible(
+                  flex: 4,
+                  child: Row(
+                    children: [
+                      Flexible(
+                        child: Container(
+                          padding: EdgeInsets.only(left: 8, top: 8),
+                          alignment: Alignment.topLeft,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  'Total Servicios',
+                                  style: TextStyle(
+                                    fontFamily: "Lato",
+                                    decoration: TextDecoration.none,
+                                    fontSize: 17.0,
+                                  ),
                                 ),
                               ),
-                            ),
-                            SizedBox(height: 8),
-                            Flexible(
-                              child: Text(
-                                'Valor Total',
-                                style: TextStyle(
-                                  fontFamily: "Lato",
-                                  decoration: TextDecoration.none,
-                                  fontSize: 17.0,
+                              SizedBox(height: 8),
+                              Flexible(
+                                child: Text(
+                                  'Valor Total',
+                                  style: TextStyle(
+                                    fontFamily: "Lato",
+                                    decoration: TextDecoration.none,
+                                    fontSize: 17.0,
+                                  ),
                                 ),
                               ),
-                            ),
-                            SizedBox(height: 9),
-                            Flexible(
-                              child: Text(
-                                'Comisión Total',
-                                style: TextStyle(
-                                  fontFamily: "Lato",
-                                  decoration: TextDecoration.none,
-                                  fontSize: 17.0,
+                              SizedBox(height: 9),
+                              Flexible(
+                                child: Text(
+                                  'Comisión Total',
+                                  style: TextStyle(
+                                    fontFamily: "Lato",
+                                    decoration: TextDecoration.none,
+                                    fontSize: 17.0,
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              Flexible(
-                flex: 2,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Flexible(
-                      child: Container(
-                        alignment: Alignment.centerRight,
-                        padding: EdgeInsets.only(right: 8, top: 8),
-                        child: Text(
-                          _totalServices.toString(),
-                          style: TextStyle(
-                            fontFamily: "Lato",
-                            fontWeight: FontWeight.w600,
-                            fontSize: 17.0,
-                            color: Color(0xFF59B258),
+                Flexible(
+                  flex: 2,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Flexible(
+                        child: Container(
+                          alignment: Alignment.centerRight,
+                          padding: EdgeInsets.only(right: 8, top: 8),
+                          child: Text(
+                            _totalServices.toString(),
+                            style: TextStyle(
+                              fontFamily: "Lato",
+                              fontWeight: FontWeight.w600,
+                              fontSize: 17.0,
+                              color: Color(0xFF59B258),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    SizedBox(height: 5),
-                    Flexible(
-                      child: Container(
-                        alignment: Alignment.centerRight,
-                        padding: EdgeInsets.only(right: 8, top: 8),
-                        child: Text(
-                          '\$${formatterPrice.format(_totalValue)}',
-                          style: TextStyle(
-                            fontFamily: "Lato",
-                            fontWeight: FontWeight.w600,
-                            fontSize: 17.0,
-                            color: Color(0xFF59B258),
+                      SizedBox(height: 5),
+                      Flexible(
+                        child: Container(
+                          alignment: Alignment.centerRight,
+                          padding: EdgeInsets.only(right: 8, top: 8),
+                          child: Text(
+                            '\$${formatterPrice.format(_totalValue)}',
+                            style: TextStyle(
+                              fontFamily: "Lato",
+                              fontWeight: FontWeight.w600,
+                              fontSize: 17.0,
+                              color: Color(0xFF59B258),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    SizedBox(height: 5),
-                    Flexible(
-                      child: Container(
-                        alignment: Alignment.centerRight,
-                        padding: EdgeInsets.only(right: 8, top: 8),
-                        child: Text(
-                          '\$${formatterPrice.format(_totalCommission)}',
-                          style: TextStyle(
-                            fontFamily: "Lato",
-                            fontWeight: FontWeight.w600,
-                            fontSize: 17.0,
-                            color: Color(0xFF59B258),
+                      SizedBox(height: 5),
+                      Flexible(
+                        child: Container(
+                          alignment: Alignment.centerRight,
+                          padding: EdgeInsets.only(right: 8, top: 8),
+                          child: Text(
+                            '\$${formatterPrice.format(_totalCommission)}',
+                            style: TextStyle(
+                              fontFamily: "Lato",
+                              fontWeight: FontWeight.w600,
+                              fontSize: 17.0,
+                              color: Color(0xFF59B258),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

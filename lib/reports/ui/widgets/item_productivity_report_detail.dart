@@ -1,5 +1,4 @@
 import 'package:car_wash_app/reports/model/products_card_detail.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -15,15 +14,13 @@ class ItemProductivityReportDetail extends StatefulWidget {
 
 class _ItemProductivityReportDetail
     extends State<ItemProductivityReportDetail> {
-  ProductsCardDetail _serviceDetail;
+  late ProductsCardDetail _serviceDetail;
 
   @override
   void initState() {
     super.initState();
-    if (widget.serviceDetail != null) {
-      _serviceDetail = widget.serviceDetail;
+    _serviceDetail = widget.serviceDetail;
     }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,6 +63,20 @@ class _ItemProductivityReportDetail
                   padding: EdgeInsets.only(left: 12, top: 8),
                   child: Text(
                     _serviceDetail.dateServices,
+                    style: TextStyle(
+                      fontFamily: "Lato",
+                      fontWeight: FontWeight.w600,
+                      fontSize: 17.0,
+                      color: Color(0xFF59B258),
+                    ),
+                  ),
+                ),
+              ),
+              Flexible(
+                child: Container(
+                  padding: EdgeInsets.only(left: 12, top: 8),
+                  child: Text(
+                    '--   ${_serviceDetail.countInvoices} Lavadas',
                     style: TextStyle(
                       fontFamily: "Lato",
                       fontWeight: FontWeight.w600,

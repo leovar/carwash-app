@@ -1,36 +1,38 @@
+import 'dart:ffi';
+
 import 'package:car_wash_app/vehicle/model/vehicle.dart';
 import 'package:car_wash_app/widgets/firestore_collections.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class VehicleRepository {
-  final Firestore _db = Firestore.instance;
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  Future<Vehicle> getVehicleByPlaca(String placa) async {
+  Future<Vehicle?> getVehicleByPlaca(String placa) async {
     final querySnapshot = await this
         ._db
         .collection(FirestoreCollections.vehicles)
         .where(FirestoreCollections.vehiclesFieldPlaca, isEqualTo: placa)
-        .getDocuments();
+        .get();
 
-    final documents = querySnapshot.documents;
+    final documents = querySnapshot.docs;
     if (documents.length > 0) {
       final documentSnapshot = documents.first;
       return Vehicle.fromJson(
-        documentSnapshot.data,
-        id: documentSnapshot.documentID,
+        documentSnapshot.data(),
+        id: documentSnapshot.id,
       );
     }
     return null;
   }
 
-  Future<DocumentReference> getVehicleReferenceByPlaca(String placa) async {
+  Future<DocumentReference?> getVehicleReferenceByPlaca(String placa) async {
     final querySnapshot = await this
         ._db
         .collection(FirestoreCollections.vehicles)
         .where(FirestoreCollections.vehiclesFieldPlaca, isEqualTo: placa)
-        .getDocuments();
+        .get();
 
-    final documents = querySnapshot.documents;
+    final documents = querySnapshot.docs;
     if (documents.length > 0) {
       return documents.first.reference;
     }
@@ -41,18 +43,18 @@ class VehicleRepository {
     final querySnapshot = await this
         ._db
         .collection(FirestoreCollections.vehicles)
-        .document(idVehicle)
+        .doc(idVehicle)
         .get();
     return Vehicle.fromJson(
-      querySnapshot.data,
-      id: querySnapshot.documentID,
+      querySnapshot.data() as Map<String, dynamic>,
+      id: querySnapshot.id,
     );
   }
 
   Future<DocumentReference> updateVehicle(Vehicle vehicle) async {
     DocumentReference ref =
-        _db.collection(FirestoreCollections.vehicles).document(vehicle.id);
-    ref.setData(vehicle.toJson(), merge: true);
+        _db.collection(FirestoreCollections.vehicles).doc(vehicle.id);
+    ref.set(vehicle.toJson(), SetOptions(merge: true));
     return ref;
   }
 }

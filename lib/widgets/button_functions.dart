@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 
 class ButtonFunctions extends StatefulWidget {
 
-  final String buttonName;
-  final String imageAsset;
-  final VoidCallback onPressed;
-  final bool buttonEnabled;
+  final String? buttonName;
+  final String? imageAsset;
+  final VoidCallback? onPressed;
+  final bool? buttonEnabled;
 
-  ButtonFunctions({Key key, @required this.onPressed, this.buttonName, this.imageAsset, this.buttonEnabled});
+  ButtonFunctions({Key? key, @required this.onPressed, this.buttonName, this.imageAsset, this.buttonEnabled});
 
   @override
   State<StatefulWidget> createState() {
@@ -24,7 +24,7 @@ class _ButtonFunctions extends State<ButtonFunctions> {
     return Container(
       child: Material(
         child: InkWell(
-          onTap: widget.buttonEnabled ? widget.onPressed : null,
+          onTap: widget.buttonEnabled??false ? widget.onPressed : null,
           child: Container(
             height: 70.0,
             child: Align(

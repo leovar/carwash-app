@@ -21,7 +21,7 @@ class _ItemProduct extends State<ItemProduct> {
       splashColor: Colors.white,
       onTap: widget.editForm ? () {
         setState(() {
-          if (widget.productList[widget.index].isSelected) {
+          if (widget.productList[widget.index].isSelected??false) {
             widget.productList[widget.index].isSelected = false;
           } else {
             widget.productList[widget.index].isSelected = true;
@@ -42,7 +42,7 @@ class _ItemProduct extends State<ItemProduct> {
       child: Container(
         width: MediaQuery.of(context).size.width,
         decoration: BoxDecoration(
-          color: _itemProduct.isSelected ? Color(0xFFF1F1F1) : Colors.white,
+          color: (_itemProduct.isSelected??false) ? Color(0xFFF1F1F1) : Colors.white,
           border: Border(
             bottom: BorderSide(
               color: Color(0xFFD8D8D8),
@@ -55,7 +55,7 @@ class _ItemProduct extends State<ItemProduct> {
             Container(
               margin: EdgeInsets.only(left: 10, right: 15),
               width: 30,
-              child: _itemProduct.isSelected
+              child: (_itemProduct.isSelected??false)
                   ? Icon(
                 Icons.check,
                 color: Color(0xFF59B258),
@@ -70,7 +70,7 @@ class _ItemProduct extends State<ItemProduct> {
                 children: <Widget>[
                   Flexible(
                     child: Text(
-                      _itemProduct.productName,
+                      _itemProduct.productName??'',
                       style: TextStyle(
                         fontFamily: "Lato",
                         decoration: TextDecoration.none,
@@ -86,7 +86,7 @@ class _ItemProduct extends State<ItemProduct> {
                         '\$${formatter.format(_itemProduct.price)}',
                         style: TextStyle(
                           fontFamily: "Lato",
-                          color: Theme.of(context).accentColor,
+                          color: Theme.of(context).colorScheme.secondary,
                           fontWeight: FontWeight.bold,
                           fontSize: 18,
                         ),

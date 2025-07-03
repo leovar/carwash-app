@@ -1,67 +1,65 @@
-
+import 'dart:async';
 import 'dart:io';
 
-import 'package:car_wash_app/location/model/location.dart';
-import 'package:car_wash_app/user/model/user.dart';
+import 'package:car_wash_app/user/model/sysUser.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:car_wash_app/widgets/firestore_collections.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
-
 class UserRepository {
-
-  final Firestore _db = Firestore.instance;
-  final StorageReference _storageReference = FirebaseStorage.instance.ref();
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
+  final Reference _storageReference = FirebaseStorage.instance.ref();
 
   ///Get current user reference
   Future<DocumentReference> getCurrentUserReference() async {
-    FirebaseUser user = await FirebaseAuth.instance.currentUser();
-    return _db.collection(FirestoreCollections.users).document(user.uid);
+    User? user = FirebaseAuth.instance.currentUser;
+    return _db.collection(FirestoreCollections.users).doc(user?.uid);
   }
 
-  Future<User> getCurrentUser() async {
+  Future<SysUser?> getCurrentUser() async {
     try {
-      FirebaseUser user = await FirebaseAuth.instance.currentUser();
+      User? user = FirebaseAuth.instance.currentUser;
       final querySnapshot = await _db
           .collection(FirestoreCollections.users)
-          .where(FirestoreCollections.usersFieldUid, isEqualTo: user.uid)
-          .getDocuments();
-      if(querySnapshot.documents.length > 0) {
-        return User.fromJson(querySnapshot.documents.first.data, id: querySnapshot.documents.first.documentID);
+          .where(FirestoreCollections.usersFieldUid, isEqualTo: user?.uid)
+          .get();
+      if (querySnapshot.docs.length > 0) {
+        return SysUser.fromJson(
+            querySnapshot.docs.first.data(),
+            id: querySnapshot.docs.first.id);
       } else {
-        return null;
+        return Future.value(null);
       }
     } catch (e) {
-      print(e.message);
+      print(e);
     }
   }
 
   Future<DocumentReference> getUserReferenceById(String userId) async {
-    return _db.collection(FirestoreCollections.users).document(userId);
+    return _db.collection(FirestoreCollections.users).doc(userId);
   }
 
   Future<DocumentReference> getUserReferenceByUserName(String userName) async {
     var querySnapshot = await _db
         .collection(FirestoreCollections.users)
         .where(FirestoreCollections.usersFieldName, isEqualTo: userName)
-        .getDocuments();
-    return querySnapshot.documents.first.reference;
-  }
-
-  Future<User> getUserById(String userId) async {
-    final querySnapshot = await this
-        ._db
-        .collection(FirestoreCollections.users)
-        .document(userId)
         .get();
-
-    return User.fromJson(querySnapshot.data, id: querySnapshot.documentID);
+    return querySnapshot.docs.first.reference;
   }
 
-  void updateUserDataRepository(User user) async {
-    DocumentReference ref = _db.collection(FirestoreCollections.users).document(user.id);
-    return await ref.setData(user.toJson(), merge: true);
+  Future<SysUser> getUserById(String userId) async {
+    final querySnapshot =
+        await this._db.collection(FirestoreCollections.users).doc(userId).get();
+
+    return SysUser.fromJson(querySnapshot.data() as Map<String, dynamic>,
+        id: querySnapshot.id);
+  }
+
+  void updateUserDataRepository(SysUser userGet) async {
+    DocumentReference ref =
+        _db.collection(FirestoreCollections.users).doc(userGet.id);
+    return await ref.set(userGet.toJson(), SetOptions(merge: true));
   }
 
   ///Get all users by id
@@ -73,17 +71,22 @@ class UserRepository {
         .snapshots();
     return querySnapshot;
   }
-  List<User> buildGetAllUsers(List<DocumentSnapshot> usersListSnapshot) {
-    List<User> usersList = <User>[];
+
+  List<SysUser> buildGetAllUsers(List<DocumentSnapshot> usersListSnapshot) {
+    List<SysUser> usersList = <SysUser>[];
+
     usersListSnapshot.forEach((p) {
-      User loc = User.fromJson(p.data, id: p.documentID);
-      usersList.add(loc);
+      var data = p.data();
+      if (data != null) {
+        SysUser loc = SysUser.fromJson(p.data() as Map<String, dynamic>, id: p.id);
+        usersList.add(loc);
+      }
     });
     return usersList;
   }
 
   ///Get Users By Id
-  Stream<QuerySnapshot> getUsersByIdStream(String uid) {
+  Stream<QuerySnapshot<Map<String, dynamic>>> getUsersByIdStream(String uid) {
     final querySnapshot = this
         ._db
         .collection(FirestoreCollections.users)
@@ -91,56 +94,66 @@ class UserRepository {
         .snapshots();
     return querySnapshot;
   }
-  User buildGetUsersById(List<DocumentSnapshot> usersListSnapshot) {
-    return User.fromJson(usersListSnapshot.first.data, id: usersListSnapshot.first.documentID);
+
+  SysUser buildGetUsersById(List<DocumentSnapshot> usersListSnapshot) {
+    return SysUser.fromJson(
+        usersListSnapshot.first.data() as Map<String, dynamic>,
+        id: usersListSnapshot.first.id);
   }
 
   ///Search Users By Email
-  Future<User> searchUserByEmail(String email) async {
+  Future<SysUser?> searchUserByEmail(String? email) async {
     final querySnapshot = await this
         ._db
         .collection(FirestoreCollections.users)
         .where(FirestoreCollections.usersFieldEmail, isEqualTo: email)
-        .getDocuments();
+        .get();
 
-    final documents = querySnapshot.documents;
-    if (documents.length > 0) {
-      final documentSnapshot = documents.first;
-      return User.fromJson(
-        documentSnapshot.data,
-        id: documentSnapshot.documentID,
-      );
+    if (querySnapshot.docs.isNotEmpty) {
+      return SysUser.fromJson(
+          querySnapshot.docs.first.data(),
+          id: querySnapshot.docs.first.id);
     }
-    return null;
+    return Future.value(null);
   }
 
+  //TODO validar si funciona la lo que hay en el putData
   /// Save user profile image in firebase storage
-  Future<StorageTaskSnapshot> uploadProfileImageUser(
+  Future<TaskSnapshot> uploadProfileImageUser(
       String path, File imageFile) async {
-    StorageUploadTask storageUploadTask = _storageReference.child(path).putData(
-      imageFile.readAsBytesSync(),
-      StorageMetadata(
+    Reference storageUploadTask = _storageReference.child(path);
+    UploadTask uploadTask = storageUploadTask.putData(
+      imageFile
+          .readAsBytesSync(), // Esta es otra opcion que me da GPT: await imageFile.readAsBytes(),
+      SettableMetadata(
         contentType: 'image/jpeg',
       ),
     );
-    return storageUploadTask.onComplete;
+    return await uploadTask;
   }
 
   /// Update email user
   Future<void> updateEmailUser(String email) async {
-    FirebaseUser user = await FirebaseAuth.instance.currentUser();
-    user.updateEmail(email);
+    User? user = FirebaseAuth.instance.currentUser;
+    if (email != null) {
+      await user?.updateEmail(email);
+    } else {
+      throw Exception('El usuario no esta actualmente logueado');
+    }
   }
 
   /// Update password user
   Future<void> updatePasswordUser(String password) async {
-    FirebaseUser user = await FirebaseAuth.instance.currentUser();
-    user.updatePassword(password);
+    User? user = FirebaseAuth.instance.currentUser;
+    if (password != null) {
+    } else {
+      throw new Exception('El usuario no esta actualmente logueado');
+    }
+    user?.updatePassword(password);
   }
 
   /// Reset password user
   Future<void> resetPasswordUser(String email) async {
     await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
   }
-
 }

@@ -1,4 +1,3 @@
-import 'dart:ffi';
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
@@ -6,12 +5,12 @@ import 'package:meta/meta.dart';
 
 @immutable
 class Configuration extends Equatable {
-  final String id;
-  final String emailFrom;
-  final String passFrom;
-  final String smtpFrom;
-  final double salaryMonth;
-  final double salaryDay;
+  final String? id;
+  final String? emailFrom;
+  final String? passFrom;
+  final String? smtpFrom;
+  final double? salaryMonth;
+  final double? salaryDay;
 
   Configuration({
     this.id,
@@ -22,7 +21,7 @@ class Configuration extends Equatable {
     this.salaryDay,
   });
 
-  factory Configuration.fromJson(Map<String, dynamic> json, {String id}) {
+  factory Configuration.fromJson(Map<String, dynamic> json, {String? id}) {
     return Configuration(
       id: id,
       emailFrom: json['emailFrom'],
@@ -45,11 +44,11 @@ class Configuration extends Equatable {
 
   @override
   List<Object> get props => [
-    id,
-    emailFrom,
-    passFrom,
-    smtpFrom,
-    salaryMonth,
-    salaryDay,
+    id!,
+    emailFrom!,
+    passFrom!,
+    smtpFrom!,
+    salaryMonth!,
+    salaryDay!,
   ];
 }

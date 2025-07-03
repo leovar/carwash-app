@@ -3,9 +3,9 @@ import 'package:flutter/cupertino.dart';
 
 @immutable
 class Brand extends Equatable {
-  final String id;
-  final String brand;
-  final int vehicleType;
+  final String? id;
+  final String? brand;
+  final int? vehicleType;
 
   Brand({
    this.id,
@@ -13,7 +13,7 @@ class Brand extends Equatable {
    this.vehicleType,
   });
 
-  factory Brand.fromJson(Map<String, dynamic> json, {String id}) {
+  factory Brand.fromJson(Map<String, dynamic> json, {required String id}) {
     return Brand(
       id: id,
       brand: json['brand'],
@@ -30,9 +30,9 @@ class Brand extends Equatable {
 
   @override
   List<Object> get props => [
-    id,
-    brand,
-    vehicleType,
+    id ?? '',
+    brand ?? '',
+    vehicleType ?? 0,
   ];
 
 }

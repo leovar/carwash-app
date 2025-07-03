@@ -1,4 +1,3 @@
-import 'package:car_wash_app/invoice/model/invoice.dart';
 import 'package:car_wash_app/invoice/model/invoice_history_list.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -8,7 +7,7 @@ class InfoLastServicesByVehicle extends StatelessWidget {
   final double _widthContainer = 300;
   final formatter = new DateFormat('dd-MM-yyyy');
 
-  InfoLastServicesByVehicle({Key key, @required this.listHistoryInvoices});
+  InfoLastServicesByVehicle({Key? key, required this.listHistoryInvoices});
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +19,7 @@ class InfoLastServicesByVehicle extends StatelessWidget {
         children: <Widget>[
           Text(
               'Realizó ${_listInvoices.length} servicios en los ultimos 2 meses',
-              style: Theme.of(context).textTheme.display2),
+              style: Theme.of(context).textTheme.displaySmall),
           Container(
             height: 200,
             width: _widthContainer,

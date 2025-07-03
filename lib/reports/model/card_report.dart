@@ -1,5 +1,4 @@
 import 'package:car_wash_app/invoice/model/invoice.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CardReport {
   final String operatorName;

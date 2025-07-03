@@ -1,27 +1,25 @@
 import 'package:car_wash_app/vehicle_type/model/brand.dart';
-import 'package:car_wash_app/vehicle_type/model/brand_reference.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 
 class ItemAdminBrandList extends StatefulWidget {
-  final Brand brand;
-  final Function(Brand) editBrand;
+  final Brand? brand;
+  final Function(Brand?) editBrand;
 
-  ItemAdminBrandList({Key key, this.brand, this.editBrand});
+  ItemAdminBrandList({Key? key, this.brand, required this.editBrand});
 
   @override
   State<StatefulWidget> createState() => _ItemAdminBrandList();
 }
 
 class _ItemAdminBrandList extends State<ItemAdminBrandList> {
-  double _imageWith;
-  String _iconVehicle;
+  late double _imageWith;
+  late String _iconVehicle;
   String _vehicleTypeName = '';
 
   @override
   void initState() {
     super.initState();
-    switch (widget.brand.vehicleType) {
+    switch (widget.brand?.vehicleType) {
       case 1:
         _imageWith = 38;
         _iconVehicle = "assets/images/icon_car_admin.png";
@@ -98,7 +96,7 @@ class _ItemAdminBrandList extends State<ItemAdminBrandList> {
           ),
           Flexible(
             child: Text(
-              widget.brand.brand,
+              widget.brand?.brand??'',
               style: TextStyle(
                 fontFamily: "Lato",
                 decoration: TextDecoration.none,

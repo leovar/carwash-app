@@ -1,11 +1,10 @@
 import 'dart:io';
-
 import 'package:car_wash_app/invoice/ui/widgets/text_field_input.dart';
 import 'package:car_wash_app/location/bloc/bloc_location.dart';
 import 'package:car_wash_app/location/model/location.dart';
 import 'package:car_wash_app/location/ui/screens/locations_select_list_page.dart';
 import 'package:car_wash_app/user/bloc/bloc_user.dart';
-import 'package:car_wash_app/user/model/user.dart';
+import 'package:car_wash_app/user/model/sysUser.dart';
 import 'package:car_wash_app/widgets/messages_utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -19,16 +18,16 @@ import 'package:popup_menu/popup_menu.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
 class CreateUserAdminPage extends StatefulWidget {
-  final User currentUser;
+  final SysUser? currentUser;
 
-  CreateUserAdminPage({Key key, this.currentUser});
+  CreateUserAdminPage({Key? key, this.currentUser});
 
   @override
   State<StatefulWidget> createState() => _CreateUserAdminPage();
 }
 
 class _CreateUserAdminPage extends State<CreateUserAdminPage> {
-  UserBloc _userBloc;
+  late UserBloc _userBloc;
   BlocLocation _blocLocation = BlocLocation();
 
   GlobalKey btnChangeImageProfile = GlobalKey();
@@ -44,7 +43,8 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
   bool _userAdministrator = false;
   bool _userCoordinator = false;
   bool _userOperator = false;
-  User _userSelected;
+  late SysUser _userSelected;
+  final ImagePicker _picker = ImagePicker();
   final String _cameraTag = "Camera";
   final String _galleryTag = "Gallery";
   String _selectSourceImagePicker = "Camara";
@@ -54,17 +54,14 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
   @override
   void initState() {
     super.initState();
-    if (widget.currentUser != null) {
-      _userSelected = widget.currentUser;
-      _imageUrl = _userSelected.photoUrl;
-      _selectUserList();
+    _userSelected = widget.currentUser ?? new SysUser(uid: '', name: '', email: '');
+    _imageUrl = _userSelected.photoUrl ?? '';
+    _selectUserList();
     }
-  }
 
   @override
   Widget build(BuildContext context) {
     _userBloc = BlocProvider.of(context);
-    PopupMenu.context = context;
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -147,7 +144,7 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
                 children: <Widget>[
                   Checkbox(
                     value: _userAdministrator,
-                    onChanged: (bool value) {
+                    onChanged: (bool? value) {
                       _onChangeRol(1, value);
                     },
                     checkColor: Colors.white,
@@ -171,7 +168,7 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
                 children: <Widget>[
                   Checkbox(
                     value: _userCoordinator,
-                    onChanged: (bool value) {
+                    onChanged: (bool? value) {
                       _onChangeRol(2, value);
                     },
                     checkColor: Colors.white,
@@ -195,7 +192,7 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
                 children: <Widget>[
                   Checkbox(
                     value: _userOperator,
-                    onChanged: (bool value) {
+                    onChanged: (bool? value) {
                       _onChangeRol(3, value);
                     },
                     checkColor: Colors.white,
@@ -219,9 +216,9 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
                 children: <Widget>[
                   Checkbox(
                     value: _userActive,
-                    onChanged: (bool value) {
+                    onChanged: (bool? value) {
                       setState(() {
-                        _userActive = value;
+                        _userActive = value ?? false;
                       });
                     },
                     checkColor: Colors.white,
@@ -240,9 +237,7 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
               ),
             ),
             SizedBox(height: 9),
-            Flexible(
-              child: _buttonSave(),
-            ),
+            Flexible(child: _buttonSave()),
             SizedBox(height: 9),
           ],
         ),
@@ -265,13 +260,11 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
   }
 
   Widget _getLocationsToSelectWidget(AsyncSnapshot snapshot) {
-    if (_blocLocation.buildLocations(snapshot.data.documents).length >
+    if (_blocLocation.buildLocations(snapshot.data.docs).length >
         _listLocation.length) {
-      _listLocation = _blocLocation.buildLocations(snapshot.data.documents);
-      if (widget.currentUser != null) {
-        _selectUserList();
-      }
-    }
+      _listLocation = _blocLocation.buildLocations(snapshot.data.docs);
+      _selectUserList();
+        }
     return InkWell(
       child: Container(
         height: 50,
@@ -282,7 +275,7 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
             Container(
               padding: EdgeInsets.only(left: 10),
               child: Text(
-                '${_listLocation.where((f) => f.isSelected).toList().length} sedes agregadas',
+                '${_listLocation.where((f) => f.isSelected??false).toList().length} sedes agregadas',
                 style: TextStyle(
                   fontFamily: "Lato",
                   decoration: TextDecoration.none,
@@ -294,11 +287,8 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
             Align(
               alignment: Alignment.centerRight,
               child: IconButton(
-                icon: Icon(
-                  Icons.keyboard_arrow_down,
-                  size: 30,
-                ),
-                onPressed: (){},
+                icon: Icon(Icons.keyboard_arrow_down, size: 30),
+                onPressed: () {},
               ),
             ),
           ],
@@ -312,10 +302,11 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => LocationsSelectListPage(
-              callbackSetLocationsList: _setLocationsDb,
-              locationsList: _listLocation,
-            ),
+            builder:
+                (context) => LocationsSelectListPage(
+                  callbackSetLocationsList: _setLocationsDb,
+                  locationsList: _listLocation,
+                ),
           ),
         );
       },
@@ -329,10 +320,7 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
       width: 120,
       height: 120,
       decoration: BoxDecoration(
-        border: Border.all(
-          width: 2,
-          color: Colors.grey,
-        ),
+        border: Border.all(width: 2, color: Colors.grey),
         shape: BoxShape.circle,
         image: DecorationImage(
           fit: BoxFit.cover,
@@ -348,10 +336,12 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
         height: 55,
         child: Align(
           alignment: Alignment.center,
-          child: RaisedButton(
+          child: ElevatedButton(
             key: btnChangeImageProfile,
-            padding: EdgeInsets.symmetric(vertical: 4, horizontal: 17),
-            color: Color(0xFF59B258),
+            style: ElevatedButton.styleFrom(
+              padding: EdgeInsets.symmetric(vertical: 4, horizontal: 17),
+              backgroundColor: Color(0xFF59B258),
+            ),
             child: Text(
               "Cambiar Imagen",
               style: TextStyle(
@@ -376,9 +366,11 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
       height: 100,
       child: Align(
         alignment: Alignment.center,
-        child: RaisedButton(
-          padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
-          color: Color(0xFF59B258),
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            padding: EdgeInsets.symmetric(vertical: 15, horizontal: 60),
+            backgroundColor: Color(0xFF59B258),
+          ),
           child: Text(
             "Guardar",
             style: TextStyle(
@@ -417,114 +409,136 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
 
   void _changeProfileImage() {
     PopupMenu menu = PopupMenu(
+      context: context,
+      config: MenuConfig(
         backgroundColor: Color(0xFF59B258),
         lineColor: Color(0xFF59B258),
         maxColumn: 1,
-        items: [
-          MenuItem(
-              title: _cameraTag,
-              textStyle: TextStyle(color: Colors.white),
-              image: Icon(
-                Icons.camera_alt,
-                color: Colors.white,
-              )),
-          MenuItem(
-              title: _galleryTag,
-              textStyle: TextStyle(color: Colors.white),
-              image: Icon(
-                Icons.image,
-                color: Colors.white,
-              )),
-        ],
-        onClickMenu: _onClickMenuImageSelected);
+      ),
+      items: [
+        MenuItem(
+          title: _cameraTag,
+          textStyle: TextStyle(color: Colors.white),
+          image: Icon(Icons.camera_alt, color: Colors.white),
+        ),
+        MenuItem(
+          title: _galleryTag,
+          textStyle: TextStyle(color: Colors.white),
+          image: Icon(Icons.image, color: Colors.white),
+        ),
+      ],
+      onClickMenu: _onClickMenuImageSelected,
+    );
     menu.show(widgetKey: btnChangeImageProfile);
   }
 
   void _onClickMenuImageSelected(MenuItemProvider item) {
     _selectSourceImagePicker = item.menuTitle;
     _addImageTour();
-    print('Click menu -> ${item.menuTitle}');
   }
 
   Future _addImageTour() async {
-    var imageCapture = await ImagePicker.pickImage(
-            source: _selectSourceImagePicker == _cameraTag
-                ? ImageSource.camera
-                : ImageSource.gallery)
-        .catchError((onError) => print(onError));
+    XFile? imageCapture = await _picker.pickImage(
+      source:
+          _selectSourceImagePicker == _cameraTag
+              ? ImageSource.camera
+              : ImageSource.gallery,
+    );
 
     if (imageCapture != null) {
       setState(() {
-        print(imageCapture.lengthSync());
         _cropImage(imageCapture);
       });
     }
   }
 
-  Future<Null> _cropImage(File imageCapture) async {
-    File croppedFile = await ImageCropper.cropImage(
-      sourcePath: imageCapture.path,
-      aspectRatioPresets: Platform.isAndroid
-          ? [
-              CropAspectRatioPreset.square,
-              CropAspectRatioPreset.ratio3x2,
-              CropAspectRatioPreset.original,
-              CropAspectRatioPreset.ratio4x3,
-              CropAspectRatioPreset.ratio16x9
-            ]
-          : [
-              CropAspectRatioPreset.original,
-              CropAspectRatioPreset.square,
-              CropAspectRatioPreset.ratio3x2,
-              CropAspectRatioPreset.ratio4x3,
-              CropAspectRatioPreset.ratio5x3,
-              CropAspectRatioPreset.ratio5x4,
-              CropAspectRatioPreset.ratio7x5,
-              CropAspectRatioPreset.ratio16x9
-            ],
-      androidUiSettings: AndroidUiSettings(
+  Future<void> _cropImage(XFile _imageCapture) async {
+    CroppedFile? _croppedFile = await ImageCropper().cropImage(
+      sourcePath: _imageCapture.path,
+      compressFormat: ImageCompressFormat.jpg,
+      compressQuality: 40,
+      uiSettings: [
+        AndroidUiSettings(
           toolbarTitle: 'Cropper',
           toolbarColor: Colors.white,
           toolbarWidgetColor: Theme.of(context).primaryColor,
-          initAspectRatio: CropAspectRatioPreset.original,
-          lockAspectRatio: false),
-      iosUiSettings: IOSUiSettings(
-        minimumAspectRatio: 1.0,
-      ),
+          initAspectRatio: CropAspectRatioPreset.square,
+          lockAspectRatio: false,
+          aspectRatioPresets: [
+            CropAspectRatioPreset.square,
+            CropAspectRatioPreset.ratio3x2,
+            CropAspectRatioPreset.original,
+            CropAspectRatioPreset.ratio4x3,
+            CropAspectRatioPreset.ratio16x9,
+          ],
+        ),
+        IOSUiSettings(
+          title: 'Cropper',
+          minimumAspectRatio: 1.0,
+          aspectRatioPresets: [
+            CropAspectRatioPreset.original,
+            CropAspectRatioPreset.square,
+            CropAspectRatioPreset.ratio3x2,
+            CropAspectRatioPreset.ratio4x3,
+            CropAspectRatioPreset.ratio5x3,
+            CropAspectRatioPreset.ratio5x4,
+            CropAspectRatioPreset.ratio7x5,
+            CropAspectRatioPreset.ratio16x9,
+          ],
+        ),
+        WebUiSettings(
+          context: context,
+          presentStyle: WebPresentStyle.dialog,
+          size: const CropperSize(
+            width: 520,
+            height: 520,
+          ),
+        ),
+      ],
     );
-    if (croppedFile != null) {
-      final dir = await path_provider.getTemporaryDirectory();
-      final targetPath = dir.absolute.path +
-          "/${imageCapture.path.substring(imageCapture.path.length - 10, imageCapture.path.length)}"; //dir.absolute.path + "/temp${imageList.length}.jpg";
-      File fileCompress = await FlutterImageCompress.compressAndGetFile(
-        croppedFile.absolute.path,
-        targetPath,
-        quality: 40,
-      );
 
+    if (_croppedFile == null) return; // Handle cancel action
+
+    setState(() {
+      _imageUrl = _croppedFile.path ?? '';
+    });
+
+    /* //TODO esta parte del codigo me arrojo chatgpt para la version flutter 3, se puede eliminar despues de las pruebas si funciona con el anterior
+
+    final dir = await getTemporaryDirectory();
+    final targetPath = "${dir.path}/${imageCapture.path.split('/').last}";
+
+    File? fileCompress = await FlutterImageCompress.compressAndGetFile(
+      croppedFile.path,
+      targetPath,
+      quality: 40,
+    );
+
+    if (fileCompress != null) {
       setState(() {
         _imageUrl = fileCompress.path;
       });
     }
+    */
   }
 
   //1. administrator, 2. coordinator, 3. Operator
-  void _onChangeRol(int rol, bool value) {
+  void _onChangeRol(int rol, bool? value) {
     setState(() {
       switch (rol) {
         case 1:
-          _userAdministrator = value;
+          _userAdministrator = value?? false;
           _userOperator = false;
           _userCoordinator = false;
           break;
         case 2:
           _userAdministrator = false;
           //_userOperator = false; // Se comenta por que un uusario coordinador también puede ser operador
-          _userCoordinator = value;
+          _userCoordinator = value ?? false;
           break;
         case 3:
           _userAdministrator = false;
-          _userOperator = value;
+          _userOperator = value ?? false;
           //_userCoordinator = false;
           break;
       }
@@ -539,13 +553,12 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
     _textUserName.text = _userSelected.name;
     _textEmail.text = _userSelected.email;
     _textPassword.text = '';
-    _userActive = _userSelected.active;
-    _userAdministrator = _userSelected.isAdministrator;
-    _userCoordinator = _userSelected.isCoordinator;
-    _userOperator = _userSelected.isOperator;
+    _userActive = _userSelected.active ?? false;
+    _userAdministrator = _userSelected.isAdministrator ?? false;
+    _userCoordinator = _userSelected.isCoordinator ?? false;
+    _userOperator = _userSelected.isOperator ?? false;
     _listLocation.forEach((Location loc) {
-      List<DocumentReference> dr =
-          _userSelected.locations.where((e) => e.documentID == loc.id).toList();
+      List<DocumentReference> dr = _userSelected.locations?.where((e) => e.id == loc.id).toList() ?? [];
       if (dr.length > 0) {
         _listLocation[_listLocation.indexOf(loc)].isSelected = true;
       } else {
@@ -568,19 +581,12 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
     } else
       _validateEmail = false;
 
-    if (widget.currentUser == null) {
-      if (_textPassword.text.isEmpty) {
-        _validatePassword = true;
-        canSave = false;
-      } else
-        _validatePassword = false;
-    }
-
     if (canSave == false) {
       setState(() {
         MessagesUtils.showAlert(
-                context: context, title: 'Faltan campos por llenar')
-            .show();
+          context: context,
+          title: 'Faltan campos por llenar',
+        ).show();
       });
     }
 
@@ -605,68 +611,65 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
   Future<void> _saveUser() async {
     if (_validateInputs()) {
       try {
-        MessagesUtils.showAlertWithLoading(context: context, title: 'Guardando')
-            .show();
+        MessagesUtils.showAlertWithLoading(
+          context: context,
+          title: 'Guardando',
+        ).show();
 
         //Add new locations at user exist
-        if (_userSelected != null) {
-          _listLocation.where((l) => l.isSelected).toList().forEach((f) {
-            List<DocumentReference> listFind = _userSelected.locations
-                .where((e) => e.documentID == f.id)
-                .toList();
-            if (listFind.length <= 0) {
-              _userSelected.locations
-                  .add(_blocLocation.getDocumentReferenceLocationById(f.id));
-            }
-          });
-        }
-
+        _listLocation.where((l) => l.isSelected??false).toList().forEach((f) {
+          List<DocumentReference> listFind =
+              _userSelected.locations?.where((e) => e.id == f.id).toList() ?? [];
+          if (listFind.length <= 0) {
+            _userSelected.locations?.add(_blocLocation.getDocumentReferenceLocationById(f.id??''),
+            );
+          }
+        });
+      
         //Delete locations at user exist
-        if (_userSelected != null) {
-          List<DocumentReference> locListDeleted = <DocumentReference>[];
-          _userSelected.locations.forEach((item) {
-            locListDeleted.add(item);
-          });
-          _userSelected.locations.forEach((DocumentReference locRefDelete) {
-            List<Location> lotionsFind = _listLocation
-                .where((f) => f.id == locRefDelete.documentID && f.isSelected)
-                .toList();
-            if (lotionsFind.length == 0) {
-              locListDeleted
-                  .removeAt(_userSelected.locations.indexOf(locRefDelete));
-            }
-          });
-          _userSelected.locations.clear();
-          locListDeleted.forEach((d) {
-            _userSelected.locations.add(d);
-          });
-        }
-
+        List<DocumentReference> locListDeleted = <DocumentReference>[];
+        _userSelected.locations?.forEach((item) {
+          locListDeleted.add(item);
+        });
+        _userSelected.locations?.forEach((DocumentReference locRefDelete) {
+          List<Location> lotionsFind =
+              _listLocation.where(
+                    (f) => f.id == locRefDelete.id && (f.isSelected??false),
+                  )
+                  .toList();
+          if (lotionsFind.length == 0) {
+            locListDeleted.removeAt(_userSelected.locations!.indexOf(locRefDelete),
+            );
+          }
+        });
+        _userSelected.locations?.clear();
+        locListDeleted.forEach((d) {
+          _userSelected.locations?.add(d);
+        });
+      
         List<DocumentReference> _newListLocationsReferences =
             <DocumentReference>[];
-        _listLocation.where((d) => d.isSelected).toList().forEach((f) {
-          _newListLocationsReferences
-              .add(_blocLocation.getDocumentReferenceLocationById(f.id));
+        _listLocation.where((d) => d.isSelected??false).toList().forEach((f) {
+          _newListLocationsReferences.add(
+            _blocLocation.getDocumentReferenceLocationById(f.id??''),
+          );
         });
 
         //New User save in firestore
-        String userNewRegister;
-        if (_userSelected == null) {
-          userNewRegister = await _userBloc.registerEmailUser(
-              _textEmail.text.trim(), _textPassword.text.trim());
-        }
+        String userNewRegister = '';
 
-        final user = User(
-          id: _userSelected != null ? _userSelected.id : null,
+        final user = SysUser(
+          id: _userSelected.id,
           uid: _userSelected != null ? _userSelected.uid : userNewRegister,
           name: _textUserName.text.trim(),
           email: _textEmail.text.toLowerCase().trim(),
           photoUrl: _imageUrl,
           lastSignIn: Timestamp.now(),
           active: _userActive,
-          locations: _userSelected != null
-              ? _userSelected.locations
-              : _newListLocationsReferences,
+          locations:
+              _userSelected != null
+                  ? _userSelected.locations
+                  : _newListLocationsReferences,
           isAdministrator: _userAdministrator,
           isCoordinator: _userCoordinator,
           isOperator: _userOperator,

@@ -1,7 +1,6 @@
 import 'package:car_wash_app/payment_methods/bloc/bloc_payment_method.dart';
 import 'package:car_wash_app/payment_methods/model/payment_methods.dart';
 import 'package:car_wash_app/payment_methods/ui/screens/create_payment_method_admin_page.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 
@@ -75,7 +74,7 @@ class _ItemPaymentMethodAdmin extends State<ItemPaymentMethodAdmin> {
                         children: <Widget>[
                           Flexible(
                             child: Text(
-                              _itemPaymentMethod.name,
+                              _itemPaymentMethod.name??'',
                               style: TextStyle(
                                 fontFamily: "Lato",
                                 color: Theme.of(context).primaryColor,
@@ -94,7 +93,7 @@ class _ItemPaymentMethodAdmin extends State<ItemPaymentMethodAdmin> {
             Container(
               height: 25,
               margin: EdgeInsets.only(right: 8.0),
-              child: _itemPaymentMethod.active
+              child: _itemPaymentMethod.active??false
                   ? Icon(
                 Icons.check,
                 color: Theme.of(context).primaryColor,

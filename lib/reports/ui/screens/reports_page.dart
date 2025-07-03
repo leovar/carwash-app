@@ -1,9 +1,7 @@
 import 'package:car_wash_app/reports/ui/screens/customers_report.dart';
 import 'package:car_wash_app/reports/ui/screens/earnings_report.dart';
 import 'package:car_wash_app/reports/ui/screens/productivity_report.dart';
-import 'package:car_wash_app/widgets/app_bar_widget.dart';
 import 'package:car_wash_app/widgets/app_bar_widget_simple.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class ReportsPage extends StatefulWidget {
@@ -24,9 +22,9 @@ class _ReportsPage extends State<ReportsPage> {
     ];
 
     final _tabItems = <BottomNavigationBarItem>[
-      BottomNavigationBarItem(icon: Icon(Icons.supervisor_account), title: Text('productividad')),
-      BottomNavigationBarItem(icon: Icon(Icons.trending_up), title: Text('ganancias')),
-      BottomNavigationBarItem(icon: Icon(Icons.contacts), title: Text('clientes')),
+      BottomNavigationBarItem(icon: Icon(Icons.supervisor_account), label: 'productividad'),
+      BottomNavigationBarItem(icon: Icon(Icons.trending_up), label: 'ganancias'),
+      BottomNavigationBarItem(icon: Icon(Icons.contacts), label: 'clientes'),
     ];
     assert(_tabPages.length == _tabItems.length);
     final bottomNavBar = BottomNavigationBar(

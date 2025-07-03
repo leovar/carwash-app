@@ -1,7 +1,6 @@
 import 'package:car_wash_app/invoice/bloc/bloc_invoice.dart';
 import 'package:car_wash_app/invoices_list/ui/widgets/form_invoices_list.dart';
 import 'package:car_wash_app/widgets/app_bar_widget.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 
@@ -10,7 +9,7 @@ class InvoicesListPage extends StatefulWidget {
   final user;
   final locationReference;
 
-  InvoicesListPage({Key key, this.user, this.locationReference});
+  InvoicesListPage({Key? key, this.user, this.locationReference});
 
   @override
   State<StatefulWidget> createState() => _InvoicesListPage();

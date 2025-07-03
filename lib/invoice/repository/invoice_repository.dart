@@ -7,7 +7,7 @@ import 'package:car_wash_app/invoice/model/configuration.dart';
 import 'package:car_wash_app/invoice/model/invoice.dart';
 import 'package:car_wash_app/payment_methods/model/payment_methods.dart';
 import 'package:car_wash_app/product/model/product.dart';
-import 'package:car_wash_app/user/model/user.dart';
+import 'package:car_wash_app/user/model/sysUser.dart';
 import 'package:car_wash_app/vehicle_type/model/brand.dart';
 import 'package:car_wash_app/widgets/firestore_collections.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -17,31 +17,31 @@ import 'package:firebase_storage/firebase_storage.dart';
 class InvoiceRepository {
   String uid = '';
 
-  final Firestore _db = Firestore.instance;
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
   final FirebaseAuth _authApi = FirebaseAuth.instance;
-  final StorageReference _storageReference = FirebaseStorage.instance.ref();
+  final _storageReference = FirebaseStorage.instance;
 
   /// Save and Update Invoice
   Future<DocumentReference> updateInvoiceData(Invoice invoice) async {
     var jsonInvoice = invoice.toJson();
     var mapProducts = [];
-    invoice.invoiceProducts.forEach((element) {
+    invoice.invoiceProducts?.forEach((element) {
       var mapProduct = Product().toJsonInvoiceProduct(
-        element.productName,
-        element.price,
-        element.ivaPercent,
-        element.isAdditional,
-        element.id,
-        element.productType,
-        element.serviceTime,
-        element.productCommission,
+        element.productName??'',
+        element.price??0,
+        element.ivaPercent??0,
+        element.isAdditional??false,
+        element.id??'',
+        element.productType??'',
+        element.serviceTime??0,
+        element.productCommission??0,
       );
       mapProducts.add(mapProduct);
     });
     jsonInvoice['invoiceProducts'] = mapProducts;
     var mapOperators = [];
-    invoice.operatorUsers.forEach((item) {
-      var mapOperator = User().toJsonInvoiceOperator(
+    invoice.operatorUsers?.forEach((item) {
+      var mapOperator = SysUser.toJsonInvoiceOperator(
         item.id,
         item.name,
         item.operatorCommission,
@@ -50,42 +50,39 @@ class InvoiceRepository {
     });
     jsonInvoice['operatorUsers'] = mapOperators;
     DocumentReference ref =
-        _db.collection(FirestoreCollections.invoices).document(invoice.id);
-    ref.setData(jsonInvoice, merge: true);
+        _db.collection(FirestoreCollections.invoices).doc(invoice.id);
+    ref.set(jsonInvoice, SetOptions( merge: true ));
     return ref;
   }
 
   /// Save invoice images in firebase storage
-  Future<StorageTaskSnapshot> uploadImageInvoice(
-      String path, File imageFile) async {
-    StorageUploadTask storageUploadTask = _storageReference.child(path).putFile(
-          imageFile, //imageFile.readAsBytesSync(),
-          StorageMetadata(
+  Future<TaskSnapshot> uploadImageInvoice(String path, File imageFile) async {
+    final storageUploadTask = _storageReference.ref().child(path).putFile(
+          imageFile,
+          SettableMetadata(
             contentType: 'image/jpeg',
           ),
         );
-    return storageUploadTask.onComplete;
+    return await storageUploadTask.whenComplete((){});
   }
 
   ///Save Firm Image in firebase storage
-  Future<StorageTaskSnapshot> uploadImageFirmInvoice(
+  Future<TaskSnapshot> uploadImageFirmInvoice(
       String path, Uint8List imageFile) async {
-    StorageUploadTask storageUploadTask = _storageReference.child(path).putData(
+    final storageUploadTask = _storageReference.ref().child(path).putData(
           imageFile,
-          StorageMetadata(
-            contentType: 'image/jpeg',
-          ),
+          SettableMetadata( contentType: 'image/jpeg' ),
         );
-    return storageUploadTask.onComplete;
+    return await storageUploadTask.whenComplete((){});
   }
 
   /// Save images URL in subcollection invoice
-  Future<void> updateInvoiceImages(
+  Future<DocumentReference<Map<String, dynamic>>> updateInvoiceImages(
       String invoiceId, String invoiceImage, String imagePath) async {
-    return await this
-        ._db
+    return await
+        _db
         .collection(FirestoreCollections.invoices)
-        .document(invoiceId)
+        .doc(invoiceId)
         .collection('images')
         .add({'imageUrl': invoiceImage, 'imagePath': imagePath});
   }
@@ -107,25 +104,25 @@ class InvoiceRepository {
         .collection(FirestoreCollections.users)
         .where(FirestoreCollections.locations,
             arrayContains:
-                _db.document('${FirestoreCollections.locations}/$idLocation'))
+                _db.doc('${FirestoreCollections.locations}/$idLocation'))
         .where(FirestoreCollections.usersFieldIsOperator, isEqualTo: true)
         .where(FirestoreCollections.usersFieldUserActive, isEqualTo: true)
         .snapshots();
     return querySnapshot;
   }
 
-  List<User> buildOperators(List<DocumentSnapshot> operatorsListSnapshot) {
-    List<User> usersList = <User>[];
+  List<SysUser> buildOperators(List<DocumentSnapshot> operatorsListSnapshot) {
+    List<SysUser> usersList = <SysUser>[];
     operatorsListSnapshot.forEach((p) {
-      User loc = User.fromJson(p.data, id: p.documentID);
+      SysUser loc = SysUser.fromJson(p.data() as Map<String, dynamic>, id: p.id);
       usersList.add(loc);
     });
     return usersList;
   }
 
 /*
-  Future<List<User>> getOperatorsUsers() async {
-    List<User> userList = <User>[];
+  Future<List<SysUser>> getOperatorsUsers() async {
+    List<SysUser> userList = <SysUser>[];
     final querySnapshot = await this
         ._db
         .collection(FirestoreCollections.users)
@@ -134,7 +131,7 @@ class InvoiceRepository {
 
     final snapShot = querySnapshot.documents;
     snapShot.forEach((document) {
-      User user = User.fromJson(document.data, id: document.documentID);
+      SysUser user = SysUser.fromJson(document.data(), id: document.documentID);
       userList.add(user);
     });
     return userList;
@@ -156,18 +153,17 @@ class InvoiceRepository {
         ._db
         .collection(FirestoreCollections.users)
         .where(FirestoreCollections.locations,
-            arrayContains:
-                _db.document('${FirestoreCollections.locations}/$idLocation'))
+            arrayContains: _db.doc('${FirestoreCollections.locations}/$idLocation'))
         .where(FirestoreCollections.usersFieldIsCoordinator, isEqualTo: true)
         .where(FirestoreCollections.usersFieldUserActive, isEqualTo: true)
         .snapshots();
     return querySnapshot;
   }
 
-  List<User> buildCoordinator(List<DocumentSnapshot> coordinatorListSnapshot) {
-    List<User> usersList = <User>[];
+  List<SysUser> buildCoordinator(List<DocumentSnapshot> coordinatorListSnapshot) {
+    List<SysUser> usersList = <SysUser>[];
     coordinatorListSnapshot.forEach((p) {
-      User loc = User.fromJson(p.data, id: p.documentID);
+      SysUser loc = SysUser.fromJson(p.data() as Map<String, dynamic>, id: p.id);
       usersList.add(loc);
     });
     return usersList;
@@ -191,11 +187,11 @@ class InvoiceRepository {
   Future<List<String>> getListAllBrandsInvoiceRepo() async {
     List<String> brandList = <String>[];
     var querySnapshot =
-        await this._db.collection(FirestoreCollections.brands).getDocuments();
+        await this._db.collection(FirestoreCollections.brands).get();
 
-    if (querySnapshot.documents.length > 0) {
-      querySnapshot.documents.forEach((doc) {
-        String brandData = doc.data['brand'];
+    if (querySnapshot.docs.isNotEmpty) {
+      querySnapshot.docs.forEach((doc) {
+        String brandData = doc.data()['brand'];
         brandList.add(brandData);
       });
     }
@@ -205,7 +201,8 @@ class InvoiceRepository {
   List<String> buildBrandsInvoice(List<DocumentSnapshot> brandsListSnapshot) {
     List<String> brandsList = <String>[];
     brandsListSnapshot.forEach((p) {
-      String brand = p.data['brand'];
+      var data = p.data() as Map<String, dynamic>; // Explicit cast
+      String brand = data['brand'];
       brandsList.add(brand);
     });
     return brandsList;
@@ -214,7 +211,7 @@ class InvoiceRepository {
   List<Brand> buildBrands(List<DocumentSnapshot> brandsListSnapshot) {
     List<Brand> brandsList = <Brand>[];
     brandsListSnapshot.forEach((p) {
-      Brand _brand = Brand.fromJson(p.data, id: p.documentID);
+      Brand _brand = Brand.fromJson(p.data() as Map<String, dynamic>, id: p.id);
       brandsList.add(_brand);
     });
     return brandsList;
@@ -227,8 +224,8 @@ class InvoiceRepository {
         ._db
         .collection(FirestoreCollections.brands)
         .where(FirestoreCollections.brandFieldBrand, isEqualTo: brand)
-        .getDocuments();
-    return querySnapshot.documents.first.documentID;
+        .get();
+    return querySnapshot.docs.first.id;
   }
 
   Future<List<String>> getBrandReferences(String brandId) async {
@@ -236,13 +233,13 @@ class InvoiceRepository {
     final querySnapshot = await this
         ._db
         .collection(FirestoreCollections.brands)
-        .document(brandId)
+        .doc(brandId)
         .collection(FirestoreCollections.brandReferences)
-        .getDocuments();
+        .get();
 
-    if (querySnapshot.documents.length > 0) {
-      querySnapshot.documents.forEach((doc) {
-        String brandReference = doc.data['reference'];
+    if (querySnapshot.docs.length > 0) {
+      querySnapshot.docs.forEach((doc) {
+        String brandReference = doc.data()['reference'];
         referencesList.add(brandReference);
       });
     }
@@ -259,14 +256,15 @@ class InvoiceRepository {
   List<String> buildColors(List<DocumentSnapshot> colorsListSnapshot) {
     List<String> colorsList = <String>[];
     colorsListSnapshot.forEach((p) {
-      String brand = p.data['color'];
+      var data = p.data() as Map<String, dynamic>; // Explicit cast
+      String brand = data['color'];
       colorsList.add(brand);
     });
     return colorsList;
   }
 
-  /*Future<List<User>> getCoordinatorUsers() async {
-    List<User> userList = <User>[];
+  /*Future<List<SysUser>> getCoordinatorUsers() async {
+    List<SysUser> userList = <SysUser>[];
     final querySnapshot = await this
         ._db
         .collection(FirestoreCollections.users)
@@ -275,7 +273,7 @@ class InvoiceRepository {
 
     final snapShot = querySnapshot.documents;
     snapShot.forEach((document) {
-      User user = User.fromJson(document.data, id: document.documentID);
+      SysUser user = SysUser.fromJson(document.data(), id: document.documentID);
       userList.add(user);
     });
     return userList;
@@ -288,16 +286,16 @@ class InvoiceRepository {
         .collection(FirestoreCollections.vehicleType)
         .where(FirestoreCollections.vehicleTypeFieldVehicleType,
             isEqualTo: vehicleType)
-        .getDocuments();
+        .get();
 
-    final documents = querySnapshot.documents;
+    final documents = querySnapshot.docs;
     if (documents.length > 0) {
       final documentSnapshot = documents.first;
       return _db
           .collection(FirestoreCollections.vehicleType)
-          .document(documentSnapshot.documentID);
+          .doc(documentSnapshot.id);
     }
-    return null;
+    return Future.value(null);
   }
 
   ///Get invoices list from current Month
@@ -306,7 +304,6 @@ class InvoiceRepository {
     DateTime dateInit,
     DateTime dateFinal,
     String placa,
-    String operator,
     String consecutive,
     String productTypeSelected,
     String paymentMethod,
@@ -327,12 +324,6 @@ class InvoiceRepository {
     if (placa.isNotEmpty) {
       querySnapshot = querySnapshot
           .where(FirestoreCollections.invoiceFieldPlaca, isEqualTo: placa);
-    }
-
-    if (operator.isNotEmpty) {
-      querySnapshot = querySnapshot.where(
-          FirestoreCollections.invoiceFieldUserOperatorName,
-          isEqualTo: operator);
     }
 
     if (consecutive.isNotEmpty) {
@@ -359,14 +350,14 @@ class InvoiceRepository {
   List<Invoice> buildInvoicesListFromSnapshot(List<DocumentSnapshot> invoicesListSnapshot) {
     List<Invoice> invoicesList = <Invoice>[];
     invoicesListSnapshot.forEach((p) {
-      Invoice invoice = Invoice.fromJson(p.data, id: p.documentID);
+      Invoice invoice = Invoice.fromJson(p.data() as Map<String, dynamic>, id: p.id);
       invoicesList.add(invoice);
     });
     return invoicesList;
   }
 
   /// Get invoices pending for Washing Stream
-  Stream<QuerySnapshot> getInvoicesListPendingWashingStream(DocumentReference locationReference) {
+  Stream<QuerySnapshot> getInvoicesListPendingWashingStream(DocumentReference? locationReference) {
     var querySnapshot = this
         ._db
         .collection(FirestoreCollections.invoices)
@@ -379,7 +370,7 @@ class InvoiceRepository {
   }
 
   /// Get invoices pending for Washing Documents
-  Future<List<Invoice>> getInvoicesListPendingWashing(DocumentReference locationReference) async {
+  Future<List<Invoice>> getInvoicesListPendingWashing(DocumentReference? locationReference) async {
     List<Invoice> invoiceList = <Invoice>[];
     var querySnapshot = await this
         ._db
@@ -387,11 +378,11 @@ class InvoiceRepository {
         .where(FirestoreCollections.invoiceFieldLocation, isEqualTo: locationReference)
         .where(FirestoreCollections.invoiceClosed, isEqualTo: false)
         .where(FirestoreCollections.invoiceStartWashing, isEqualTo: false)
-        .where(FirestoreCollections.invoiceCancelled, isEqualTo: false).getDocuments();
-    final documents = querySnapshot.documents;
+        .where(FirestoreCollections.invoiceCancelled, isEqualTo: false).get();
+    final documents = querySnapshot.docs;
     if (documents.length > 0) {
       documents.forEach((invoice) {
-        Invoice invoiceGet = Invoice.fromJson(invoice.data, id: invoice.documentID);
+        Invoice invoiceGet = Invoice.fromJson(invoice.data(), id: invoice.id);
         invoiceList.add(invoiceGet);
       });
     }
@@ -399,7 +390,7 @@ class InvoiceRepository {
   }
 
   /// Get invoices in washing process Stream
-  Stream<QuerySnapshot> getInvoicesListWashingStream(DocumentReference locationReference) {
+  Stream<QuerySnapshot> getInvoicesListWashingStream(DocumentReference? locationReference) {
     var querySnapshot = this
         ._db
         .collection(FirestoreCollections.invoices)
@@ -410,7 +401,7 @@ class InvoiceRepository {
     return querySnapshot.snapshots();
   }
 
-  Future<List<Invoice>> getInvoicesWashingList(DocumentReference locationReference) async {
+  Future<List<Invoice>> getInvoicesWashingList(DocumentReference? locationReference) async {
     List<Invoice> invoiceList = <Invoice>[];
     var querySnapshot = await this
         ._db
@@ -418,11 +409,11 @@ class InvoiceRepository {
         .where(FirestoreCollections.invoiceFieldLocation, isEqualTo: locationReference)
         .where(FirestoreCollections.invoiceClosed, isEqualTo: false)
         .where(FirestoreCollections.invoiceEndWash, isEqualTo: false)
-        .where(FirestoreCollections.invoiceStartWashing, isEqualTo: true).getDocuments();
-    final documents = querySnapshot.documents;
+        .where(FirestoreCollections.invoiceStartWashing, isEqualTo: true).get();
+    final documents = querySnapshot.docs;
     if (documents.length > 0) {
       documents.forEach((element) {
-        Invoice invoiceGet = Invoice.fromJson(element.data, id: element.documentID);
+        Invoice invoiceGet = Invoice.fromJson(element.data(), id: element.id);
         invoiceList.add(invoiceGet);
       });
     }
@@ -435,15 +426,15 @@ class InvoiceRepository {
     var querySnapshot = await this
         ._db
         .collection(FirestoreCollections.invoices)
-        .document(idInvoice)
+        .doc(idInvoice)
         .collection(FirestoreCollections.invoiceFieldProducts)
-        .getDocuments();
+        .get();
 
-    final documents = querySnapshot.documents;
+    final documents = querySnapshot.docs;
     if (documents.length > 0) {
       documents.forEach((document) {
         Product product =
-            Product.fromJson(document.data, id: document.documentID);
+            Product.fromJson(document.data(), id: document.id);
         productList.add(product);
       });
     }
@@ -456,14 +447,14 @@ class InvoiceRepository {
     var querySnapshot = await this
         ._db
         .collection(FirestoreCollections.invoices)
-        .document(idInvoice)
+        .doc(idInvoice)
         .collection(FirestoreCollections.invoiceFieldProducts)
-        .getDocuments();
+        .get();
 
-    final documents = querySnapshot.documents;
+    final documents = querySnapshot.docs;
     if (documents.length > 0) {
       documents.forEach((document) {
-        Product product = Product.fromJsonTemporal(document.data);
+        Product product = Product.fromJsonTemporal(document.data());
         productList.add(product);
       });
     }
@@ -480,14 +471,14 @@ class InvoiceRepository {
             isEqualTo: locationReference)
         .orderBy(FirestoreCollections.invoiceFieldConsecutive, descending: true)
         .limit(3)
-        .getDocuments();
+        .get();
 
-    final documents = querySnapshot.documents;
+    final documents = querySnapshot.docs;
     if (documents.length > 0) {
-      Invoice invoice = Invoice.fromJson(documents.first.data,
-          id: documents.first.documentID);
-      if (invoice.consecutive != null && invoice.consecutive > 0) {
-        return invoice.consecutive;
+      Invoice invoice = Invoice.fromJson(documents.first.data(),
+          id: documents.first.id);
+      if ((invoice.consecutive??0) > 0) {
+        return invoice.consecutive??0;
       } else {
         return 0;
       }
@@ -502,15 +493,15 @@ class InvoiceRepository {
     final querySnapshot = await this
         ._db
         .collection(FirestoreCollections.invoices)
-        .document(invoiceId)
+        .doc(invoiceId)
         .collection(FirestoreCollections.invoiceFieldProducts)
-        .getDocuments();
+        .get();
 
-    final documents = querySnapshot.documents;
+    final documents = querySnapshot.docs;
     if (documents.length > 0) {
       documents.forEach((product) {
         Product productGet =
-            Product.fromJsonProInvoice(product.data, id: product.documentID);
+            Product.fromJsonProInvoice(product.data(), id: product.id);
         productList.add(productGet);
       });
     }
@@ -523,14 +514,14 @@ class InvoiceRepository {
     final querySnapshot = await this
         ._db
         .collection(FirestoreCollections.invoices)
-        .document(invoiceId)
+        .doc(invoiceId)
         .collection(FirestoreCollections.invoiceFieldImages)
-        .getDocuments();
+        .get();
 
-    final documents = querySnapshot.documents;
+    final documents = querySnapshot.docs;
     if (documents.length > 0) {
       documents.forEach((product) {
-        String imageGet = product.data['imageUrl'];
+        String imageGet = product.data()['imageUrl'];
         imageList.add(imageGet);
       });
     }
@@ -542,33 +533,37 @@ class InvoiceRepository {
     final querySnapshot = await this
         ._db
         .collection(FirestoreCollections.invoices)
-        .document(invoiceId)
+        .doc(invoiceId)
         .get();
 
-    return Invoice.fromJson(querySnapshot.data, id: querySnapshot.documentID);
+    return Invoice.fromJson(querySnapshot.data() as Map<String, dynamic>, id: querySnapshot.id);
   }
 
   /// Get List Invoices by Placa
   Future<List<Invoice>> getListInvoicesByVehicle(String vehicleId) async {
-    var date = DateTime.now();
-    var newDate = DateTime(date.year, date.month + 2, date.day);
-    List<Invoice> listInvoices = [];
-    final querySnapshot = await this
-        ._db
-        .collection(FirestoreCollections.invoices)
-        .where(FirestoreCollections.invoiceFieldPlaca, isEqualTo: vehicleId)
-        .where(FirestoreCollections.invoiceFieldCreationDate,
-            isLessThanOrEqualTo: newDate)
-        .getDocuments();
+    try {
+      var date = DateTime.now();
+      var newDate = DateTime(date.year, date.month + 2, date.day);
+      List<Invoice> listInvoices = [];
+      final querySnapshot = await this
+          ._db
+          .collection(FirestoreCollections.invoices)
+          .where(FirestoreCollections.invoiceFieldPlaca, isEqualTo: vehicleId)
+          .where(FirestoreCollections.invoiceFieldCreationDate,
+          isLessThanOrEqualTo: newDate)
+          .get();
 
-    final documents = querySnapshot.documents;
-    if (documents.length > 0) {
-      documents.forEach((invoice) {
-        listInvoices
-            .add(Invoice.fromJson(invoice.data, id: invoice.documentID));
-      });
+      final documents = querySnapshot.docs;
+      if (documents.length > 0) {
+        documents.forEach((invoice) {
+          listInvoices.add(Invoice.fromJson(invoice.data(), id: invoice.id));
+        });
+      }
+      return listInvoices;
+    } catch (e) {
+      print('Error consultando servicios: $e');
+      return Future.value(null);
     }
-    return listInvoices;
   }
 
   Future<Configuration> getConfiguration() async {
@@ -576,12 +571,12 @@ class InvoiceRepository {
     final querySnapshot = await this
         ._db
         .collection(FirestoreCollections.configuration)
-        .getDocuments();
+        .get();
 
-    final snapShot = querySnapshot.documents;
+    final snapShot = querySnapshot.docs;
     snapShot.forEach((document) {
       Configuration config =
-          Configuration.fromJson(document.data, id: document.documentID);
+          Configuration.fromJson(document.data(), id: document.id);
       configList.add(config);
     });
     return configList[0];

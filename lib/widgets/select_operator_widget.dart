@@ -1,10 +1,8 @@
 import 'package:car_wash_app/invoice/bloc/bloc_invoice.dart';
 import 'package:car_wash_app/payment_methods/bloc/bloc_payment_method.dart';
 import 'package:car_wash_app/payment_methods/model/payment_methods.dart';
-import 'package:car_wash_app/user/model/user.dart';
 import 'package:car_wash_app/invoice/model/invoice.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 
 class SelectOperatorWidget extends StatefulWidget {
   final PaymentMethod paymentMethodSelected;
@@ -12,10 +10,10 @@ class SelectOperatorWidget extends StatefulWidget {
   final Invoice currentInvoice;
 
   SelectOperatorWidget({
-    Key key,
-    this.paymentMethodSelected,
-    this.selectPaymentMethod,
-    this.currentInvoice,
+    Key? key,
+    required this.paymentMethodSelected,
+    required this.selectPaymentMethod,
+    required this.currentInvoice,
   });
 
   @override
@@ -25,15 +23,14 @@ class SelectOperatorWidget extends StatefulWidget {
 class _SelectOperatorWidget extends State<SelectOperatorWidget> {
   BlocInvoice _blocInvoice = BlocInvoice();
   BlocPaymentMethod _paymentMethodBloc = BlocPaymentMethod();
-  List<DropdownMenuItem<PaymentMethod>> _listPaymentMethods;
-  PaymentMethod _selectedPaymentMethod;
+  late List<DropdownMenuItem<PaymentMethod>> _listPaymentMethods;
+  PaymentMethod _selectedPaymentMethod = new PaymentMethod(id: '' ,name: '' ,active: true);
 
   @override
   void initState() {
     super.initState();
-    if (widget.paymentMethodSelected.name != null &&
-        widget.paymentMethodSelected.name != '') {
-      _selectedPaymentMethod = widget.paymentMethodSelected;
+    if (widget.paymentMethodSelected.name != '') {
+      _selectedPaymentMethod = widget.paymentMethodSelected ?? new PaymentMethod();
     }
   }
 
@@ -61,7 +58,7 @@ class _SelectOperatorWidget extends State<SelectOperatorWidget> {
   }
 
   Widget _chargeDropPaymentMethods(AsyncSnapshot snapshot) {
-    List<PaymentMethod> paymentsList = _paymentMethodBloc.buildPaymentMethods(snapshot.data.documents);
+    List<PaymentMethod> paymentsList = _paymentMethodBloc.buildPaymentMethods(snapshot.data.docs);
     _listPaymentMethods = builtDropdownPaymentMethod(paymentsList);
     return Column(
       children: [
@@ -86,7 +83,7 @@ class _SelectOperatorWidget extends State<SelectOperatorWidget> {
           ),
           underline: Container(
             height: 1,
-            color: Theme.of(context).cursorColor,
+            color: Theme.of(context).textSelectionTheme.cursorColor,
           ),
         ),
       ],
@@ -94,13 +91,23 @@ class _SelectOperatorWidget extends State<SelectOperatorWidget> {
   }
 
   List<DropdownMenuItem<PaymentMethod>> builtDropdownPaymentMethod(List payments) {
-    List<DropdownMenuItem<PaymentMethod>> listItems = List();
+    List<DropdownMenuItem<PaymentMethod>> listItems = [];
     for (PaymentMethod documentPm in payments) {
       listItems.add(
         DropdownMenuItem(
           value: documentPm,
           child: Text(
-            documentPm.name,
+            documentPm.name ?? '',
+          ),
+        ),
+      );
+    }
+    if (_selectedPaymentMethod.id == '') {
+      listItems.add(
+        DropdownMenuItem(
+          value: _selectedPaymentMethod,
+          child: Text(
+            _selectedPaymentMethod.name ?? '',
           ),
         ),
       );
@@ -108,10 +115,10 @@ class _SelectOperatorWidget extends State<SelectOperatorWidget> {
     return listItems;
   }
 
-  onChangeDropDawPayment(PaymentMethod payment) {
+  onChangeDropDawPayment(PaymentMethod? payment) {
     setState(() {
-      widget.selectPaymentMethod(payment);
-      _selectedPaymentMethod = payment;
+      widget.selectPaymentMethod(payment ?? new PaymentMethod());
+      _selectedPaymentMethod = payment ?? new PaymentMethod();
     });
   }
 }

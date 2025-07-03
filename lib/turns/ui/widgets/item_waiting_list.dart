@@ -1,6 +1,4 @@
 import 'package:car_wash_app/invoice/model/invoice.dart';
-import 'package:car_wash_app/invoice/ui/screens/invoice_page.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -10,18 +8,18 @@ class ItemWaitingList extends StatefulWidget {
   final Function(Invoice) assignTurn;
 
   ItemWaitingList(
-      {Key key,
-      this.listInvoices,
-      this.index,
-      this.assignTurn});
+      {Key? key,
+      required this.listInvoices,
+      required this.index,
+      required this.assignTurn});
 
   @override
   State<StatefulWidget> createState() => _ItemWaitingList();
 }
 
 class _ItemWaitingList extends State<ItemWaitingList> {
-  double _imageWith;
-  String _iconVehicle;
+  late double _imageWith;
+  late String _iconVehicle;
   var formatter = new DateFormat('dd-MM-yyyy hh:mm a');
 
   @override
@@ -50,7 +48,7 @@ class _ItemWaitingList extends State<ItemWaitingList> {
   @override
   Widget build(BuildContext context) {
     Invoice invoiceList = widget.listInvoices[widget.index];
-    int invoiceDuration = invoiceList.washingServicesTime == null ? 0 : invoiceList.washingServicesTime;
+    int invoiceDuration = invoiceList.washingServicesTime == null ? 0 : invoiceList.washingServicesTime??0;
     var durationTime = Duration(minutes: invoiceDuration);
     return ConstrainedBox(
       constraints: BoxConstraints(
@@ -91,7 +89,7 @@ class _ItemWaitingList extends State<ItemWaitingList> {
                                   child: Text(
                                     invoiceList.consecutive.toString(),
                                     style: TextStyle(
-                                      color: Theme.of(context).accentColor,
+                                      color: Theme.of(context).colorScheme.secondary,
                                       fontFamily: "Lato",
                                       fontWeight: FontWeight.bold,
                                       fontSize: 17.0,
@@ -127,7 +125,7 @@ class _ItemWaitingList extends State<ItemWaitingList> {
                           Flexible(
                             child: Text(
                               formatter
-                                  .format(invoiceList.creationDate.toDate()),
+                                  .format(invoiceList.creationDate!.toDate()),
                               style: TextStyle(
                                 color: Theme.of(context).cardColor,
                                 fontFamily: "Lato",
@@ -150,20 +148,27 @@ class _ItemWaitingList extends State<ItemWaitingList> {
                 margin: EdgeInsets.only(right: 2),
                 child: ButtonTheme(
                   minWidth: 84,
-                  child: RaisedButton(
-                    shape: RoundedRectangleBorder(
-                        borderRadius:
-                        new BorderRadius.circular(18.0),
-                        side: BorderSide(
-                            color: Theme.of(context).accentColor)),
-                    color: Theme.of(context).accentColor,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.secondary,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                          borderRadius:
+                          new BorderRadius.circular(18.0),
+                          side: BorderSide(
+                              color: Theme.of(context).colorScheme.secondary)),
+                    ),
                     onPressed: () {
                       widget.assignTurn(invoiceList);
                     },
-                    textColor: Colors.white,
-                    child: Text(
-                      'Lavar'.toUpperCase(),
-                      style: TextStyle(fontSize: 12),
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          'Lavar'.toUpperCase(),
+                        ),
+                      ),
                     ),
                   ),
                 ),

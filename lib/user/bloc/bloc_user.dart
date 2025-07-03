@@ -1,10 +1,7 @@
-
 import 'dart:io';
 
 import 'package:car_wash_app/user/repository/auth_repository.dart';
-import 'package:car_wash_app/location/model/location.dart';
-import 'package:car_wash_app/location/repository/location_repository.dart';
-import 'package:car_wash_app/user/model/user.dart';
+import 'package:car_wash_app/user/model/sysUser.dart';
 import 'package:car_wash_app/user/repository/user_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -24,18 +21,18 @@ class UserBloc implements Bloc {
   //4. Registrar usuario en la base de datos
 
   //stream Controller
-  Stream<FirebaseUser> streamFirebase = FirebaseAuth.instance.onAuthStateChanged;
-  Stream<FirebaseUser> get authStatus => streamFirebase;
+  Stream<User?> streamFirebase = FirebaseAuth.instance.authStateChanges();
+  Stream<User?> get authStatus => streamFirebase;
 
-  Future<FirebaseUser> signInGoogle() {
+  Future<User?> signInGoogle() {
     return _auth_repository.signInFirebase();
   }
 
-  Future<FirebaseUser> signInFacebook() {
+  Future<User?> signInFacebook() {
     return _auth_repository.signInFacebook();
   }
 
-  Future<FirebaseUser> signInEmail(String email, String password) {
+  Future<User?> signInEmail(String email, String password) {
     return _auth_repository.signInEmail(email, password);
   }
 
@@ -47,12 +44,12 @@ class UserBloc implements Bloc {
     return _auth_repository.registerEmailUser(email, password);
   }
 
-  Future<void> updateUserData(User user) async {
-
-    if (user.photoUrl.isNotEmpty && !user.photoUrl.contains('https://')) {
-      File imageFile = File(user.photoUrl);
-      final pathImage = '${user.id}/profile/${basename(user.photoUrl)}';
-      StorageTaskSnapshot storageTaskSnapshot = await _userRepository.uploadProfileImageUser(pathImage, imageFile);
+  Future<void> updateUserData(SysUser user) async {
+    if (user.photoUrl!.isNotEmpty && !user.photoUrl!.contains('https://')) {
+      File imageFile = File(user.photoUrl!);
+      final pathImage = '${user.id}/profile/${basename(user.photoUrl!)}';
+      TaskSnapshot storageTaskSnapshot =
+          await _userRepository.uploadProfileImageUser(pathImage, imageFile);
       String imageUrl = await storageTaskSnapshot.ref.getDownloadURL();
       user.photoUrl = imageUrl;
     }
@@ -71,13 +68,14 @@ class UserBloc implements Bloc {
     return await _userRepository.resetPasswordUser(email);
   }
 
-  Future<User> getUserById(String userId) async => await _userRepository.getUserById(userId);
+  Future<SysUser> getUserById(String userId) async =>
+      await _userRepository.getUserById(userId);
 
   Future<DocumentReference> getCurrentUserReference() async {
     return _userRepository.getCurrentUserReference();
   }
 
-  Future<User> getCurrentUser() async {
+  Future<SysUser?> getCurrentUser() async {
     return await _userRepository.getCurrentUser();
   }
 
@@ -89,21 +87,22 @@ class UserBloc implements Bloc {
     return _userRepository.getUserReferenceByUserName(userName);
   }
 
-  Stream<QuerySnapshot> getUsersByIdStream(String uid) {
+  Stream<QuerySnapshot<Map<String, dynamic>>> getUsersByIdStream(String uid) {
     return _userRepository.getUsersByIdStream(uid);
   }
-  User buildUsersById(List<DocumentSnapshot> usersListSnapshot) => _userRepository.buildGetUsersById(usersListSnapshot);
 
-  Stream<QuerySnapshot> get allUsersStream => _userRepository.getAllUsersStream();
-  List<User> buildAllUsers(List<DocumentSnapshot> usersListSnapshot) => _userRepository.buildGetAllUsers(usersListSnapshot);
+  SysUser buildUsersById(List<DocumentSnapshot> usersListSnapshot) =>
+      _userRepository.buildGetUsersById(usersListSnapshot);
 
-  Future<User> searchUserByEmail(String email) async {
+  Stream<QuerySnapshot> get allUsersStream =>
+      _userRepository.getAllUsersStream();
+  List<SysUser> buildAllUsers(List<DocumentSnapshot> usersListSnapshot) =>
+      _userRepository.buildGetAllUsers(usersListSnapshot);
+
+  Future<SysUser?> searchUserByEmail(String? email) async {
     return await _userRepository.searchUserByEmail(email);
   }
 
-
-
   @override
-  void dispose() {
-  }
+  void dispose() {}
 }
