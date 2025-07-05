@@ -112,7 +112,10 @@ class _LoginPage extends State<LoginPage> {
     child: SingleChildScrollView(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: <Widget>[loginHeader(), loginFields()],
+        children: <Widget>[
+          loginHeader(),
+          loginFields(),
+        ],
       ),
     ),
   );
@@ -135,56 +138,15 @@ class _LoginPage extends State<LoginPage> {
     child: Column(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: <Widget>[
-        //dropDawnLocations(),
         inputUserName(),
         inputPassword(),
         _loginButton(),
         loginFacebookGoogle(),
         olvidoContrasena(),
-        registrese(),
+        //registrese(),
       ],
     ),
   );
-
-  Widget dropDawnLocations() {
-    return StreamBuilder(
-      stream: blocLocation.locationsStream,
-      builder: (context, snapshot) {
-        switch (snapshot.connectionState) {
-          case ConnectionState.waiting:
-            return CircularProgressIndicator();
-          default:
-            return dropListLocations(snapshot);
-        }
-      },
-    );
-  }
-
-  Widget dropListLocations(AsyncSnapshot snapshot) {
-    List<Location> locationList = blocLocation.buildLocations(
-      snapshot.data.docs,
-    );
-    _dropdownMenuItems = builDropdownMenuItems(locationList);
-    return DropdownButton(
-      isExpanded: true,
-      items: _dropdownMenuItems,
-      value: _selectedLocation,
-      onChanged: onChangeDropDawn,
-      hint: Text(
-        "Seleccione la Sede...",
-        style: TextStyle(color: Colors.white),
-      ),
-      icon: Icon(Icons.keyboard_arrow_down, color: Colors.white),
-      iconSize: 24,
-      elevation: 16,
-      style: TextStyle(
-        fontFamily: "AvenirNext",
-        fontWeight: FontWeight.normal,
-        color: Colors.black,
-      ),
-      underline: Container(height: 1, color: Colors.white),
-    );
-  }
 
   inputUserName() => Container(
     padding: EdgeInsets.symmetric(vertical: 29.0),
@@ -258,33 +220,6 @@ class _LoginPage extends State<LoginPage> {
       ),
     ),
   );
-
-  Widget _buttonGo() {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 49),
-      child: OutlinedButton(
-        style: OutlinedButton.styleFrom(
-          foregroundColor: Colors.white,
-          side: BorderSide(width: 1, color: Colors.white),
-          padding: EdgeInsets.symmetric(vertical: 15, horizontal: 58),
-          /*shape: RoundedRectangleBorder(  //TODO validar como se ve el boton para definir si estas lineas son necesarias
-            borderRadius: BorderRadius.circular(10), // Rounded corners
-          ),*/
-        ),
-        child: Text(
-          "INGRESAR",
-          style: TextStyle(
-            fontFamily: "Lato",
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-        onPressed: () {
-          _emailLogin();
-        },
-      ),
-    );
-  }
 
   Widget _loginButton() {
     return Container(
@@ -386,6 +321,7 @@ class _LoginPage extends State<LoginPage> {
     ),
   );
 
+/* TODO este fragmento de codigo de registrese ya no se usa por que los registros son previos al ingreso a la app
   Widget registrese() {
     return Container(
       child: TextButton(
@@ -407,6 +343,7 @@ class _LoginPage extends State<LoginPage> {
       ),
     );
   }
+ */
 
   /// Functions
 
@@ -428,33 +365,22 @@ class _LoginPage extends State<LoginPage> {
     String _userName = '';
     SysUser? currentUser = await _userBloc.searchUserByEmail(user.email);
 
-    // Select photoUrl
-    if (currentUser != null && (currentUser.photoUrl ?? '').isNotEmpty)
-      _imageUserProfile = currentUser.photoUrl ?? '';
-    else
-      _imageUserProfile = user.photoURL ?? '';
-
-    // Select userName
-    if (currentUser != null && (currentUser.name ?? '').isNotEmpty)
-      _userName = currentUser.name;
-    else
-      _userName = user.displayName ?? '';
-
-    if (currentUser == null) {
-      _userBloc.updateUserData(
-        SysUser(
-          uid: user.uid,
-          name: user.displayName ?? '',
-          email: user.email ?? '',
-          photoUrl: user.photoURL ?? '',
-          lastSignIn: Timestamp.now(),
-          active: true,
-          isAdministrator: false,
-          isCoordinator: false,
-          isOperator: false,
-        ),
-      );
+    if (currentUser == null || (currentUser.companyId??'').isEmpty) {
+      MessagesUtils.showAlert(context: context, title: 'El usuario no se encuenta creado, comuniquese con el administrador para mas detalles');
     } else {
+
+      // Select photoUrl
+      if ((currentUser.photoUrl ?? '').isNotEmpty)
+        _imageUserProfile = currentUser.photoUrl ?? '';
+      else
+        _imageUserProfile = user.photoURL ?? '';
+
+      // Select userName
+      if ((currentUser.name ?? '').isNotEmpty)
+        _userName = currentUser.name;
+      else
+        _userName = user.displayName ?? '';
+
       _userBloc.updateUserData(
         SysUser(
           id: currentUser.id,
@@ -468,6 +394,7 @@ class _LoginPage extends State<LoginPage> {
           isAdministrator: currentUser.isAdministrator,
           isCoordinator: currentUser.isCoordinator,
           isOperator: currentUser.isOperator,
+          companyId: currentUser.companyId,
         ),
       );
     }
@@ -499,9 +426,12 @@ class _LoginPage extends State<LoginPage> {
       pref.setString(Keys.userName, userName);
       pref.setString(Keys.userEmail, user.email ?? '');
       pref.setBool(Keys.isAdministrator, userDatabase.isAdministrator ?? false);
+      pref.setString(Keys.companyId, userDatabase.companyId);
+      pref.setString(Keys.companyName, '');
     }
   }
 
+  //TODO validar en una proxima visualziación por que este fragmento de location ya no se usa desde el login
   List<DropdownMenuItem<Location>> builDropdownMenuItems(List locations) {
     List<DropdownMenuItem<Location>> listItems = [];
     for (Location documentLoc in locations) {
@@ -579,7 +509,7 @@ class _LoginPage extends State<LoginPage> {
           MessagesUtils.showAlert(
             context: context,
             title:
-                'Usuario o Contraseña incorrectos, recuerde que debe registrarte primero!',
+                'Usuario o Contraseña incorrectos',
             alertType: AlertType.warning,
           ).show();
         } catch (error) {

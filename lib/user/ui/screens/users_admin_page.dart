@@ -3,6 +3,7 @@ import 'package:car_wash_app/user/model/sysUser.dart';
 import 'package:car_wash_app/user/ui/screens/create_user_admin_page.dart';
 import 'package:car_wash_app/user/ui/widgets/item_user_admin_list.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 
 class UsersAdminPage extends StatefulWidget {
@@ -213,21 +214,19 @@ class _UsersAdminPage extends State<UsersAdminPage>
               fontSize: 19,
             ),
           ),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) {
-                  return BlocProvider(
-                    bloc: UserBloc(),
-                    child: CreateUserAdminPage(),
-                  );
-                },
-              ),
-            );
-          },
+          onPressed: _updateCompanyUsers,
         ),
       ),
     );
+  }
+
+  void _updateCompanyUsers() async {
+    _userList.forEach((item) async {
+      if (item.companyId == null) {
+        SysUser newUser = SysUser.copyWith(origin: item, companyId: 'gtixUTsEImKUuhdSCwKX');
+        await _userBloc.updateUserCompany(newUser);
+      }
+    });
+    Fluttertoast.showToast(msg: "Usuario actualizados con la compania gtixUTsEImKUuhdSCwKX", toastLength: Toast.LENGTH_LONG);
   }
 }

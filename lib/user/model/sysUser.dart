@@ -9,6 +9,7 @@ class SysUser extends Equatable {
   final String uid;
   final String name;
   final String email;
+  final String companyId;
   String? photoUrl;
   final Timestamp? lastSignIn;
   final bool? active;
@@ -19,10 +20,12 @@ class SysUser extends Equatable {
   final double? operatorCommission;
   bool? isSelected;
 
+
   SysUser({
     required this.uid,
     required this.name,
     required this.email,
+    required this.companyId,
     this.id,
     this.photoUrl,
     this.lastSignIn,
@@ -55,6 +58,7 @@ class SysUser extends Equatable {
       isCoordinator: json['isCoordinator'],
       isOperator: json['isOperator'],
       isSelected: false,
+      companyId: json['companyId'],
     );
   }
 
@@ -70,6 +74,23 @@ class SysUser extends Equatable {
       'isAdministrator': this.isAdministrator,
       'isCoordinator': this.isCoordinator,
       'isOperator': this.isOperator,
+      'companyId': this.companyId,
+    };
+  }
+
+  Map<String, dynamic> toJsonUpdateCompany() {
+    return {
+      'uid': this.uid,
+      'name': this.name,
+      'email': this.email,
+      'photoUrl': this.photoUrl,
+      'lastSignIn': this.lastSignIn,
+      'active': this.active,
+      'locations': this.locations,
+      'isAdministrator': this.isAdministrator,
+      'isCoordinator': this.isCoordinator,
+      'isOperator': this.isOperator,
+      'companyId': this.companyId,
     };
   }
 
@@ -81,6 +102,7 @@ class SysUser extends Equatable {
     String? photoUrl,
     Timestamp? lastSignIn,
     bool? isSelected,
+    String? companyId,
   }) {
     return SysUser(
       id: origin.id,
@@ -94,6 +116,8 @@ class SysUser extends Equatable {
       isCoordinator: origin.isCoordinator,
       isOperator: origin.isOperator,
       isSelected: isSelected ?? origin.isSelected,
+      locations: origin.locations,
+      companyId: companyId ?? origin.companyId,
     );
   }
 
@@ -143,5 +167,6 @@ class SysUser extends Equatable {
     isOperator ?? false,
     isSelected ?? false,
     operatorCommission ?? 0,
+    companyId ?? '',
   ];
 }

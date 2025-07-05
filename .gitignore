@@ -88,3 +88,6 @@ android/key.properties
 android/app/google-services.json
 
 pubspec.lock
+
+**/lib/firebase_options.dart
+

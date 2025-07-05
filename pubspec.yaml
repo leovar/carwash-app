@@ -41,7 +41,7 @@ dependencies:
   whatsapp_unilink: ^2.1.0
 
   #firebase
-  firebase_auth:
+  firebase_auth: ^5.6.2
   google_sign_in: ^6.3.0
   firebase_storage: ^12.4.4
   cloud_firestore: ^5.6.5

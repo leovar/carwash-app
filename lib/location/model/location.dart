@@ -23,6 +23,7 @@ class Location extends Equatable {
   bool? isSelected;
   int? activeCells;
   final int? totalCells;
+  final String? companyId;
 
   Location({
     this.id,
@@ -44,6 +45,7 @@ class Location extends Equatable {
     this.printIva,
     this.activeCells,
     this.totalCells,
+    this.companyId,
   });
 
   factory Location.fromJson(Map<String, dynamic> json, {String? id}) {
@@ -67,6 +69,7 @@ class Location extends Equatable {
         isSelected: false,
         activeCells: json['activeCells'],
         totalCells: json['totalCells'],
+        companyId: json['companyId'],
     );
   }
 
@@ -89,6 +92,7 @@ class Location extends Equatable {
       'printIva': this.printIva,
       'activeCells': this.activeCells,
       'totalCells': this.totalCells,
+      'companyId': this.companyId,
     };
   }
 
@@ -116,6 +120,7 @@ class Location extends Equatable {
       isSelected: origin.isSelected,
       activeCells: activeCells ?? origin.activeCells,
       totalCells: origin.totalCells,
+      companyId: origin.companyId,
     );
   }
 
@@ -140,5 +145,6 @@ class Location extends Equatable {
         printIva ?? false,
         activeCells ?? 0,
         totalCells ?? 0,
+        companyId ?? '',
       ];
 }

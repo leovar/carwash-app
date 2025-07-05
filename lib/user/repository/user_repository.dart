@@ -62,6 +62,12 @@ class UserRepository {
     return await ref.set(userGet.toJson(), SetOptions(merge: true));
   }
 
+  void updateUserCompanyDataRepository(SysUser userGet) async {
+    DocumentReference ref =
+    _db.collection(FirestoreCollections.users).doc(userGet.id);
+    return await ref.set(userGet.toJsonUpdateCompany(), SetOptions(merge: true));
+  }
+
   ///Get all users by id
   Stream<QuerySnapshot> getAllUsersStream() {
     final querySnapshot = this

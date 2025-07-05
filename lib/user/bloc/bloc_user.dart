@@ -56,6 +56,10 @@ class UserBloc implements Bloc {
     _userRepository.updateUserDataRepository(user);
   }
 
+  Future<void> updateUserCompany(SysUser user) async {
+    _userRepository.updateUserCompanyDataRepository(user);
+  }
+
   Future<void> updateEmailUser(String email) async {
     return await _userRepository.updateEmailUser(email);
   }

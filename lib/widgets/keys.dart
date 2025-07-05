@@ -8,4 +8,6 @@ class Keys {
   static String userName = 'userName';
   static String userEmail = 'userEmail';
   static String isAdministrator = 'isAdministrator';
+  static String companyId = 'companyId';
+  static String companyName = 'companyName';
 }
