@@ -16,6 +16,7 @@ class ProductsInvoicePage extends StatefulWidget {
   final String idLocation;
   final bool editForm;
   final Invoice? invoice;
+  final String companyId;
 
   ProductsInvoicePage({
     Key? key,
@@ -26,6 +27,7 @@ class ProductsInvoicePage extends StatefulWidget {
     required this.vehicleTypeSelect,
     required this.idLocation,
     required this.editForm,
+    required this.companyId,
     this.invoice,
   });
 
@@ -79,8 +81,7 @@ class _ProductsInvoicePage extends State<ProductsInvoicePage> {
       return _showListProducts();
     } else {
       return StreamBuilder(
-        stream: _productBloc.productsByLocationStream(
-            widget.idLocation, widget.vehicleTypeSelect.uid),
+        stream: _productBloc.productsByLocationStream(widget.idLocation, widget.vehicleTypeSelect.uid, widget.companyId),
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           switch (snapshot.connectionState) {
             case ConnectionState.waiting:

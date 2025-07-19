@@ -21,6 +21,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 
 class FormTurns extends StatefulWidget {
+  final String companyId;
+
+  FormTurns({Key? key, required this.companyId});
+
   @override
   State<StatefulWidget> createState() => _FormTurns();
 }
@@ -36,7 +40,7 @@ class _FormTurns extends State<FormTurns> with SingleTickerProviderStateMixin {
   late String _locationName;
   String _idLocation = '';
   DocumentReference? _locationReference;
-  Location _locationData = new Location();
+  late Location _locationData;
   CellsModel _cellSelected = CellsModel('', '');
   int _activeCellsSelected = 0;
   late SysUser _currentUser;
@@ -49,8 +53,9 @@ class _FormTurns extends State<FormTurns> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    _locationData = new Location(companyId: widget.companyId);
     _blocUser.getCurrentUser().then((SysUser? user) {
-      _currentUser = user?? new SysUser(uid: '', name: '', email: '');
+      _currentUser = user?? new SysUser(uid: '', name: '', email: '', companyId: widget.companyId);
     });
     _tabController = new TabController(length: 2, vsync: this);
     _everyMinute = Timer.periodic(Duration(minutes: 1), (Timer t) {
@@ -282,7 +287,7 @@ class _FormTurns extends State<FormTurns> with SingleTickerProviderStateMixin {
       return CircularProgressIndicator();
     } else {
       return StreamBuilder(
-        stream: _blocInvoice.invoicesListPendingWashingStream(this._locationReference),
+        stream: _blocInvoice.invoicesListPendingWashingStream(this._locationReference, widget.companyId),
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           return _containerWaitingList(snapshot);
         },
@@ -326,7 +331,7 @@ class _FormTurns extends State<FormTurns> with SingleTickerProviderStateMixin {
        return CircularProgressIndicator();
     } else {
       return StreamBuilder(
-        stream: _blocInvoice.invoicesListWashingStream(this._locationReference),
+        stream: _blocInvoice.invoicesListWashingStream(this._locationReference, widget.companyId),
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           return _containerWashingList(snapshot);
         },
@@ -576,9 +581,9 @@ class _FormTurns extends State<FormTurns> with SingleTickerProviderStateMixin {
 
   void _getInitLists() async {
     List<Invoice> pendingWash = <Invoice>[];
-    _blocInvoice.getListPendingWashList(this._locationReference).then((value) {
+    _blocInvoice.getListPendingWashList(this._locationReference, widget.companyId).then((value) {
       pendingWash = value;
-      _blocInvoice.invoicesWashingList(this._locationReference).then((items) {
+      _blocInvoice.invoicesWashingList(this._locationReference, widget.companyId).then((items) {
         setState(() {
           _listInvoicesWaiting = pendingWash;
           _listInvoicesWashing = items;

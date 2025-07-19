@@ -22,6 +22,7 @@ class Product extends Equatable {
   final double? productCommission;
   int? countOperatorsInvoice;
   int? invoiceConsecutive;
+  final String? companyId;
 
   Product({
     this.id,
@@ -42,6 +43,7 @@ class Product extends Equatable {
     this.productCommission,
     this.countOperatorsInvoice,
     this.invoiceConsecutive,
+    this.companyId,
   });
 
   factory Product.fromJson(Map<String, dynamic> json, {String? id}) {
@@ -64,60 +66,7 @@ class Product extends Equatable {
       isSelected: false,
       productType: json['productType'],
       serviceTime: json['serviceTime'],
-    );
-  }
-
-  factory Product.fromJsonTemporal(Map<String, dynamic> json) {
-    List<DocumentReference> locationsListDb = <DocumentReference>[];
-    List locationsList = json['locations'];
-    locationsList.forEach((drLocation) {
-      locationsListDb.add(drLocation);
-    });
-    bool additional = json['isAdditional'];
-    String newId = json['productId'];
-    if (additional ?? false) {
-      newId = '';
-    }
-
-    return Product(
-      id: newId,
-      productName: json['productName'],
-      price: json['price'].toDouble(),
-      ivaPercent: json['ivaPercent'].toDouble(),
-      vehicleType: json['vehicleType'],
-      productActive: json['productActive'],
-      vehicleTypeUid: json['vehicleTypeUid'],
-      isAdditional: json['isAdditional'],
-      locations: locationsListDb,
-      isSelected: false,
-      productType: json['productType'],
-      serviceTime: json['serviceTime'],
-      productCommission: json['productCommission'],
-    );
-  }
-
-  factory Product.fromJsonProInvoice(Map<String, dynamic> json, {String? id}) {
-    List<DocumentReference> locationsListDb = <DocumentReference>[];
-    List locationsList = json['locations'];
-    locationsList.forEach((drLocation) {
-      locationsListDb.add(drLocation);
-    });
-
-    return Product(
-      id: json['productId'],
-      productName: json['productName'],
-      price: json['price'].toDouble(),
-      ivaPercent: json['ivaPercent'].toDouble(),
-      vehicleType: json['vehicleType'],
-      productActive: json['productActive'],
-      vehicleTypeUid: json['vehicleTypeUid'],
-      isAdditional: json['isAdditional'],
-      locations: locationsListDb,
-      isSelected: true,
-      productType: json['productType'],
-      productInvoiceId: id,
-      serviceTime: json['serviceTime'],
-      productCommission: json['productCommission'],
+      companyId: json['companyId'],
     );
   }
 
@@ -142,6 +91,7 @@ class Product extends Equatable {
       productCommission: json['productCommission'],
       countOperatorsInvoice: countOperators,
       invoiceConsecutive: consecutive,
+      companyId: json['companyId'],
     );
   }
 
@@ -156,6 +106,7 @@ class Product extends Equatable {
       'vehicleTypeUid': this.vehicleTypeUid,
       'productType': this.productType,
       'serviceTime': this.serviceTime,
+      'companyId': this.companyId,
     };
   }
 
@@ -206,6 +157,7 @@ class Product extends Equatable {
       productInvoiceId: productInvoiceId ?? '',
       serviceTime: origin.serviceTime,
       productCommission: commission ?? origin.productCommission,
+      companyId: origin.companyId,
     );
   }
 
@@ -232,6 +184,26 @@ class Product extends Equatable {
     );
   }
 
+  factory Product.copyWith({
+    required Product origin,
+    String? id,
+    String? companyId,
+  }) {
+    return Product(
+      id: id ?? origin.id,
+      companyId: companyId ?? origin.companyId,
+      ivaPercent: origin.ivaPercent,
+      locations: origin.locations,
+      price: origin.price,
+      productActive: origin.productActive,
+      productName: origin.productName,
+      productType: origin.productType,
+      serviceTime: origin.serviceTime,
+      vehicleType: origin.vehicleType,
+      vehicleTypeUid: origin.vehicleTypeUid,
+    );
+  }
+
   @override
   List<Object> get props => [
     id ?? '',
@@ -247,5 +219,6 @@ class Product extends Equatable {
     productInvoiceId ?? '',
     serviceTime ?? 0,
     productCommission ?? 0,
+    companyId ?? '',
   ];
 }

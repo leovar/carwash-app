@@ -7,19 +7,21 @@ class PaymentMethodRepository {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   ///Get Payment Methods
-  Stream<QuerySnapshot> getListPaymentMethodsStream() {
+  Stream<QuerySnapshot> getListPaymentMethodsStream(String companyId) {
     final querySnapshot = this
         ._db
         .collection(FirestoreCollections.paymentMethods)
+        .where(FirestoreCollections.paymentCompany, isEqualTo: companyId)
         .where(FirestoreCollections.paymentActive, isEqualTo: true)
         .snapshots();
     return querySnapshot;
   }
 
-  Stream<QuerySnapshot> getAllListPaymentMethodsStream() {
+  Stream<QuerySnapshot> getAllListPaymentMethodsStream(String companyId) {
     final querySnapshot = this
         ._db
         .collection(FirestoreCollections.paymentMethods)
+        .where(FirestoreCollections.paymentCompany, isEqualTo: companyId)
         .snapshots();
     return querySnapshot;
   }
@@ -41,7 +43,7 @@ class PaymentMethodRepository {
         .where(FirestoreCollections.paymentName, isEqualTo: name)
         .get();
 
-    PaymentMethod pm = new PaymentMethod();
+    late PaymentMethod pm;
     if (querySnapshot.docs.length > 0) {
       pm = PaymentMethod.fromJson(querySnapshot.docs[0].data(),
           id: querySnapshot.docs[0].id);

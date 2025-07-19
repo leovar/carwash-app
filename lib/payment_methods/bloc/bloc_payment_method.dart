@@ -6,8 +6,8 @@ import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 class BlocPaymentMethod implements Bloc {
   final _paymentMethodRepository = PaymentMethodRepository();
 
-  Stream<QuerySnapshot> paymentMethodsStream() =>
-      _paymentMethodRepository.getListPaymentMethodsStream();
+  Stream<QuerySnapshot> paymentMethodsStream(String companyId) =>
+      _paymentMethodRepository.getListPaymentMethodsStream(companyId);
 
   List<PaymentMethod> buildPaymentMethods(List<DocumentSnapshot> paymentMethodsListSnapshot) =>
       _paymentMethodRepository.buildPaymentMethods(paymentMethodsListSnapshot);
@@ -29,7 +29,9 @@ class BlocPaymentMethod implements Bloc {
 
   DocumentReference getDocumentReferencePMethodById(String idLocation) => _paymentMethodRepository.getDocumentReferencePaymentsById(idLocation);
 
-  Stream<QuerySnapshot> get allPaymentMethodsStream => _paymentMethodRepository.getAllListPaymentMethodsStream();
+  Stream<QuerySnapshot> allPaymentMethodsStream(String companyId) {
+    return _paymentMethodRepository.getAllListPaymentMethodsStream(companyId);
+  }
 
   @override
   void dispose() {

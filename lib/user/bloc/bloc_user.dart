@@ -98,8 +98,10 @@ class UserBloc implements Bloc {
   SysUser buildUsersById(List<DocumentSnapshot> usersListSnapshot) =>
       _userRepository.buildGetUsersById(usersListSnapshot);
 
-  Stream<QuerySnapshot> get allUsersStream =>
-      _userRepository.getAllUsersStream();
+  Stream<QuerySnapshot> allUsersStream(String companyId) {
+    return _userRepository.getAllUsersStream(companyId);
+  }
+
   List<SysUser> buildAllUsers(List<DocumentSnapshot> usersListSnapshot) =>
       _userRepository.buildGetAllUsers(usersListSnapshot);
 

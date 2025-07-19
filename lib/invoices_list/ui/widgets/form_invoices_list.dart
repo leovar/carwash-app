@@ -20,8 +20,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-//import 'package:flutter_open_whatsapp/flutter_open_whatsapp.dart';
-//import 'package:flutter_sms/flutter_sms.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -32,8 +30,9 @@ import 'package:whatsapp_unilink/whatsapp_unilink.dart';
 
 class FormInvoicesList extends StatefulWidget {
   final locationReference;
+  final companyId;
 
-  FormInvoicesList({Key? key, this.locationReference});
+  FormInvoicesList({Key? key, required this.companyId, this.locationReference});
 
   @override
   State<StatefulWidget> createState() => _FormInvoicesList();
@@ -52,7 +51,7 @@ class _FormInvoicesList extends State<FormInvoicesList> {
   double _totalMonth = 0.0;
   String _idLocation = '';
   late Location _location;
-  PaymentMethod _selectedPaymentMethod = PaymentMethod(id: '' ,name: '' ,active: true);
+  late PaymentMethod _selectedPaymentMethod;
   late Invoice _invoiceSelected;
 
   ///Filter Keys
@@ -60,14 +59,15 @@ class _FormInvoicesList extends State<FormInvoicesList> {
   final _textConsecutive = TextEditingController();
   var _dateFilterInit = DateTime(DateTime.now().year, DateTime.now().month, 1);
   var _dateFilterFinal = DateTime.now();
-  SysUser _operatorFilter = SysUser(name: '', uid: '', email: '');
+  late SysUser _operatorFilter;
   double _totalPriceFilters = 0.0;
   String _productTypeSelected = '';
-  PaymentMethod _paymentMethodFilter = PaymentMethod(id: '', name: '');
+  late PaymentMethod _paymentMethodFilter = new PaymentMethod(companyId: widget.companyId);
 
   @override
   void initState() {
     super.initState();
+    _operatorFilter = new SysUser(uid: '', name: '', email: '', companyId: widget.companyId);
     _blocUser.getCurrentUser().then((SysUser? user) {
       if (user != null) {
         _currentUser = user;
@@ -118,6 +118,7 @@ class _FormInvoicesList extends State<FormInvoicesList> {
         _textConsecutive.text,
         _productTypeSelected,
         _paymentMethodFilter.name ?? '',
+        widget.companyId,
       ),
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         return _containerList(snapshot);
@@ -352,6 +353,7 @@ class _FormInvoicesList extends State<FormInvoicesList> {
         operatorSelected: _operatorFilter,
         productTypeSelected: _productTypeSelected,
         paymentMethodSelected: _paymentMethodFilter,
+        companyId: widget.companyId,
         selectOperator: _callBackSelectOperatorFilter,
         selectDateInit: _setDateInitFilter,
         selectDateFinal: _setDateFinalFilter,
@@ -405,7 +407,7 @@ class _FormInvoicesList extends State<FormInvoicesList> {
     if ((_invoiceSelected.paymentMethod ?? '') == '') {
       _selectedPaymentMethod =
           ((_invoiceSelected.paymentMethod ?? '') == '')
-              ? new PaymentMethod(name: '')
+              ? new PaymentMethod(name: '', companyId: widget.companyId)
               : await _paymentMethodBloc.getPaymentMethodByName(
                 _invoiceSelected.paymentMethod??'',
               );
@@ -471,6 +473,7 @@ class _FormInvoicesList extends State<FormInvoicesList> {
               closedInvoice: _invoiceToFinish.invoiceClosed??false,
               fromCompleteInvoice: true,
               callbackFinishInvoice: _finishInvoice,
+              companyId: widget.companyId,
             ),
       ),
     );
@@ -531,6 +534,7 @@ class _FormInvoicesList extends State<FormInvoicesList> {
               ((_invoiceSelected.totalCommission ?? 0) /
                       _selectedOperators.length)
                   .ceilToDouble(),
+          companyId: widget.companyId,
         );
         _operatorsToSave.add(operatorSave);
       });

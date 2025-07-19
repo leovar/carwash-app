@@ -15,6 +15,7 @@ class OperatorsInvoicePage extends StatefulWidget {
   final bool closedInvoice;
   final bool fromCompleteInvoice;
   final Invoice? invoice;
+  final String companyId;
 
   OperatorsInvoicePage({
     Key? key,
@@ -25,6 +26,7 @@ class OperatorsInvoicePage extends StatefulWidget {
     required this.idLocation,
     required this.closedInvoice,
     required this.fromCompleteInvoice,
+    required this.companyId,
     this.invoice,
   });
 
@@ -74,7 +76,7 @@ class _OperatorsInvoicePage extends State<OperatorsInvoicePage> {
       return _showOperators();
     } else {
       return StreamBuilder(
-        stream: _blocInvoice.operatorsByLocationStream(widget.idLocation),
+        stream: _blocInvoice.operatorsByLocationStream(widget.idLocation, widget.companyId),
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           switch (snapshot.connectionState) {
             case ConnectionState.waiting:
@@ -93,7 +95,7 @@ class _OperatorsInvoicePage extends State<OperatorsInvoicePage> {
     _listUsersOperators.forEach((item) {
       SysUser userFind = widget.usersListCallback.firstWhere(
           (element) => element.id == item.id && (element.isSelected??false),
-          orElse: () => new SysUser(uid: '', name: '', email: ''));
+          orElse: () => new SysUser(uid: '', name: '', email: '', companyId: ''));
       if (userFind.name.isEmpty) {
         _userGet.add(item);
       } else {

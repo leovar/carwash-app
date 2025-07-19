@@ -22,7 +22,7 @@ class _AdminBrandReference extends State<AdminBrandReference> {
   List<Brand> _listBrands = <Brand>[];
   List<BrandReference> _listBrandReference = [];
   late List<DropdownMenuItem<Brand>> _dropdownBrands;
-  late Brand _selectedBrand;
+  Brand _selectedBrand = new Brand();
   late BrandReference _referenceToEdit;
 
   @override
@@ -229,7 +229,8 @@ class _AdminBrandReference extends State<AdminBrandReference> {
     return Container(
       padding: EdgeInsets.only(top: 10, bottom: 17),
       child: StreamBuilder(
-        stream: _vehicleTypeBloc.vehicleBrandReferences(_selectedBrand.id ?? '1'),
+        stream:
+            _vehicleTypeBloc.vehicleBrandReferences(_selectedBrand.id ?? '1'),
         builder: (context, snapshot) {
           switch (snapshot.connectionState) {
             case ConnectionState.waiting:
@@ -245,7 +246,9 @@ class _AdminBrandReference extends State<AdminBrandReference> {
   Widget _chargeListBrandReferences(AsyncSnapshot snapshot) {
     _listBrandReference =
         _vehicleTypeBloc.buildBrandReference(snapshot.data.docs);
-    _listBrandReference.sort((a, b) => (a.reference??'').toLowerCase().compareTo((b.reference??'').toLowerCase()));
+    _listBrandReference.sort((a, b) => (a.reference ?? '')
+        .toLowerCase()
+        .compareTo((b.reference ?? '').toLowerCase()));
     return ListView.builder(
       itemCount: _listBrandReference.length,
       scrollDirection: Axis.vertical,
@@ -265,12 +268,21 @@ class _AdminBrandReference extends State<AdminBrandReference> {
 
   List<DropdownMenuItem<Brand>> _buildDropdownBrands(List vehicleBrands) {
     List<DropdownMenuItem<Brand>> listItems = [];
+    listItems.add(
+      DropdownMenuItem(
+        value: new Brand(),
+        child: Text(
+          '',
+        ),
+      ),
+    );
+
     for (Brand documentLoc in vehicleBrands) {
       listItems.add(
         DropdownMenuItem(
           value: documentLoc,
           child: Text(
-            documentLoc.brand??'',
+            documentLoc.brand ?? '',
           ),
         ),
       );
@@ -281,7 +293,7 @@ class _AdminBrandReference extends State<AdminBrandReference> {
   onChangeDropDawn(Brand? selectedBrand) {
     setState(() {
       _textReferenceName.text = '';
-      _selectedBrand = selectedBrand?? new Brand();
+      _selectedBrand = selectedBrand ?? new Brand();
     });
   }
 
@@ -293,10 +305,10 @@ class _AdminBrandReference extends State<AdminBrandReference> {
         reference: _textReferenceName.text,
         active: true,
       );
-          _vehicleTypeBloc.updateBrandReference(_selectedBrand.id??'', ref);
+      _vehicleTypeBloc.updateBrandReference(_selectedBrand.id ?? '', ref);
       _referenceToEdit = new BrandReference();
       _textReferenceName.text = '';
-        } else {
+    } else {
       MessagesUtils.showAlert(
         context: context,
         title: 'Escriba una referencia',
@@ -306,7 +318,7 @@ class _AdminBrandReference extends State<AdminBrandReference> {
 
   void _editBrandReference(Brand? selectBrand, BrandReference? brandRef) {
     _referenceToEdit = brandRef ?? new BrandReference();
-    _textReferenceName.text = brandRef?.reference??'';
+    _textReferenceName.text = brandRef?.reference ?? '';
     _selectedBrand = selectBrand ?? new Brand();
   }
 }

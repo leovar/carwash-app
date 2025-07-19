@@ -16,6 +16,7 @@ class FieldsProducts extends StatefulWidget {
   final String idLocation;
   final bool editForm;
   final Invoice? invoice;
+  final String companyId;
 
   FieldsProducts({
     Key? key,
@@ -29,6 +30,7 @@ class FieldsProducts extends StatefulWidget {
     required this.idLocation,
     required this.editForm,
     required this.invoice,
+    required this.companyId,
   });
 
   @override
@@ -102,6 +104,7 @@ class _FieldsProducts extends State<FieldsProducts> {
                               idLocation: widget.idLocation,
                               editForm: widget.editForm,
                               invoice: widget.invoice,
+                              companyId: widget.companyId,
                             ),
                           ),
                         );

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:car_wash_app/invoice/bloc/bloc_invoice.dart';
 import 'package:car_wash_app/invoice/model/invoice.dart';
 import 'package:car_wash_app/widgets/messages_utils.dart';
 import 'package:intl/intl.dart';
@@ -13,7 +14,14 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:excel/excel.dart';
 import 'package:flutter/material.dart';
 
+
+import '../../../widgets/keys.dart';
+
 class CustomersReport extends StatefulWidget {
+  final String companyId;
+
+  CustomersReport({Key? key, required this.companyId});
+
   @override
   State<StatefulWidget> createState() => _CustomersReport();
 }
@@ -22,12 +30,15 @@ class _CustomersReport extends State<CustomersReport> {
   BlocReports _blocReports = BlocReports();
   BlocLocation _blocLocation = BlocLocation();
   BlocCustomer _blocCustomer = BlocCustomer();
+  BlocInvoice _blocInvoice = BlocInvoice();
+
   late List<DropdownMenuItem<Location>> _dropdownMenuItems;
-  Location _selectedLocation = new Location();
+  late Location _selectedLocation;
 
   final _textDateInit = TextEditingController();
   final _textDateFinal = TextEditingController();
-  DocumentReference _locationReference = FirebaseFirestore.instance.collection('locations').doc('defaultDocId');
+  DocumentReference _locationReference = FirebaseFirestore.instance.doc(
+      "placeholder/empty"); //FirebaseFirestore.instance.collection('locations').doc('defaultDocId');
   var formatter = new DateFormat('dd-MM-yyyy');
   var _dateTimeInit = DateTime(DateTime.now().year, DateTime.now().month, 1);
   var _dateTimeFinal = DateTime.now();
@@ -35,35 +46,38 @@ class _CustomersReport extends State<CustomersReport> {
   @override
   void initState() {
     super.initState();
+    _selectedLocation = new Location(companyId: widget.companyId);
     _textDateInit.text = formatter.format(_dateTimeInit);
     _textDateFinal.text = formatter.format(_dateTimeFinal);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      mainAxisSize: MainAxisSize.max,
-      children: <Widget>[
-        _filterParamsReport(),
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Theme.of(context).colorScheme.secondary,
-            padding: EdgeInsets.symmetric(vertical: 15, horizontal: 10),
-          ),
-          child: Text(
-            "GENERAR EXCEL",
-            style: TextStyle(
-              fontFamily: "Lato",
-              decoration: TextDecoration.none,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-              fontSize: 19,
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisSize: MainAxisSize.max,
+        children: <Widget>[
+          _filterParamsReport(),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.secondary,
+              padding: EdgeInsets.symmetric(vertical: 15, horizontal: 10),
             ),
+            child: Text(
+              "GENERAR EXCEL",
+              style: TextStyle(
+                fontFamily: "Lato",
+                decoration: TextDecoration.none,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                fontSize: 19,
+              ),
+            ),
+            onPressed: _generateInvoiceCustomerReport,
           ),
-          onPressed: _generateInvoiceCustomerReport,
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -104,7 +118,7 @@ class _CustomersReport extends State<CustomersReport> {
   /// Locations filter section
   Widget _locationsList() {
     return StreamBuilder(
-      stream: _blocLocation.locationsStream,
+      stream: _blocLocation.locationsStream(widget.companyId),
       builder: (context, snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.waiting:
@@ -136,7 +150,8 @@ class _CustomersReport extends State<CustomersReport> {
         fontWeight: FontWeight.normal,
         color: Theme.of(context).cardColor,
       ),
-      underline: Container(height: 1, color: Theme.of(context).textSelectionTheme.cursorColor),
+      underline: Container(
+          height: 1, color: Theme.of(context).textSelectionTheme.cursorColor),
     );
   }
 
@@ -152,7 +167,7 @@ class _CustomersReport extends State<CustomersReport> {
     } else {
       listItems.add(
         DropdownMenuItem(
-          value: new Location(),
+          value: new Location(companyId: widget.companyId),
           child: Text('Todas las sedes'),
         ),
       );
@@ -161,7 +176,7 @@ class _CustomersReport extends State<CustomersReport> {
       listItems.add(
         DropdownMenuItem(
           value: documentLoc,
-          child: Text(documentLoc.locationName??''),
+          child: Text(documentLoc.locationName ?? ''),
         ),
       );
     }
@@ -170,19 +185,22 @@ class _CustomersReport extends State<CustomersReport> {
 
   /// Functions
   onChangeDropDawn(Location? selectedLocation) async {
-    if (selectedLocation?.id?.isNotEmpty??false) {
+    if (selectedLocation?.id?.isNotEmpty ?? false) {
       _locationReference = await _blocLocation.getLocationReference(
-        selectedLocation?.id??'',
+        selectedLocation?.id ?? '',
       );
       setState(() {
-        if (selectedLocation !=  null) {
+        if (selectedLocation != null) {
           _selectedLocation = selectedLocation;
         }
       });
     } else {
-      _locationReference = FirebaseFirestore.instance.collection('locations').doc('defaultDocId');
+      _locationReference = FirebaseFirestore.instance
+          .collection('locations')
+          .doc('defaultDocId');
       setState(() {
-        _selectedLocation = selectedLocation ?? new Location();
+        _selectedLocation =
+            selectedLocation ?? new Location(companyId: widget.companyId);
       });
     }
   }
@@ -229,7 +247,8 @@ class _CustomersReport extends State<CustomersReport> {
         context: context,
         title: 'Generando reporte',
       ).show();
-      List<Invoice> _listInvoices = await _blocReports.getListCustomerInvoicesByLocation(
+      List<Invoice> _listInvoices =
+          await _blocReports.getListCustomerInvoicesByLocation(
         _locationReference,
         _dateTimeInit,
         _dateTimeFinal,
@@ -238,7 +257,8 @@ class _CustomersReport extends State<CustomersReport> {
       if (_listInvoices.isNotEmpty) {
         List<Invoice> _newListInvoices = [];
         _newListInvoices = _listInvoices.toSet().toList();
-        _newListInvoices.sort((a, b) => (a.customerName??'').compareTo(b.customerName??''));
+        _newListInvoices.sort(
+            (a, b) => (a.customerName ?? '').compareTo(b.customerName ?? ''));
 
         var excel = Excel.createExcel();
         var sheetObject = excel["Sheet1"];
@@ -259,7 +279,7 @@ class _CustomersReport extends State<CustomersReport> {
           sheetObject.appendRow(header.map((e) => TextCellValue(e)).toList());
           _newListInvoices.forEach((item) {
             List<CellValue> row = [
-              TextCellValue(item.consecutive?.toString()??''),
+              TextCellValue(item.consecutive?.toString() ?? ''),
               TextCellValue(item.customerName ?? ''),
               TextCellValue(item.phoneNumber ?? ''),
               TextCellValue(
@@ -280,7 +300,8 @@ class _CustomersReport extends State<CustomersReport> {
 
         excel.rename("Sheet1", "Hoja1");
 
-        String outputFile = "/storage/emulated/0/Download/ReporteClientes_${_selectedLocation.locationName == null ? 'Todas las sedes' : _selectedLocation.locationName}.xlsx";
+        String outputFile =
+            "/storage/emulated/0/Download/ReporteClientes_${_selectedLocation.locationName == null ? 'Todas las sedes' : _selectedLocation.locationName}.xlsx";
         var encodedExcel = await excel.encode();
         if (encodedExcel != null) {
           File(path_prov.join(outputFile))
@@ -317,11 +338,11 @@ class _CustomersReport extends State<CustomersReport> {
       context: context,
       title: 'Generando reporte',
     ).show();
-    List<Customer> _listCustomers = await _blocCustomer
-        .getListCustomerReportByLocation(_locationReference);
+    List<Customer> _listCustomers =
+        await _blocCustomer.getListCustomerReportByLocation(_locationReference);
     List<Customer> _newListCustomer = [];
     _newListCustomer = _listCustomers.toSet().toList();
-    _newListCustomer.sort((a, b) => (a.name??'').compareTo(b.name??''));
+    _newListCustomer.sort((a, b) => (a.name ?? '').compareTo(b.name ?? ''));
     var excel = Excel.createExcel();
     var sheetObject = excel["Sheet1"];
 
@@ -370,5 +391,16 @@ class _CustomersReport extends State<CustomersReport> {
       msg: "Su reporte ha sido descargado en: ${outputFile}",
       toastLength: Toast.LENGTH_LONG,
     );
-    }
+  }
+
+  ///TODO metodo usado para actualziar la compania en los diferentes objetos
+  void _updateCompanyInObjects() async {
+    //_blocReports.updateInfoCompanyIdInvoices();
+    //_blocReports.updateCompanyInProducts();
+    //String? totalRegisters = await _blocReports.updateCustomersCompany();
+    //String? totalRegisters = await _blocReports.updateVehiclesCompany();
+    //String? totalRegisters = await _blocReports.updateCompanyIdInInvoices();
+    int? totalRegisters = await _blocInvoice.getInvoicesTotalCount();
+    MessagesUtils.showAlert(context: context, title: "Proceso completado con ${totalRegisters??''} Registros").show();
+  }
 }

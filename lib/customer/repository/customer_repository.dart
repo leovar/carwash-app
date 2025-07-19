@@ -12,9 +12,9 @@ class CustomerRepository {
         ._db
         .collection(FirestoreCollections.customers)
         .where(FirestoreCollections.customerFieldVehicles,
-        arrayContains: vehicleReference)
-        .orderBy(
-        FirestoreCollections.customerFieldCreationDate, descending: true)
+            arrayContains: vehicleReference)
+        .orderBy(FirestoreCollections.customerFieldCreationDate,
+            descending: true)
         .get();
 
     final documents = querySnapshot.docs;
@@ -41,15 +41,15 @@ class CustomerRepository {
     );
   }
 
-  Future<List<Customer>> getCustomerFilter(String telephoneNumber,
-      String email) async {
+  Future<List<Customer>> getCustomerFilter(
+      String telephoneNumber, String email) async {
     List<Customer> customerList = [];
     QuerySnapshot querySnapshot;
     var queryFirestore = this
         ._db
         .collection(FirestoreCollections.customers)
         .where(FirestoreCollections.customerFieldCreationDate,
-        isLessThan: Timestamp.now());
+            isLessThan: Timestamp.now());
 
     if (telephoneNumber.isNotEmpty) {
       queryFirestore = queryFirestore.where(
@@ -66,7 +66,8 @@ class CustomerRepository {
     querySnapshot = await queryFirestore.get();
     if (querySnapshot.docs.length > 0) {
       querySnapshot.docs.forEach((doc) {
-        final customer = Customer.fromJson(doc.data() as Map<String, dynamic>, id: doc.id);
+        final customer =
+            Customer.fromJson(doc.data() as Map<String, dynamic>, id: doc.id);
         customerList.add(customer);
       });
     }
@@ -76,7 +77,7 @@ class CustomerRepository {
 
   Future<DocumentReference> updateCustomer(Customer customer) async {
     DocumentReference ref =
-    _db.collection(FirestoreCollections.customers).doc(customer.id);
+        _db.collection(FirestoreCollections.customers).doc(customer.id);
     ref.set(customer.toJson(), SetOptions(merge: true));
     return ref;
   }
@@ -93,20 +94,47 @@ class CustomerRepository {
         ._db
         .collection(FirestoreCollections.invoices)
         .where(FirestoreCollections.invoiceFieldLocation,
-        isEqualTo: locationReference);
+            isEqualTo: locationReference);
 
     querySnapshot = await queryFirestore.get();
     final responses = await Future.wait(
-        querySnapshot.docs.map((p) {
-            Invoice invoice = Invoice.fromJson(p.data() as Map<String, dynamic>, id: p.id);
-            return invoice.customer != null ? invoice.customer!.get() : Future.value(null);
-        }),
+      querySnapshot.docs.map((p) {
+        Invoice invoice =
+            Invoice.fromJson(p.data() as Map<String, dynamic>, id: p.id);
+        return invoice.customer != null
+            ? invoice.customer!.get()
+            : Future.value(null);
+      }),
     );
 
     customerList = responses.map((response) {
-      Customer customerModel = Customer.fromJson(response?.data() as Map<String, dynamic>, id: response?.id);
+      Customer customerModel = Customer.fromJson(
+          response?.data() as Map<String, dynamic>,
+          id: response?.id);
       return customerModel;
     }).toList();
-    return  customerList;
+    return customerList;
+  }
+
+  Future<QuerySnapshot> getBatchCustomers(int batchSize, DocumentSnapshot? lastDocument) async {
+    Query querySnapshot = await this
+        ._db
+        .collection(FirestoreCollections.customers)
+        .limit(batchSize);
+
+    if (lastDocument != null) {
+      querySnapshot = querySnapshot.startAfterDocument(lastDocument);
+    }
+    return querySnapshot.get();
+  }
+
+  Future<void> updateBatch(List<QueryDocumentSnapshot> docs, String companyId) async {
+    final WriteBatch batch = _db.batch();
+
+    for (final doc in docs) {
+      batch.update(doc.reference, {'companyId': companyId});
+    }
+
+    await batch.commit();
   }
 }

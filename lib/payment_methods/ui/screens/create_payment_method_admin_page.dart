@@ -7,8 +7,9 @@ import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 
 class CreatePaymentMethodAdminPage extends StatefulWidget {
   final PaymentMethod? currentPaymentMethod;
+  final String companyId;
 
-  CreatePaymentMethodAdminPage({Key? key, this.currentPaymentMethod});
+  CreatePaymentMethodAdminPage({Key? key, required this.companyId, this.currentPaymentMethod});
 
   @override
   State<StatefulWidget> createState() => _CreatePaymentMethodAdminPage();
@@ -26,7 +27,7 @@ class _CreatePaymentMethodAdminPage
   @override
   void initState() {
     super.initState();
-    _paymentMethodSelected = widget.currentPaymentMethod?? new PaymentMethod();
+    _paymentMethodSelected = widget.currentPaymentMethod?? new PaymentMethod(companyId: widget.companyId);
     _selectLocationList();
     }
 
@@ -183,6 +184,7 @@ class _CreatePaymentMethodAdminPage
         id: _paymentMethodSelected != null ? _paymentMethodSelected.id : null,
         name: _textName.text.trim(),
         active: _registerActive,
+        companyId: widget.companyId,
       );
 
       _paymentMethodBloc.updatePaymentMethodData(paymentMethodData);

@@ -11,14 +11,18 @@ import 'package:car_wash_app/user/model/sysUser.dart';
 import 'package:car_wash_app/vehicle_type/model/brand.dart';
 import 'package:car_wash_app/widgets/firestore_collections.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter/cupertino.dart';
 
 class InvoiceRepository {
   String uid = '';
 
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   final FirebaseAuth _authApi = FirebaseAuth.instance;
+  final FirebaseFunctions _functions = FirebaseFunctions.instance;
   final _storageReference = FirebaseStorage.instance;
 
   /// Save and Update Invoice
@@ -88,20 +92,22 @@ class InvoiceRepository {
   }
 
   ///Get Operators list by Location
-  Stream<QuerySnapshot> getListOperatorsStream() {
+  Stream<QuerySnapshot> getListOperatorsStream(String companyId) {
     final querySnapshot = this
         ._db
         .collection(FirestoreCollections.users)
+        .where(FirestoreCollections.usersFieldCompanyId, isEqualTo: companyId)
         .where(FirestoreCollections.usersFieldIsOperator, isEqualTo: true)
         .where(FirestoreCollections.usersFieldUserActive, isEqualTo: true)
         .snapshots();
     return querySnapshot;
   }
 
-  Stream<QuerySnapshot> getListOperatorsByLocationStream(String idLocation) {
+  Stream<QuerySnapshot> getListOperatorsByLocationStream(String idLocation, String companyId) {
     final querySnapshot = this
         ._db
         .collection(FirestoreCollections.users)
+        .where(FirestoreCollections.usersFieldCompanyId, isEqualTo: companyId)
         .where(FirestoreCollections.locations,
             arrayContains:
                 _db.doc('${FirestoreCollections.locations}/$idLocation'))
@@ -148,10 +154,11 @@ class InvoiceRepository {
     return querySnapshot;
   }
 
-  Stream<QuerySnapshot> getListCoordinatorByLocationStream(String idLocation) {
+  Stream<QuerySnapshot> getListCoordinatorByLocationStream(String idLocation, String companyId) {
     final querySnapshot = this
         ._db
         .collection(FirestoreCollections.users)
+        .where(FirestoreCollections.usersFieldCompanyId, isEqualTo: companyId)
         .where(FirestoreCollections.locations,
             arrayContains: _db.doc('${FirestoreCollections.locations}/$idLocation'))
         .where(FirestoreCollections.usersFieldIsCoordinator, isEqualTo: true)
@@ -307,6 +314,7 @@ class InvoiceRepository {
     String consecutive,
     String productTypeSelected,
     String paymentMethod,
+    String companyId,
   ) {
     DateTime dateFinalModify =
         DateTime(dateFinal.year, dateFinal.month, dateFinal.day, 23, 59);
@@ -314,6 +322,7 @@ class InvoiceRepository {
     var querySnapshot = this
         ._db
         .collection(FirestoreCollections.invoices)
+        .where(FirestoreCollections.invoiceFieldCompanyId, isEqualTo: companyId)
         .where(FirestoreCollections.invoiceFieldCreationDate,
             isGreaterThanOrEqualTo: Timestamp.fromDate(dateInit))
         .where(FirestoreCollections.invoiceFieldCreationDate,
@@ -357,10 +366,11 @@ class InvoiceRepository {
   }
 
   /// Get invoices pending for Washing Stream
-  Stream<QuerySnapshot> getInvoicesListPendingWashingStream(DocumentReference? locationReference) {
+  Stream<QuerySnapshot> getInvoicesListPendingWashingStream(DocumentReference? locationReference, String companyId) {
     var querySnapshot = this
         ._db
         .collection(FirestoreCollections.invoices)
+        .where(FirestoreCollections.invoiceFieldCompanyId, isEqualTo: companyId)
         .where(FirestoreCollections.invoiceFieldLocation, isEqualTo: locationReference)
         .where(FirestoreCollections.invoiceClosed, isEqualTo: false)
         .where(FirestoreCollections.invoiceClosedDate, isNull: true)
@@ -370,11 +380,12 @@ class InvoiceRepository {
   }
 
   /// Get invoices pending for Washing Documents
-  Future<List<Invoice>> getInvoicesListPendingWashing(DocumentReference? locationReference) async {
+  Future<List<Invoice>> getInvoicesListPendingWashing(DocumentReference? locationReference, String companyId) async {
     List<Invoice> invoiceList = <Invoice>[];
     var querySnapshot = await this
         ._db
         .collection(FirestoreCollections.invoices)
+        .where(FirestoreCollections.invoiceFieldCompanyId, isEqualTo: companyId)
         .where(FirestoreCollections.invoiceFieldLocation, isEqualTo: locationReference)
         .where(FirestoreCollections.invoiceClosed, isEqualTo: false)
         .where(FirestoreCollections.invoiceStartWashing, isEqualTo: false)
@@ -390,7 +401,7 @@ class InvoiceRepository {
   }
 
   /// Get invoices in washing process Stream
-  Stream<QuerySnapshot> getInvoicesListWashingStream(DocumentReference? locationReference) {
+  Stream<QuerySnapshot> getInvoicesListWashingStream(DocumentReference? locationReference, String companyId) {
     var querySnapshot = this
         ._db
         .collection(FirestoreCollections.invoices)
@@ -401,7 +412,7 @@ class InvoiceRepository {
     return querySnapshot.snapshots();
   }
 
-  Future<List<Invoice>> getInvoicesWashingList(DocumentReference? locationReference) async {
+  Future<List<Invoice>> getInvoicesWashingList(DocumentReference? locationReference, String companyId) async {
     List<Invoice> invoiceList = <Invoice>[];
     var querySnapshot = await this
         ._db
@@ -420,50 +431,9 @@ class InvoiceRepository {
     return invoiceList;
   }
 
-  //TODO esta metodo caducaria cuando el producto se guarde en la misma factura
-  Future<List<Product>> getInvoiceProducts(String idInvoice) async {
-    List<Product> productList = <Product>[];
-    var querySnapshot = await this
-        ._db
-        .collection(FirestoreCollections.invoices)
-        .doc(idInvoice)
-        .collection(FirestoreCollections.invoiceFieldProducts)
-        .get();
-
-    final documents = querySnapshot.docs;
-    if (documents.length > 0) {
-      documents.forEach((document) {
-        Product product =
-            Product.fromJson(document.data(), id: document.id);
-        productList.add(product);
-      });
-    }
-    return productList;
-  }
-
-  //TODO metodo temporal para pasar los productos de una lista aparte de la factura al interior de la factura
-  Future<List<Product>> getInvoiceProductsTemporal(String idInvoice) async {
-    List<Product> productList = <Product>[];
-    var querySnapshot = await this
-        ._db
-        .collection(FirestoreCollections.invoices)
-        .doc(idInvoice)
-        .collection(FirestoreCollections.invoiceFieldProducts)
-        .get();
-
-    final documents = querySnapshot.docs;
-    if (documents.length > 0) {
-      documents.forEach((document) {
-        Product product = Product.fromJsonTemporal(document.data());
-        productList.add(product);
-      });
-    }
-    return productList;
-  }
-
   ///Get last consecutive for location
   Future<int> getLastConsecutiveByLocation(
-      DocumentReference locationReference) async {
+      DocumentReference locationReference, String companyId) async {
     final querySnapshot = await this
         ._db
         .collection(FirestoreCollections.invoices)
@@ -484,28 +454,6 @@ class InvoiceRepository {
       }
     }
     return 0;
-  }
-
-  //TODO esta metodo caducaria cuando el producto se guarde en la misma factura
-  /// Get products per invoice
-  Future<List<Product>> getProductsByIdInvoice(String invoiceId) async {
-    List<Product> productList = <Product>[];
-    final querySnapshot = await this
-        ._db
-        .collection(FirestoreCollections.invoices)
-        .doc(invoiceId)
-        .collection(FirestoreCollections.invoiceFieldProducts)
-        .get();
-
-    final documents = querySnapshot.docs;
-    if (documents.length > 0) {
-      documents.forEach((product) {
-        Product productGet =
-            Product.fromJsonProInvoice(product.data(), id: product.id);
-        productList.add(productGet);
-      });
-    }
-    return productList;
   }
 
   /// Get invoices images
@@ -540,17 +488,17 @@ class InvoiceRepository {
   }
 
   /// Get List Invoices by Placa
-  Future<List<Invoice>> getListInvoicesByVehicle(String vehicleId) async {
+  Future<List<Invoice>> getListInvoicesByVehicle(String plate, String companyId) async {
     try {
       var date = DateTime.now();
-      var newDate = DateTime(date.year, date.month + 2, date.day);
+      var newDate = DateTime(date.year, date.month - 2, date.day);
       List<Invoice> listInvoices = [];
       final querySnapshot = await this
           ._db
           .collection(FirestoreCollections.invoices)
-          .where(FirestoreCollections.invoiceFieldPlaca, isEqualTo: vehicleId)
-          .where(FirestoreCollections.invoiceFieldCreationDate,
-          isLessThanOrEqualTo: newDate)
+          .where(FirestoreCollections.invoiceFieldCompanyId, isEqualTo: companyId)
+          .where(FirestoreCollections.invoiceFieldPlaca, isEqualTo: plate)
+          .where(FirestoreCollections.invoiceFieldCreationDate, isGreaterThanOrEqualTo: newDate)
           .get();
 
       final documents = querySnapshot.docs;
@@ -566,7 +514,7 @@ class InvoiceRepository {
     }
   }
 
-  Future<Configuration> getConfiguration() async {
+  Future<Configuration> getConfiguration(String companyId) async {
     List<Configuration> configList = <Configuration>[];
     final querySnapshot = await this
         ._db
@@ -580,5 +528,112 @@ class InvoiceRepository {
       configList.add(config);
     });
     return configList[0];
+  }
+
+  //TODO metodo para agregar regiones yu municipios, eliminar despues de cargados
+  Future<void> uploadRegions() async {
+    final url = Uri.parse(
+        'https://raw.githubusercontent.com/marcovega/colombia-json/master/colombia.min.json');
+    final res = await http.get(url);
+    final List<dynamic> data = json.decode(res.body);
+
+    for (var dep in data) {
+      final name = dep['departamento'] as String;
+      final ciudades = List<String>.from(dep['ciudades']);
+      final municipalities = ciudades.map((c) => {'name': c}).toList();
+
+      await _db
+          .collection('regions')
+          .doc()
+          .set({
+        'name': name,
+        'municipalities': municipalities,
+        'country': 'Colombia',
+      });
+      print('✅ $name (${name}) agregado con ${municipalities.length} municipios.');
+    }
+  }
+
+  //TODO metodos que actualiza la compania en todas las invoices en batch
+  Future<QuerySnapshot> getAllInvoicesPerBatch(int batchSize, DocumentSnapshot? lastDocument) async {
+    Query querySnapshot = await this
+        ._db
+        .collection(FirestoreCollections.invoices)
+        .limit(batchSize);
+    if (lastDocument != null) {
+      querySnapshot = querySnapshot.startAfterDocument(lastDocument);
+    }
+    return querySnapshot.get();
+  }
+
+  Future<void> getBatchInvoices(List<QueryDocumentSnapshot> docs, String companyId) async {
+    final WriteBatch batch = _db.batch();
+
+    for(final doc in docs) {
+      batch.update(doc.reference, {FirestoreCollections.invoiceFieldCompanyId: companyId});
+    }
+    return batch.commit();
+  }
+
+  ///Metodo para actualizar masivamente el companiId llamando una función en cloud functions enviando el companiId
+  Future<int?> updateBatchInvoicesFunction() async {
+    try {
+      // Llamar a tu función
+      final HttpsCallable callable = _functions.httpsCallable('updateCustomersCompanyId');
+
+      // Pasar datos si es necesario
+      final result = await callable.call({
+        'companyId': 'gtixUTsEImKUuhdSCwKX',
+      }).timeout(Duration(seconds: 540));
+
+      final data = result.data as Map<String, dynamic>;
+
+      if (data['success'] == true) {
+        print('Total de registros analizados: ${data['totalProcessed']}');
+        print('Total de registros actualizados: ${data['totalUpdated']}');
+        print(data['message']);
+        return data['totalUpdated'] as int;
+      } else {
+        throw Exception(data['error'] ?? 'Error desconocido');
+      }
+    } catch (e) {
+      print('Error llamando la función: $e');
+    }
+  }
+
+  //Metodo para obtener el conteo total de invoices e invoices faltantes por companyId desde una funcion en cloud functions
+  Future<int?> getInvoicesCountFunction() async {
+    try {
+      // Llamar a tu función
+      final HttpsCallable callable = _functions.httpsCallable('countDocumentsToUpdate');
+      final HttpsCallableResult result = await callable.call().timeout(Duration(seconds: 540));
+
+      final data = result.data as Map<String, dynamic>;
+
+      if (data['success'] == true) {
+        print('Total de registros analizados: ${data['totalDocuments']}');
+        print('Total de registros por actualizar: ${data['documentsToUpdate']}');
+        print(data['message']);
+        return data['documentsToUpdate'] as int;
+      } else {
+        throw Exception(data['error'] ?? 'Error desconocido');
+      }
+    } catch (e) {
+      print('Error llamando la función: $e');
+    }
+  }
+
+  //Método para obtener el contador de todas las facturas que ya tienen compañia
+  Future<int?> getInvoicesCountPerCompany() async {
+    try {
+      var totalCount = await _db
+        .collection(FirestoreCollections.invoices)
+        .where(FirestoreCollections.invoiceFieldCompanyId, isEqualTo: 'gtixUTsEImKUuhdSCwKX')
+        .count()
+        .get();
+      return totalCount.count;
+    } catch (e) {
+      print('Error llamando la función: $e');
+    }
   }
 }

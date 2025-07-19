@@ -5,11 +5,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class ProductRepository {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  Stream<QuerySnapshot> getListProductsStream() {
+  Stream<QuerySnapshot> getListProductsStream(String companyId) {
     final querySnapshot = this
         ._db
         .collection(FirestoreCollections.products)
-        //.where(FirestoreCollections.locations, arrayContains: )
+        .where(FirestoreCollections.productFieldCompanyId, isEqualTo: companyId)
         .snapshots();
     return querySnapshot;
   }
@@ -23,11 +23,11 @@ class ProductRepository {
     return productList;
   }
 
-  Stream<QuerySnapshot> getListProductsByLocationStream(
-      String idLocation, int uidVehicleType) {
+  Stream<QuerySnapshot> getListProductsByLocationStream(String idLocation, int uidVehicleType, String companyId) {
     final querySnapshot = this
         ._db
         .collection(FirestoreCollections.products)
+        .where(FirestoreCollections.productFieldCompanyId, isEqualTo: companyId)
         .where(FirestoreCollections.locations,
             arrayContains:
                 _db.doc('${FirestoreCollections.locations}/$idLocation'))
@@ -38,8 +38,7 @@ class ProductRepository {
     return querySnapshot;
   }
 
-  List<Product> buildProductsByLocation(
-      List<DocumentSnapshot> productListSnapshot) {
+  List<Product> buildProductsByLocation(List<DocumentSnapshot> productListSnapshot) {
     List<Product> productList = <Product>[];
     productListSnapshot.forEach((p) {
       Product loc = Product.fromJson(p.data() as Map<String, dynamic>, id: p.id);

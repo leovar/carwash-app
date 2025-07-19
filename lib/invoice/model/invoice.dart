@@ -9,6 +9,7 @@ import 'package:meta/meta.dart';
 @immutable
 class Invoice extends Equatable {
   final String? id;
+  final String companyId;
   final double? totalPrice;
   final double? subtotal;
   final double? iva;
@@ -61,6 +62,7 @@ class Invoice extends Equatable {
 
   Invoice({
     this.id,
+    required this.companyId,
     this.totalPrice,
     this.subtotal,
     this.iva,
@@ -156,6 +158,7 @@ class Invoice extends Equatable {
       'washingTime': this.washingTime,
       'countOperators': this.countOperators,
       'totalCommission': this.totalCommission,
+      'companyId': this.companyId,
     };
   }
 
@@ -186,17 +189,22 @@ class Invoice extends Equatable {
     }
 
     var operators = json['operatorUsers']??[];
-    operators?.forEach((item) {
-      SysUser userResult = SysUser.fromJsonOperatorIntoInvoice(item);
-      listOperators.add(userResult);
-      oSplit = oSplit + userResult.name + ', ';
-    });
-    if (oSplit.length > 0) {
-      oSplit = oSplit.substring(0, oSplit.length - 2);
+    if (operators.isNotEmpty) {
+      operators?.forEach((item) {
+        SysUser userResult = SysUser.fromJsonOperatorIntoInvoice(item);
+        listOperators.add(userResult);
+        oSplit = oSplit + userResult.name + ', ';
+      });
+      if (oSplit.length > 0) {
+        oSplit = oSplit.substring(0, oSplit.length - 2);
+      }
     }
+
+    print('vacio');
 
     return Invoice(
       id: id ?? '',
+      companyId: json['companyId'] ?? '',
       totalPrice: json['totalPrice'].toDouble(),
       subtotal: json['subtotal'].toDouble(),
       iva: json['iva'].toDouble(),
@@ -271,9 +279,11 @@ class Invoice extends Equatable {
     int? countOperators,
     double? oppCommission,
     double? totalCommission,
+    String? companyId,
   }) {
     return Invoice(
       id: origin.id,
+      companyId: companyId ?? origin.companyId,
       totalPrice: origin.totalPrice,
       subtotal: origin.subtotal,
       iva: origin.iva,
@@ -328,6 +338,7 @@ class Invoice extends Equatable {
   @override
   List<Object> get props => [
     id ?? '',
+    companyId,
     totalPrice ?? 0,
     subtotal ?? 0,
     iva ?? 0,

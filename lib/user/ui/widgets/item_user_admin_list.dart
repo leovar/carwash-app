@@ -33,6 +33,7 @@ class _ItemUserAdminList extends State<ItemUserAdminList> {
                 bloc: UserBloc(),
                 child: CreateUserAdminPage(
                   currentUser: widget.userList[widget.index],
+                  companyId: widget.userList[widget.index].companyId,
                 ),
               );
             },

@@ -7,6 +7,10 @@ import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 import 'create_payment_method_admin_page.dart';
 
 class PaymentMethodAdminPage extends StatefulWidget{
+  final String companyId;
+
+  PaymentMethodAdminPage({Key? key, required this.companyId});
+
   @override
   State<StatefulWidget> createState() => _PaymentMethodAdminPage();
 }
@@ -59,7 +63,7 @@ class _PaymentMethodAdminPage extends State<PaymentMethodAdminPage> {
 
   Widget _listPaymentMethodsStream() {
     return StreamBuilder(
-      stream: _paymentMethodBloc.allPaymentMethodsStream,
+      stream: _paymentMethodBloc.allPaymentMethodsStream(widget.companyId),
       builder: (context, snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.waiting:
@@ -114,7 +118,7 @@ class _PaymentMethodAdminPage extends State<PaymentMethodAdminPage> {
                 builder: (context) {
                   return BlocProvider(
                     bloc: BlocPaymentMethod(),
-                    child: CreatePaymentMethodAdminPage(),
+                    child: CreatePaymentMethodAdminPage(companyId: widget.companyId,),
                   );
                 },
               ),

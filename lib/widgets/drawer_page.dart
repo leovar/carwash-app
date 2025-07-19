@@ -1,5 +1,6 @@
 import 'package:car_wash_app/commission/bloc/bloc_commission.dart';
 import 'package:car_wash_app/commission/ui/screens/commission_list_admin_page.dart';
+import 'package:car_wash_app/company/ui/screens/company_profile_page.dart';
 import 'package:car_wash_app/location/bloc/bloc_location.dart';
 import 'package:car_wash_app/location/ui/screens/locations_admin_page.dart';
 import 'package:car_wash_app/payment_methods/bloc/bloc_payment_method.dart';
@@ -30,6 +31,7 @@ class _DrawerPage extends State<DrawerPage> {
   String _userEmail = '';
   late SysUser _currentUser;
   bool _showInfoAdministrator = false;
+  late String _companyId;
 
   @override
   void initState() {
@@ -87,7 +89,7 @@ class _DrawerPage extends State<DrawerPage> {
                   ),
                 ),
               ),
-              ListTile(
+              /*ListTile(
                 title: Text(
                   "Inicio",
                   style: TextStyle(
@@ -101,7 +103,7 @@ class _DrawerPage extends State<DrawerPage> {
                   image: AssetImage("assets/images/icon_home.png"),
                   width: 22,
                 ),
-              ),
+              ),*/
               Visibility(
                 visible: _showInfoAdministrator,
                 child: ExpansionTile(
@@ -285,7 +287,7 @@ class _DrawerPage extends State<DrawerPage> {
                               builder: (context) {
                                 return BlocProvider<BlocPaymentMethod>(
                                   bloc: BlocPaymentMethod(),
-                                  child: PaymentMethodAdminPage(),
+                                  child: PaymentMethodAdminPage(companyId: _companyId,),
                                 );
                               },
                             ),
@@ -296,7 +298,7 @@ class _DrawerPage extends State<DrawerPage> {
                   ],
                 ),
               ),
-              ListTile(
+              /*ListTile(
                 title: Text(
                   "Vehículos",
                   style: TextStyle(
@@ -310,7 +312,7 @@ class _DrawerPage extends State<DrawerPage> {
                   image: AssetImage("assets/images/icon_car_admin.png"),
                   width: 25,
                 ),
-              ),
+              ),*/
               Flexible(
                 child: InkWell(
                   child: ListTile(
@@ -339,6 +341,34 @@ class _DrawerPage extends State<DrawerPage> {
                   },
                 ),
               ),
+              Flexible(
+                child: InkWell(
+                  child: ListTile(
+                    title: Text(
+                      "Compañia",
+                      style: TextStyle(
+                        fontFamily: "Lato",
+                        fontWeight: FontWeight.normal,
+                        fontSize: 17,
+                        color: Color(0xFF27AEBB),
+                      ),
+                    ),
+                    leading: Icon(
+                      Icons.add_business_outlined,
+                      color: Color(0xFF59B258),
+                    ),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => CompanyProfilePage(),
+                        ),
+                    );
+                  },
+                ),
+              ),
             ],
           ),
         ),
@@ -355,7 +385,7 @@ class _DrawerPage extends State<DrawerPage> {
                 Flexible(
                   child: Align(
                     alignment: Alignment.bottomCenter,
-                    child: Container(child: Text('Version 1.2.0')),
+                    child: Container(child: Text('Version 1.3.0')),
                   ),
                 ),
                 Flexible(
@@ -383,7 +413,7 @@ class _DrawerPage extends State<DrawerPage> {
                         ),
                         onTap: () {
                           Navigator.pop(context);
-                          _deleteLocationPreference();
+                          _deletePreferences();
                           _logOut();
                         },
                       ),
@@ -405,16 +435,19 @@ class _DrawerPage extends State<DrawerPage> {
       _photoUser = pref.getString(Keys.photoUserUrl) ?? '';
       _userName = pref.getString(Keys.userName) ?? '';
       _userEmail = pref.getString(Keys.userEmail) ?? '';
+      _companyId = pref.getString(Keys.companyId) ?? '';
       _showInfoAdministrator = pref.getBool(Keys.isAdministrator) ?? false;
     });
   }
 
-  Future<void> _deleteLocationPreference() async {
+  Future<void> _deletePreferences() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
     pref.setString(Keys.idLocation, '');
     pref.setString(Keys.locationName, '');
     pref.setString(Keys.locationInitCount, '0');
     pref.setString(Keys.locationFinalCount, '0');
+    pref.setString(Keys.companyId, '');
+    pref.setString(Keys.companyName, '');
   }
 
   Future<void> _logOut() async {

@@ -15,6 +15,7 @@ class ReportsRepository {
       DocumentReference locationReference,
       DateTime dateInit,
       DateTime dateFinal,
+      String companyId,
       ) {
     DateTime dateFinalModify =
     DateTime(dateFinal.year, dateFinal.month, dateFinal.day, 23, 59);
@@ -22,6 +23,7 @@ class ReportsRepository {
     var querySnapshot = this
         ._db
         .collection(FirestoreCollections.invoices)
+        .where(FirestoreCollections.invoiceFieldCompanyId, isEqualTo: companyId)
         .where(FirestoreCollections.invoiceFieldCreationDate,
         isGreaterThanOrEqualTo: Timestamp.fromDate(dateInit))
         .where(FirestoreCollections.invoiceFieldCreationDate,
@@ -35,6 +37,9 @@ class ReportsRepository {
 
   List<Invoice> buildInvoiceListReport(List<DocumentSnapshot> invoicesListSnapshot) {
     List<Invoice> invoicesList = <Invoice>[];
+    if (invoicesListSnapshot.isEmpty) {
+      return invoicesList;
+    }
     invoicesListSnapshot.forEach((p) {
       Invoice invoice = Invoice.fromJson(p.data() as Map<String, dynamic>, id: p.id);
       invoicesList.add(invoice);
@@ -46,6 +51,7 @@ class ReportsRepository {
   Stream<QuerySnapshot> getListEarningsReportStream(
       DateTime dateInit,
       DateTime dateFinal,
+      String companyId
       ) {
     DateTime dateFinalModify =
     DateTime(dateFinal.year, dateFinal.month, dateFinal.day, 23, 59);
@@ -53,6 +59,7 @@ class ReportsRepository {
     var querySnapshot = this
         ._db
         .collection(FirestoreCollections.invoices)
+        .where(FirestoreCollections.invoiceFieldCompanyId, isEqualTo: companyId)
         .where(FirestoreCollections.invoiceFieldCreationDate,
         isGreaterThanOrEqualTo: Timestamp.fromDate(dateInit))
         .where(FirestoreCollections.invoiceFieldCreationDate,
@@ -64,13 +71,14 @@ class ReportsRepository {
   }
 
   ///Get Operator Productivity report
-  Stream<QuerySnapshot> getOperatorInvoicesListCurrentMonth(DocumentReference locationReference) {
+  Stream<QuerySnapshot> getOperatorInvoicesListCurrentMonth(DocumentReference locationReference, String companyId) {
     var _dateTimeInit = DateTime(DateTime.now().year, DateTime.now().month, 1);
     DateTime _dateTimeFinal = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day, 23, 59);
 
     var querySnapshot = this
         ._db
         .collection(FirestoreCollections.invoices)
+        .where(FirestoreCollections.invoiceFieldCompanyId, isEqualTo: companyId)
         .where(FirestoreCollections.invoiceFieldCreationDate,
         isGreaterThanOrEqualTo: Timestamp.fromDate(_dateTimeInit))
         .where(FirestoreCollections.invoiceFieldCreationDate,
@@ -87,6 +95,7 @@ class ReportsRepository {
     final querySnapshot = await this
         ._db
         .collection(FirestoreCollections.invoices)
+        .where(FirestoreCollections.invoiceFieldLocationName, isEqualTo: 'PRUEBAS')
         .get();
 
     final documents = querySnapshot.docs;

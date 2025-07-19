@@ -36,9 +36,10 @@ class _LoginPage extends State<LoginPage> {
   final blocLocation = BlocLocation();
   final _textUser = TextEditingController();
   final _textPassword = TextEditingController();
+  late String _companyId = '';
 
   late List<DropdownMenuItem<Location>> _dropdownMenuItems;
-  Location _selectedLocation = Location();
+  late Location _selectedLocation;
 
   @override
   void initState() {
@@ -73,8 +74,7 @@ class _LoginPage extends State<LoginPage> {
         if (!snapshot.hasData || snapshot.hasError) {
           return loginScreen();
         } else {
-          _selectedLocation = Location();
-          _validateLocationPreferences();
+          _validateCompanyPreferences();
 
           _deleteCacheDir();
           _deleteAppDir();
@@ -368,6 +368,7 @@ class _LoginPage extends State<LoginPage> {
     if (currentUser == null || (currentUser.companyId??'').isEmpty) {
       MessagesUtils.showAlert(context: context, title: 'El usuario no se encuenta creado, comuniquese con el administrador para mas detalles');
     } else {
+      _companyId = currentUser.companyId;
 
       // Select photoUrl
       if ((currentUser.photoUrl ?? '').isNotEmpty)
@@ -447,7 +448,7 @@ class _LoginPage extends State<LoginPage> {
 
   onChangeDropDawn(Location? selectedLocation) {
     setState(() {
-      _selectedLocation = selectedLocation ?? new Location();
+      _selectedLocation = selectedLocation ?? new Location(companyId: _companyId);
     });
   }
 
@@ -530,6 +531,7 @@ class _LoginPage extends State<LoginPage> {
         content: SelectLocationWidget(
           locationSelected: _selectedLocation,
           selectLocation: _callBackSelectLocation,
+          companyId: _companyId,
         ),
         buttons: [
           DialogButton(
@@ -562,6 +564,25 @@ class _LoginPage extends State<LoginPage> {
       Keys.locationFinalCount,
       locationSelected.finalConsec.toString(),
     );
+  }
+
+  void _validateCompanyPreferences() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    String companyId = pref.getString(Keys.companyId) ?? '';
+    _companyId = companyId;
+    if (companyId.isEmpty) {
+      SysUser? userDatabase = await _userBloc.getCurrentUser();
+      if (userDatabase != null) {
+        pref.setString(Keys.companyId, userDatabase.companyId);
+        pref.setString(Keys.companyName, '');
+        _companyId = userDatabase.companyId;
+        _selectedLocation = Location(companyId: _companyId);
+        _validateLocationPreferences();
+      }
+    } else {
+      _selectedLocation = Location(companyId: _companyId);
+      _validateLocationPreferences();
+    }
   }
 
   void _reloadPasswordPressed(String userEmail) {

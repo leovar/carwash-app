@@ -8,8 +8,9 @@ class InvoicesListPage extends StatefulWidget {
 
   final user;
   final locationReference;
+  final companyId;
 
-  InvoicesListPage({Key? key, this.user, this.locationReference});
+  InvoicesListPage({Key? key, required this.companyId, this.user, this.locationReference});
 
   @override
   State<StatefulWidget> createState() => _InvoicesListPage();
@@ -30,7 +31,7 @@ class _InvoicesListPage extends State<InvoicesListPage> {
       body: BlocProvider<BlocInvoice>(
         bloc: BlocInvoice(),
         child: SafeArea(
-          child: FormInvoicesList(locationReference: widget.locationReference,),
+          child: FormInvoicesList(companyId: widget.companyId, locationReference: widget.locationReference,),
         ),
       ),
     );

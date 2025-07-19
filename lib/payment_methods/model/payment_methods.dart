@@ -7,11 +7,13 @@ class PaymentMethod extends Equatable {
   final String? id;
   final String? name;
   final bool? active;
+  final String companyId;
 
   PaymentMethod({
     this.id,
     this.name,
     this.active,
+    required this.companyId,
   });
 
   factory PaymentMethod.fromJson(Map<String, dynamic> json, {String? id}) {
@@ -19,6 +21,7 @@ class PaymentMethod extends Equatable {
       id: id,
       name: json['name'],
       active: json['active'],
+      companyId: json['companyId'],
     );
   }
 
@@ -26,6 +29,7 @@ class PaymentMethod extends Equatable {
     return {
       'name': this.name,
       'active': this.active,
+      'companyId': this.companyId,
     };
   }
 
@@ -34,5 +38,6 @@ class PaymentMethod extends Equatable {
     id ?? '',
     name ?? '',
     active ?? true,
+    companyId ?? '',
   ];
 }

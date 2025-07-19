@@ -4,6 +4,9 @@ import 'package:car_wash_app/product/ui/screens/product_admin_page.dart';
 import 'package:car_wash_app/product/ui/widgets/item_products_admin_list.dart';
 import 'package:flutter/material.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../../widgets/keys.dart';
 
 class ProductListAdminPage extends StatefulWidget {
   @override
@@ -13,33 +16,59 @@ class ProductListAdminPage extends StatefulWidget {
 class _ProductListAdminPage extends State<ProductListAdminPage> {
   late ProductBloc _productBloc;
   List<Product> _productList = <Product>[];
+  String _companyId = '';
 
   @override
   Widget build(BuildContext context) {
     _productBloc = BlocProvider.of(context);
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          iconSize: 30,
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          "Servicios",
-          style: TextStyle(
-            fontFamily: "Lato",
-            decoration: TextDecoration.none,
-            fontWeight: FontWeight.w600,
-            color: Colors.black,
-            fontSize: 24,
+    this._getPreferences();
+    if (_companyId.isEmpty) {
+      return Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            iconSize: 30,
+            onPressed: () => Navigator.pop(context),
           ),
+          title: Text(
+            "Servicios",
+            style: TextStyle(
+              fontFamily: "Lato",
+              decoration: TextDecoration.none,
+              fontWeight: FontWeight.w600,
+              color: Colors.black,
+              fontSize: 24,
+            ),
+          ),
+          backgroundColor: Colors.white,
         ),
-        backgroundColor: Colors.white,
-      ),
-      body: SafeArea(
-        child: _containerBody(),
-      ),
-    );
+        body: Center(child: CircularProgressIndicator()),
+      );
+    } else {
+      return Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            iconSize: 30,
+            onPressed: () => Navigator.pop(context),
+          ),
+          title: Text(
+            "Servicios",
+            style: TextStyle(
+              fontFamily: "Lato",
+              decoration: TextDecoration.none,
+              fontWeight: FontWeight.w600,
+              color: Colors.black,
+              fontSize: 24,
+            ),
+          ),
+          backgroundColor: Colors.white,
+        ),
+        body: SafeArea(
+          child: _containerBody(),
+        ),
+      );
+    }
   }
 
   Widget _containerBody() {
@@ -58,7 +87,7 @@ class _ProductListAdminPage extends State<ProductListAdminPage> {
 
   Widget _listProducts() {
     return StreamBuilder(
-      stream: _productBloc.allProductsStream,
+      stream: _productBloc.allProductsStream(_companyId),
       builder: (context, snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.waiting:
@@ -85,7 +114,7 @@ class _ProductListAdminPage extends State<ProductListAdminPage> {
         scrollDirection: Axis.vertical,
         shrinkWrap: true,
         itemBuilder: (BuildContext context, int index) {
-          return ItemProductAdminList(_selectProductList, _productList, index);
+          return ItemProductAdminList(_selectProductList, _productList, index, _companyId);
         },
       ),
     );
@@ -119,7 +148,7 @@ class _ProductListAdminPage extends State<ProductListAdminPage> {
                 builder: (context) {
                   return BlocProvider(
                     bloc: ProductBloc(),
-                    child: ProductAdminPage(),
+                    child: ProductAdminPage(companyId: _companyId,),
                   );
                 },
               ),
@@ -131,4 +160,13 @@ class _ProductListAdminPage extends State<ProductListAdminPage> {
   }
 
   void _selectProductList(Product selectedProduct) {}
+
+  Future<void> _getPreferences() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    if (_companyId.isEmpty) {
+      setState(() {
+        _companyId = pref.getString(Keys.companyId) ?? '';
+      });
+    }
+  }
 }

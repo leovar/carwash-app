@@ -33,6 +33,7 @@ class _ItemPaymentMethodAdmin extends State<ItemPaymentMethodAdmin> {
                 bloc: BlocPaymentMethod(),
                 child: CreatePaymentMethodAdminPage(
                   currentPaymentMethod: widget.paymentMethodList[widget.index],
+                  companyId: widget.paymentMethodList[widget.index].companyId,
                 ),
               );
             },

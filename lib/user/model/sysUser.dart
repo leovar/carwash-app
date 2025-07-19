@@ -125,8 +125,9 @@ class SysUser extends Equatable {
     String? id,
     required String name,
     double? operatorCommission,
+    required String companyId,
   }) {
-    return SysUser(id: id, name: name, operatorCommission: operatorCommission, uid: '', email: '');
+    return SysUser(id: id, name: name, companyId: companyId , operatorCommission: operatorCommission, uid: '', email: '');
   }
 
   factory SysUser.fromJsonOperatorIntoInvoice(Map<dynamic, dynamic> json) {
@@ -134,6 +135,7 @@ class SysUser extends Equatable {
       id: json['id'],
       name: json['name'],
       operatorCommission: json['operatorCommission'],
+      companyId: '',
       isSelected: true,
       uid: '',
       email: '',
@@ -167,6 +169,6 @@ class SysUser extends Equatable {
     isOperator ?? false,
     isSelected ?? false,
     operatorCommission ?? 0,
-    companyId ?? '',
+    companyId,
   ];
 }

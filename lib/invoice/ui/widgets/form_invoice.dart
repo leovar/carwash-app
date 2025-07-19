@@ -69,8 +69,6 @@ class _FormInvoice extends State<FormInvoice> {
   bool _closedInvoice = false;
 
   ///global variables
-  //Esta variable _scaffoldKey se usa para poder abrir el drawer desde un boton diferente al que se coloca por defecto en el AppBar
-  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey();
   GlobalKey btnAddImage = GlobalKey();
   List<String> imageList = [];
   String _tagSpecialService = 'Especial';
@@ -111,7 +109,7 @@ class _FormInvoice extends State<FormInvoice> {
   List<Product> _listProduct = <Product>[];
   List<AdditionalProduct> _listAdditionalProducts = <AdditionalProduct>[];
   bool _validatePlaca = false;
-  Customer _customer = new Customer();
+  Customer _customer = new Customer(companyId: '');
   DocumentReference _vehicleReference = FirebaseFirestore.instance.collection('vehicles').doc('defaultDocId') ;
   int _countOperators = 0;
   int _listCoordinatorsCount = 0;
@@ -124,10 +122,12 @@ class _FormInvoice extends State<FormInvoice> {
   bool _canceledInvoice = false;
   Configuration _config = Configuration();
   List<SysUser> _listOperators = <SysUser>[];
+  late String _companyId;
 
   @override
   void initState() {
     super.initState();
+    _companyId = '';
     getPreferences();
     _enableForm = false;
     _clientFocusNode = FocusNode();
@@ -181,6 +181,7 @@ class _FormInvoice extends State<FormInvoice> {
     vehicleTypeList[0].isSelected = true;
     vehicleTypeSelected = vehicleTypeList[0];
     if (widget.editInvoice != null) {
+      _companyId = widget.editInvoice?.companyId ?? '';
       _editInvoice(widget.editInvoice);
       _editForm = false;
     }
@@ -355,6 +356,7 @@ class _FormInvoice extends State<FormInvoice> {
                 selectedPaymentMethod: _selectedPaymentMethod,
                 uidVehicleType: vehicleTypeSelected.uid,
                 enableForm: _enableForm,
+                companyId: _companyId,
               ),
               SizedBox(height: 9),
               TextFieldInput(
@@ -386,6 +388,7 @@ class _FormInvoice extends State<FormInvoice> {
                 closedInvoice: _closedInvoice,
                 idLocation: _idLocation,
                 invoice: widget.editInvoice,
+                companyId: _companyId,
               ),
               SizedBox(height: 9),
               FieldsProducts(
@@ -401,6 +404,7 @@ class _FormInvoice extends State<FormInvoice> {
                         _listAdditionalProducts.length,
                 editForm: _editForm,
                 invoice: widget.editInvoice,
+                companyId: _companyId,
               ),
               SizedBox(height: 9),
               Visibility(visible: _editForm, child: _showDraw()),
@@ -895,12 +899,13 @@ class _FormInvoice extends State<FormInvoice> {
         operatorCommission: ((widget.editInvoice?.totalCommission ?? 0) /
                 _selectedOperators.length)
             .ceilToDouble(),
+        companyId: _companyId,
       );
       _operatorsToSave.add(operatorSave);
     });
     _countOperators = _selectedOperators.length;
     Invoice invoice = Invoice.copyWith(
-      origin: widget.editInvoice ?? new Invoice(),
+      origin: widget.editInvoice ?? new Invoice(companyId: _companyId),
       listOperators: _operatorsToSave,
       countOperators: _countOperators,
     );
@@ -940,7 +945,7 @@ class _FormInvoice extends State<FormInvoice> {
   Future<void> _getVehicleInfo (String _placa) async {
     try {
       // Get Vehicle Reference
-      DocumentReference? _vehicleRef = await _blocVehicle.getVehicleReferenceByPlaca(_placa);
+      DocumentReference? _vehicleRef = await _blocVehicle.getVehicleReferenceByPlaca(_placa, _companyId);
       if (_vehicleRef != null) {
         _vehicleReference = _vehicleRef;
 
@@ -1004,15 +1009,16 @@ class _FormInvoice extends State<FormInvoice> {
       _initConsecLocation = pref.getString(Keys.locationInitCount) ?? '';
       _finalConsecLocation = pref.getString(Keys.locationFinalCount) ?? '';
       _idLocation = pref.getString(Keys.idLocation) ?? '';
+      _companyId = pref.getString(Keys.companyId) ?? '';
     });
     _locationReference = await _locationBloc.getLocationReference(_idLocation);
-    _blocInvoice.getConfigurationObject().then((value) => _config = value);
+    _blocInvoice.getConfigurationObject(_companyId).then((value) => _config = value);
   }
 
   // Get last invoices per vehicle
   void _getInvoicesForPlaca(String placa) async {
     try {
-      List<Invoice> listInvoicesByVehicle = await _blocInvoice.getListInvoicesByVehicle(placa) ?? [];
+      List<Invoice> listInvoicesByVehicle = await _blocInvoice.getListInvoicesByVehicle(placa, _companyId) ?? [];
       if (listInvoicesByVehicle.length > 0) {
         final dataList = listInvoicesByVehicle
             .map(
@@ -1153,6 +1159,7 @@ class _FormInvoice extends State<FormInvoice> {
             //_vehicleTypeRef,
             creationDate: Timestamp.now(),
             brandReference: _selectedBrandReference,
+            companyId: _companyId,
           );
           DocumentReference vehicleRef =
           await _blocVehicle.updateVehicle(updateVehicle);
@@ -1174,6 +1181,7 @@ class _FormInvoice extends State<FormInvoice> {
             email: _textEmail.text.trim(),
             creationDate: Timestamp.now(),
             vehicles: listVehicles,
+            companyId: _companyId,
           );
           DocumentReference customerRef =
           await _customerBloc.updateCustomer(customer);
@@ -1293,6 +1301,7 @@ class _FormInvoice extends State<FormInvoice> {
               name: user.name,
               operatorCommission:
                   (_totalCommission / _selectedOperators.length).ceilToDouble(),
+              companyId: _companyId,
             );
             _operatorsToSave.add(operatorSave);
           });
@@ -1309,7 +1318,7 @@ class _FormInvoice extends State<FormInvoice> {
 
         //Get Consecutive
         int _consecutive = await _blocInvoice.getLastConsecutiveByLocation(
-          _locationReference,
+          _locationReference, _companyId,
         );
         if (_consecutive == 0) {
           _consecutive = int.parse(_initConsecLocation);
@@ -1319,6 +1328,7 @@ class _FormInvoice extends State<FormInvoice> {
 
         final _invoice = Invoice(
           id: widget.editInvoice != null ? widget.editInvoice?.id : null,
+          companyId: _companyId,
           consecutive: widget.editInvoice != null
               ? widget.editInvoice?.consecutive
               : _consecutive,
@@ -1491,7 +1501,7 @@ class _FormInvoice extends State<FormInvoice> {
       _canceledInvoice = invoiceToEdit.cancelledInvoice ?? false;
 
       //get vehicle reference
-      DocumentReference? _vehicleRef = await _blocVehicle.getVehicleReferenceByPlaca(invoiceToEdit.placa??'');
+      DocumentReference? _vehicleRef = await _blocVehicle.getVehicleReferenceByPlaca(invoiceToEdit.placa??'', _companyId);
       if (_vehicleRef != null) {
         _vehicleReference = _vehicleRef;
       }
@@ -1552,7 +1562,7 @@ class _FormInvoice extends State<FormInvoice> {
         title: 'Guardando',
       ).show();
       Invoice invoiceCopy = Invoice.copyWith(
-        origin: widget.editInvoice?? new Invoice(),
+        origin: widget.editInvoice?? new Invoice(companyId: _companyId),
         cancelledInvoice: _canceledInvoice,
       );
       _blocInvoice.saveInvoice(invoiceCopy);
@@ -1576,6 +1586,7 @@ class _FormInvoice extends State<FormInvoice> {
           additionalProducts: listAddProducts,
           customerEmail: customerEmail,
           configuration: _config,
+          companyId: _companyId,
         ),
       ),
     );

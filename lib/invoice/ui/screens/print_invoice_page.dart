@@ -41,6 +41,7 @@ class PrintInvoicePage extends StatefulWidget {
   final List<AdditionalProduct> additionalProducts;
   final String customerEmail;
   final Configuration configuration;
+  final String companyId;
 
   PrintInvoicePage({
     Key? key,
@@ -49,6 +50,7 @@ class PrintInvoicePage extends StatefulWidget {
     required this.additionalProducts,
     required this.customerEmail,
     required this.configuration,
+    required this.companyId,
   });
 
   @override
@@ -61,8 +63,8 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
   final _customerBloc = BlocCustomer();
   late Uint8List imageInMemory;
   bool inside = false;
-  Location _location = Location();
-  Customer _customer = Customer();
+  late Location _location;
+  late Customer _customer;
   var formatter = new DateFormat('dd/MM/yyyy hh:mm aaa');
   final numberFormatter = NumberFormat("#,###");
 
@@ -79,6 +81,8 @@ class _PrintInvoicePage extends State<PrintInvoicePage> {
   @override
   void initState() {
     super.initState();
+    _location = new Location(companyId: widget.companyId);
+    _customer = new Customer(companyId: widget.companyId);
     _getPreferences();
     _getCustomer(widget.currentInvoice?.customer?.id??'');
     _requestPermissions();

@@ -14,6 +14,7 @@ class FilterFieldsWidget extends StatefulWidget {
   final SysUser operatorSelected;
   final String productTypeSelected;
   final PaymentMethod paymentMethodSelected;
+  final String companyId;
   final Function(SysUser) selectOperator;
   final Function(DateTime) selectDateInit;
   final Function(DateTime) selectDateFinal;
@@ -29,6 +30,7 @@ class FilterFieldsWidget extends StatefulWidget {
     required this.operatorSelected,
     required this.productTypeSelected,
     required this.paymentMethodSelected,
+    required this.companyId,
     required this.selectOperator,
     required this.selectDateInit,
     required this.selectDateFinal,
@@ -49,7 +51,7 @@ class _FilterFieldsWidget extends State<FilterFieldsWidget> {
   late List<DropdownMenuItem<PaymentMethod>> _dropdownMenuItemsPayments;
   late List<DropdownMenuItem<String>> _dropdownMenuItemsProductTypes;
   List<String> _productsTypeList = [];
-  SysUser _selectedOperator = new SysUser(uid: '', name: '', email: '');
+  late SysUser _selectedOperator;
   late DateTime _dateTimeInit;
   late DateTime _dateTimeFinal;
   late String _selectProductType;
@@ -71,6 +73,9 @@ class _FilterFieldsWidget extends State<FilterFieldsWidget> {
     _selectedPaymentMethod = widget.paymentMethodSelected;
     if (widget.operatorSelected.id != null) {
       _selectedOperator = widget.operatorSelected;
+    } else {
+      _selectedOperator = new SysUser(
+          uid: '', name: '', email: '', companyId: widget.companyId);
     }
   }
 
@@ -140,7 +145,7 @@ class _FilterFieldsWidget extends State<FilterFieldsWidget> {
 
   Widget _getOperators() {
     return StreamBuilder(
-      stream: _blocInvoice.operatorsStream(),
+      stream: _blocInvoice.operatorsStream(widget.companyId),
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.waiting:
@@ -153,8 +158,11 @@ class _FilterFieldsWidget extends State<FilterFieldsWidget> {
   }
 
   Widget _showOperators(AsyncSnapshot snapshot) {
-    List<SysUser> operators = _blocInvoice.buildOperators(snapshot.data.docs);
-    operators.sort((a,b) => a.name.compareTo(b.name));
+    List<SysUser> operators = [];
+    if (snapshot.hasData && snapshot.data.docs.isNotEmpty) {
+      operators = _blocInvoice.buildOperators(snapshot.data.docs);
+      operators.sort((a, b) => a.name.compareTo(b.name));
+    }
 
     _dropdownMenuItems = _builtDropdownMenuItems(operators);
     return DropdownButton(
@@ -171,13 +179,14 @@ class _FilterFieldsWidget extends State<FilterFieldsWidget> {
         fontWeight: FontWeight.normal,
         color: Theme.of(context).cardColor,
       ),
-      underline: Container(height: 1, color: Theme.of(context).textSelectionTheme.cursorColor),
+      underline: Container(
+          height: 1, color: Theme.of(context).textSelectionTheme.cursorColor),
     );
   }
 
   Widget _getPaymentMethods() {
     return StreamBuilder(
-      stream: _paymentMethodBloc.paymentMethodsStream(),
+      stream: _paymentMethodBloc.paymentMethodsStream(widget.companyId),
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.waiting:
@@ -194,12 +203,17 @@ class _FilterFieldsWidget extends State<FilterFieldsWidget> {
       id: '0',
       name: 'Seleccione el método de pago...',
       active: true,
+      companyId: widget.companyId,
     );
-    List<PaymentMethod> paymentMethods = _paymentMethodBloc.buildPaymentMethods(
-      snapshot.data.docs,
-    );
+    List<PaymentMethod> paymentMethods = [];
+    if (snapshot.hasData && snapshot.data.docs.isNotEmpty) {
+      paymentMethods = _paymentMethodBloc.buildPaymentMethods(
+        snapshot.data.docs,
+      );
+    }
     paymentMethods.add(paymentMethodSelectionEmpty);
-    if (_selectedPaymentMethod.name!.isEmpty) {
+    if (_selectedPaymentMethod.name == null ||
+        _selectedPaymentMethod.name!.isEmpty) {
       _selectedPaymentMethod = paymentMethodSelectionEmpty;
     }
     _dropdownMenuItemsPayments = _builtDropdownMenuItemsPaymentMethods(
@@ -219,7 +233,8 @@ class _FilterFieldsWidget extends State<FilterFieldsWidget> {
         fontWeight: FontWeight.normal,
         color: Theme.of(context).cardColor,
       ),
-      underline: Container(height: 1, color: Theme.of(context).textSelectionTheme.cursorColor),
+      underline: Container(
+          height: 1, color: Theme.of(context).textSelectionTheme.cursorColor),
     );
   }
 
@@ -242,7 +257,8 @@ class _FilterFieldsWidget extends State<FilterFieldsWidget> {
         fontWeight: FontWeight.normal,
         color: Theme.of(context).cardColor,
       ),
-      underline: Container(height: 1, color: Theme.of(context).textSelectionTheme.cursorColor),
+      underline: Container(
+          height: 1, color: Theme.of(context).textSelectionTheme.cursorColor),
     );
   }
 
@@ -252,7 +268,8 @@ class _FilterFieldsWidget extends State<FilterFieldsWidget> {
     setState(() {
       if (selectedOperator != null) {
         if (selectedOperator.uid == '0') {
-          widget.selectOperator(SysUser(name: '', uid: '', email: ''));
+          widget.selectOperator(SysUser(
+              name: '', uid: '', email: '', companyId: widget.companyId));
         } else {
           widget.selectOperator(selectedOperator);
         }
@@ -263,12 +280,13 @@ class _FilterFieldsWidget extends State<FilterFieldsWidget> {
 
   List<DropdownMenuItem<SysUser>> _builtDropdownMenuItems(List users) {
     List<DropdownMenuItem<SysUser>> listItems = [];
-    SysUser emptyUser = SysUser(uid: '', name: '', email: '');
+    SysUser emptyUser =
+        SysUser(uid: '', name: '', email: '', companyId: widget.companyId);
     if (_selectedOperator.id == null) {
       listItems.add(
         DropdownMenuItem(
-            value: _selectedOperator,
-            child: Text('Seleccione el Operador...'),
+          value: _selectedOperator,
+          child: Text('Seleccione el Operador...'),
         ),
       );
     } else {
@@ -291,7 +309,8 @@ class _FilterFieldsWidget extends State<FilterFieldsWidget> {
     setState(() {
       if (selectedPaymentMethod != null) {
         if (selectedPaymentMethod.id == '0') {
-          widget.selectPaymentMethod(PaymentMethod(name: '', id: ''));
+          widget.selectPaymentMethod(
+              PaymentMethod(name: '', id: '', companyId: widget.companyId));
         } else {
           widget.selectPaymentMethod(selectedPaymentMethod);
         }
@@ -306,7 +325,8 @@ class _FilterFieldsWidget extends State<FilterFieldsWidget> {
     List<DropdownMenuItem<PaymentMethod>> listItems = [];
     for (PaymentMethod documentLoc in paymentMethods) {
       listItems.add(
-        DropdownMenuItem(value: documentLoc, child: Text(documentLoc.name??'')),
+        DropdownMenuItem(
+            value: documentLoc, child: Text(documentLoc.name ?? '')),
       );
     }
     return listItems;
@@ -314,8 +334,8 @@ class _FilterFieldsWidget extends State<FilterFieldsWidget> {
 
   onChangeDropDawnProductTypes(String? selectedProductType) {
     setState(() {
-      widget.selectProductType(selectedProductType??'');
-      _selectProductType = selectedProductType??'';
+      widget.selectProductType(selectedProductType ?? '');
+      _selectProductType = selectedProductType ?? '';
     });
   }
 

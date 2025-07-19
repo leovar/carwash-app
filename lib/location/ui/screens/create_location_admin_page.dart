@@ -8,9 +8,10 @@ import 'package:flutter/services.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 
 class CreateLocationAdminPage extends StatefulWidget {
+  final String companyId;
   final Location? currentLocation;
 
-  CreateLocationAdminPage({Key? key, this.currentLocation});
+  CreateLocationAdminPage({Key? key, required this.companyId, this.currentLocation});
 
   @override
   State<StatefulWidget> createState() => _CreateLocationAdminPage();
@@ -49,7 +50,7 @@ class _CreateLocationAdminPage extends State<CreateLocationAdminPage> {
   @override
   void initState() {
     super.initState();
-    _locationSelected = widget.currentLocation?? new Location();
+    _locationSelected = widget.currentLocation?? new Location(companyId: widget.companyId);
     _selectLocationList();
     }
 
@@ -476,6 +477,7 @@ class _CreateLocationAdminPage extends State<CreateLocationAdminPage> {
         regimen: _textRegimen.text.trim(),
         activeCells: _locationSelected != null ? minActiveCells : 0,
         totalCells: int.tryParse(_textTotalCells.text.trim()) ?? 0,
+        companyId: widget.companyId,
       );
 
       _blocLocation.updateLocationData(location);

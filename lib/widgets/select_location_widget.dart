@@ -6,8 +6,9 @@ import 'package:flutter/material.dart';
 class SelectLocationWidget extends StatefulWidget {
   final Function(Location) selectLocation;
   final Location locationSelected;
+  final String companyId;
 
-  SelectLocationWidget({Key? key, required this.locationSelected, required this.selectLocation});
+  SelectLocationWidget({Key? key, required this.locationSelected, required this.selectLocation, required this.companyId});
 
   @override
   State<StatefulWidget> createState() => _SelectLocationWidget();
@@ -17,11 +18,13 @@ class _SelectLocationWidget extends State<SelectLocationWidget> {
   BlocLocation _blocLocation = BlocLocation();
   late List<DropdownMenuItem<Location>> _dropdownMenuItems;
   late Location _selectedLocation;
+  late String _companyId;
 
   @override
   void initState() {
     super.initState();
     _selectedLocation = widget.locationSelected;
+    _companyId = widget.companyId;
   }
 
   @override
@@ -35,7 +38,7 @@ class _SelectLocationWidget extends State<SelectLocationWidget> {
 
   Widget _getLocationsList() {
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-      stream: _blocLocation.locationsStream,
+      stream: _blocLocation.locationsListStream(_companyId),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return CircularProgressIndicator(); // Show loading indicator
@@ -113,8 +116,8 @@ class _SelectLocationWidget extends State<SelectLocationWidget> {
 
   onChangeDropDawn(Location? selectedLocation) {
     setState(() {
-      widget.selectLocation(selectedLocation ?? new Location());
-      _selectedLocation = selectedLocation ?? new Location();
+      widget.selectLocation(selectedLocation ?? new Location(companyId: _companyId));
+      _selectedLocation = selectedLocation ?? new Location(companyId: _companyId);
     });
   }
 }

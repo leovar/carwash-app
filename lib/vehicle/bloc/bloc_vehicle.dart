@@ -10,8 +10,8 @@ class BlocVehicle extends Bloc {
     return await _vehicleRepository.getVehicleByPlaca(placa);
   }
 
-  Future<DocumentReference?> getVehicleReferenceByPlaca(String placa) async {
-    return await _vehicleRepository.getVehicleReferenceByPlaca(placa);
+  Future<DocumentReference?> getVehicleReferenceByPlaca(String placa, String companyId) async {
+    return await _vehicleRepository.getVehicleReferenceByPlaca(placa, companyId);
   }
 
   Future<DocumentReference> updateVehicle(Vehicle vehicle) async {
@@ -20,6 +20,15 @@ class BlocVehicle extends Bloc {
 
   Future<Vehicle> getVehicleById(String idVehicle) async {
     return await _vehicleRepository.getVehicleById(idVehicle);
+  }
+
+  //TODO metodos para actualzación de companyId en todos los vehículos por batch
+  Future<QuerySnapshot> getAllVehicles(int batchSize, DocumentSnapshot? doc) async {
+    return _vehicleRepository.getBatchVehicles(batchSize, doc);
+  }
+
+  Future<void> updateVehiclesBatch(List<QueryDocumentSnapshot> docs, String companyId) async {
+    _vehicleRepository.updateBatch(docs, companyId);
   }
 
   @override

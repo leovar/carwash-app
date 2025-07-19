@@ -19,8 +19,9 @@ import '../widgets/fiels_menu_product.dart';
 class ProductAdminPage extends StatefulWidget {
 
   final Product? currentProduct;
+  final String companyId;
 
-  ProductAdminPage({Key? key, this.currentProduct});
+  ProductAdminPage({Key? key, required this.companyId, this.currentProduct});
 
   @override
   State<StatefulWidget> createState() => _ProductAdminPage();
@@ -252,7 +253,7 @@ class _ProductAdminPage extends State<ProductAdminPage> {
 
   Widget _locationsToSelect() {
     return StreamBuilder(
-      stream: _blocLocation.locationsListStream,
+      stream: _blocLocation.locationsListStream(widget.companyId),
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.waiting:
@@ -530,6 +531,7 @@ class _ProductAdminPage extends State<ProductAdminPage> {
           vehicleTypeUid: _selectedVehicleType.uid,
           productType: _productTypeSimple ? 'Sencillo' : 'Especial',
           serviceTime: int.tryParse(_textServiceTime.text.trim()) ?? 0,
+          companyId: widget.companyId,
       );
 
       _productBloc.updateProduct(product);

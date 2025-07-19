@@ -27,6 +27,7 @@ class FieldsMenusInvoice extends StatefulWidget {
   final String selectedPaymentMethod;
   final int uidVehicleType;
   final bool enableForm;
+  final String companyId;
 
   FieldsMenusInvoice({
     Key? key,
@@ -50,6 +51,7 @@ class FieldsMenusInvoice extends StatefulWidget {
     required this.selectedPaymentMethod,
     required this.uidVehicleType,
     required this.enableForm,
+    required this.companyId,
   });
 
   @override
@@ -114,7 +116,7 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
       children: <Widget>[
         _chargeListTypeSex(),
         SizedBox(height: 12),
-        _chargeListBrands(), //_getBrandsStream(),  //se comenta por que se carga todas las referencias
+        _chargeListBrands(),
         SizedBox(height: 12),
         _chargeListBrandReferences(),
         SizedBox(height: 12),
@@ -134,7 +136,7 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
       }
 
       return StreamBuilder(
-        stream: _blocInvoice.coordinatorsByLocationStream(widget.idLocation),
+        stream: _blocInvoice.coordinatorsByLocationStream(widget.idLocation, widget.companyId),
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           switch (snapshot.connectionState) {
             case ConnectionState.waiting:
@@ -283,7 +285,7 @@ class _FieldsMenusInvoice extends State<FieldsMenusInvoice> {
   Widget _getPaymentMethods() {
     if (widget.listCountPaymentMethods == 0) {
       return StreamBuilder(
-        stream: _paymentMethodBloc.paymentMethodsStream(),
+        stream: _paymentMethodBloc.paymentMethodsStream(widget.companyId),
         builder: (context, snapshot) {
           switch (snapshot.connectionState) {
             case ConnectionState.waiting:

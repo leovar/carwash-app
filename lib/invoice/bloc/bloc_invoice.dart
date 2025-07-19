@@ -63,16 +63,22 @@ class BlocInvoice implements Bloc {
     }
   }
 
+  ///TODO metodo unicamente usado para actualziar la compania en las facturas, no guarda ni actualzia imagenes, se debe eliminar cuando se actualicen las companias en las facturas
+  Future<DocumentReference> updateCompanyInvoice(Invoice invoice) async {
+    DocumentReference ref = await _invoiceRepository.updateInvoiceData(invoice);
+    return ref;
+  }
+
   Future<DocumentReference> getVehicleTypeReference(String vehicleType) {
     return _invoiceRepository.getVehicleTypeReference(vehicleType);
   }
 
   /// Operators
-  Stream<QuerySnapshot> operatorsStream() =>
-      _invoiceRepository.getListOperatorsStream();
+  Stream<QuerySnapshot> operatorsStream(String companyId) =>
+      _invoiceRepository.getListOperatorsStream(companyId);
 
-  Stream<QuerySnapshot> operatorsByLocationStream(String idLocation) =>
-      _invoiceRepository.getListOperatorsByLocationStream(idLocation);
+  Stream<QuerySnapshot> operatorsByLocationStream(String idLocation, String companyId) =>
+      _invoiceRepository.getListOperatorsByLocationStream(idLocation, companyId);
 
   List<SysUser> buildOperators(List<DocumentSnapshot> operatorsListSnapshot) =>
       _invoiceRepository.buildOperators(operatorsListSnapshot);
@@ -85,8 +91,8 @@ class BlocInvoice implements Bloc {
   Stream<QuerySnapshot> coordinatorsStream() =>
       _invoiceRepository.getListCoordinatorStream();
 
-  Stream<QuerySnapshot> coordinatorsByLocationStream(String idLocation) =>
-      _invoiceRepository.getListCoordinatorByLocationStream(idLocation);
+  Stream<QuerySnapshot> coordinatorsByLocationStream(String idLocation, String companyId) =>
+      _invoiceRepository.getListCoordinatorByLocationStream(idLocation, companyId);
 
   List<SysUser> buildCoordinators(
           List<DocumentSnapshot> coordinatorListSnapshot) =>
@@ -158,6 +164,7 @@ class BlocInvoice implements Bloc {
     String consecutive,
     String productTypeSelected,
     String paymentMethod,
+    String companyId,
   ) {
     return _invoiceRepository.getListInvoicesByMonthStream(
       locationReference,
@@ -166,7 +173,8 @@ class BlocInvoice implements Bloc {
       placa,
       consecutive,
       productTypeSelected,
-      paymentMethod
+      paymentMethod,
+      companyId,
     );
   }
 
@@ -176,46 +184,38 @@ class BlocInvoice implements Bloc {
   }
 
   /// Get invoices pending for Washing
-  Stream<QuerySnapshot> invoicesListPendingWashingStream(DocumentReference? locationReference) {
-    return _invoiceRepository.getInvoicesListPendingWashingStream(locationReference);
+  Stream<QuerySnapshot> invoicesListPendingWashingStream(DocumentReference? locationReference, String companyId) {
+    return _invoiceRepository.getInvoicesListPendingWashingStream(locationReference, companyId);
   }
 
   List<Invoice> buildInvoicesListPendingWashing(List<DocumentSnapshot> invoicesListSnapshot) {
     return _invoiceRepository.buildInvoicesListFromSnapshot(invoicesListSnapshot);
   }
 
-  Future<List<Invoice>> getListPendingWashList(DocumentReference? locationReference) async {
-    return await _invoiceRepository.getInvoicesListPendingWashing(locationReference);
+  Future<List<Invoice>> getListPendingWashList(DocumentReference? locationReference, String companyId) async {
+    return await _invoiceRepository.getInvoicesListPendingWashing(locationReference, companyId);
   }
 
   /// Get invoices current Wash
-  Stream<QuerySnapshot> invoicesListWashingStream(DocumentReference? locationReference) {
-    return _invoiceRepository.getInvoicesListWashingStream(locationReference);
+  Stream<QuerySnapshot> invoicesListWashingStream(DocumentReference? locationReference, String companyId) {
+    return _invoiceRepository.getInvoicesListWashingStream(locationReference, companyId);
   }
 
   List<Invoice> buildInvoicesListWashing(List<DocumentSnapshot> invoicesListSnapshot) {
     return _invoiceRepository.buildInvoicesListFromSnapshot(invoicesListSnapshot);
   }
 
-  Future<List<Invoice>> invoicesWashingList(DocumentReference? locationReference) async {
-    return await _invoiceRepository.getInvoicesWashingList(locationReference);
+  Future<List<Invoice>> invoicesWashingList(DocumentReference? locationReference, String companyId) async {
+    return await _invoiceRepository.getInvoicesWashingList(locationReference, companyId);
   }
 
-  /// Get invoices list for placa
-  Future<List<Invoice>> getListInvoicesByVehicle(String vehicleId) async {
-    return await _invoiceRepository.getListInvoicesByVehicle(vehicleId);
+  /// Get invoices list for placa in the last 2 months
+  Future<List<Invoice>> getListInvoicesByVehicle(String plate, String companyId) async {
+    return await _invoiceRepository.getListInvoicesByVehicle(plate, companyId);
   }
 
-  Future<List<Product>> getInvoiceProducts(String idInvoice) =>
-      _invoiceRepository.getInvoiceProducts(idInvoice);
-
-  Future<int> getLastConsecutiveByLocation(
-          DocumentReference locationReference) =>
-      _invoiceRepository.getLastConsecutiveByLocation(locationReference);
-
-  Future<List<Product>> getProductsByInvoice(String invoiceId) {
-    return _invoiceRepository.getProductsByIdInvoice(invoiceId);
-  }
+  Future<int> getLastConsecutiveByLocation(DocumentReference locationReference, String companyId) =>
+      _invoiceRepository.getLastConsecutiveByLocation(locationReference, companyId);
 
   Future<List<String>> getInvoiceImages(String invoiceId) {
     return _invoiceRepository.getImagesByIdInvoice(invoiceId);
@@ -225,8 +225,23 @@ class BlocInvoice implements Bloc {
     return _invoiceRepository.getInvoiceByIdInvoice(invoiceId);
   }
 
-  Future<Configuration> getConfigurationObject() {
-    return _invoiceRepository.getConfiguration();
+  Future<Configuration> getConfigurationObject(String companyId) {
+    return _invoiceRepository.getConfiguration(companyId);
+  }
+
+  Future<QuerySnapshot> getAllInvoicesBatch(int batchSize, DocumentSnapshot? doc) async {
+    return _invoiceRepository.getAllInvoicesPerBatch(batchSize, doc);
+  }
+
+  Future<void> updateInvoicesBatch(List<QueryDocumentSnapshot> docs, String companyId) async {
+    _invoiceRepository.getBatchInvoices(docs, companyId);
+  }
+
+  Future<int?> getInvoicesTotalCount() async {
+    return _invoiceRepository.getInvoicesCountFunction();
+    //return _invoiceRepository.updateBatchInvoicesFunction();
+    //_invoiceRepository.uploadRegions();
+    //return 0;
   }
 
   @override

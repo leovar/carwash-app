@@ -3,7 +3,9 @@ import 'package:car_wash_app/location/model/location.dart';
 import 'package:car_wash_app/location/ui/widgets/item_location_admin_list.dart';
 import 'package:flutter/material.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../widgets/keys.dart';
 import 'create_location_admin_page.dart';
 
 class LocationsAdminPage extends StatefulWidget{
@@ -14,33 +16,59 @@ class LocationsAdminPage extends StatefulWidget{
 class _LocationsAdminPage extends State<LocationsAdminPage> {
   late BlocLocation _locationsBloc;
   List<Location> _locationList = <Location>[];
+  String _companyId = '';
 
   @override
   Widget build(BuildContext context) {
     _locationsBloc = BlocProvider.of(context);
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          iconSize: 30,
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          "Sedes",
-          style: TextStyle(
-            fontFamily: "Lato",
-            decoration: TextDecoration.none,
-            fontWeight: FontWeight.w600,
-            color: Colors.black,
-            fontSize: 24,
+    this._getPreferences();
+    if (_companyId.isEmpty) {
+      return Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            iconSize: 30,
+            onPressed: () => Navigator.pop(context),
           ),
+          title: Text(
+            "Sedes",
+            style: TextStyle(
+              fontFamily: "Lato",
+              decoration: TextDecoration.none,
+              fontWeight: FontWeight.w600,
+              color: Colors.black,
+              fontSize: 24,
+            ),
+          ),
+          backgroundColor: Colors.white,
         ),
-        backgroundColor: Colors.white,
-      ),
-      body: SafeArea(
-        child: _bodyContainer(),
-      ),
-    );
+        body: Center(child: CircularProgressIndicator()),
+      );
+    } else {
+      return Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            iconSize: 30,
+            onPressed: () => Navigator.pop(context),
+          ),
+          title: Text(
+            "Sedes",
+            style: TextStyle(
+              fontFamily: "Lato",
+              decoration: TextDecoration.none,
+              fontWeight: FontWeight.w600,
+              color: Colors.black,
+              fontSize: 24,
+            ),
+          ),
+          backgroundColor: Colors.white,
+        ),
+        body: SafeArea(
+          child: _bodyContainer(),
+        ),
+      );
+    }
   }
 
   Widget _bodyContainer() {
@@ -59,7 +87,7 @@ class _LocationsAdminPage extends State<LocationsAdminPage> {
 
   Widget _listLocationsStream() {
     return StreamBuilder(
-      stream: _locationsBloc.allLocationsStream,
+      stream: _locationsBloc.allLocationsStream(_companyId),
       builder: (context, snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.waiting:
@@ -72,7 +100,7 @@ class _LocationsAdminPage extends State<LocationsAdminPage> {
   }
 
   Widget _getDataLocationsList(AsyncSnapshot snapshot) {
-    _locationList = _locationsBloc.buildAllLocations(snapshot.data.docs);
+    _locationList = _locationsBloc.buildLocations(snapshot.data.docs);
     return Flexible(
       child: ListView.builder(
         itemCount: _locationList.length,
@@ -113,7 +141,7 @@ class _LocationsAdminPage extends State<LocationsAdminPage> {
                 builder: (context) {
                   return BlocProvider(
                     bloc: BlocLocation(),
-                    child: CreateLocationAdminPage(),
+                    child: CreateLocationAdminPage(companyId: _companyId),
                   );
                 },
               ),
@@ -122,5 +150,14 @@ class _LocationsAdminPage extends State<LocationsAdminPage> {
         ),
       ),
     );
+  }
+
+  Future<void> _getPreferences() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    if (_companyId.isEmpty) {
+      setState(() {
+        _companyId = pref.getString(Keys.companyId) ?? '';
+      });
+    }
   }
 }

@@ -33,6 +33,7 @@ class _ItemLocationAdminList extends State<ItemLocationAdminList> {
                 bloc: BlocLocation(),
                 child: CreateLocationAdminPage(
                   currentLocation: widget.locationList[widget.index],
+                  companyId: widget.locationList[widget.index].companyId,
                 ),
               );
             },

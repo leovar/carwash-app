@@ -88,10 +88,13 @@ class _FieldsInvoice extends State<FieldsInvoice> {
         TextFieldInput(
           labelText: "Telefono",
           textController: widget.textPhoneNumber,
-          inputType: TextInputType.number,
+          inputType:  TextInputType.number,
           enable: widget.enableForm,
           autofocus: false,
           maxLength: 10,
+          textInputFormatter: [
+            FilteringTextInputFormatter.allow(RegExp("^[0-9.]*")),
+          ],
         ),
         SizedBox(height: 9),
         TextFieldInput(

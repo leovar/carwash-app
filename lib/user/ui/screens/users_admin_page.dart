@@ -1,3 +1,5 @@
+import 'package:car_wash_app/company/bloc/bloc_company.dart';
+import 'package:car_wash_app/company/model/company.dart';
 import 'package:car_wash_app/user/bloc/bloc_user.dart';
 import 'package:car_wash_app/user/model/sysUser.dart';
 import 'package:car_wash_app/user/ui/screens/create_user_admin_page.dart';
@@ -5,6 +7,9 @@ import 'package:car_wash_app/user/ui/widgets/item_user_admin_list.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../../widgets/keys.dart';
 
 class UsersAdminPage extends StatefulWidget {
   @override
@@ -14,8 +19,11 @@ class UsersAdminPage extends StatefulWidget {
 class _UsersAdminPage extends State<UsersAdminPage>
     with SingleTickerProviderStateMixin {
   late UserBloc _userBloc;
+  BlocCompany _blocCompany = BlocCompany();
   late TabController _tabController;
   List<SysUser> _userList = <SysUser>[];
+  String _companyId = '';
+  late Company _companyInfo;
 
   @override
   void initState() {
@@ -32,6 +40,30 @@ class _UsersAdminPage extends State<UsersAdminPage>
   @override
   Widget build(BuildContext context) {
     _userBloc = BlocProvider.of(context);
+    this._getPreferences();
+    if (_companyId.isEmpty) {
+      return Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            iconSize: 30,
+            onPressed: () => Navigator.pop(context),
+          ),
+          title: Text(
+            "Usuarios",
+            style: TextStyle(
+              fontFamily: "Lato",
+              decoration: TextDecoration.none,
+              fontWeight: FontWeight.w600,
+              color: Colors.black,
+              fontSize: 24,
+            ),
+          ),
+          backgroundColor: Colors.white,
+        ),
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -59,7 +91,7 @@ class _UsersAdminPage extends State<UsersAdminPage>
 
   Widget _bodyContainer() {
     return StreamBuilder(
-      stream: _userBloc.allUsersStream,
+      stream: _userBloc.allUsersStream(_companyId),
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return CircularProgressIndicator();
@@ -77,8 +109,10 @@ class _UsersAdminPage extends State<UsersAdminPage>
 
   Widget _listUsersContainer(AsyncSnapshot snapshot) {
     _userList = _userBloc.buildAllUsers(snapshot.data.docs);
-    List<SysUser> _activeUsers = _userList.where((x) => x.active == true).toList();
-    List<SysUser> _inactiveUsers = _userList.where((x) => x.active == false).toList();
+    List<SysUser> _activeUsers =
+        _userList.where((x) => x.active == true).toList();
+    List<SysUser> _inactiveUsers =
+        _userList.where((x) => x.active == false).toList();
     return Container(
       padding: EdgeInsets.only(bottom: 17),
       color: Colors.white,
@@ -119,7 +153,7 @@ class _UsersAdminPage extends State<UsersAdminPage>
 
   Widget _listUsersStream() {
     return StreamBuilder(
-      stream: _userBloc.allUsersStream,
+      stream: _userBloc.allUsersStream(_companyId),
       builder: (context, snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.waiting:
@@ -133,7 +167,8 @@ class _UsersAdminPage extends State<UsersAdminPage>
 
   Widget _getDataUsersList(AsyncSnapshot snapshot) {
     _userList = _userBloc.buildAllUsers(snapshot.data.docs);
-    List<SysUser> _activeUsers = _userList.where((x) => x.active == true).toList();
+    List<SysUser> _activeUsers =
+        _userList.where((x) => x.active == true).toList();
     List<SysUser> _inactiveUsers =
         _userList.where((x) => x.active == false).toList();
     return Column(
@@ -220,13 +255,30 @@ class _UsersAdminPage extends State<UsersAdminPage>
     );
   }
 
+  Future<void> _getPreferences() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    if (_companyId.isEmpty) {
+      setState(() {
+        _companyId = pref.getString(Keys.companyId) ?? '';
+        _getCompanyInformation(_companyId);
+      });
+    }
+  }
+
+  void _getCompanyInformation(String companyId) async {
+    _companyInfo = await _blocCompany.getCompanyInformation(companyId);
+  }
+
   void _updateCompanyUsers() async {
     _userList.forEach((item) async {
       if (item.companyId == null) {
-        SysUser newUser = SysUser.copyWith(origin: item, companyId: 'gtixUTsEImKUuhdSCwKX');
+        SysUser newUser =
+            SysUser.copyWith(origin: item, companyId: 'gtixUTsEImKUuhdSCwKX');
         await _userBloc.updateUserCompany(newUser);
       }
     });
-    Fluttertoast.showToast(msg: "Usuario actualizados con la compania gtixUTsEImKUuhdSCwKX", toastLength: Toast.LENGTH_LONG);
+    Fluttertoast.showToast(
+        msg: "Usuario actualizados con la compania gtixUTsEImKUuhdSCwKX",
+        toastLength: Toast.LENGTH_LONG);
   }
 }

@@ -25,10 +25,11 @@ class VehicleRepository {
     return null;
   }
 
-  Future<DocumentReference?> getVehicleReferenceByPlaca(String placa) async {
+  Future<DocumentReference?> getVehicleReferenceByPlaca(String placa, String companyId) async {
     final querySnapshot = await this
         ._db
         .collection(FirestoreCollections.vehicles)
+        .where(FirestoreCollections.vehiclesFieldCompanyId, isEqualTo: companyId)
         .where(FirestoreCollections.vehiclesFieldPlaca, isEqualTo: placa)
         .get();
 
@@ -56,5 +57,26 @@ class VehicleRepository {
         _db.collection(FirestoreCollections.vehicles).doc(vehicle.id);
     ref.set(vehicle.toJson(), SetOptions(merge: true));
     return ref;
+  }
+
+  //TODO estos 2 metodos siguientes actualizan en batch la compania en los vehículos, se pueden eliminar una vez actualizadas las companias en los vehiculos.
+  Future<QuerySnapshot> getBatchVehicles(int batchSize, DocumentSnapshot? lastDocument) async {
+    Query querySnapshot = await this
+        ._db
+        .collection(FirestoreCollections.vehicles)
+        .limit(batchSize);
+    if (lastDocument != null) {
+      querySnapshot = querySnapshot.startAfterDocument(lastDocument);
+    }
+    return querySnapshot.get();
+  }
+
+  Future<void> updateBatch(List<QueryDocumentSnapshot> docs, String companyId) async {
+    final WriteBatch batch = _db.batch();
+
+    for (final doc in docs) {
+      batch.update(doc.reference, {FirestoreCollections.vehiclesFieldCompanyId : companyId});
+    }
+    return batch.commit();
   }
 }

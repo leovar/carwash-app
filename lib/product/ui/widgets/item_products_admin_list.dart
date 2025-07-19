@@ -9,9 +9,10 @@ class ItemProductAdminList extends StatefulWidget {
   final Function(Product) productSelectCallback;
   final List<Product> productList;
   final int index;
+  final String companyId;
 
   ItemProductAdminList(
-      this.productSelectCallback, this.productList, this.index);
+      this.productSelectCallback, this.productList, this.index, this.companyId);
 
   @override
   State<StatefulWidget> createState() => _ItemProductAdminList();
@@ -171,6 +172,7 @@ class _ItemProductAdminList extends State<ItemProductAdminList> {
                 bloc: ProductBloc(),
                 child: ProductAdminPage(
                   currentProduct: _itemProduct,
+                  companyId: widget.companyId,
                 ),
               );
             },

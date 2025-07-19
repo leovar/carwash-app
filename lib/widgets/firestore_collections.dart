@@ -13,6 +13,8 @@ class FirestoreCollections {
   static String configuration = 'configuration';
   static String commissions = 'commissions';
   static String paymentMethods = 'paymentMethods';
+  static String company = 'companies';
+  static String regions = 'regions';
 
   /// Fields User Collection
   static String usersFieldUid = 'uid';
@@ -24,10 +26,18 @@ class FirestoreCollections {
   static String usersFieldIsOperator = 'isOperator';
   static String usersFieldLocations = 'locations';
   static String usersFieldUserActive = 'active';
+  static String usersFieldCompanyId = 'companyId';
+
+  /// Fields Locations Collection
+  static String locationCompanyId = 'companyId';
+
+  /// Fields Company Collection
+  static String companyId = 'id';
 
   ///Fields Vehicle Collection
   static String vehiclesFieldPlaca = 'placa';
   static String vehiclesFieldId = 'id';
+  static String vehiclesFieldCompanyId = 'companyId';
 
   /// Fields Vehicle Type Collection
   static String vehicleTypeFieldVehicleType = 'vehicleType';
@@ -38,6 +48,7 @@ class FirestoreCollections {
   static String productFieldLocations = 'locations';
   static String productFieldUidVehicleType = 'vehicleTypeUid';
   static String productFieldProductActive = 'productActive';
+  static String productFieldCompanyId = 'companyId';
 
   /// Fields Customer Collections
   static String customerFieldVehicles = 'vehicles';
@@ -50,6 +61,7 @@ class FirestoreCollections {
   static String invoiceFieldProducts = 'products';
   static String invoiceFieldImages = 'images';
   static String invoiceFieldLocation = 'location';
+  static String invoiceFieldLocationName = 'locationName';
   static String invoiceFieldConsecutive = 'consecutive';
   static String invoiceFieldPlaca = 'placa';
   static String invoiceFieldUserOperatorName = 'userOperatorName';
@@ -63,6 +75,7 @@ class FirestoreCollections {
   static String invoiceEndWash = 'endWash';
   static String invoiceStartWashing = 'startWashing';
   static String invoiceFieldCancelled = 'cancelledInvoice';
+  static String invoiceFieldCompanyId = 'companyId';
 
   /// Fields Brands
   static String brandFieldVehicleType = 'vehicleType';
@@ -78,4 +91,5 @@ class FirestoreCollections {
   /// Fields Payment Methods
   static String paymentName = 'name';
   static String paymentActive = 'active';
+  static String paymentCompany = 'companyId';
 }

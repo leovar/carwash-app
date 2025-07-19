@@ -37,7 +37,7 @@ class _UserProfilePage extends State<UserProfilePage> {
   final double _heightTextField = 60;
   String _imageUrl = '';
   late SysUser _currentUser;
-  Customer _currentCustomer = Customer();
+  Customer _currentCustomer = Customer(companyId: '');
   bool _obscureText = true;
   DateTime _date = new DateTime.now();
   String _oldTextBirthDay = '';
@@ -477,7 +477,7 @@ class _UserProfilePage extends State<UserProfilePage> {
 
   void _getUser() {
     _userBloc.getCurrentUser().then((user) {
-      _currentUser = user?? new SysUser(uid: '', name: '', email: '');
+      _currentUser = user?? new SysUser(uid: '', name: '', email: '', companyId: '');
       _updatePreference();
       this._selectUserList();
       _customerBloc.getCustomerFilter('', user?.email ?? '').then((customer) {

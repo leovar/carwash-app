@@ -12,6 +12,10 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 
 class EarningsReport extends StatefulWidget {
+  final String companyId;
+
+  EarningsReport({Key? key, required this.companyId});
+
   @override
   State<StatefulWidget> createState() => _EarningsReport();
 }
@@ -108,6 +112,7 @@ class _EarningsReport extends State<EarningsReport> {
       stream: _blocReports.earningsReportListStream(
         _dateTimeInit,
         _dateTimeFinal,
+        widget.companyId,
       ),
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         return _containerData(snapshot);
@@ -120,19 +125,23 @@ class _EarningsReport extends State<EarningsReport> {
       case ConnectionState.waiting:
         return Center(child: CircularProgressIndicator());
       default:
-        _listInvoices = _blocReports.buildEarningsReportList(snapshot.data.docs);
-        _listCardReport = _blocReports.buildEarningCards(_listInvoices);
-        _listCardReport.sort((a, b) => a.locationName.compareTo(b.locationName));
+        if (snapshot.data != null) {
+          _listInvoices = _blocReports.buildEarningsReportList(snapshot.data.docs);
+          _listCardReport = _blocReports.buildEarningCards(_listInvoices);
+          _listCardReport.sort((a, b) => a.locationName.compareTo(b.locationName));
 
-        if (_listInvoices.length > 0) {
-          return Container(
-            padding: EdgeInsets.only(bottom: 17),
-            color: Colors.white,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [_listCards(), _quantitySummary()],
-            ),
-          );
+          if (_listInvoices.length > 0) {
+            return Container(
+              padding: EdgeInsets.only(bottom: 17),
+              color: Colors.white,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [_listCards(), _quantitySummary()],
+              ),
+            );
+          } else {
+            return _emptyLocation();
+          }
         } else {
           return _emptyLocation();
         }

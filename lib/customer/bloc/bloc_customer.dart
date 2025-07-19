@@ -38,6 +38,14 @@ class BlocCustomer implements Bloc {
     return await _customerRepository.getCustomersByLocation(locationReference);
   }
 
+  Future<QuerySnapshot> getAllCustomers(int batchSize, DocumentSnapshot? doc) async {
+    return _customerRepository.getBatchCustomers(batchSize, doc);
+  }
+
+  Future<void> updateCustomerBatch(List<QueryDocumentSnapshot> docs, String companyId) async {
+    _customerRepository.updateBatch(docs, companyId);
+  }
+
   @override
   void dispose() {}
 }

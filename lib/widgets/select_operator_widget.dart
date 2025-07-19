@@ -24,13 +24,13 @@ class _SelectOperatorWidget extends State<SelectOperatorWidget> {
   BlocInvoice _blocInvoice = BlocInvoice();
   BlocPaymentMethod _paymentMethodBloc = BlocPaymentMethod();
   late List<DropdownMenuItem<PaymentMethod>> _listPaymentMethods;
-  PaymentMethod _selectedPaymentMethod = new PaymentMethod(id: '' ,name: '' ,active: true);
+  late PaymentMethod _selectedPaymentMethod;
 
   @override
   void initState() {
     super.initState();
     if (widget.paymentMethodSelected.name != '') {
-      _selectedPaymentMethod = widget.paymentMethodSelected ?? new PaymentMethod();
+      _selectedPaymentMethod = widget.paymentMethodSelected;
     }
   }
 
@@ -45,7 +45,7 @@ class _SelectOperatorWidget extends State<SelectOperatorWidget> {
 
   Widget _getPaymentMethodsList() {
     return StreamBuilder(
-      stream: _paymentMethodBloc.paymentMethodsStream(),
+      stream: _paymentMethodBloc.paymentMethodsStream(widget.currentInvoice.companyId),
       builder: (context, snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.waiting:
@@ -117,8 +117,8 @@ class _SelectOperatorWidget extends State<SelectOperatorWidget> {
 
   onChangeDropDawPayment(PaymentMethod? payment) {
     setState(() {
-      widget.selectPaymentMethod(payment ?? new PaymentMethod());
-      _selectedPaymentMethod = payment ?? new PaymentMethod();
+      widget.selectPaymentMethod(payment ?? new PaymentMethod(companyId:  widget.currentInvoice.companyId));
+      _selectedPaymentMethod = payment ?? new PaymentMethod(companyId: widget.currentInvoice.companyId);
     });
   }
 }

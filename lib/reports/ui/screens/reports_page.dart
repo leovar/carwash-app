@@ -5,6 +5,10 @@ import 'package:car_wash_app/widgets/app_bar_widget_simple.dart';
 import 'package:flutter/material.dart';
 
 class ReportsPage extends StatefulWidget {
+  final String companyId;
+
+  ReportsPage({Key? key, required this.companyId});
+
   @override
   State<StatefulWidget> createState() => _ReportsPage();
 }
@@ -16,9 +20,9 @@ class _ReportsPage extends State<ReportsPage> {
   @override
   Widget build(BuildContext context) {
     final _tabPages = <Widget> [
-      ProductivityReport(),
-      EarningsReport(),
-      CustomersReport(),
+      ProductivityReport(companyId: widget.companyId,),
+      EarningsReport(companyId: widget.companyId,),
+      CustomersReport(companyId: widget.companyId,),
     ];
 
     final _tabItems = <BottomNavigationBarItem>[

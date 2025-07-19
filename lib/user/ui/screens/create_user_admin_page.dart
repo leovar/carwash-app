@@ -19,8 +19,9 @@ import 'package:rflutter_alert/rflutter_alert.dart';
 
 class CreateUserAdminPage extends StatefulWidget {
   final SysUser? currentUser;
+  final String companyId;
 
-  CreateUserAdminPage({Key? key, this.currentUser});
+  CreateUserAdminPage({Key? key, this.currentUser, required this.companyId});
 
   @override
   State<StatefulWidget> createState() => _CreateUserAdminPage();
@@ -54,7 +55,7 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
   @override
   void initState() {
     super.initState();
-    _userSelected = widget.currentUser ?? new SysUser(uid: '', name: '', email: '');
+    _userSelected = widget.currentUser ?? new SysUser(uid: '', name: '', email: '', companyId: widget.companyId);
     _imageUrl = _userSelected.photoUrl ?? '';
     _selectUserList();
     }
@@ -247,7 +248,7 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
 
   Widget _locationsToSelect() {
     return StreamBuilder(
-      stream: _blocLocation.locationsListStream,
+      stream: _blocLocation.locationsListStream(widget.companyId),
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.waiting:
@@ -673,6 +674,7 @@ class _CreateUserAdminPage extends State<CreateUserAdminPage> {
           isAdministrator: _userAdministrator,
           isCoordinator: _userCoordinator,
           isOperator: _userOperator,
+          companyId: widget.companyId,
         );
 
         await _userBloc.updateUserData(user);

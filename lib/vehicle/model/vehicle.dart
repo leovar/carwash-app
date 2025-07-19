@@ -13,6 +13,7 @@ class Vehicle extends Equatable {
   final String? vehicleType;
   final Timestamp? creationDate;
   final String? brandReference;
+  final String companyId;
 
   Vehicle({
     this.id,
@@ -23,6 +24,7 @@ class Vehicle extends Equatable {
     this.vehicleType,
     this.creationDate,
     this.brandReference,
+    required this.companyId,
   });
 
   factory Vehicle.fromJson(Map<String, dynamic> json, {String? id}) {
@@ -35,6 +37,7 @@ class Vehicle extends Equatable {
       vehicleType: json['vehicleType'],
       creationDate: json['creationDate'],
       brandReference: json['brandReference'],
+      companyId: json['companyId'],
     );
   }
 
@@ -47,6 +50,7 @@ class Vehicle extends Equatable {
       'vehicleType': this.vehicleType,
       'creationDate': this.creationDate,
       'brandReference': this.brandReference,
+      'companyId': this.companyId,
     };
   }
 
@@ -59,6 +63,7 @@ class Vehicle extends Equatable {
     color ?? '',
     vehicleType ?? '',
     creationDate ?? new DateTime.timestamp(),
-    brandReference ?? ''
+    brandReference ?? '',
+    companyId
   ];
 }

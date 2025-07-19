@@ -22,8 +22,15 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../../widgets/keys.dart';
 
 class ProductivityReport extends StatefulWidget {
+  final String companyId;
+
+  ProductivityReport({Key? key, required this.companyId});
+
   @override
   State<StatefulWidget> createState() => _ProductivityReport();
 }
@@ -34,7 +41,7 @@ class _ProductivityReport extends State<ProductivityReport> {
   BlocInvoice _blocInvoice = BlocInvoice();
   BlocCommission _blocCommission = BlocCommission();
   late List<DropdownMenuItem<Location>> _dropdownMenuItems;
-  Location _selectedLocation = new Location();
+  late Location _selectedLocation;
   List<CardReport> _listCardReport = [];
   List<Invoice> _listInvoices = [];
 
@@ -42,12 +49,13 @@ class _ProductivityReport extends State<ProductivityReport> {
   final _textDateFinal = TextEditingController();
   var _dateTimeInit = DateTime(DateTime.now().year, DateTime.now().month, 1);
   var _dateTimeFinal = DateTime.now();
-  DocumentReference _locationReference = FirebaseFirestore.instance.collection('locations').doc('defaultDocId');
+  DocumentReference _locationReference = FirebaseFirestore.instance.doc("placeholder/empty"); //FirebaseFirestore.instance.collection('locations').doc('defaultDocId');
   var formatter = new DateFormat('dd-MM-yyyy');
 
   @override
   void initState() {
     super.initState();
+    _selectedLocation = new Location(companyId: widget.companyId);
     _textDateInit.text = formatter.format(_dateTimeInit);
     _textDateFinal.text = formatter.format(_dateTimeFinal);
   }
@@ -126,6 +134,7 @@ class _ProductivityReport extends State<ProductivityReport> {
           _locationReference,
           _dateTimeInit,
           _dateTimeFinal,
+          widget.companyId,
         ),
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           return _containerList(snapshot);
@@ -178,7 +187,7 @@ class _ProductivityReport extends State<ProductivityReport> {
   /// Locations filter section
   Widget _locationsList() {
     return StreamBuilder(
-      stream: _blocLocation.locationsStream,
+      stream: _blocLocation.locationsStream(widget.companyId),
       builder: (context, snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.waiting:
@@ -224,7 +233,7 @@ class _ProductivityReport extends State<ProductivityReport> {
         ),
       );
     } else {
-      var locationList = new Location();
+      var locationList = new Location(companyId: widget.companyId);
       listItems.add(
         DropdownMenuItem(
           value: locationList,
@@ -1019,6 +1028,7 @@ class _ProductivityReport extends State<ProductivityReport> {
               id: operator.id,
               name: operator.name,
               operatorCommission: _totalCommission / (invo.countOperators??0),
+              companyId: widget.companyId,
             );
             _operatorsToSave.add(operatorSave);
           });

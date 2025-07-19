@@ -11,8 +11,9 @@ import 'package:fluttertoast/fluttertoast.dart';
 class OperatorsReport extends StatefulWidget {
   final DocumentReference locationReference;
   final Configuration configuration;
+  final String companyId;
 
-  OperatorsReport({Key? key, required this.locationReference, required this.configuration});
+  OperatorsReport({Key? key, required this.locationReference, required this.configuration, required this.companyId});
 
   @override
   State<StatefulWidget> createState() => _OperatorsReport();
@@ -71,7 +72,7 @@ class _OperatorsReport extends State<OperatorsReport> {
   Widget _containerBody() {
     return StreamBuilder(
         stream: _blocReports.productivityReportListStream(
-            widget.locationReference, _dateTimeInit, _dateTimeFinal),
+            widget.locationReference, _dateTimeInit, _dateTimeFinal, widget.companyId),
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           return _listOperators(snapshot);
         });

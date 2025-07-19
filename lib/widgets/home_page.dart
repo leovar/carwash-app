@@ -42,7 +42,8 @@ class _HomePage extends State<HomePage> {
   String _locationName = '';
   bool _isAdministrator = false;
   bool _isCoordinator = false;
-  Location _selectedLocation = Location();
+  late String _companyId;
+  late Location _selectedLocation;
   Configuration _config = Configuration();
 
   @override
@@ -59,7 +60,7 @@ class _HomePage extends State<HomePage> {
         stream: _userBloc.streamFirebase,
         builder: (BuildContext context, AsyncSnapshot snapshot) {
           switch (snapshot.connectionState) {
-          /*case ConnectionState.waiting:
+            /*case ConnectionState.waiting:
               return indicadorDeProgreso();*/
             default:
               return showSnapShot(snapshot);
@@ -108,6 +109,7 @@ class _HomePage extends State<HomePage> {
       SysUser user = _userBloc.buildUsersById(snapshot.data.docs);
       this._currentUser = user;
       this._currentUser.photoUrl = _photoUrl;
+      this._companyId = user.companyId;
       if (user.isAdministrator ?? false) {
         _isAdministrator = true;
       }
@@ -116,7 +118,7 @@ class _HomePage extends State<HomePage> {
       }
       return homePage();
     } else {
-      _deleteLocationPreference();
+      _deletePreferences();
       this._logOut();
       return indicadorDeProgreso();
     }
@@ -137,23 +139,24 @@ class _HomePage extends State<HomePage> {
       );
 
   homePage() => UpgradeAlert(
-    upgrader: Upgrader(durationUntilAlertAgain: Duration(days: 1)),
-    child: Scaffold(
-      key: _scaffoldKey,
-      appBar: PreferredSize(
-        preferredSize: Size(MediaQuery.of(context).size.width, 65),
-        child: AppBarWidget(_scaffoldKey, _currentUser.photoUrl ?? '', true),
-      ),
-      body: Stack(
-        children: <Widget>[
-          GradientBack(),
-          bodyContainer(),
-          locationIndicator(),
-        ],
-      ),
-      drawer: DrawerPage(),
-    ),
-  );
+        upgrader: Upgrader(durationUntilAlertAgain: Duration(days: 1)),
+        child: Scaffold(
+          key: _scaffoldKey,
+          appBar: PreferredSize(
+            preferredSize: Size(MediaQuery.of(context).size.width, 65),
+            child:
+                AppBarWidget(_scaffoldKey, _currentUser.photoUrl ?? '', true),
+          ),
+          body: Stack(
+            children: <Widget>[
+              GradientBack(),
+              bodyContainer(),
+              locationIndicator(),
+            ],
+          ),
+          drawer: DrawerPage(),
+        ),
+      );
 
   bodyContainer() => Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -211,6 +214,7 @@ class _HomePage extends State<HomePage> {
               context,
               MaterialPageRoute(
                 builder: (context) => InvoicesListPage(
+                  companyId: _companyId,
                   user: _currentUser,
                   locationReference: _locationReference,
                 ),
@@ -230,6 +234,7 @@ class _HomePage extends State<HomePage> {
               context,
               MaterialPageRoute(
                 builder: (context) => TurnsPage(
+                  companyId: _companyId,
                   user: _currentUser,
                   locationReference: _locationReference,
                 ),
@@ -249,7 +254,10 @@ class _HomePage extends State<HomePage> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => ReportsPage()),
+                MaterialPageRoute(
+                    builder: (context) => ReportsPage(
+                          companyId: _companyId,
+                        )),
               );
             },
             buttonName: "INFORMES",
@@ -266,10 +274,12 @@ class _HomePage extends State<HomePage> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => OperatorsReport(
-                    locationReference: _locationReference,
-                    configuration: _config,
-                )),
+                MaterialPageRoute(
+                    builder: (context) => OperatorsReport(
+                          locationReference: _locationReference,
+                          configuration: _config,
+                          companyId: _companyId,
+                        )),
               );
             },
             buttonName: "INFORME OPERADORES",
@@ -333,8 +343,6 @@ class _HomePage extends State<HomePage> {
   ///Functions
 
   void _changeLocationPreferences() async {
-    SharedPreferences pref = await SharedPreferences.getInstance();
-    String locationId = pref.getString(Keys.idLocation) ?? '';
     Alert(
       context: context,
       title: 'Sede',
@@ -342,6 +350,7 @@ class _HomePage extends State<HomePage> {
       content: SelectLocationWidget(
         locationSelected: _selectedLocation,
         selectLocation: _callBackSelectLocation,
+        companyId: _companyId,
       ),
       buttons: [
         DialogButton(
@@ -367,6 +376,10 @@ class _HomePage extends State<HomePage> {
   void _serLocationPreference(Location locationSelected) async {
     SharedPreferences pref = await SharedPreferences.getInstance();
     setState(() {
+      _selectedLocation = locationSelected;
+      _locationName = locationSelected.locationName ?? '';
+      _locationReference = _locationBloc
+          .getDocumentReferenceLocationById(locationSelected.id ?? '');
       pref.setString(Keys.idLocation, locationSelected.id ?? '');
       pref.setString(Keys.locationName, locationSelected.locationName ?? '');
       pref.setString(
@@ -379,20 +392,33 @@ class _HomePage extends State<HomePage> {
   Future<void> _getPreferences() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
     String? idLocation = pref.getString(Keys.idLocation);
-    if (idLocation != null) {
-      _locationReference = await _locationBloc.getLocationReference(idLocation ?? '');
-    }
     _locationName = pref.getString(Keys.locationName) ?? '';
     _photoUrl = pref.getString(Keys.photoUserUrl) ?? '';
-    _blocInvoice.getConfigurationObject().then((value) => _config = value);
+    _companyId = pref.getString(Keys.companyId) ?? '';
+
+    if (idLocation != null && idLocation != '') {
+      _locationReference = await _locationBloc.getLocationReference(idLocation);
+      try {
+        _selectedLocation = await _locationBloc.getLocationById(idLocation);
+      } catch (e) {
+        print('Error getting location: $e');
+        _selectedLocation = Location(companyId: _companyId);
+      }
+    } else {
+      _selectedLocation = Location(companyId: _companyId);
+    }
+
+    _blocInvoice.getConfigurationObject(_companyId).then((value) => _config = value);
   }
 
-  Future<void> _deleteLocationPreference() async {
+  Future<void> _deletePreferences() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
     pref.setString(Keys.idLocation, '');
     pref.setString(Keys.locationName, '');
     pref.setString(Keys.locationInitCount, '0');
     pref.setString(Keys.locationFinalCount, '0');
+    pref.setString(Keys.companyId, '');
+    pref.setString(Keys.companyName, '');
   }
 
   Future<void> _logOut() async {

@@ -23,7 +23,7 @@ class Location extends Equatable {
   bool? isSelected;
   int? activeCells;
   final int? totalCells;
-  final String? companyId;
+  final String companyId;
 
   Location({
     this.id,
@@ -45,7 +45,7 @@ class Location extends Equatable {
     this.printIva,
     this.activeCells,
     this.totalCells,
-    this.companyId,
+    required this.companyId,
   });
 
   factory Location.fromJson(Map<String, dynamic> json, {String? id}) {

@@ -69,10 +69,11 @@ class UserRepository {
   }
 
   ///Get all users by id
-  Stream<QuerySnapshot> getAllUsersStream() {
+  Stream<QuerySnapshot> getAllUsersStream(String companyId) {
     final querySnapshot = this
         ._db
         .collection(FirestoreCollections.users)
+        .where(FirestoreCollections.usersFieldCompanyId, isEqualTo: companyId)
         .orderBy(FirestoreCollections.usersFieldName)
         .snapshots();
     return querySnapshot;

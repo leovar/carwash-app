@@ -8,8 +8,9 @@ class TurnsPage extends StatefulWidget {
 
   final user;
   final locationReference;
+  final companyId;
 
-  TurnsPage({Key? key, this.user, this.locationReference});
+  TurnsPage({Key? key, required this.companyId, this.user, this.locationReference});
 
   @override
   State<StatefulWidget> createState() => _TurnsPage();
@@ -30,7 +31,7 @@ class _TurnsPage extends State<TurnsPage> {
       body: BlocProvider<BlocInvoice>(
         bloc: BlocInvoice(),
         child: SafeArea(
-          child: FormTurns(),
+          child: FormTurns(companyId: widget.companyId,),
         ),
       ),
     );
