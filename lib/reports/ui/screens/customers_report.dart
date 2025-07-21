@@ -14,7 +14,6 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:excel/excel.dart';
 import 'package:flutter/material.dart';
 
-
 import '../../../widgets/keys.dart';
 
 class CustomersReport extends StatefulWidget {
@@ -75,6 +74,27 @@ class _CustomersReport extends State<CustomersReport> {
               ),
             ),
             onPressed: _generateInvoiceCustomerReport,
+          ),
+          SizedBox(height: 9),
+          Visibility(
+            visible: true,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.secondary,
+                padding: EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+              ),
+              child: Text(
+                "PROCESAR DATOS",
+                style: TextStyle(
+                  fontFamily: "Lato",
+                  decoration: TextDecoration.none,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  fontSize: 19,
+                ),
+              ),
+              onPressed: _updateCompanyInObjects,
+            ),
           ),
         ],
       ),
@@ -401,6 +421,9 @@ class _CustomersReport extends State<CustomersReport> {
     //String? totalRegisters = await _blocReports.updateVehiclesCompany();
     //String? totalRegisters = await _blocReports.updateCompanyIdInInvoices();
     int? totalRegisters = await _blocInvoice.getInvoicesTotalCount();
-    MessagesUtils.showAlert(context: context, title: "Proceso completado con ${totalRegisters??''} Registros").show();
+    MessagesUtils.showAlert(
+            context: context,
+            title: "Proceso completado con ${totalRegisters ?? ''} Registros")
+        .show();
   }
 }

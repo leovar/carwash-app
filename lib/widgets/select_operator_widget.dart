@@ -24,7 +24,7 @@ class _SelectOperatorWidget extends State<SelectOperatorWidget> {
   BlocInvoice _blocInvoice = BlocInvoice();
   BlocPaymentMethod _paymentMethodBloc = BlocPaymentMethod();
   late List<DropdownMenuItem<PaymentMethod>> _listPaymentMethods;
-  late PaymentMethod _selectedPaymentMethod;
+  late PaymentMethod _selectedPaymentMethod = new PaymentMethod(companyId: '');
 
   @override
   void initState() {
@@ -102,7 +102,7 @@ class _SelectOperatorWidget extends State<SelectOperatorWidget> {
         ),
       );
     }
-    if (_selectedPaymentMethod.id == '') {
+    if ((_selectedPaymentMethod.id??'') == '') {
       listItems.add(
         DropdownMenuItem(
           value: _selectedPaymentMethod,

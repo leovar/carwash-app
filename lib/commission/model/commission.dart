@@ -4,6 +4,7 @@ import 'package:meta/meta.dart';
 @immutable
 class Commission extends Equatable {
   final String? id;
+  final String companyId;
   final int? uidVehicleType;
   final String? productType;
   final bool? isPercentage;
@@ -15,6 +16,7 @@ class Commission extends Equatable {
 
   Commission({
     this.id,
+    required this.companyId,
     this.uidVehicleType,
     this.productType,
     this.isPercentage,
@@ -28,6 +30,7 @@ class Commission extends Equatable {
   factory Commission.fromJson(Map<String, dynamic> json, {String? id}) {
     return Commission(
       id: id,
+      companyId: json['companyId'],
       uidVehicleType: json['uidVehicleType'],
       productType: json['productType'],
       isPercentage: json['isPercentage'],
@@ -41,6 +44,7 @@ class Commission extends Equatable {
 
   Map<String, dynamic> toJson() {
     return {
+      'companyId': this.companyId,
       'uidVehicleType': this.uidVehicleType,
       'productType': this.productType,
       'isPercentage': this.isPercentage,
@@ -55,6 +59,7 @@ class Commission extends Equatable {
   @override
   List<Object> get props => [
         id!,
+        companyId,
         uidVehicleType!,
         productType!,
         isPercentage!,

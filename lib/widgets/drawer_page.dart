@@ -258,7 +258,7 @@ class _DrawerPage extends State<DrawerPage> {
                               builder: (context) {
                                 return BlocProvider<BlocCommission>(
                                   bloc: BlocCommission(),
-                                  child: CommissionListAdminPage(),
+                                  child: CommissionListAdminPage(companyId: _companyId),
                                 );
                               },
                             ),
@@ -287,7 +287,7 @@ class _DrawerPage extends State<DrawerPage> {
                               builder: (context) {
                                 return BlocProvider<BlocPaymentMethod>(
                                   bloc: BlocPaymentMethod(),
-                                  child: PaymentMethodAdminPage(companyId: _companyId,),
+                                  child: PaymentMethodAdminPage(companyId: _companyId),
                                 );
                               },
                             ),

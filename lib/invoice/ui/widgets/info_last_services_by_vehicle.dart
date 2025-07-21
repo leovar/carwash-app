@@ -18,7 +18,7 @@ class InfoLastServicesByVehicle extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Text(
-              'Realizó ${_listInvoices.length} servicios en los ultimos 2 meses',
+              'Ha realizado ${_listInvoices.length} servicios',
               style: Theme.of(context).textTheme.displaySmall),
           Container(
             height: 200,

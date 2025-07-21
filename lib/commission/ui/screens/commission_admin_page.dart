@@ -11,9 +11,10 @@ class CommissionAdminPage extends StatefulWidget {
   final Commission currentCommission;
   final String iconVehicle;
   final String vehicleType;
+  final String companyId;
 
   CommissionAdminPage(
-      {Key? key, required this.currentCommission, required this.iconVehicle, required this.vehicleType});
+      {Key? key, required this.currentCommission, required this.iconVehicle, required this.vehicleType, required this.companyId});
 
   @override
   State<StatefulWidget> createState() => _CommissionAdminPage();
@@ -326,6 +327,7 @@ class _CommissionAdminPage extends State<CommissionAdminPage> {
         calculatePerCount: _isCalculatedPerCount,
         commissionThreshold: double.tryParse(_valueCommissionThreshold.text.trim()) ?? 0,
         valueBeforeThreshold: double.tryParse(_valueBeforeThreshold.text.trim()) ?? 0,
+        companyId: widget.companyId,
       );
 
       _blocCommission.updateCommission(commission);

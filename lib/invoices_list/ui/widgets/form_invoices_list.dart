@@ -51,7 +51,7 @@ class _FormInvoicesList extends State<FormInvoicesList> {
   double _totalMonth = 0.0;
   String _idLocation = '';
   late Location _location;
-  late PaymentMethod _selectedPaymentMethod;
+  PaymentMethod _selectedPaymentMethod = new PaymentMethod(companyId: '');
   late Invoice _invoiceSelected;
 
   ///Filter Keys

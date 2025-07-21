@@ -7,15 +7,17 @@ class BlocCommission implements Bloc {
 
   final _commissionRepository = CommissionRepository();
 
-  Stream<QuerySnapshot> get allCommissionStream => _commissionRepository.getListCommissionsStream();
+  Stream<QuerySnapshot> allCommissionStream(String companyId) {
+    return _commissionRepository.getListCommissionsStream(companyId);
+  }
   List<Commission> buildAllCommissions(List<DocumentSnapshot> commissionListSnapshot) => _commissionRepository.buildCommissions(commissionListSnapshot);
 
   void updateCommission(Commission commission) async {
     return _commissionRepository.updateCommission(commission);
   }
 
-  Future<List<Commission>> getAllCommissions() async {
-    return _commissionRepository.getAllCommissions();
+  Future<List<Commission>> getAllCommissions(String companyId) async {
+    return _commissionRepository.getAllCommissions(companyId);
   }
 
   @override

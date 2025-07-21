@@ -5,6 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 
 class CommissionListAdminPage extends StatefulWidget {
+  final String companyId;
+
+  CommissionListAdminPage({Key? key, required this.companyId});
+
   @override
   State<StatefulWidget> createState() => _CommissionListAdminPage();
 }
@@ -46,7 +50,7 @@ class _CommissionListAdminPage extends State<CommissionListAdminPage> {
       padding: EdgeInsets.only(bottom: 5),
       color: Colors.white,
       child: StreamBuilder(
-        stream: _blocCommission.allCommissionStream,
+        stream: _blocCommission.allCommissionStream(widget.companyId),
         builder: (context, snapshot) {
           switch (snapshot.connectionState) {
             case ConnectionState.waiting:
@@ -68,7 +72,7 @@ class _CommissionListAdminPage extends State<CommissionListAdminPage> {
       scrollDirection: Axis.vertical,
       shrinkWrap: true,
       itemBuilder: (BuildContext context, int index) {
-        return ItemCommissionAdminList(_commissionList, index);
+        return ItemCommissionAdminList(_commissionList, index, widget.companyId);
       },
     );
   }

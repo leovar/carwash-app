@@ -5,10 +5,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class CommissionRepository {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  Stream<QuerySnapshot> getListCommissionsStream() {
+  Stream<QuerySnapshot> getListCommissionsStream(String companyId) {
     final querySnapshot = this
         ._db
         .collection(FirestoreCollections.commissions)
+        .where(FirestoreCollections.commissionCompanyId, isEqualTo: companyId)
         .snapshots();
     return querySnapshot;
   }
@@ -28,11 +29,12 @@ class CommissionRepository {
     return await ref.set(commission.toJson(), SetOptions(merge: true));
   }
 
-  Future<List<Commission>> getAllCommissions() async {
+  Future<List<Commission>> getAllCommissions(String companyId) async {
     List<Commission> commissionList = <Commission>[];
     final querySnapshot = await this
         ._db
         .collection(FirestoreCollections.commissions)
+        .where(FirestoreCollections.commissionCompanyId, isEqualTo: companyId)
         .get();
 
     final documents = querySnapshot.docs;

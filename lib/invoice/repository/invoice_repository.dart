@@ -487,18 +487,18 @@ class InvoiceRepository {
     return Invoice.fromJson(querySnapshot.data() as Map<String, dynamic>, id: querySnapshot.id);
   }
 
-  /// Get List Invoices by Placa
+  /// Get List Invoices by Placa, se tiene con + 2 para que muestre todo el historial del vehículo, si llegado el requerimiento que sea menos tiempo se modifica este valor y el where
   Future<List<Invoice>> getListInvoicesByVehicle(String plate, String companyId) async {
     try {
       var date = DateTime.now();
-      var newDate = DateTime(date.year, date.month - 2, date.day);
+      var newDate = DateTime(date.year, date.month + 2, date.day);
       List<Invoice> listInvoices = [];
       final querySnapshot = await this
           ._db
           .collection(FirestoreCollections.invoices)
           .where(FirestoreCollections.invoiceFieldCompanyId, isEqualTo: companyId)
           .where(FirestoreCollections.invoiceFieldPlaca, isEqualTo: plate)
-          .where(FirestoreCollections.invoiceFieldCreationDate, isGreaterThanOrEqualTo: newDate)
+          .where(FirestoreCollections.invoiceFieldCreationDate, isLessThanOrEqualTo: newDate)
           .get();
 
       final documents = querySnapshot.docs;
@@ -584,6 +584,7 @@ class InvoiceRepository {
       // Pasar datos si es necesario
       final result = await callable.call({
         'companyId': 'gtixUTsEImKUuhdSCwKX',
+        'collection': 'invoices'
       }).timeout(Duration(seconds: 540));
 
       final data = result.data as Map<String, dynamic>;
@@ -606,7 +607,12 @@ class InvoiceRepository {
     try {
       // Llamar a tu función
       final HttpsCallable callable = _functions.httpsCallable('countDocumentsToUpdate');
-      final HttpsCallableResult result = await callable.call().timeout(Duration(seconds: 540));
+      //final HttpsCallableResult result = await callable.call().timeout(Duration(seconds: 540));
+
+      // Pasar datos si es necesario
+      final result = await callable.call({
+        'collection': 'customers'
+      }).timeout(Duration(seconds: 540));
 
       final data = result.data as Map<String, dynamic>;
 

@@ -378,7 +378,7 @@ class _ProductivityReport extends State<ProductivityReport> {
   ) async {
     List<ProductsCardDetail> _productList = [];
     List<InvoicesDateCount> _invoicesPerDate = [];
-    List<Commission> commissionsList = await _blocCommission.getAllCommissions();
+    List<Commission> commissionsList = await _blocCommission.getAllCommissions(widget.companyId);
     Alert(
       context: context,
       title: '',
@@ -582,7 +582,7 @@ class _ProductivityReport extends State<ProductivityReport> {
       (c) =>
           c.productType == prod.productType &&
           c.uidVehicleType == prod.vehicleTypeUid,
-      orElse: () => new Commission(),
+      orElse: () => new Commission(companyId: widget.companyId),
     );
     double countService = 0;
     double _calculateComm = 0;
@@ -963,7 +963,7 @@ class _ProductivityReport extends State<ProductivityReport> {
   ///TODO metodo para calcular la comisión en el mismo producto de la cotización
   void _updateProductsCommission(List<Invoice> _invoice) async {
     List<Commission> commissionsList =
-        await _blocCommission.getAllCommissions();
+        await _blocCommission.getAllCommissions(widget.companyId);
     _invoice.forEach((invo) async {
       if ((invo.invoiceProducts?.length??0) > 0) {
         List<Product> _productsInvoice = [];
@@ -975,7 +975,7 @@ class _ProductivityReport extends State<ProductivityReport> {
               (c) =>
                   c.productType == prod.productType &&
                   c.uidVehicleType == invo.uidVehicleType,
-              orElse: () => new Commission(),
+              orElse: () => new Commission(companyId: widget.companyId),
             );
             print(commissionProd);
             bool isNormal = false;

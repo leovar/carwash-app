@@ -21,20 +21,21 @@ exports.updateCustomersCompanyId = functions.https.onCall(functionConfig, async 
     const data = request.data;
     const companyId = data.companyId || 'gtixUTsEImKUuhdSCwKX';
     const batchSize = 450; // Límite seguro para Firestore batch
+    const collection = data.collection || '';
 
     let totalUpdated = 0;
     let totalProcessed = 0;
-    let hasMoreDocuments = true;
+    let hasMoreDocuments = collection == '' ? false : true;
     let lastDocumentId = null;
 
     while (hasMoreDocuments) {
       try {
         // Construir la consulta
-        let query = db.collection('invoices').limit(batchSize);
+        let query = db.collection(collection).limit(batchSize);
 
         // Si tenemos un último documento, empezar después de él
         if (lastDocumentId) {
-          const lastDoc = await db.collection('invoices').doc(lastDocumentId).get();
+          const lastDoc = await db.collection(collection).doc(lastDocumentId).get();
           if (lastDoc.exists) {
             query = query.startAfter(lastDoc);
           }
@@ -122,9 +123,12 @@ exports.countDocumentsToUpdate = functions.https.onCall({
   try {
     console.log('Contando documentos que necesitan actualización...');
 
+    const data = request.data;
+    const collection = data.collection || '';
+
     let totalCount = 0;
     let totalDocuments = 0;
-    let hasMoreDocuments = true;
+    let hasMoreDocuments = collection == '' ? false : true;
     let lastDocumentId = null;
     const batchSize = 1000;
 

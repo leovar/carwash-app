@@ -522,8 +522,7 @@ class _ProductAdminPage extends State<ProductAdminPage> {
           productName: _textProductName.text.trim(),
           price: double.tryParse(_textPrice.text.trim()) ?? 0.0,
           ivaPercent: double.tryParse(_textIvaPercent.text.trim()) ?? 0.0,
-          vehicleType: _vehicleTypeBloc
-              .getVehicleTypeReferenceById(_selectedVehicleType.id??''),
+          vehicleType: _vehicleTypeBloc.getVehicleTypeReferenceById(_selectedVehicleType.id??''),
           locations: _productSelected != null
               ? _productSelected.locations
               : _newListLocationsReferences,

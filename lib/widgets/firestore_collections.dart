@@ -87,6 +87,7 @@ class FirestoreCollections {
   static String commissionIsPercentage = 'isPercentage';
   static String commissionIsValue = 'isValue';
   static String commissionValue = 'value';
+  static String commissionCompanyId = 'companyId';
 
   /// Fields Payment Methods
   static String paymentName = 'name';

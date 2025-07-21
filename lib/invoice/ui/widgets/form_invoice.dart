@@ -1064,7 +1064,7 @@ class _FormInvoice extends State<FormInvoice> {
   ) {
     final commissionProd = commissionsList.firstWhere(
       (c) => c.productType == prodType && c.uidVehicleType == vehicleType,
-      orElse: () => new Commission(),
+      orElse: () => new Commission(companyId: _companyId),
     );
     bool isNormal = false;
     double calculateComm = 0;
@@ -1126,7 +1126,6 @@ class _FormInvoice extends State<FormInvoice> {
       ).show();
 
       try {
-        DocumentReference _vehicleTypeRef; //esta referencia debe traerse de la bd, en el momento se construye en la app
         DocumentReference _customerReference;
         DocumentReference? _coordinatorReference;
         double _total = 0;
@@ -1156,7 +1155,6 @@ class _FormInvoice extends State<FormInvoice> {
             placa: _textPlaca.text.trim(),
             color: _selectColor,
             vehicleType: vehicleTypeSelected.text,
-            //_vehicleTypeRef,
             creationDate: Timestamp.now(),
             brandReference: _selectedBrandReference,
             companyId: _companyId,
@@ -1238,7 +1236,7 @@ class _FormInvoice extends State<FormInvoice> {
 
         //Save products list
         List<Commission> commissionsList =
-            await _blocCommission.getAllCommissions();
+            await _blocCommission.getAllCommissions(_companyId);
         List<Product> _selectedProducts =
             _listProduct.where((f) => (f.isSelected??false)).toList();
         List<Product> _productToSave = [];

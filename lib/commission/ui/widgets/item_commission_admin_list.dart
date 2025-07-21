@@ -8,8 +8,9 @@ import 'package:intl/intl.dart';
 class ItemCommissionAdminList extends StatefulWidget {
   final List<Commission> commissionList;
   final int index;
+  final String companyId;
 
-  ItemCommissionAdminList(this.commissionList, this.index);
+  ItemCommissionAdminList(this.commissionList, this.index, this.companyId);
 
   @override
   State<StatefulWidget> createState() => _ItemCommissionAdminList();
@@ -169,7 +170,9 @@ class _ItemCommissionAdminList extends State<ItemCommissionAdminList> {
                 child: CommissionAdminPage(
                     currentCommission: _itemCommission,
                     iconVehicle: _iconVehicle,
-                    vehicleType: _vehicleTypeName),
+                    vehicleType: _vehicleTypeName,
+                    companyId: widget.companyId,
+                ),
               );
             },
           ),
